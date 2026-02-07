@@ -61,41 +61,75 @@ export function VisaDetail() {
   }, [id, user]);
 
   const handlePurchase = async () => {
-    if (!user || !id) return;
+    if (!user || !id || !product) return;
     setPurchaseLoading(true);
-    const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-payment`;
+
     try {
-      const res = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-          'Content-Type': 'application/json',
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({ visa_id: id }),
-      });
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || 'Payment failed');
+      const hasStripeConfig = product.stripe_price_id && import.meta.env.VITE_STRIPE_SECRET_KEY;
 
-      toast('success', 'Guide unlocked! You now have full access.');
-      setShowPaywall(false);
+      if (hasStripeConfig) {
+        const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-checkout`;
+        const session = await supabase.auth.getSession();
 
-      const { data: p } = await supabase
-        .from('user_visa_purchases')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('visa_id', id)
-        .maybeSingle();
-      setPurchase(p);
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.data.session?.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            price_id: product.stripe_price_id,
+            mode: 'payment',
+            success_url: `${window.location.origin}/visas/${id}?payment=success`,
+            cancel_url: `${window.location.origin}/visas/${id}?payment=cancelled`,
+          }),
+        });
 
-      const { data: content } = await supabase
-        .from('visa_premium_content')
-        .select('*')
-        .eq('visa_id', id)
-        .order('step_number');
-      setPremiumContent(content || []);
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || 'Failed to create checkout session');
+
+        if (result.url) {
+          window.location.href = result.url;
+        } else {
+          throw new Error('No checkout URL returned');
+        }
+      } else {
+        const mockApiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-payment`;
+        const session = await supabase.auth.getSession();
+
+        const res = await fetch(mockApiUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.data.session?.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ visa_id: id }),
+        });
+
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || 'Payment failed');
+
+        toast('success', 'Guide unlocked! You now have full access.');
+        setShowPaywall(false);
+
+        const { data: p } = await supabase
+          .from('user_visa_purchases')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('visa_id', id)
+          .maybeSingle();
+        setPurchase(p);
+
+        const { data: content } = await supabase
+          .from('visa_premium_content')
+          .select('*')
+          .eq('visa_id', id)
+          .order('step_number');
+        setPremiumContent(content || []);
+      }
     } catch (err) {
-      toast('error', err instanceof Error ? err.message : 'Something went wrong');
+      const message = err instanceof Error ? err.message : 'Something went wrong';
+      toast('error', message);
     } finally {
       setPurchaseLoading(false);
     }

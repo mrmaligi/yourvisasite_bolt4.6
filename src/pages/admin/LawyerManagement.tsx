@@ -72,14 +72,35 @@ export function LawyerManagement() {
     fetchLawyers();
   };
 
+  const viewDocument = async (lawyer: LawyerProfile) => {
+    if (!lawyer.verification_document_url) {
+      toast('error', 'No verification document available');
+      return;
+    }
+
+    const { data } = await supabase.storage
+      .from('lawyer-verification')
+      .createSignedUrl(lawyer.verification_document_url, 300);
+
+    if (data?.signedUrl) {
+      window.open(data.signedUrl, '_blank');
+    } else {
+      toast('error', 'Failed to load document');
+    }
+  };
+
   const columns: Column<LawyerProfile>[] = [
     { key: 'bar', header: 'Bar Number', render: (r) => r.bar_number },
     { key: 'jurisdiction', header: 'Jurisdiction', render: (r) => r.jurisdiction },
+    { key: 'experience', header: 'Experience', render: (r) => `${r.years_experience} years` },
     { key: 'status', header: 'Status', render: (r) => <Badge variant={statusVariant[r.verification_status]}>{r.verification_status}</Badge> },
     { key: 'rate', header: 'Rate', render: (r) => r.hourly_rate_cents ? `$${r.hourly_rate_cents / 100}/hr` : 'Not set' },
     {
       key: 'actions', header: 'Actions', render: (r) => (
         <div className="flex gap-2">
+          {r.verification_document_url && (
+            <Button size="sm" variant="ghost" onClick={() => viewDocument(r)}>View Doc</Button>
+          )}
           {r.verification_status === 'pending' && (
             <>
               <Button size="sm" onClick={() => handleApprove(r)}>Approve</Button>

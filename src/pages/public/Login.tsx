@@ -24,6 +24,7 @@ export function Login() {
   const [showReset, setShowReset] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [resetSubmitting, setResetSubmitting] = useState(false);
+  const [becomingAdmin, setBecomingAdmin] = useState(false);
 
   if (!isLoading && user) {
     return <Navigate to={getRoleDashboard(role)} replace />;
@@ -55,6 +56,43 @@ export function Login() {
       setResetEmail('');
     }
     setResetSubmitting(false);
+  };
+
+  const handleBecomeAdmin = async () => {
+    if (!user) {
+      toast('error', 'Please sign in first to become an admin');
+      return;
+    }
+
+    setBecomingAdmin(true);
+    try {
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/seed-admin`;
+      const session = await supabase.auth.getSession();
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.data.session?.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to become admin');
+      }
+
+      toast('success', data.message);
+      setTimeout(() => {
+        window.location.href = '/admin';
+      }, 1500);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to become admin';
+      toast('error', message);
+    } finally {
+      setBecomingAdmin(false);
+    }
   };
 
   return (
@@ -160,15 +198,24 @@ export function Login() {
             </div>
           </Link>
 
-          <div className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-neutral-50 border border-neutral-100">
-            <div className="w-10 h-10 rounded-xl bg-neutral-200/60 flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5 text-neutral-500" />
+          <button
+            type="button"
+            onClick={handleBecomeAdmin}
+            disabled={!user || becomingAdmin}
+            className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl border border-neutral-200/80 hover:border-primary-300 hover:bg-primary-50/50 transition-all duration-200 group bg-white shadow-soft disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-neutral-200 disabled:hover:bg-white"
+          >
+            <div className="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
+              <ShieldCheck className="w-5 h-5 text-primary-700" />
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-neutral-700">Admin Access</p>
-              <p className="text-xs text-neutral-500">Admins sign in above with their credentials</p>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-sm font-semibold text-neutral-900">
+                {becomingAdmin ? 'Setting up admin...' : 'Admin Access'}
+              </p>
+              <p className="text-xs text-neutral-500">
+                {user ? 'Click to become admin (first-time setup)' : 'Sign in first to access admin panel'}
+              </p>
             </div>
-          </div>
+          </button>
         </div>
       </div>
     </div>

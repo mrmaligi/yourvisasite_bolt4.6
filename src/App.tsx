@@ -19,6 +19,7 @@ const LawyerProfile = lazy(() => import('./pages/public/LawyerProfile').then(m =
 const NewsDetail = lazy(() => import('./pages/public/NewsDetail').then(m => ({ default: m.NewsDetail })));
 const Success = lazy(() => import('./pages/Success').then(m => ({ default: m.Success })));
 const LawyerRegister = lazy(() => import('./pages/lawyer/LawyerRegister').then(m => ({ default: m.LawyerRegister })));
+const LawyerPending = lazy(() => import('./pages/lawyer/LawyerPending').then(m => ({ default: m.LawyerPending })));
 
 const UserDashboard = lazy(() => import('./pages/user/Dashboard').then(m => ({ default: m.UserDashboard })));
 const MyVisas = lazy(() => import('./pages/user/MyVisas').then(m => ({ default: m.MyVisas })));
@@ -78,10 +79,13 @@ export default function App() {
                 <Route path="settings" element={<UserSettings />} />
               </Route>
 
-              <Route path="lawyer" element={<ProtectedRoute requiredRole="lawyer"><LawyerDashboardLayout /></ProtectedRoute>}>
-                <Route index element={<LawyerDashboard />} />
-                <Route path="availability" element={<Availability />} />
-                <Route path="marketing" element={<Marketing />} />
+              <Route path="lawyer">
+                <Route path="pending" element={<ProtectedRoute><LawyerPending /></ProtectedRoute>} />
+                <Route element={<ProtectedRoute requiredRole="lawyer"><LawyerDashboardLayout /></ProtectedRoute>}>
+                  <Route index element={<LawyerDashboard />} />
+                  <Route path="availability" element={<Availability />} />
+                  <Route path="marketing" element={<Marketing />} />
+                </Route>
               </Route>
 
               <Route path="admin" element={<ProtectedRoute requiredRole="admin"><AdminDashboardLayout /></ProtectedRoute>}>

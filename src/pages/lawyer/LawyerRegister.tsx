@@ -23,56 +23,76 @@ export function LawyerRegister() {
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async () => {
-    if (!user) return;
-    setSubmitting(true);
-
-    let verificationUrl = '';
-    if (verificationFile) {
-      const path = `${user.id}/${verificationFile.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from('lawyer-verification')
-        .upload(path, verificationFile);
-      if (uploadError) {
-        toast('error', 'Upload failed: ' + uploadError.message);
-        setSubmitting(false);
-        return;
-      }
-      verificationUrl = path;
-    }
-
-    const { error } = await supabase.schema('lawyer').from('profiles').insert({
-      profile_id: user.id,
-      bar_number: barNumber,
-      jurisdiction,
-      practice_areas: practiceAreas.split(',').map((s) => s.trim()).filter(Boolean),
-      years_experience: parseInt(yearsExperience) || 0,
-      bio,
-      verification_document_url: verificationUrl,
-    });
-
-    if (error) {
-      toast('error', error.message);
-      setSubmitting(false);
+    if (!user) {
+      toast('error', 'You must be logged in to register as a lawyer');
       return;
     }
 
-    try {
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevate-role`;
-      await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-          'Content-Type': 'application/json',
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({ user_id: user.id, role: 'lawyer' }),
-      });
-    } catch {}
+    setSubmitting(true);
 
-    await refreshProfile();
-    toast('success', 'Registration submitted! Pending admin verification.');
-    setSubmitting(false);
-    navigate('/lawyer');
+    try {
+      let verificationUrl = '';
+      if (verificationFile) {
+        const path = `${user.id}/${Date.now()}_${verificationFile.name}`;
+        const { error: uploadError, data } = await supabase.storage
+          .from('lawyer-verification')
+          .upload(path, verificationFile, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (uploadError) {
+          throw new Error(`Upload failed: ${uploadError.message}`);
+        }
+        verificationUrl = path;
+      }
+
+      const { error: insertError } = await supabase.schema('lawyer').from('profiles').insert({
+        profile_id: user.id,
+        bar_number: barNumber,
+        jurisdiction,
+        practice_areas: practiceAreas.split(',').map((s) => s.trim()).filter(Boolean),
+        years_experience: parseInt(yearsExperience) || 0,
+        bio: bio || null,
+        verification_document_url: verificationUrl || null,
+      });
+
+      if (insertError) {
+        if (insertError.code === '23505') {
+          throw new Error('You have already submitted a lawyer registration');
+        }
+        throw new Error(insertError.message);
+      }
+
+      try {
+        const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevate-role`;
+        const session = await supabase.auth.getSession();
+
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.data.session?.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ user_id: user.id, role: 'lawyer' }),
+        });
+
+        if (!response.ok) {
+          console.error('Failed to elevate role:', await response.text());
+        }
+      } catch (roleError) {
+        console.error('Role elevation error:', roleError);
+      }
+
+      await refreshProfile();
+      toast('success', 'Registration submitted successfully!');
+      navigate('/lawyer/pending');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Registration failed';
+      toast('error', message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
