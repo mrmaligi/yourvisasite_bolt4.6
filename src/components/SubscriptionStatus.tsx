@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Crown, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../contexts/AuthContext';
 
 interface SubscriptionData {
   status: string;

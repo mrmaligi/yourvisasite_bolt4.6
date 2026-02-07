@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Store, ShoppingCart, Clock, Calendar, Check, Filter } from 'lucide-react';
+import { Store, ShoppingCart, Clock, Calendar, Check, Filter, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -14,6 +14,14 @@ interface Category {
   id: string;
   name: string;
   icon: string;
+}
+
+interface Review {
+  rating: number;
+  title: string;
+  comment: string | null;
+  user_name: string | null;
+  created_at: string;
 }
 
 interface Listing {
@@ -31,6 +39,9 @@ interface Listing {
   features: string[];
   lawyer_name: string | null;
   lawyer_jurisdiction: string | null;
+  average_rating: number | null;
+  review_count: number;
+  reviews: Review[];
 }
 
 export function Marketplace() {
@@ -67,8 +78,9 @@ export function Marketplace() {
     if (listingsData && listingsData.length > 0) {
       const lawyerIds = [...new Set(listingsData.map((l) => l.lawyer_id))];
       const categoryIds = [...new Set(listingsData.map((l) => l.category_id).filter(Boolean))];
+      const listingIds = listingsData.map((l) => l.id);
 
-      const [lawyersRes, categoriesRes] = await Promise.all([
+      const [lawyersRes, categoriesRes, reviewsRes] = await Promise.all([
         supabase
           .schema('lawyer')
           .from('profiles')
@@ -77,6 +89,11 @@ export function Marketplace() {
         categoryIds.length > 0
           ? supabase.from('marketplace_categories').select('id, name').in('id', categoryIds)
           : { data: [] },
+        supabase
+          .from('marketplace_reviews')
+          .select('listing_id, rating, title, comment, user_id, created_at')
+          .in('listing_id', listingIds)
+          .order('created_at', { ascending: false }),
       ]);
 
       if (lawyersRes.data) {
@@ -98,13 +115,43 @@ export function Marketplace() {
         const lawyerDetailsMap = new Map(lawyerDetailsData?.map((l) => [l.id, l.jurisdiction]) || []);
         const categoryMap = new Map(categoriesRes.data?.map((c) => [c.id, c.name]) || []);
 
-        const enriched = listingsData.map((l) => ({
-          ...l,
-          features: Array.isArray(l.features) ? l.features : [],
-          lawyer_name: lawyerProfileMap.get(l.lawyer_id) || null,
-          lawyer_jurisdiction: lawyerDetailsMap.get(l.lawyer_id) || null,
-          category_name: l.category_id ? categoryMap.get(l.category_id) || null : null,
-        }));
+        const reviewUserIds = [...new Set(reviewsRes.data?.map((r) => r.user_id).filter(Boolean) || [])];
+        const { data: reviewUsers } = reviewUserIds.length > 0
+          ? await supabase.from('profiles').select('id, full_name').in('id', reviewUserIds)
+          : { data: [] };
+        const reviewUserMap = new Map(reviewUsers?.map((u) => [u.id, u.full_name]) || []);
+
+        const reviewsByListing = new Map<string, Review[]>();
+        reviewsRes.data?.forEach((r) => {
+          if (!reviewsByListing.has(r.listing_id)) {
+            reviewsByListing.set(r.listing_id, []);
+          }
+          reviewsByListing.get(r.listing_id)!.push({
+            rating: r.rating,
+            title: r.title,
+            comment: r.comment,
+            user_name: r.user_id ? reviewUserMap.get(r.user_id) || 'Anonymous' : 'Anonymous',
+            created_at: r.created_at,
+          });
+        });
+
+        const enriched = listingsData.map((l) => {
+          const reviews = reviewsByListing.get(l.id) || [];
+          const average_rating = reviews.length > 0
+            ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+            : null;
+
+          return {
+            ...l,
+            features: Array.isArray(l.features) ? l.features : [],
+            lawyer_name: lawyerProfileMap.get(l.lawyer_id) || null,
+            lawyer_jurisdiction: lawyerDetailsMap.get(l.lawyer_id) || null,
+            category_name: l.category_id ? categoryMap.get(l.category_id) || null : null,
+            average_rating,
+            review_count: reviews.length,
+            reviews: reviews.slice(0, 3),
+          };
+        });
 
         setListings(enriched);
       }
@@ -255,6 +302,30 @@ export function Marketplace() {
                   </div>
 
                   <h3 className="text-xl font-semibold text-neutral-900 mb-2">{listing.title}</h3>
+
+                  {listing.average_rating !== null && (
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-4 h-4 ${
+                              i < Math.round(listing.average_rating!)
+                                ? 'fill-amber-400 text-amber-400'
+                                : 'text-neutral-300'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-sm font-medium text-neutral-700">
+                        {listing.average_rating.toFixed(1)}
+                      </span>
+                      <span className="text-xs text-neutral-500">
+                        ({listing.review_count} {listing.review_count === 1 ? 'review' : 'reviews'})
+                      </span>
+                    </div>
+                  )}
+
                   <p className="text-sm text-neutral-600 mb-4 line-clamp-2">
                     {listing.short_description || listing.description}
                   </p>
@@ -268,6 +339,35 @@ export function Marketplace() {
                         </li>
                       ))}
                     </ul>
+                  )}
+
+                  {listing.reviews.length > 0 && (
+                    <div className="border-t border-neutral-100 pt-3 mb-3">
+                      <h4 className="text-xs font-semibold text-neutral-700 mb-2">Recent Reviews</h4>
+                      <div className="space-y-2">
+                        {listing.reviews.slice(0, 2).map((review, idx) => (
+                          <div key={idx} className="bg-neutral-50 rounded-lg p-2">
+                            <div className="flex items-center gap-1 mb-1">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`w-3 h-3 ${
+                                    i < review.rating
+                                      ? 'fill-amber-400 text-amber-400'
+                                      : 'text-neutral-300'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <p className="text-xs font-medium text-neutral-800 mb-1">{review.title}</p>
+                            {review.comment && (
+                              <p className="text-xs text-neutral-600 line-clamp-2">{review.comment}</p>
+                            )}
+                            <p className="text-xs text-neutral-500 mt-1">- {review.user_name}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
 
                   <div className="border-t border-neutral-100 pt-4 mt-auto">
