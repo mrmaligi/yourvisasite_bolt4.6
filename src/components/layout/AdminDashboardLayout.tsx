@@ -1,5 +1,6 @@
 import {
   LayoutDashboard,
+  Activity,
   Users,
   Scale,
   FileText,
@@ -14,6 +15,7 @@ import { DashboardLayout } from './DashboardLayout';
 
 const sidebarItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/admin/activity', label: 'Activity Log', icon: Activity },
   { to: '/admin/users', label: 'Users', icon: Users },
   { to: '/admin/lawyers', label: 'Lawyers', icon: Scale },
   { to: '/admin/visas', label: 'Visas', icon: FileText },

@@ -28,10 +28,12 @@ const Consultations = lazy(() => import('./pages/user/Consultations').then(m => 
 const UserSettings = lazy(() => import('./pages/user/UserSettings').then(m => ({ default: m.UserSettings })));
 
 const LawyerDashboard = lazy(() => import('./pages/lawyer/Dashboard').then(m => ({ default: m.LawyerDashboard })));
+const LawyerClients = lazy(() => import('./pages/lawyer/Clients').then(m => ({ default: m.Clients })));
 const Availability = lazy(() => import('./pages/lawyer/Availability').then(m => ({ default: m.Availability })));
 const Marketing = lazy(() => import('./pages/lawyer/Marketing').then(m => ({ default: m.Marketing })));
 
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard').then(m => ({ default: m.AdminDashboard })));
+const AdminActivityLog = lazy(() => import('./pages/admin/ActivityLog').then(m => ({ default: m.ActivityLog })));
 const UserManagement = lazy(() => import('./pages/admin/UserManagement').then(m => ({ default: m.UserManagement })));
 const LawyerManagement = lazy(() => import('./pages/admin/LawyerManagement').then(m => ({ default: m.LawyerManagement })));
 const VisaManagement = lazy(() => import('./pages/admin/VisaManagement').then(m => ({ default: m.VisaManagement })));
@@ -83,6 +85,7 @@ export default function App() {
                 <Route path="pending" element={<ProtectedRoute><LawyerPending /></ProtectedRoute>} />
                 <Route element={<ProtectedRoute requiredRole="lawyer"><LawyerDashboardLayout /></ProtectedRoute>}>
                   <Route index element={<LawyerDashboard />} />
+                  <Route path="clients" element={<LawyerClients />} />
                   <Route path="availability" element={<Availability />} />
                   <Route path="marketing" element={<Marketing />} />
                 </Route>
@@ -90,6 +93,7 @@ export default function App() {
 
               <Route path="admin" element={<ProtectedRoute requiredRole="admin"><AdminDashboardLayout /></ProtectedRoute>}>
                 <Route index element={<AdminDashboard />} />
+                <Route path="activity" element={<AdminActivityLog />} />
                 <Route path="users" element={<UserManagement />} />
                 <Route path="lawyers" element={<LawyerManagement />} />
                 <Route path="visas" element={<VisaManagement />} />
