@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, FolderOpen, Calendar, Settings } from 'lucide-react';
+import { LayoutDashboard, FileText, FolderOpen, Calendar, BookOpen, Settings } from 'lucide-react';
 import { DashboardLayout } from './DashboardLayout';
 
 const sidebarItems = [
@@ -6,6 +6,7 @@ const sidebarItems = [
   { to: '/dashboard/visas', label: 'My Visas', icon: FileText },
   { to: '/dashboard/documents', label: 'My Documents', icon: FolderOpen },
   { to: '/dashboard/consultations', label: 'Consultations', icon: Calendar },
+  { to: '/dashboard/premium', label: 'Premium Content', icon: BookOpen },
   { to: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
