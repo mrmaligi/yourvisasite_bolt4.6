@@ -20,12 +20,12 @@ export function UserDashboard() {
       supabase.from('tracker_entries').select('id', { count: 'exact', head: true }).eq('submitted_by', profile.id),
     ]).then(([purchases, docs, bookings, submissions]) => {
       setCounts({
-        purchases: purchases.count || 0,
-        documents: docs.count || 0,
-        bookings: bookings.count || 0,
-        submissions: submissions.count || 0,
+        purchases: purchases.count ?? 0,
+        documents: docs.count ?? 0,
+        bookings: bookings.count ?? 0,
+        submissions: submissions.count ?? 0,
       });
-    });
+    }).catch(() => {});
 
     supabase
       .from('news_articles')

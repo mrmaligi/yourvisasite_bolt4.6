@@ -26,6 +26,8 @@ export function PublicLayout() {
               <ul className="space-y-3 text-sm">
                 <li><Link to="/tracker" className="hover:text-white transition-colors duration-200">Tracker</Link></li>
                 <li><Link to="/visas" className="hover:text-white transition-colors duration-200">Visa Search</Link></li>
+                <li><Link to="/marketplace" className="hover:text-white transition-colors duration-200">Marketplace</Link></li>
+                <li><Link to="/news" className="hover:text-white transition-colors duration-200">News</Link></li>
               </ul>
             </div>
             <div>
@@ -33,6 +35,8 @@ export function PublicLayout() {
               <ul className="space-y-3 text-sm">
                 <li><Link to="/lawyers" className="hover:text-white transition-colors duration-200">Find a Lawyer</Link></li>
                 <li><Link to="/visas" className="hover:text-white transition-colors duration-200">Premium Guides</Link></li>
+                <li><Link to="/register/lawyer" className="hover:text-white transition-colors duration-200">Become a Lawyer</Link></li>
+                <li><Link to="/pricing" className="hover:text-white transition-colors duration-200">Pricing</Link></li>
               </ul>
             </div>
             <div>

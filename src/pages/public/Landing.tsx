@@ -22,10 +22,11 @@ export function Landing() {
     Promise.all([
       supabase.from('tracker_entries').select('id', { count: 'exact', head: true }),
       supabase.from('visas').select('id', { count: 'exact', head: true }).eq('is_active', true),
-    ]).then(([entries, visas]) => {
+      supabase.schema('lawyer').from('profiles').select('id', { count: 'exact', head: true }).eq('is_verified', true),
+    ]).then(([entries, visas, lawyers]) => {
       setCounts({
         entries: entries.count || 0,
-        lawyers: 0,
+        lawyers: lawyers.count || 0,
         visas: visas.count || 0,
       });
     });
@@ -173,6 +174,10 @@ export function Landing() {
                 <p className="text-sm font-semibold text-primary-600 tracking-wide uppercase mb-3">Updates</p>
                 <h2 className="text-3xl font-bold text-neutral-900">Latest news</h2>
               </div>
+              <Link to="/news" className="text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1 transition-colors">
+                View all
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               {news.map((article) => (
