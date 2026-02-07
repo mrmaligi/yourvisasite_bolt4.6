@@ -1,0 +1,14 @@
+import { LayoutDashboard, FileText, FolderOpen, Calendar, Settings } from 'lucide-react';
+import { DashboardLayout } from './DashboardLayout';
+
+const sidebarItems = [
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/dashboard/visas', label: 'My Visas', icon: FileText },
+  { to: '/dashboard/documents', label: 'My Documents', icon: FolderOpen },
+  { to: '/dashboard/consultations', label: 'Consultations', icon: Calendar },
+  { to: '/dashboard/settings', label: 'Settings', icon: Settings },
+];
+
+export function UserDashboardLayout() {
+  return <DashboardLayout sidebarItems={sidebarItems} title="My Dashboard" />;
+}

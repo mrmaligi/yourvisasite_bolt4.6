@@ -1,0 +1,30 @@
+# Project Instructions: VisaBuild Global Mobility Platform
+
+**Architecture & Tech Stack**
+
+* **Frameworks:** Build with React (JSX), Tailwind CSS, and Lucide React icons, ensuring "beautiful, not cookie-cutter" production-ready UI.
+* **Backend:** Use Supabase and PostgreSQL with a declarative schema approach. Manage schema evolution via migrations in the `supabase/` directory.
+* **Schema Segregation:** Separate data into four distinct schemas: `public` (core), `lawyer` (professional records), `stripe` (payments), and `storage` (metadata).
+
+**Algorithmic Core (Visa Tracker)**
+
+* **Weighted Average Logic:** Processing times must use a weighted reputation system: 
+
+.
+* **Weights:** Apply constants based on role: Lawyer (), Authenticated User (), and Anonymous ().
+* **Temporal Sensitivity:** Implement Exponentially Weighted Moving Average (EWMA) to prioritize recent data points: 
+
+.
+
+**Security & Identity**
+
+* **Authentication:** Integrate Google OAuth via Supabase Auth.
+* **Authorization:** Manage roles (Anon, User, Lawyer, Admin) using custom JWT claims stored in `raw_app_meta_data`.
+* **Data Protection:** Use Row-Level Security (RLS) for all tables. Implement an "ownership-plus-membership" pattern for document sharing between lawyers and clients.
+
+**Feature Specifics**
+
+* **Monetization:** Implement $49 premium visa guides. Verify entitlements via `stripe.checkout_sessions` synchronized to the `stripe` schema.
+* **Document Management:** Use a "Dirty Bucket" pattern for uploads. Files must undergo malware scanning and OCR validation before moving to a "clean" bucket.
+* **Lawyer Tools:** Integrate Cal.com via Foreign Data Wrapper (FDW) for real-time consultation booking and availability.
+* **Admin Dashboard:** Provide dynamic control over visa requirements using `jsonb` columns and `pg_jsonschema` validation.
