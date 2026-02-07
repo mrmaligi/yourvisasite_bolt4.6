@@ -6,9 +6,6 @@ import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { loadStripe } from '@stripe/stripe-js';
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
 interface Category {
   id: string;
@@ -175,28 +172,29 @@ export function Marketplace() {
     }
 
     try {
-      const stripe = await stripePromise;
-      if (!stripe) throw new Error('Stripe failed to load');
+      const listing = listings.find((l) => l.id === listingId);
+      if (!listing) throw new Error('Listing not found');
 
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/marketplace-checkout`;
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          listingId,
-          successUrl: `${window.location.origin}/dashboard/marketplace`,
-          cancelUrl: window.location.href,
-        }),
-      });
+      const { error } = await supabase
+        .from('marketplace_purchases')
+        .insert({
+          user_id: user.id,
+          listing_id: listingId,
+          lawyer_id: listing.lawyer_id,
+          amount_cents: price,
+          status: 'completed',
+          stripe_payment_id: `demo_${Date.now()}`,
+          purchased_at: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
+        });
 
-      const { sessionId } = await response.json();
-      await stripe.redirectToCheckout({ sessionId });
+      if (error) throw error;
+
+      alert('Purchase successful! Check your dashboard to view your purchase.');
+      navigate('/dashboard/marketplace');
     } catch (error) {
       console.error('Purchase error:', error);
-      alert('Failed to initiate checkout. Please try again.');
+      alert('Failed to complete purchase. Please try again.');
     }
   };
 
