@@ -190,11 +190,11 @@ export function Marketplace() {
 
       if (error) throw error;
 
-      alert('Purchase successful! Check your dashboard to view your purchase.');
+      alert('Success! Added to your dashboard.');
       navigate('/dashboard/marketplace');
     } catch (error) {
-      console.error('Purchase error:', error);
-      alert('Failed to complete purchase. Please try again.');
+      console.error('Error:', error);
+      alert('Failed. Please try again.');
     }
   };
 
@@ -295,7 +295,7 @@ export function Marketplace() {
                       )}
                     </div>
                     <span className="text-2xl font-bold text-primary-600">
-                      ${(listing.price_cents / 100).toFixed(0)}
+                      Free
                     </span>
                   </div>
 
@@ -392,7 +392,7 @@ export function Marketplace() {
                       onClick={() => handlePurchase(listing.id, listing.price_cents)}
                     >
                       <ShoppingCart className="w-4 h-4 mr-2" />
-                      Purchase Now
+                      Get Now
                     </Button>
                   </div>
                 </CardBody>
