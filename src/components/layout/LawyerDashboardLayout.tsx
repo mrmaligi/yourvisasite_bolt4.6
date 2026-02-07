@@ -5,6 +5,7 @@ import {
   Megaphone,
   BarChart3,
   Newspaper,
+  Store,
   Settings,
 } from 'lucide-react';
 import { DashboardLayout } from './DashboardLayout';
@@ -16,6 +17,7 @@ const sidebarItems = [
   { to: '/lawyer/marketing', label: 'Marketing', icon: Megaphone },
   { to: '/lawyer/tracker', label: 'Tracker', icon: BarChart3 },
   { to: '/lawyer/news', label: 'News', icon: Newspaper },
+  { to: '/lawyer/marketplace', label: 'Marketplace', icon: Store },
   { to: '/lawyer/settings', label: 'Settings', icon: Settings },
 ];
 

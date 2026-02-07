@@ -18,6 +18,7 @@ const LawyerDirectory = lazy(() => import('./pages/public/LawyerDirectory').then
 const LawyerProfile = lazy(() => import('./pages/public/LawyerProfile').then(m => ({ default: m.LawyerProfile })));
 const News = lazy(() => import('./pages/public/News').then(m => ({ default: m.News })));
 const NewsDetail = lazy(() => import('./pages/public/NewsDetail').then(m => ({ default: m.NewsDetail })));
+const PublicMarketplace = lazy(() => import('./pages/public/Marketplace').then(m => ({ default: m.Marketplace })));
 const Success = lazy(() => import('./pages/Success').then(m => ({ default: m.Success })));
 const LawyerRegister = lazy(() => import('./pages/lawyer/LawyerRegister').then(m => ({ default: m.LawyerRegister })));
 const LawyerPending = lazy(() => import('./pages/lawyer/LawyerPending').then(m => ({ default: m.LawyerPending })));
@@ -27,6 +28,7 @@ const MyVisas = lazy(() => import('./pages/user/MyVisas').then(m => ({ default: 
 const MyDocuments = lazy(() => import('./pages/user/MyDocuments').then(m => ({ default: m.MyDocuments })));
 const Consultations = lazy(() => import('./pages/user/Consultations').then(m => ({ default: m.Consultations })));
 const UserPremiumContent = lazy(() => import('./pages/user/PremiumContent').then(m => ({ default: m.PremiumContent })));
+const UserMarketplacePurchases = lazy(() => import('./pages/user/MarketplacePurchases').then(m => ({ default: m.MarketplacePurchases })));
 const UserSettings = lazy(() => import('./pages/user/UserSettings').then(m => ({ default: m.UserSettings })));
 
 const LawyerDashboard = lazy(() => import('./pages/lawyer/Dashboard').then(m => ({ default: m.LawyerDashboard })));
@@ -35,6 +37,7 @@ const Availability = lazy(() => import('./pages/lawyer/Availability').then(m => 
 const Marketing = lazy(() => import('./pages/lawyer/Marketing').then(m => ({ default: m.Marketing })));
 const LawyerTracker = lazy(() => import('./pages/lawyer/LawyerTracker').then(m => ({ default: m.LawyerTracker })));
 const LawyerNews = lazy(() => import('./pages/lawyer/LawyerNews').then(m => ({ default: m.LawyerNews })));
+const LawyerMarketplace = lazy(() => import('./pages/lawyer/Marketplace').then(m => ({ default: m.Marketplace })));
 const LawyerSettings = lazy(() => import('./pages/lawyer/LawyerSettings').then(m => ({ default: m.LawyerSettings })));
 
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard').then(m => ({ default: m.AdminDashboard })));
@@ -76,6 +79,7 @@ export default function App() {
                 <Route path="lawyers/:id" element={<LawyerProfile />} />
                 <Route path="news" element={<News />} />
                 <Route path="news/:slug" element={<NewsDetail />} />
+                <Route path="marketplace" element={<PublicMarketplace />} />
                 <Route path="success" element={<Success />} />
               </Route>
 
@@ -85,6 +89,7 @@ export default function App() {
                 <Route path="documents" element={<MyDocuments />} />
                 <Route path="consultations" element={<Consultations />} />
                 <Route path="premium" element={<UserPremiumContent />} />
+                <Route path="marketplace" element={<UserMarketplacePurchases />} />
                 <Route path="settings" element={<UserSettings />} />
               </Route>
 
@@ -97,6 +102,7 @@ export default function App() {
                   <Route path="marketing" element={<Marketing />} />
                   <Route path="tracker" element={<LawyerTracker />} />
                   <Route path="news" element={<LawyerNews />} />
+                  <Route path="marketplace" element={<LawyerMarketplace />} />
                   <Route path="settings" element={<LawyerSettings />} />
                 </Route>
               </Route>
