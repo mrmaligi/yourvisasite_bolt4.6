@@ -15,6 +15,7 @@ export function Navbar() {
     { to: '/', label: 'Home' },
     { to: '/tracker', label: 'Tracker' },
     { to: '/visas', label: 'Visas' },
+    { to: '/lawyers', label: 'Lawyers' },
   ];
 
   const getDashboardPath = () => {

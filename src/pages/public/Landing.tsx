@@ -176,24 +176,26 @@ export function Landing() {
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               {news.map((article) => (
-                <Card key={article.id} hover className="overflow-hidden group">
-                  {article.image_url && (
-                    <div className="overflow-hidden">
-                      <img
-                        src={article.image_url}
-                        alt=""
-                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
-                  )}
-                  <CardBody>
-                    <p className="text-xs text-neutral-400 mb-2.5 font-medium">
-                      {article.published_at && new Date(article.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </p>
-                    <h3 className="font-semibold text-neutral-900 mb-2 line-clamp-2 group-hover:text-primary-700 transition-colors">{article.title}</h3>
-                    <p className="text-sm text-neutral-500 line-clamp-3">{article.body}</p>
-                  </CardBody>
-                </Card>
+                <Link key={article.id} to={`/news/${article.slug}`}>
+                  <Card hover className="overflow-hidden group h-full">
+                    {article.image_url && (
+                      <div className="overflow-hidden">
+                        <img
+                          src={article.image_url}
+                          alt=""
+                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                    )}
+                    <CardBody>
+                      <p className="text-xs text-neutral-400 mb-2.5 font-medium">
+                        {article.published_at && new Date(article.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                      <h3 className="font-semibold text-neutral-900 mb-2 line-clamp-2 group-hover:text-primary-700 transition-colors">{article.title}</h3>
+                      <p className="text-sm text-neutral-500 line-clamp-3">{article.body}</p>
+                    </CardBody>
+                  </Card>
+                </Link>
               ))}
             </div>
           </div>

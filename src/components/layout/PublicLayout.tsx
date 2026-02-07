@@ -31,8 +31,8 @@ export function PublicLayout() {
             <div>
               <h4 className="text-white font-semibold text-sm mb-4">Services</h4>
               <ul className="space-y-3 text-sm">
-                <li><span className="hover:text-white transition-colors duration-200 cursor-default">Find a Lawyer</span></li>
-                <li><span className="hover:text-white transition-colors duration-200 cursor-default">Premium Guides</span></li>
+                <li><Link to="/lawyers" className="hover:text-white transition-colors duration-200">Find a Lawyer</Link></li>
+                <li><Link to="/visas" className="hover:text-white transition-colors duration-200">Premium Guides</Link></li>
               </ul>
             </div>
             <div>

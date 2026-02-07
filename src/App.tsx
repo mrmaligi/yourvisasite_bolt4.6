@@ -13,6 +13,9 @@ const Landing = lazy(() => import('./pages/public/Landing').then((m) => ({ defau
 const Tracker = lazy(() => import('./pages/public/Tracker').then((m) => ({ default: m.Tracker })));
 const VisaSearch = lazy(() => import('./pages/public/VisaSearch').then((m) => ({ default: m.VisaSearch })));
 const VisaDetail = lazy(() => import('./pages/public/VisaDetail').then((m) => ({ default: m.VisaDetail })));
+const LawyerDirectory = lazy(() => import('./pages/public/LawyerDirectory').then((m) => ({ default: m.LawyerDirectory })));
+const LawyerPublicProfile = lazy(() => import('./pages/public/LawyerProfile').then((m) => ({ default: m.LawyerProfile })));
+const NewsDetail = lazy(() => import('./pages/public/NewsDetail').then((m) => ({ default: m.NewsDetail })));
 const Login = lazy(() => import('./pages/public/Login').then((m) => ({ default: m.Login })));
 const Register = lazy(() => import('./pages/public/Register').then((m) => ({ default: m.Register })));
 
@@ -35,6 +38,7 @@ const PremiumContent = lazy(() => import('./pages/admin/PremiumContent').then((m
 const NewsManagement = lazy(() => import('./pages/admin/NewsManagement').then((m) => ({ default: m.NewsManagement })));
 const TrackerManagement = lazy(() => import('./pages/admin/TrackerManagement').then((m) => ({ default: m.TrackerManagement })));
 const Pricing = lazy(() => import('./pages/admin/Pricing').then((m) => ({ default: m.Pricing })));
+const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagement').then((m) => ({ default: m.PromoCodeManagement })));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings').then((m) => ({ default: m.AdminSettings })));
 
 function LoadingFallback() {
@@ -71,6 +75,9 @@ function App() {
                 <Route path="/tracker" element={<Tracker />} />
                 <Route path="/visas" element={<VisaSearch />} />
                 <Route path="/visas/:id" element={<VisaDetail />} />
+                <Route path="/lawyers" element={<LawyerDirectory />} />
+                <Route path="/lawyers/:id" element={<LawyerPublicProfile />} />
+                <Route path="/news/:slug" element={<NewsDetail />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/register/lawyer" element={<ProtectedRoute><LawyerRegister /></ProtectedRoute>} />
@@ -109,6 +116,7 @@ function App() {
                 <Route path="news" element={<NewsManagement />} />
                 <Route path="tracker" element={<TrackerManagement />} />
                 <Route path="pricing" element={<Pricing />} />
+                <Route path="promos" element={<PromoCodeManagement />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Route>
             </Routes>

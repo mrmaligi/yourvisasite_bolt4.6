@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, FolderOpen, Calendar, TrendingUp, ArrowRight } from 'lucide-react';
+import { FileText, FolderOpen, Calendar, TrendingUp, ArrowRight, Scale } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
@@ -70,22 +70,41 @@ export function UserDashboard() {
         ))}
       </div>
 
+      <Link to="/lawyers">
+        <Card hover className="border-teal-100 bg-gradient-to-r from-teal-50/50 to-white">
+          <CardBody className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-11 h-11 rounded-xl bg-teal-100 flex items-center justify-center flex-shrink-0">
+                <Scale className="w-5 h-5 text-teal-700" />
+              </div>
+              <div>
+                <p className="font-semibold text-neutral-900">Book a Consultation</p>
+                <p className="text-sm text-neutral-500">Connect with a verified immigration lawyer</p>
+              </div>
+            </div>
+            <ArrowRight className="w-5 h-5 text-teal-600" />
+          </CardBody>
+        </Card>
+      </Link>
+
       {news.length > 0 && (
         <div>
           <h2 className="text-lg font-semibold text-neutral-900 mb-4">Latest Immigration News</h2>
           <div className="space-y-3">
             {news.map((article) => (
-              <Card key={article.id} hover className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-neutral-900">{article.title}</h3>
-                    <p className="text-xs text-neutral-400 mt-1">
-                      {article.published_at && new Date(article.published_at).toLocaleDateString()}
-                    </p>
+              <Link key={article.id} to={`/news/${article.slug}`}>
+                <Card hover className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium text-neutral-900">{article.title}</h3>
+                      <p className="text-xs text-neutral-400 mt-1">
+                        {article.published_at && new Date(article.published_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-neutral-400" />
                   </div>
-                  <ArrowRight className="w-4 h-4 text-neutral-400" />
-                </div>
-              </Card>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>

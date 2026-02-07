@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import { Mail, Eye, EyeOff, Scale, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
@@ -20,6 +21,9 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showReset, setShowReset] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetSubmitting, setResetSubmitting] = useState(false);
 
   if (!isLoading && user) {
     return <Navigate to={getRoleDashboard(role)} replace />;
@@ -34,6 +38,23 @@ export function Login() {
       toast('error', error.message);
       setSubmitting(false);
     }
+  };
+
+  const handleResetPassword = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail) return;
+    setResetSubmitting(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: `${window.location.origin}/login`,
+    });
+    if (error) {
+      toast('error', error.message);
+    } else {
+      toast('success', 'Password reset email sent. Check your inbox.');
+      setShowReset(false);
+      setResetEmail('');
+    }
+    setResetSubmitting(false);
   };
 
   return (
@@ -74,11 +95,37 @@ export function Login() {
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => { setShowReset(true); setResetEmail(email); }}
+                className="text-xs text-primary-600 hover:text-primary-700 font-medium transition-colors"
+              >
+                Forgot password?
+              </button>
+            </div>
             <Button type="submit" size="lg" className="w-full" loading={submitting}>
               <Mail className="w-4 h-4" />
               Sign in
             </Button>
           </form>
+
+          {showReset && (
+            <form onSubmit={handleResetPassword} className="mt-4 p-4 bg-neutral-50 rounded-xl space-y-3 border border-neutral-200/60">
+              <p className="text-sm font-semibold text-neutral-900">Reset your password</p>
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                autoComplete="email"
+              />
+              <div className="flex gap-2">
+                <Button type="submit" size="sm" loading={resetSubmitting}>Send reset link</Button>
+                <Button type="button" variant="ghost" size="sm" onClick={() => setShowReset(false)}>Cancel</Button>
+              </div>
+            </form>
+          )}
 
           <div className="my-6 flex items-center gap-3">
             <div className="flex-1 h-px bg-neutral-200" />
