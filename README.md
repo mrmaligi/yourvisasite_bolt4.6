@@ -1,35 +1,56 @@
-# YourVisaSite
+# VisaBuild
 
-YourVisaSite is a comprehensive visa management platform designed to connect visa applicants with lawyers, provide tracking tools, and offer educational resources. The platform serves three main user roles: Regular Users (Visa Applicants), Lawyers, and Administrators.
+VisaBuild is a comprehensive visa management platform designed to connect visa applicants with lawyers, provide tracking tools, and offer educational resources. The platform serves three main user roles: Regular Users (Visa Applicants), Lawyers, and Administrators.
 
-## Features
+## Project Vision
 
-### 👤 For Users (Visa Applicants)
-*   **Dashboard**: A centralized hub to view visa status and upcoming tasks.
-*   **Visa Tracking**: Track the progress of visa applications.
-*   **Document Management**: Upload, store, and manage visa-related documents.
-*   **Consultations**: Book and manage consultations with lawyers.
-*   **Premium Content**: Access exclusive guides and resources.
-*   **Marketplace**: Purchase additional services or products.
-*   **Settings**: Manage profile and account settings.
+**Goal:** Synthesize the requirements into a coherent project plan.
+**Concept:**
+*   **Tracker:** Anonymous tracker for visa processing times.
+*   **User Role:** Google login (Supabase), main page with news/tracker, "Visas" search, free basic info vs. paid premium content ($49/visa), document upload helper, consultation booking with lawyers.
+*   **Lawyer Role:** Verification process, dashboard for managing users/marketing/pricing, setting hourly rates, updating trackers (weighted), commenting on news.
+*   **Admin Role:** Oversights everything, manages premium content requirements, monitors documents, pricing control.
 
-### ⚖️ For Lawyers
-*   **Dashboard**: Overview of client activities and pending tasks.
-*   **Client Management**: Manage client cases and communications.
-*   **Availability**: Set and manage consultation availability.
-*   **Marketing Tools**: Tools to promote services to potential clients.
-*   **Marketplace**: Offer services on the marketplace.
-*   **Lawyer News**: Stay updated with relevant legal news.
-*   **Pending Status**: Track verification status.
+## Architecture Summary
 
-### 🛡️ For Admins
-*   **Dashboard**: High-level overview of platform statistics.
-*   **User Management**: Manage user accounts and permissions.
-*   **Lawyer Management**: Verify and manage lawyer profiles.
-*   **Visa Management**: Manage visa types and information.
-*   **Content Management**: Manage news, premium content, and marketplace items.
-*   **Pricing & Promos**: specific pricing strategies and promotional codes.
-*   **Activity Log**: Monitor platform activity for security and auditing.
+### Roles & Core Features
+
+#### 1. 👤 User (The Applicant)
+*   **Auth:** Google Sign-in (Supabase).
+*   **Dashboard:** Tracker, News Feed, Quick Call.
+*   **Visa Search:** Search by keywords/subclass.
+*   **Freemium Model:**
+    *   **Free:** Basic summary, official links, news.
+    *   **Paid ($49/visa):** Unlocks "Premium Content" (Step-by-step application guide, document upload helper with explanations/examples).
+*   **Consultation:** Book paid calls with lawyers (30m/1hr). Share uploaded docs with them securely.
+
+#### 2. ⚖️ Lawyer (The Expert)
+*   **Verification:** Upload proof of practice for Admin approval.
+*   **Dashboard:** Manage Users, Marketing, Set Hourly Rates.
+*   **Tracker Power:** Lawyer updates to the tracker carry more "weight" in the algorithm.
+*   **Interaction:** Comment on news, reply to user reviews, view user files (once approved).
+
+#### 3. 🛡️ Admin (The Controller)
+*   **Oversight:** View/manage everything (Users, Lawyers, Pricing).
+*   **Content Management:** Manage the "Premium" section (requirements, document categories).
+*   **Approvals:** Verify lawyer accounts.
+
+#### 4. ⏱️ The Tracker
+*   **Anonymous Access:** Users can view/submit processing times without login.
+*   **Algorithm:** Calculates current processing times based on user + weighted lawyer inputs.
+
+## Project Plan
+
+### Phase 1: Documentation & Structure
+1.  Update README.md with this exact project spec.
+2.  Create a TODO.md breaking down the features into coding tasks.
+
+### Phase 2: Database Schema (Supabase)
+1.  Design the SQL tables for profiles (roles: user/lawyer/admin), visas, user_visas (for paid unlocks), tracker_entries, and bookings.
+
+### Phase 3: Frontend Build
+1.  Build the Tracker (easiest starting point).
+2.  Build the Auth & Role System.
 
 ## Tech Stack
 
