@@ -19,6 +19,9 @@ export function Navbar() {
             <Link to="/products" className="text-gray-700 hover:text-gray-900">
               Products
             </Link>
+            <Link to="/pricing" className="text-gray-700 hover:text-indigo-600 transition-colors">
+              Pricing
+            </Link>
 
             {user ? (
               <>

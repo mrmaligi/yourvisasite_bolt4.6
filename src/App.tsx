@@ -20,6 +20,7 @@ const News = lazy(() => import('./pages/public/News').then(m => ({ default: m.Ne
 const NewsDetail = lazy(() => import('./pages/public/NewsDetail').then(m => ({ default: m.NewsDetail })));
 const PublicMarketplace = lazy(() => import('./pages/public/Marketplace').then(m => ({ default: m.Marketplace })));
 const Success = lazy(() => import('./pages/Success').then(m => ({ default: m.Success })));
+const Pricing = lazy(() => import('./pages/Pricing').then(m => ({ default: m.Pricing })));
 const LawyerRegister = lazy(() => import('./pages/lawyer/LawyerRegister').then(m => ({ default: m.LawyerRegister })));
 const LawyerPending = lazy(() => import('./pages/lawyer/LawyerPending').then(m => ({ default: m.LawyerPending })));
 
@@ -48,7 +49,7 @@ const VisaManagement = lazy(() => import('./pages/admin/VisaManagement').then(m 
 const PremiumContent = lazy(() => import('./pages/admin/PremiumContent').then(m => ({ default: m.PremiumContent })));
 const NewsManagement = lazy(() => import('./pages/admin/NewsManagement').then(m => ({ default: m.NewsManagement })));
 const TrackerManagement = lazy(() => import('./pages/admin/TrackerManagement').then(m => ({ default: m.TrackerManagement })));
-const Pricing = lazy(() => import('./pages/admin/Pricing').then(m => ({ default: m.Pricing })));
+const AdminPricing = lazy(() => import('./pages/admin/Pricing').then(m => ({ default: m.Pricing })));
 const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagement').then(m => ({ default: m.PromoCodeManagement })));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings').then(m => ({ default: m.AdminSettings })));
 
@@ -80,6 +81,7 @@ export default function App() {
                 <Route path="news" element={<News />} />
                 <Route path="news/:slug" element={<NewsDetail />} />
                 <Route path="marketplace" element={<PublicMarketplace />} />
+                <Route path="pricing" element={<Pricing />} />
                 <Route path="success" element={<Success />} />
               </Route>
 
@@ -116,7 +118,7 @@ export default function App() {
                 <Route path="premium" element={<PremiumContent />} />
                 <Route path="news" element={<NewsManagement />} />
                 <Route path="tracker" element={<TrackerManagement />} />
-                <Route path="pricing" element={<Pricing />} />
+                <Route path="pricing" element={<AdminPricing />} />
                 <Route path="promos" element={<PromoCodeManagement />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Route>

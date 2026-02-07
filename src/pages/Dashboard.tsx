@@ -3,6 +3,7 @@ import { useAuth } from '../lib/auth';
 import { supabase } from '../lib/supabase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Alert, AlertDescription } from '../components/ui/alert';
+import { SubscriptionStatus } from '../components/SubscriptionStatus';
 
 interface SubscriptionData {
   subscription_status: string;
@@ -76,6 +77,8 @@ export function Dashboard() {
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600">Welcome back, {user?.email}</p>
         </div>
+
+        <SubscriptionStatus />
 
         {error && (
           <div className="mb-8">
