@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
+import { SubscriptionStatus } from '../../components/SubscriptionStatus';
 
 interface LawyerProfileData {
   id: string;
@@ -78,6 +79,8 @@ export function LawyerDashboard() {
         <h1 className="text-2xl font-bold text-neutral-900">Lawyer Dashboard</h1>
         <p className="text-neutral-500 mt-1">Manage your practice and clients.</p>
       </div>
+
+      <SubscriptionStatus />
 
       {lawyerProfile && !lawyerProfile.is_verified && (
         <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-3">

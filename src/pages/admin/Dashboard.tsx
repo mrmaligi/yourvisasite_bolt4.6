@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Users, Scale, FileText, DollarSign, BarChart3, ShieldCheck } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
+import { SubscriptionStatus } from '../../components/SubscriptionStatus';
 
 export function AdminDashboard() {
   const [counts, setCounts] = useState({
@@ -43,6 +44,9 @@ export function AdminDashboard() {
         <h1 className="text-2xl font-bold text-neutral-900">Admin Dashboard</h1>
         <p className="text-neutral-500 mt-1">Platform overview and key metrics.</p>
       </div>
+      
+      <SubscriptionStatus />
+      
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {kpis.map((kpi) => (
           <Card key={kpi.label}>
