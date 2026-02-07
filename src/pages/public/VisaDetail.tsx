@@ -15,7 +15,6 @@ import { supabase } from '../../lib/supabase';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { Modal } from '../../components/ui/Modal';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
 import { TRACKER_THRESHOLDS } from '../../lib/constants';
@@ -30,7 +29,6 @@ export function VisaDetail() {
   const [product, setProduct] = useState<Product | null>(null);
   const [purchase, setPurchase] = useState<UserVisaPurchase | null>(null);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
-  const [showPaywall, setShowPaywall] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -78,7 +76,6 @@ export function VisaDetail() {
       if (error) throw error;
 
       toast('success', 'Guide unlocked! You now have full access.');
-      setShowPaywall(false);
 
       const { data: p } = await supabase
         .from('user_visa_purchases')
@@ -260,40 +257,15 @@ export function VisaDetail() {
             </ul>
             <Button
               size="lg"
-              onClick={() => user ? setShowPaywall(true) : toast('info', 'Please sign in first')}
+              loading={purchaseLoading}
+              onClick={() => user ? handlePurchase() : toast('info', 'Please sign in first')}
               className="bg-accent-500 hover:bg-accent-600 text-white"
             >
-              Unlock for ${(price / 100).toFixed(0)}
+              Unlock Guide (Free)
             </Button>
           </div>
         </Card>
       )}
-
-      <Modal
-        isOpen={showPaywall}
-        onClose={() => setShowPaywall(false)}
-        title="Confirm Purchase"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setShowPaywall(false)}>Cancel</Button>
-            <Button loading={purchaseLoading} onClick={handlePurchase}>
-              Pay ${(price / 100).toFixed(0)}
-            </Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          <p className="text-neutral-700">
-            You are about to unlock the premium guide for <strong>{visa.name}</strong>.
-          </p>
-          <div className="p-4 bg-neutral-50 rounded-lg">
-            <div className="flex justify-between text-sm">
-              <span className="text-neutral-600">Guide: {visa.subclass_number} - {visa.name}</span>
-              <span className="font-semibold text-neutral-900">${(price / 100).toFixed(0)}</span>
-            </div>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 }

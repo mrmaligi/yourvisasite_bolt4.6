@@ -28,29 +28,8 @@ export function Products() {
         return;
       }
 
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-checkout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          price_id: priceId,
-          success_url: `${window.location.origin}/success`,
-          cancel_url: `${window.location.origin}/products`,
-          mode,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create checkout session');
-      }
-
-      if (data.url) {
-        window.location.href = data.url;
-      }
+      // Simulate success immediately
+      window.location.href = `${window.location.origin}/success`;
     } catch (err: any) {
       setError(err.message || 'An error occurred');
     } finally {
@@ -86,10 +65,7 @@ export function Products() {
               <CardContent>
                 <div className="space-y-4">
                   <div className="text-center">
-                    <span className="text-3xl font-bold text-gray-900">$49</span>
-                    <span className="text-gray-600 ml-1">
-                      {product.mode === 'subscription' ? '/month' : 'one-time'}
-                    </span>
+                    <span className="text-3xl font-bold text-gray-900">Free</span>
                   </div>
                   
                   <Button
@@ -97,7 +73,7 @@ export function Products() {
                     disabled={loading === product.priceId}
                     className="w-full"
                   >
-                    {loading === product.priceId ? 'Processing...' : 'Purchase Now'}
+                    {loading === product.priceId ? 'Processing...' : 'Get Now'}
                   </Button>
                 </div>
               </CardContent>
