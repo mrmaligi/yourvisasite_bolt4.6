@@ -1,34 +1,53 @@
 import { forwardRef } from 'react';
+import { Loader2 } from 'lucide-react';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
+  loading?: boolean;
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className = '', variant = 'default', size = 'default', ...props }, ref) => {
-    const variants = {
-      default: 'bg-blue-600 text-white hover:bg-blue-700',
-      destructive: 'bg-red-600 text-white hover:bg-red-700',
-      outline: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
-      secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200',
-      ghost: 'text-gray-700 hover:bg-gray-100',
-      link: 'text-blue-600 underline-offset-4 hover:underline',
+  ({ className = '', variant = 'default', size = 'default', loading = false, children, disabled, ...props }, ref) => {
+
+    // Map variants to our design system classes
+    const variantClasses = {
+      default: 'btn-primary', // Green primary from index.css
+      destructive: 'btn-danger', // Red from index.css
+      outline: 'btn-secondary', // White with border from index.css
+      secondary: 'bg-neutral-100 text-neutral-900 hover:bg-neutral-200 border-none shadow-sm', // Grey background (solid secondary)
+      ghost: 'btn-ghost', // Transparent from index.css
+      link: 'text-primary-600 underline-offset-4 hover:underline p-0 h-auto bg-transparent shadow-none',
     };
 
-    const sizes = {
-      default: 'h-10 px-4 py-2',
-      sm: 'h-9 px-3',
-      lg: 'h-11 px-8',
-      icon: 'h-10 w-10',
+    // Override sizes only if not default (btn-* classes handle default size)
+    const sizeClasses = {
+      default: '', // Let btn-* handle it (usually px-5 py-2.5)
+      sm: 'h-9 px-3 text-xs',
+      lg: 'h-11 px-8 text-base',
+      icon: 'h-10 w-10 p-0 flex items-center justify-center',
     };
+
+    const variantClass = variantClasses[variant] || variantClasses.default;
+    const sizeClass = sizeClasses[size] || sizeClasses.default;
+
+    const combinedClassName = [
+      'inline-flex items-center justify-center rounded-xl font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none',
+      variantClass,
+      sizeClass,
+      className
+    ].filter(Boolean).join(' ');
 
     return (
       <button
-        className={`inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ${variants[variant]} ${sizes[size]} ${className}`}
+        className={combinedClassName}
         ref={ref}
+        disabled={disabled || loading}
         {...props}
-      />
+      >
+        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {children}
+      </button>
     );
   }
 );

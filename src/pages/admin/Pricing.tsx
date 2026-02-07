@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
-import { Input } from '../../components/ui/Input';
-import { Button } from '../../components/ui/Button';
+import { Card, CardContent, CardHeader } from '../../components/ui/card';
+import { Input } from '../../components/ui/input';
+import { Button } from '../../components/ui/button';
 import { DataTable, type Column } from '../../components/ui/DataTable';
 import { useToast } from '../../components/ui/Toast';
 import type { Product } from '../../types/database';
@@ -65,7 +65,7 @@ export function Pricing() {
 
       <Card>
         <CardHeader><h2 className="font-semibold text-neutral-900">Global Settings</h2></CardHeader>
-        <CardBody className="space-y-4">
+        <CardContent className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
             <Input label="Default Visa Price ($)" value={settings.defaultPrice} onChange={(e) => setSettings({ ...settings, defaultPrice: e.target.value })} />
             <Input label="EWMA Alpha" value={settings.alpha} onChange={(e) => setSettings({ ...settings, alpha: e.target.value })} helperText="0.0-1.0, higher = more responsive" />
@@ -75,14 +75,14 @@ export function Pricing() {
           <div className="flex justify-end">
             <Button loading={saving} onClick={handleSaveSettings}>Save Settings</Button>
           </div>
-        </CardBody>
+        </CardContent>
       </Card>
 
       <Card>
         <CardHeader><h2 className="font-semibold text-neutral-900">Per-Visa Pricing</h2></CardHeader>
-        <CardBody>
+        <CardContent>
           <DataTable columns={columns} data={products} keyExtractor={(r) => r.id} loading={loading} />
-        </CardBody>
+        </CardContent>
       </Card>
     </div>
   );

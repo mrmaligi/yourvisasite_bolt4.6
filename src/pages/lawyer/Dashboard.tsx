@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Users, Calendar, DollarSign, ShieldCheck, Clock } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/Badge';
 
 interface LawyerProfileData {
@@ -94,7 +94,7 @@ export function LawyerDashboard() {
       <div className="grid sm:grid-cols-3 gap-4">
         {statCards.map((stat) => (
           <Card key={stat.label}>
-            <CardBody className="flex items-center gap-4">
+            <CardContent className="flex items-center gap-4">
               <div className="w-11 h-11 rounded-xl bg-primary-50 flex items-center justify-center">
                 <stat.icon className="w-5 h-5 text-primary-600" />
               </div>
@@ -102,7 +102,7 @@ export function LawyerDashboard() {
                 <p className="text-2xl font-bold text-neutral-900">{stat.value}</p>
                 <p className="text-xs text-neutral-500">{stat.label}</p>
               </div>
-            </CardBody>
+            </CardContent>
           </Card>
         ))}
       </div>
@@ -115,7 +115,7 @@ export function LawyerDashboard() {
         <div className="space-y-4">
           <h2 className="text-lg font-semibold text-neutral-800">Recent Bookings</h2>
           <Card>
-            <CardBody className="divide-y divide-neutral-100">
+            <CardContent className="divide-y divide-neutral-100">
               {recentBookings.map((booking) => (
                 <div key={booking.id} className="py-3 first:pt-0 last:pb-0 flex items-start gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center flex-shrink-0">
@@ -134,7 +134,7 @@ export function LawyerDashboard() {
                   </div>
                 </div>
               ))}
-            </CardBody>
+            </CardContent>
           </Card>
         </div>
       )}

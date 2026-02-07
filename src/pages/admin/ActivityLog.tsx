@@ -11,7 +11,7 @@ import {
   DollarSign,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
+import { Card, CardContent, CardHeader } from '../../components/ui/card';
 
 interface ActivityItem {
   id: string;
@@ -193,7 +193,7 @@ export function ActivityLog() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((stat) => (
           <Card key={stat.label}>
-            <CardBody className="flex items-center gap-4">
+            <CardContent className="flex items-center gap-4">
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.color}`}>
                 <stat.icon className="w-6 h-6" />
               </div>
@@ -201,7 +201,7 @@ export function ActivityLog() {
                 <p className="text-2xl font-bold text-neutral-900">{stat.value}</p>
                 <p className="text-xs text-neutral-500">{stat.label}</p>
               </div>
-            </CardBody>
+            </CardContent>
           </Card>
         ))}
       </div>
@@ -213,7 +213,7 @@ export function ActivityLog() {
             <h2 className="text-lg font-semibold text-neutral-900">Recent Activity</h2>
           </div>
         </CardHeader>
-        <CardBody className="p-0">
+        <CardContent className="p-0">
           <div className="divide-y divide-neutral-100">
             {activities.map((activity) => {
               const Icon = activityIcons[activity.type];
@@ -236,7 +236,7 @@ export function ActivityLog() {
               );
             })}
           </div>
-        </CardBody>
+        </CardContent>
       </Card>
     </div>
   );

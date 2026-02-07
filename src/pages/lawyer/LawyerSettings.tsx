@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import { Save, User, Briefcase } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
+import { Card, CardContent, CardHeader } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
 import { useToast } from '../../components/ui/Toast';
 
 export function LawyerSettings() {
-  const { profile, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -34,11 +34,11 @@ export function LawyerSettings() {
     setProfileData({
       full_name: profile.full_name || '',
       phone: profile.phone || '',
-      email: profile.email || '',
+      email: user?.email || '',
     });
 
     fetchLawyerProfile();
-  }, [profile]);
+  }, [profile, user]);
 
   const fetchLawyerProfile = async () => {
     if (!profile) return;
@@ -147,7 +147,7 @@ export function LawyerSettings() {
             <h2 className="text-lg font-semibold text-neutral-900">Personal Information</h2>
           </div>
         </CardHeader>
-        <CardBody className="space-y-4">
+        <CardContent className="space-y-4">
           <Input
             label="Full Name"
             value={profileData.full_name}
@@ -177,7 +177,7 @@ export function LawyerSettings() {
               Save Personal Info
             </Button>
           </div>
-        </CardBody>
+        </CardContent>
       </Card>
 
       <Card>
@@ -187,7 +187,7 @@ export function LawyerSettings() {
             <h2 className="text-lg font-semibold text-neutral-900">Professional Information</h2>
           </div>
         </CardHeader>
-        <CardBody className="space-y-4">
+        <CardContent className="space-y-4">
           <Input
             label="Jurisdiction"
             value={lawyerData.jurisdiction}
@@ -249,7 +249,7 @@ export function LawyerSettings() {
               Save Professional Info
             </Button>
           </div>
-        </CardBody>
+        </CardContent>
       </Card>
     </div>
   );

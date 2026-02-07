@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Users, Calendar, Phone } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/Badge';
 import { EmptyState } from '../../components/ui/EmptyState';
 
@@ -159,7 +159,7 @@ export function Clients() {
             <div className="space-y-3">
               {clients.map((client) => (
                 <Card key={client.user_id}>
-                  <CardBody className="flex items-center justify-between">
+                  <CardContent className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center">
                         <span className="text-lg font-semibold text-primary-700">
@@ -192,7 +192,7 @@ export function Clients() {
                         Last: {new Date(client.last_booking_date).toLocaleDateString()}
                       </p>
                     </div>
-                  </CardBody>
+                  </CardContent>
                 </Card>
               ))}
             </div>
@@ -203,17 +203,17 @@ export function Clients() {
           <h2 className="text-lg font-semibold text-neutral-800">Recent Bookings</h2>
           {recentBookings.length === 0 ? (
             <Card>
-              <CardBody>
+              <CardContent>
                 <p className="text-sm text-neutral-500 text-center py-4">
                   No recent bookings
                 </p>
-              </CardBody>
+              </CardContent>
             </Card>
           ) : (
             <div className="space-y-3">
               {recentBookings.map((booking) => (
                 <Card key={booking.id}>
-                  <CardBody className="p-4">
+                  <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">
                       <p className="font-medium text-neutral-900 text-sm">
                         {booking.full_name || 'Anonymous'}
@@ -231,7 +231,7 @@ export function Clients() {
                       <span>{new Date(booking.created_at).toLocaleDateString()}</span>
                       <span>${(booking.total_price_cents / 100).toFixed(0)}</span>
                     </div>
-                  </CardBody>
+                  </CardContent>
                 </Card>
               ))}
             </div>

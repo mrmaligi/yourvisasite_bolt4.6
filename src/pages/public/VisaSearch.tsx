@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, FileText, ArrowUpRight } from 'lucide-react';
 import { useVisas } from '../../hooks/useVisas';
-import { Card, CardBody } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/Badge';
 import { CardSkeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
@@ -75,11 +75,11 @@ export function VisaSearch() {
           {visas.map((visa) => (
             <Link key={visa.id} to={`/visas/${visa.id}`}>
               <Card hover className="h-full">
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
                       <Badge>{visa.subclass_number}</Badge>
-                      <Badge variant="primary">{visa.category}</Badge>
+                      <Badge variant="default">{visa.category}</Badge>
                     </div>
                     <ArrowUpRight className="w-4 h-4 text-neutral-400" />
                   </div>
@@ -94,7 +94,7 @@ export function VisaSearch() {
                       <span>{visa.tracker_stats.total_entries} reports</span>
                     </div>
                   )}
-                </CardBody>
+                </CardContent>
               </Card>
             </Link>
           ))}

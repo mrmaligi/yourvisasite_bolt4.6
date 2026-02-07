@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Scale } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
-import { Input, Textarea } from '../../components/ui/Input';
-import { Button } from '../../components/ui/Button';
+import { Card, CardContent, CardHeader } from '../../components/ui/card';
+import { Input, Textarea } from '../../components/ui/input';
+import { Button } from '../../components/ui/button';
 import { FileUpload } from '../../components/ui/FileUpload';
 import { useToast } from '../../components/ui/Toast';
 
@@ -34,7 +34,7 @@ export function LawyerRegister() {
       let verificationUrl = '';
       if (verificationFile) {
         const path = `${user.id}/${Date.now()}_${verificationFile.name}`;
-        const { error: uploadError, data } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('lawyer-verification')
           .upload(path, verificationFile, {
             cacheControl: '3600',
@@ -108,7 +108,7 @@ export function LawyerRegister() {
       {step === 1 && (
         <Card>
           <CardHeader><h2 className="font-semibold text-neutral-900">Step 1: Professional Details</h2></CardHeader>
-          <CardBody className="space-y-4">
+          <CardContent className="space-y-4">
             <Input label="Bar Number" value={barNumber} onChange={(e) => setBarNumber(e.target.value)} />
             <Input label="Jurisdiction" value={jurisdiction} onChange={(e) => setJurisdiction(e.target.value)} />
             <Input label="Practice Areas" value={practiceAreas} onChange={(e) => setPracticeAreas(e.target.value)} helperText="Comma-separated" />
@@ -117,28 +117,28 @@ export function LawyerRegister() {
             <div className="flex justify-end">
               <Button onClick={() => setStep(2)} disabled={!barNumber || !jurisdiction}>Next</Button>
             </div>
-          </CardBody>
+          </CardContent>
         </Card>
       )}
 
       {step === 2 && (
         <Card>
           <CardHeader><h2 className="font-semibold text-neutral-900">Step 2: Verification Document</h2></CardHeader>
-          <CardBody className="space-y-4">
+          <CardContent className="space-y-4">
             <p className="text-sm text-neutral-500">Upload proof of legal practice (bar license, professional ID).</p>
             <FileUpload onFileSelect={(f) => setVerificationFile(f)} />
             <div className="flex justify-between">
               <Button variant="secondary" onClick={() => setStep(1)}>Back</Button>
               <Button onClick={() => setStep(3)} disabled={!verificationFile}>Next</Button>
             </div>
-          </CardBody>
+          </CardContent>
         </Card>
       )}
 
       {step === 3 && (
         <Card>
           <CardHeader><h2 className="font-semibold text-neutral-900">Step 3: Review & Submit</h2></CardHeader>
-          <CardBody className="space-y-4">
+          <CardContent className="space-y-4">
             <div className="space-y-2 text-sm">
               <p><span className="font-medium text-neutral-700">Bar Number:</span> {barNumber}</p>
               <p><span className="font-medium text-neutral-700">Jurisdiction:</span> {jurisdiction}</p>
@@ -150,7 +150,7 @@ export function LawyerRegister() {
               <Button variant="secondary" onClick={() => setStep(2)}>Back</Button>
               <Button loading={submitting} onClick={handleSubmit}>Submit Registration</Button>
             </div>
-          </CardBody>
+          </CardContent>
         </Card>
       )}
     </div>

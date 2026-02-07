@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { BookOpen, Download, Lock, CheckCircle, Calendar } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../components/ui/button';
 import { EmptyState } from '../../components/ui/EmptyState';
 
 interface PurchasedGuide {
@@ -115,7 +115,7 @@ export function PremiumContent() {
           <div className="grid md:grid-cols-2 gap-4">
             {purchased.map((guide) => (
               <Card key={guide.id}>
-                <CardBody>
+                <CardContent>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
@@ -136,7 +136,7 @@ export function PremiumContent() {
                   </p>
                   {guide.content_url ? (
                     <Button
-                      variant="primary"
+                      variant="default"
                       size="sm"
                       className="w-full"
                       onClick={() => window.open(guide.content_url!, '_blank')}
@@ -149,7 +149,7 @@ export function PremiumContent() {
                       Content Preparing
                     </Button>
                   )}
-                </CardBody>
+                </CardContent>
               </Card>
             ))}
           </div>
@@ -162,7 +162,7 @@ export function PremiumContent() {
           <div className="grid md:grid-cols-2 gap-4">
             {available.slice(0, 6).map((guide) => (
               <Card key={guide.id} className="hover:shadow-lg transition-shadow">
-                <CardBody>
+                <CardContent>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
@@ -188,7 +188,7 @@ export function PremiumContent() {
                   >
                     View Details
                   </Button>
-                </CardBody>
+                </CardContent>
               </Card>
             ))}
           </div>

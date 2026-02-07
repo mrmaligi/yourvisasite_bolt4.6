@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
-import { Input, Textarea } from '../../components/ui/Input';
-import { Button } from '../../components/ui/Button';
+import { Card, CardContent, CardHeader } from '../../components/ui/card';
+import { Input, Textarea } from '../../components/ui/input';
+import { Button } from '../../components/ui/button';
 import { useToast } from '../../components/ui/Toast';
 
 export function Marketing() {
@@ -60,14 +60,14 @@ export function Marketing() {
         <CardHeader>
           <h2 className="font-semibold text-neutral-900">Public Profile</h2>
         </CardHeader>
-        <CardBody className="space-y-4">
+        <CardContent className="space-y-4">
           <Textarea label="Professional Bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Tell potential clients about your experience..." />
           <Input label="Practice Areas" value={practiceAreas} onChange={(e) => setPracticeAreas(e.target.value)} helperText="Comma-separated (e.g., Work Visas, Family Visas)" />
           <Input label="Hourly Rate ($)" type="number" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} />
           <div className="flex justify-end">
             <Button loading={saving} onClick={handleSave}>Save Changes</Button>
           </div>
-        </CardBody>
+        </CardContent>
       </Card>
     </div>
   );

@@ -3,9 +3,9 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { DataTable, type Column } from '../../components/ui/DataTable';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../components/ui/button';
 import { Modal } from '../../components/ui/Modal';
-import { Textarea } from '../../components/ui/Input';
+import { Textarea } from '../../components/ui/input';
 import { useToast } from '../../components/ui/Toast';
 import type { LawyerProfile } from '../../types/database';
 
@@ -54,7 +54,9 @@ export function LawyerManagement() {
         },
         body: JSON.stringify({ lawyer_profile_id: lawyer.profile_id, action: 'approve' }),
       });
-    } catch {}
+    } catch (error) {
+      console.error('Failed to verify lawyer:', error);
+    }
 
     toast('success', 'Lawyer approved');
     fetchLawyers();
@@ -104,7 +106,7 @@ export function LawyerManagement() {
           {r.verification_status === 'pending' && (
             <>
               <Button size="sm" onClick={() => handleApprove(r)}>Approve</Button>
-              <Button size="sm" variant="danger" onClick={() => setRejectTarget(r)}>Reject</Button>
+              <Button size="sm" variant="destructive" onClick={() => setRejectTarget(r)}>Reject</Button>
             </>
           )}
         </div>
@@ -123,7 +125,7 @@ export function LawyerManagement() {
         footer={
           <>
             <Button variant="secondary" onClick={() => setRejectTarget(null)}>Cancel</Button>
-            <Button variant="danger" onClick={handleReject} disabled={!rejectReason}>Confirm Rejection</Button>
+            <Button variant="destructive" onClick={handleReject} disabled={!rejectReason}>Confirm Rejection</Button>
           </>
         }
       >

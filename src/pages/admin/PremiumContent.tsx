@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Plus, Trash2, GripVertical } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
-import { Select, Input, Textarea } from '../../components/ui/Input';
-import { Button } from '../../components/ui/Button';
+import { Card, CardContent, CardHeader } from '../../components/ui/card';
+import { Select, Input, Textarea } from '../../components/ui/input';
+import { Button } from '../../components/ui/button';
 import { useToast } from '../../components/ui/Toast';
 import type { Visa, VisaPremiumContent } from '../../types/database';
 
@@ -91,13 +91,13 @@ export function PremiumContent() {
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </CardHeader>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                   <Input label="Title" value={step.title} onChange={(e) => updateStep(idx, 'title', e.target.value)} />
                   <Textarea label="Body (Markdown)" value={step.body} onChange={(e) => updateStep(idx, 'body', e.target.value)} />
                   <Input label="Document Category" value={step.document_category || ''} onChange={(e) => updateStep(idx, 'document_category', e.target.value)} helperText="Leave empty if no document required" />
                   <Input label="Document Explanation" value={step.document_explanation || ''} onChange={(e) => updateStep(idx, 'document_explanation', e.target.value)} />
                   <Input label="Example Document URL" value={step.document_example_url || ''} onChange={(e) => updateStep(idx, 'document_example_url', e.target.value)} />
-                </CardBody>
+                </CardContent>
               </Card>
             ))}
           </div>

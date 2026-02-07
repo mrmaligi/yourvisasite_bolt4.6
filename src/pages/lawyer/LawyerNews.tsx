@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { Newspaper, ExternalLink, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../components/ui/button';
 import { EmptyState } from '../../components/ui/EmptyState';
 
 interface NewsItem {
@@ -73,7 +73,7 @@ export function LawyerNews() {
         {categories.map((cat) => (
           <Button
             key={cat.value}
-            variant={filter === cat.value ? 'primary' : 'secondary'}
+            variant={filter === cat.value ? 'default' : 'secondary'}
             size="sm"
             onClick={() => setFilter(cat.value as typeof filter)}
           >
@@ -92,7 +92,7 @@ export function LawyerNews() {
         <div className="space-y-4">
           {news.map((item) => (
             <Card key={item.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardBody onClick={() => navigate(`/news/${item.id}`)}>
+              <CardContent onClick={() => navigate(`/news/${item.id}`)}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
@@ -112,7 +112,7 @@ export function LawyerNews() {
                   </div>
                   <ExternalLink className="w-5 h-5 text-neutral-400 flex-shrink-0" />
                 </div>
-              </CardBody>
+              </CardContent>
             </Card>
           ))}
         </div>

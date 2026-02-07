@@ -12,9 +12,9 @@ import {
 import { useVisa } from '../../hooks/useVisas';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
+import { Card, CardContent, CardHeader } from '../../components/ui/card';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../components/ui/button';
 import { Modal } from '../../components/ui/Modal';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
@@ -167,7 +167,7 @@ export function VisaDetail() {
       <div className="mb-8">
         <div className="flex flex-wrap items-center gap-2 mb-3">
           <Badge>{visa.subclass_number}</Badge>
-          <Badge variant="primary">{visa.category}</Badge>
+          <Badge variant="default">{visa.category}</Badge>
           <Badge variant="info">{visa.country}</Badge>
         </div>
         <h1 className="text-3xl font-bold text-neutral-900 mb-3">{visa.name}</h1>
@@ -185,12 +185,12 @@ export function VisaDetail() {
 
       {visa.summary && (
         <Card className="mb-6">
-          <CardBody>
+          <CardContent>
             <p className="text-neutral-700 leading-relaxed">{visa.summary}</p>
             {visa.processing_fee_description && (
               <p className="text-sm text-neutral-500 mt-3">Fees: {visa.processing_fee_description}</p>
             )}
-          </CardBody>
+          </CardContent>
         </Card>
       )}
 
@@ -202,7 +202,7 @@ export function VisaDetail() {
               Processing Statistics
             </h2>
           </CardHeader>
-          <CardBody>
+          <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
               {[
                 { label: 'Weighted Avg', value: `${Math.round(stats.weighted_avg_days ?? 0)}d`, icon: Clock },
@@ -242,7 +242,7 @@ export function VisaDetail() {
                 </p>
               </div>
             )}
-          </CardBody>
+          </CardContent>
         </Card>
       )}
 
@@ -253,7 +253,7 @@ export function VisaDetail() {
             <h2 className="text-lg font-semibold text-neutral-900">Step-by-Step Guide</h2>
             <Badge variant="premium">Premium</Badge>
           </CardHeader>
-          <CardBody className="space-y-6">
+          <CardContent className="space-y-6">
             {premiumContent.map((step) => (
               <div key={step.id} className="relative pl-8 pb-6 border-l-2 border-primary-200 last:border-0 last:pb-0">
                 <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-primary-500 border-2 border-white" />
@@ -274,7 +274,7 @@ export function VisaDetail() {
                 </div>
               </div>
             ))}
-          </CardBody>
+          </CardContent>
         </Card>
       ) : (
         <Card className="mb-6 overflow-hidden">

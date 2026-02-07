@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { Calendar, Plus, Trash2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
+import { Card, CardContent } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
 import { Badge } from '../../components/ui/Badge';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { useToast } from '../../components/ui/Toast';
@@ -87,7 +87,7 @@ export function Availability() {
 
       {showAdd && (
         <Card>
-          <CardBody className="space-y-4">
+          <CardContent className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <Input label="Start Time" type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
               <Input label="End Time" type="datetime-local" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
@@ -96,7 +96,7 @@ export function Availability() {
               <Button variant="secondary" onClick={() => setShowAdd(false)}>Cancel</Button>
               <Button loading={saving} onClick={handleAdd}>Save Slot</Button>
             </div>
-          </CardBody>
+          </CardContent>
         </Card>
       )}
 
@@ -110,7 +110,7 @@ export function Availability() {
         <div className="space-y-3">
           {slots.map((slot) => (
             <Card key={slot.id}>
-              <CardBody className="flex items-center justify-between">
+              <CardContent className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-neutral-900">
                     {new Date(slot.start_time).toLocaleString()} - {new Date(slot.end_time).toLocaleTimeString()}
@@ -124,7 +124,7 @@ export function Availability() {
                     <Trash2 className="w-4 h-4" />
                   </button>
                 )}
-              </CardBody>
+              </CardContent>
             </Card>
           ))}
         </div>

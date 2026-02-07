@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
-import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 
 export function Success() {
@@ -36,13 +35,13 @@ export function Success() {
             )}
             
             <div className="space-y-3">
-              <Button asChild className="w-full">
-                <Link to="/dashboard">Go to Dashboard</Link>
-              </Button>
+              <Link to="/dashboard" className="w-full inline-flex items-center justify-center rounded-xl font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none btn-primary h-10 px-4 py-2">
+                Go to Dashboard
+              </Link>
               
-              <Button variant="outline" asChild className="w-full">
-                <Link to="/products">View More Products</Link>
-              </Button>
+              <Link to="/products" className="w-full inline-flex items-center justify-center rounded-xl font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none btn-secondary h-10 px-4 py-2">
+                View More Products
+              </Link>
             </div>
           </CardContent>
         </Card>

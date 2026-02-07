@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, MapPin, Briefcase, Clock, Scale, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/Badge';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
@@ -162,7 +162,7 @@ export function LawyerDirectory() {
           {filtered.map((lawyer) => (
             <Link key={lawyer.id} to={`/lawyers/${lawyer.id}`}>
               <Card hover className="h-full group">
-                <CardBody className="space-y-4">
+                <CardContent className="space-y-4">
                   <div className="flex items-center gap-4">
                     {lawyer.avatar_url ? (
                       <img
@@ -192,7 +192,7 @@ export function LawyerDirectory() {
 
                   <div className="flex flex-wrap gap-1.5">
                     {lawyer.practice_areas.slice(0, 3).map((area) => (
-                      <Badge key={area} variant="primary">{area}</Badge>
+                      <Badge key={area} variant="default">{area}</Badge>
                     ))}
                     {lawyer.practice_areas.length > 3 && (
                       <Badge>+{lawyer.practice_areas.length - 3}</Badge>
@@ -218,7 +218,7 @@ export function LawyerDirectory() {
                       </span>
                     )}
                   </div>
-                </CardBody>
+                </CardContent>
               </Card>
             </Link>
           ))}

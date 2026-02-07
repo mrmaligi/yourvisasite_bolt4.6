@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Users, Scale, FileText, DollarSign, BarChart3, ShieldCheck } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/card';
 
 export function AdminDashboard() {
   const [counts, setCounts] = useState({
@@ -46,7 +46,7 @@ export function AdminDashboard() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {kpis.map((kpi) => (
           <Card key={kpi.label}>
-            <CardBody className="flex items-center gap-4">
+            <CardContent className="flex items-center gap-4">
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${kpi.color}`}>
                 <kpi.icon className="w-6 h-6" />
               </div>
@@ -54,7 +54,7 @@ export function AdminDashboard() {
                 <p className="text-2xl font-bold text-neutral-900">{kpi.value}</p>
                 <p className="text-xs text-neutral-500">{kpi.label}</p>
               </div>
-            </CardBody>
+            </CardContent>
           </Card>
         ))}
       </div>

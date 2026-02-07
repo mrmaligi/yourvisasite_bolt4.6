@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { Calendar, Clock, Scale } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../components/ui/button';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { useToast } from '../../components/ui/Toast';
 import type { Booking } from '../../types/database';
@@ -108,7 +108,7 @@ export function Consultations() {
         <div className="space-y-4">
           {bookings.map((b) => (
             <Card key={b.id}>
-              <CardBody className="p-0">
+              <CardContent className="p-0">
                 <div className="p-4 border-b border-neutral-100">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
@@ -152,7 +152,7 @@ export function Consultations() {
                     </div>
                   )}
                 </div>
-              </CardBody>
+              </CardContent>
             </Card>
           ))}
         </div>

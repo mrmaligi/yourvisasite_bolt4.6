@@ -34,8 +34,8 @@ export function Dashboard() {
       }
 
       setSubscription(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch subscription data');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch subscription data');
     } finally {
       setLoading(false);
     }

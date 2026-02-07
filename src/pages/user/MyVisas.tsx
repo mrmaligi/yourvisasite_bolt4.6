@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { FileText, ExternalLink } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/Badge';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { CardSkeleton } from '../../components/ui/Skeleton';
@@ -54,7 +54,7 @@ export function MyVisas() {
           {purchases.map((p) => (
             <Link key={p.id} to={`/visas/${p.visa_id}`}>
               <Card hover>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                   <div className="flex items-center gap-2">
                     <Badge>{p.visas.subclass_number}</Badge>
                     <Badge variant="premium">Premium</Badge>
@@ -65,7 +65,7 @@ export function MyVisas() {
                     <span>Purchased {new Date(p.purchased_at).toLocaleDateString()}</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </div>
-                </CardBody>
+                </CardContent>
               </Card>
             </Link>
           ))}

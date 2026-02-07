@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../components/ui/Toast';
-import { Button } from '../../components/ui/Button';
-import { Input, Select } from '../../components/ui/Input';
+import { Button } from '../../components/ui/button';
+import { Input, Select } from '../../components/ui/input';
 import type { Visa, TrackerOutcome } from '../../types/database';
 
 interface Props {
@@ -14,7 +14,7 @@ interface Props {
 export function TrackerSubmitForm({ onSuccess, preselectedVisaId }: Props) {
   const { user, role } = useAuth();
   const { toast } = useToast();
-  const [visas, setVisas] = useState<Visa[]>([]);
+  const [visas, setVisas] = useState<Pick<Visa, 'id' | 'name' | 'subclass_number'>[]>([]);
   const [visaId, setVisaId] = useState(preselectedVisaId || '');
   const [applicationDate, setApplicationDate] = useState('');
   const [decisionDate, setDecisionDate] = useState('');

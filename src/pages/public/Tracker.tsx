@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, TrendingUp, Clock, ArrowUpRight } from 'lucide-react';
 import { useTrackerStats } from '../../hooks/useVisas';
-import { Card, CardBody } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/Badge';
 import { CardSkeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
@@ -46,9 +46,9 @@ export function Tracker() {
 
       {showSubmit && (
         <Card className="mb-8">
-          <CardBody>
+          <CardContent>
             <TrackerSubmitForm onSuccess={() => setShowSubmit(false)} />
-          </CardBody>
+          </CardContent>
         </Card>
       )}
 
@@ -82,7 +82,7 @@ export function Tracker() {
             return (
               <Link key={v.id} to={`/visas/${v.id}`}>
                 <Card hover className="h-full">
-                  <CardBody className="space-y-4">
+                  <CardContent className="space-y-4">
                     <div className="flex items-start justify-between">
                       <div>
                         <Badge variant="default">{v.subclass_number}</Badge>
@@ -108,7 +108,7 @@ export function Tracker() {
                       </div>
                     </div>
                     <Badge variant={badge.variant}>{badge.label}</Badge>
-                  </CardBody>
+                  </CardContent>
                 </Card>
               </Link>
             );

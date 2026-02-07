@@ -6,9 +6,9 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
+import { Card, CardContent, CardHeader } from '../../components/ui/card';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../components/ui/button';
 import { Modal } from '../../components/ui/Modal';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
@@ -218,22 +218,22 @@ export function LawyerProfile() {
 
       {lawyer.bio && (
         <Card className="mb-6">
-          <CardBody>
+          <CardContent>
             <h2 className="text-sm font-semibold text-neutral-900 mb-2">About</h2>
             <p className="text-neutral-600 leading-relaxed whitespace-pre-wrap">{lawyer.bio}</p>
-          </CardBody>
+          </CardContent>
         </Card>
       )}
 
       <Card className="mb-6">
-        <CardBody>
+        <CardContent>
           <h2 className="text-sm font-semibold text-neutral-900 mb-3">Practice Areas</h2>
           <div className="flex flex-wrap gap-2">
             {lawyer.practice_areas.map((area) => (
-              <Badge key={area} variant="primary">{area}</Badge>
+              <Badge key={area} variant="default">{area}</Badge>
             ))}
           </div>
-        </CardBody>
+        </CardContent>
       </Card>
 
       <Card className="mb-6">
@@ -243,7 +243,7 @@ export function LawyerProfile() {
             Available Time Slots
           </h2>
         </CardHeader>
-        <CardBody>
+        <CardContent>
           {slots.length === 0 ? (
             <div className="text-center py-8">
               <Clock className="w-8 h-8 text-neutral-300 mx-auto mb-3" />
@@ -281,7 +281,7 @@ export function LawyerProfile() {
               ))}
             </div>
           )}
-        </CardBody>
+        </CardContent>
       </Card>
 
       <Modal

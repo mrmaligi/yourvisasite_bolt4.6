@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Store, ShoppingCart, Clock, Calendar, Check, Filter } from 'lucide-react';
+import { Store, ShoppingCart, Clock, Calendar, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../components/ui/button';
 import { loadStripe } from '@stripe/stripe-js';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
@@ -121,7 +121,7 @@ export function Marketplace() {
     setLoading(false);
   };
 
-  const handlePurchase = async (listingId: string, price: number) => {
+  const handlePurchase = async (listingId: string) => {
     if (!user) {
       navigate('/login');
       return;
@@ -185,7 +185,7 @@ export function Marketplace() {
 
         <div className="flex flex-wrap gap-3 justify-center mb-12">
           <Button
-            variant={selectedCategory === 'all' ? 'primary' : 'secondary'}
+            variant={selectedCategory === 'all' ? 'default' : 'secondary'}
             size="sm"
             onClick={() => setSelectedCategory('all')}
           >
@@ -194,7 +194,7 @@ export function Marketplace() {
           {categories.map((cat) => (
             <Button
               key={cat.id}
-              variant={selectedCategory === cat.id ? 'primary' : 'secondary'}
+              variant={selectedCategory === cat.id ? 'default' : 'secondary'}
               size="sm"
               onClick={() => setSelectedCategory(cat.id)}
             >
@@ -205,21 +205,21 @@ export function Marketplace() {
 
         <div className="flex gap-2 justify-center mb-8">
           <Button
-            variant={selectedType === 'all' ? 'primary' : 'secondary'}
+            variant={selectedType === 'all' ? 'default' : 'secondary'}
             size="sm"
             onClick={() => setSelectedType('all')}
           >
             All Types
           </Button>
           <Button
-            variant={selectedType === 'service' ? 'primary' : 'secondary'}
+            variant={selectedType === 'service' ? 'default' : 'secondary'}
             size="sm"
             onClick={() => setSelectedType('service')}
           >
             Services
           </Button>
           <Button
-            variant={selectedType === 'product' ? 'primary' : 'secondary'}
+            variant={selectedType === 'product' ? 'default' : 'secondary'}
             size="sm"
             onClick={() => setSelectedType('product')}
           >
@@ -237,7 +237,7 @@ export function Marketplace() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {listings.map((listing) => (
               <Card key={listing.id} className="hover:shadow-xl transition-shadow flex flex-col">
-                <CardBody className="flex flex-col flex-1">
+                <CardContent className="flex flex-col flex-1">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2 flex-wrap">
                       <Badge variant="default" className="capitalize text-xs">
@@ -291,13 +291,13 @@ export function Marketplace() {
                     </div>
                     <Button
                       className="w-full"
-                      onClick={() => handlePurchase(listing.id, listing.price_cents)}
+                      onClick={() => handlePurchase(listing.id)}
                     >
                       <ShoppingCart className="w-4 h-4 mr-2" />
                       Purchase Now
                     </Button>
                   </div>
-                </CardBody>
+                </CardContent>
               </Card>
             ))}
           </div>

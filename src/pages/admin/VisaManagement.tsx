@@ -3,9 +3,9 @@ import { Plus } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { DataTable, type Column } from '../../components/ui/DataTable';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../components/ui/button';
 import { Modal } from '../../components/ui/Modal';
-import { Input, Textarea, Select } from '../../components/ui/Input';
+import { Input, Textarea, Select } from '../../components/ui/input';
 import { useToast } from '../../components/ui/Toast';
 import type { Visa, VisaCategory } from '../../types/database';
 
@@ -80,7 +80,7 @@ export function VisaManagement() {
     { key: 'subclass', header: 'Subclass', render: (r) => <Badge>{r.subclass_number}</Badge>, sortable: true },
     { key: 'name', header: 'Name', render: (r) => r.name, sortable: true },
     { key: 'country', header: 'Country', render: (r) => r.country, sortable: true },
-    { key: 'category', header: 'Category', render: (r) => <Badge variant="primary">{r.category}</Badge> },
+    { key: 'category', header: 'Category', render: (r) => <Badge variant="default">{r.category}</Badge> },
     { key: 'status', header: 'Active', render: (r) => <Badge variant={r.is_active ? 'success' : 'default'}>{r.is_active ? 'Yes' : 'No'}</Badge> },
     { key: 'actions', header: '', render: (r) => <Button size="sm" variant="ghost" onClick={() => openEdit(r)}>Edit</Button> },
   ];

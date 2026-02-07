@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { TrendingUp, Plus, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../components/ui/button';
 import { Modal } from '../../components/ui/Modal';
-import { Input } from '../../components/ui/Input';
+import { Input } from '../../components/ui/input';
 import { useToast } from '../../components/ui/Toast';
 import { EmptyState } from '../../components/ui/EmptyState';
 
@@ -179,7 +179,7 @@ export function LawyerTracker() {
             const Icon = outcomeIcon[entry.outcome];
             return (
               <Card key={entry.id}>
-                <CardBody className="flex items-center justify-between">
+                <CardContent className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center">
                       <Icon className="w-5 h-5 text-primary-600" />
@@ -193,7 +193,7 @@ export function LawyerTracker() {
                     </div>
                   </div>
                   <Badge variant={outcomeVariant[entry.outcome]}>{entry.outcome}</Badge>
-                </CardBody>
+                </CardContent>
               </Card>
             );
           })}

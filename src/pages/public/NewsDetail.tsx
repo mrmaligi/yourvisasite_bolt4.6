@@ -3,9 +3,9 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Calendar, MessageSquare, Send, Scale, Shield } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../components/ui/button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
 import type { NewsArticle, NewsComment } from '../../types/database';
@@ -171,7 +171,7 @@ export function NewsDetail() {
 
         {canComment && (
           <Card className="mb-8">
-            <CardBody>
+            <CardContent>
               <div className="flex items-start gap-3">
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center flex-shrink-0 mt-0.5">
                   {role === 'admin' ? (
@@ -200,7 +200,7 @@ export function NewsDetail() {
                   </div>
                 </div>
               </div>
-            </CardBody>
+            </CardContent>
           </Card>
         )}
 
@@ -237,7 +237,7 @@ export function NewsDetail() {
                       <Badge variant="success">Lawyer</Badge>
                     )}
                     {comment.author_role === 'admin' && (
-                      <Badge variant="danger">Admin</Badge>
+                      <Badge variant="destructive">Admin</Badge>
                     )}
                     <span className="text-xs text-neutral-400">
                       {new Date(comment.created_at).toLocaleDateString('en-US', {

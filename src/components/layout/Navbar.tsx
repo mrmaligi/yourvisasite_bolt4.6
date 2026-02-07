@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown, LogOut, LayoutDashboard, User } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { Button } from '../ui/Button';
+import { Button } from '../ui/button';
 import { Logo } from '../ui/Logo';
 
 export function Navbar() {

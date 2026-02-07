@@ -3,8 +3,8 @@ import { Navigate, Link } from 'react-router-dom';
 import { Mail, Eye, EyeOff, Scale, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
 import { useToast } from '../../components/ui/Toast';
 import { Logo } from '../../components/ui/Logo';
 

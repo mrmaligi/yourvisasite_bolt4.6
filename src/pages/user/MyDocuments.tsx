@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   FolderOpen,
-  Trash2,
+
   Download,
   HelpCircle,
   Upload,
@@ -12,9 +12,9 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
+import { Card, CardContent, CardHeader } from '../../components/ui/card';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../components/ui/button';
 import { Modal } from '../../components/ui/Modal';
 import { FileUpload } from '../../components/ui/FileUpload';
 import { useToast } from '../../components/ui/Toast';
@@ -130,13 +130,6 @@ export function MyDocuments() {
     }
   };
 
-  const handleDelete = async (doc: UserDocument) => {
-    await supabase.storage.from('user-documents').remove([doc.storage_path]);
-    await supabase.from('user_documents').delete().eq('id', doc.id);
-    toast('success', 'Document deleted');
-    fetchDocs();
-  };
-
   const handleDownload = async (doc: UserDocument) => {
     const { data } = await supabase.storage
       .from('user-documents')
@@ -191,7 +184,7 @@ export function MyDocuments() {
                   </div>
                   <p className="text-xs text-neutral-500 mt-1">{category.description}</p>
                 </CardHeader>
-                <CardBody className="pt-3 border-t border-neutral-100">
+                <CardContent className="pt-3 border-t border-neutral-100">
                   <div className="space-y-2">
                     {categoryDocs.length === 0 ? (
                       <div className="text-center py-3">
@@ -238,7 +231,7 @@ export function MyDocuments() {
                     <div className="flex items-center gap-2 pt-2">
                       {verified > 0 && <Badge variant="success" className="text-xs py-0.5">{verified} verified</Badge>}
                       {pending > 0 && <Badge variant="warning" className="text-xs py-0.5">{pending} pending</Badge>}
-                      {rejected > 0 && <Badge variant="danger" className="text-xs py-0.5">{rejected} rejected</Badge>}
+                      {rejected > 0 && <Badge variant="destructive" className="text-xs py-0.5">{rejected} rejected</Badge>}
                     </div>
 
                     <Button
@@ -251,7 +244,7 @@ export function MyDocuments() {
                       Upload
                     </Button>
                   </div>
-                </CardBody>
+                </CardContent>
               </Card>
             );
           })}

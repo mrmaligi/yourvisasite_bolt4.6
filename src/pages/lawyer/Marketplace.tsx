@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { Store, Plus, Edit, Trash2, Eye, EyeOff, DollarSign, Package } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../components/ui/button';
 import { Modal } from '../../components/ui/Modal';
-import { Input } from '../../components/ui/Input';
+import { Input } from '../../components/ui/input';
 import { useToast } from '../../components/ui/Toast';
 import { EmptyState } from '../../components/ui/EmptyState';
 
@@ -276,7 +276,7 @@ export function Marketplace() {
         <div className="space-y-3">
           {listings.map((listing) => (
             <Card key={listing.id}>
-              <CardBody className="flex items-center justify-between">
+              <CardContent className="flex items-center justify-between">
                 <div className="flex items-center gap-4 flex-1">
                   <div className="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center">
                     <Package className="w-6 h-6 text-primary-600" />
@@ -318,7 +318,7 @@ export function Marketplace() {
                     <Trash2 className="w-4 h-4 text-red-500" />
                   </Button>
                 </div>
-              </CardBody>
+              </CardContent>
             </Card>
           ))}
         </div>

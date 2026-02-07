@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { FileText, FolderOpen, Calendar, TrendingUp, ArrowRight, Scale } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/card';
 import type { NewsArticle } from '../../types/database';
 
 export function UserDashboard() {
@@ -56,7 +56,7 @@ export function UserDashboard() {
         {statCards.map((stat) => (
           <Link key={stat.label} to={stat.to}>
             <Card hover>
-              <CardBody className="flex items-center gap-4">
+              <CardContent className="flex items-center gap-4">
                 <div className="w-11 h-11 rounded-xl bg-primary-50 flex items-center justify-center flex-shrink-0">
                   <stat.icon className="w-5 h-5 text-primary-600" />
                 </div>
@@ -64,7 +64,7 @@ export function UserDashboard() {
                   <p className="text-2xl font-bold text-neutral-900">{stat.value}</p>
                   <p className="text-xs text-neutral-500">{stat.label}</p>
                 </div>
-              </CardBody>
+              </CardContent>
             </Card>
           </Link>
         ))}
@@ -72,7 +72,7 @@ export function UserDashboard() {
 
       <Link to="/lawyers">
         <Card hover className="border-teal-100 bg-gradient-to-r from-teal-50/50 to-white">
-          <CardBody className="flex items-center justify-between">
+          <CardContent className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-11 h-11 rounded-xl bg-teal-100 flex items-center justify-center flex-shrink-0">
                 <Scale className="w-5 h-5 text-teal-700" />
@@ -83,7 +83,7 @@ export function UserDashboard() {
               </div>
             </div>
             <ArrowRight className="w-5 h-5 text-teal-600" />
-          </CardBody>
+          </CardContent>
         </Card>
       </Link>
 

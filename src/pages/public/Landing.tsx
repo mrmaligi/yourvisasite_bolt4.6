@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BarChart3, Scale, FileCheck, BookOpen, ArrowRight, Globe, Shield, Clock, Users, ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
+import { Card, CardContent } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
 import type { NewsArticle } from '../../types/database';
 
 export function Landing() {
@@ -132,13 +132,13 @@ export function Landing() {
               { icon: BookOpen, title: 'Premium Guides', desc: 'Expert visa guides with step-by-step instructions.', color: 'bg-primary-50 text-primary-600' },
             ].map((feature, i) => (
               <Card key={i} hover className="p-6 group">
-                <CardBody className="p-0">
+                <CardContent className="p-0">
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-5 ${feature.color} transition-transform duration-300 group-hover:scale-110`}>
                     <feature.icon className="w-6 h-6" />
                   </div>
                   <h3 className="font-semibold text-neutral-900 mb-2">{feature.title}</h3>
                   <p className="text-sm text-neutral-500 leading-relaxed">{feature.desc}</p>
-                </CardBody>
+                </CardContent>
               </Card>
             ))}
           </div>
@@ -187,13 +187,13 @@ export function Landing() {
                         />
                       </div>
                     )}
-                    <CardBody>
+                    <CardContent>
                       <p className="text-xs text-neutral-400 mb-2.5 font-medium">
                         {article.published_at && new Date(article.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </p>
                       <h3 className="font-semibold text-neutral-900 mb-2 line-clamp-2 group-hover:text-primary-700 transition-colors">{article.title}</h3>
                       <p className="text-sm text-neutral-500 line-clamp-3">{article.body}</p>
-                    </CardBody>
+                    </CardContent>
                   </Card>
                 </Link>
               ))}
