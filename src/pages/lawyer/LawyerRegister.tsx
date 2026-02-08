@@ -95,6 +95,28 @@ export function LawyerRegister() {
     }
   };
 
+  if (!user) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-16 text-center">
+        <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Scale className="w-8 h-8 text-primary-600" />
+        </div>
+        <h1 className="text-2xl font-bold text-neutral-900 mb-4">Join as a Lawyer</h1>
+        <p className="text-neutral-500 mb-8">
+          To register as a lawyer, you first need to create a VisaBuild account.
+        </p>
+        <div className="flex flex-col gap-3">
+          <Button onClick={() => navigate('/login')} className="w-full">
+            Log In
+          </Button>
+          <Button variant="secondary" onClick={() => navigate('/register')} className="w-full">
+            Create Account
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
       <div className="text-center mb-8">

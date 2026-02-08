@@ -32,6 +32,7 @@ const UserPremiumContent = lazy(() => import('./pages/user/PremiumContent').then
 const UserMarketplacePurchases = lazy(() => import('./pages/user/MarketplacePurchases').then(m => ({ default: m.MarketplacePurchases })));
 const UserSettings = lazy(() => import('./pages/user/UserSettings').then(m => ({ default: m.UserSettings })));
 
+const PortalLanding = lazy(() => import('./pages/lawyer/PortalLanding').then(m => ({ default: m.PortalLanding })));
 const LawyerDashboard = lazy(() => import('./pages/lawyer/Dashboard').then(m => ({ default: m.LawyerDashboard })));
 const LawyerClients = lazy(() => import('./pages/lawyer/Clients').then(m => ({ default: m.Clients })));
 const Availability = lazy(() => import('./pages/lawyer/Availability').then(m => ({ default: m.Availability })));
@@ -96,9 +97,10 @@ export default function App() {
               </Route>
 
               <Route path="lawyer">
+                <Route index element={<PortalLanding />} />
                 <Route path="pending" element={<ProtectedRoute><LawyerPending /></ProtectedRoute>} />
                 <Route element={<ProtectedRoute requiredRole="lawyer"><LawyerDashboardLayout /></ProtectedRoute>}>
-                  <Route index element={<LawyerDashboard />} />
+                  <Route path="dashboard" element={<LawyerDashboard />} />
                   <Route path="clients" element={<LawyerClients />} />
                   <Route path="availability" element={<Availability />} />
                   <Route path="marketing" element={<Marketing />} />
