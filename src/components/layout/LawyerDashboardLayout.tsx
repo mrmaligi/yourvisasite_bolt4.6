@@ -11,7 +11,7 @@ import {
 import { DashboardLayout } from './DashboardLayout';
 
 const sidebarItems = [
-  { to: '/lawyer', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/lawyer/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/lawyer/clients', label: 'My Clients', icon: Users },
   { to: '/lawyer/availability', label: 'Availability', icon: CalendarDays },
   { to: '/lawyer/marketing', label: 'Marketing', icon: Megaphone },
