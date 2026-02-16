@@ -6,11 +6,18 @@ import { Card, CardBody } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import type { NewsArticle } from '../../types/database';
 
+const USE_MOCK = true;
+
 export function Landing() {
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [counts, setCounts] = useState({ entries: 0, lawyers: 0, visas: 0 });
 
   useEffect(() => {
+    if (USE_MOCK) {
+      setCounts({ entries: 1250, lawyers: 45, visas: 12 });
+      return;
+    }
+
     supabase
       .from('news_articles')
       .select('*')

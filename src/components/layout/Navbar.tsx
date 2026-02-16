@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, ChevronDown, LogOut, LayoutDashboard, User } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
 import { Logo } from '../ui/Logo';
 
 export function Navbar() {
-  const { user, profile, role, signOut, isLoading } = useAuth();
+  const { user, profile, role, signOut, isLoading, switchRole } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const publicLinks = [
     { to: '/', label: 'Home' },
@@ -24,6 +25,14 @@ export function Navbar() {
     if (role === 'admin') return '/admin';
     if (role === 'lawyer') return '/lawyer';
     return '/dashboard';
+  };
+
+  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newRole = e.target.value as any;
+    switchRole(newRole);
+    if (newRole === 'admin') navigate('/admin');
+    else if (newRole === 'lawyer') navigate('/lawyer/dashboard');
+    else navigate('/dashboard');
   };
 
   return (
@@ -51,6 +60,20 @@ export function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
+             {/* Dev Switcher */}
+             <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-50 border border-yellow-200 rounded-md">
+              <span className="text-xs font-bold text-yellow-800 uppercase tracking-wide">Dev</span>
+              <select
+                className="text-xs font-medium text-yellow-900 bg-transparent border-none p-0 focus:ring-0 cursor-pointer outline-none"
+                value={profile?.role || 'user'}
+                onChange={handleRoleChange}
+              >
+                <option value="user">User</option>
+                <option value="lawyer">Lawyer</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+
             {isLoading ? (
               <div className="w-8 h-8 rounded-full bg-neutral-200 animate-pulse" />
             ) : user ? (
@@ -110,9 +133,8 @@ export function Navbar() {
                 )}
               </div>
             ) : (
-              <Link to="/login">
-                <Button size="sm">Sign in</Button>
-              </Link>
+                // Remove login button in dev mode (optional, but requested to remove auth requirements)
+               null
             )}
           </div>
 
@@ -138,6 +160,20 @@ export function Navbar() {
             </Link>
           ))}
           <hr className="border-neutral-100 my-2" />
+           {/* Dev Switcher Mobile */}
+            <div className="px-4 py-2">
+                 <span className="text-xs font-bold text-yellow-800 uppercase tracking-wide block mb-1">Dev Switcher</span>
+                 <select
+                    className="block w-full text-sm border-gray-300 rounded-md"
+                    value={profile?.role || 'user'}
+                    onChange={handleRoleChange}
+                >
+                    <option value="user">User</option>
+                    <option value="lawyer">Lawyer</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+
           {user ? (
             <>
               <Link
@@ -155,9 +191,7 @@ export function Navbar() {
               </button>
             </>
           ) : (
-            <Link to="/login" onClick={() => setMobileOpen(false)}>
-              <Button size="sm" className="w-full">Sign in</Button>
-            </Link>
+            null
           )}
         </div>
       )}

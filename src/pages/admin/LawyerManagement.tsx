@@ -8,6 +8,9 @@ import { Modal } from '../../components/ui/Modal';
 import { Textarea } from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
 import type { LawyerProfile } from '../../types/database';
+import { MOCK_LAWYER_PROFILES } from '../../lib/mockData';
+
+const USE_MOCK = true;
 
 const statusVariant = {
   pending: 'warning' as const,
@@ -24,6 +27,12 @@ export function LawyerManagement() {
   const [rejectReason, setRejectReason] = useState('');
 
   const fetchLawyers = async () => {
+    if (USE_MOCK) {
+        setLawyers(MOCK_LAWYER_PROFILES);
+        setLoading(false);
+        return;
+    }
+
     const { data } = await supabase
       .schema('lawyer')
       .from('profiles')
@@ -36,6 +45,11 @@ export function LawyerManagement() {
   useEffect(() => { fetchLawyers(); }, []);
 
   const handleApprove = async (lawyer: LawyerProfile) => {
+    if (USE_MOCK) {
+        toast('success', 'Lawyer approved (Mock)');
+        return;
+    }
+
     await supabase.schema('lawyer').from('profiles').update({
       is_verified: true,
       verification_status: 'approved',
@@ -62,6 +76,14 @@ export function LawyerManagement() {
 
   const handleReject = async () => {
     if (!rejectTarget) return;
+
+    if (USE_MOCK) {
+        toast('success', 'Lawyer rejected (Mock)');
+        setRejectTarget(null);
+        setRejectReason('');
+        return;
+    }
+
     await supabase.schema('lawyer').from('profiles').update({
       verification_status: 'rejected',
       rejection_reason: rejectReason,
@@ -73,6 +95,11 @@ export function LawyerManagement() {
   };
 
   const viewDocument = async (lawyer: LawyerProfile) => {
+    if (USE_MOCK) {
+        window.open(lawyer.verification_document_url || '#', '_blank');
+        return;
+    }
+
     if (!lawyer.verification_document_url) {
       toast('error', 'No verification document available');
       return;

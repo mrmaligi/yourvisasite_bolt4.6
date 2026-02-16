@@ -3,6 +3,9 @@ import { supabase } from '../../lib/supabase';
 import { DataTable, type Column } from '../../components/ui/DataTable';
 import { Badge } from '../../components/ui/Badge';
 import type { Profile } from '../../types/database';
+import { ALL_MOCK_PROFILES } from '../../lib/mockData';
+
+const USE_MOCK = true;
 
 const roleVariant = {
   user: 'primary' as const,
@@ -16,6 +19,13 @@ export function UserManagement() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (USE_MOCK) {
+      setUsers(ALL_MOCK_PROFILES);
+      setFiltered(ALL_MOCK_PROFILES);
+      setLoading(false);
+      return;
+    }
+
     supabase
       .from('profiles')
       .select('*')

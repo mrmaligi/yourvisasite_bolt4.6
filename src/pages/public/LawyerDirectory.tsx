@@ -6,6 +6,9 @@ import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { MOCK_LAWYER_DIRECTORY_ITEMS } from '../../lib/mockData';
+
+const USE_MOCK = true;
 
 interface LawyerListItem {
   id: string;
@@ -28,6 +31,13 @@ export function LawyerDirectory() {
 
   useEffect(() => {
     async function fetchLawyers() {
+      if (USE_MOCK) {
+        // Force cast to avoid minor type mismatches if any
+        setLawyers(MOCK_LAWYER_DIRECTORY_ITEMS as unknown as LawyerListItem[]);
+        setLoading(false);
+        return;
+      }
+
       const { data: lawyerRows } = await supabase
         .schema('lawyer')
         .from('profiles')
