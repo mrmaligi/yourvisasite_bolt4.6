@@ -3,7 +3,7 @@
 ## What is VisaBuild?
 A comprehensive visa management platform connecting applicants with immigration lawyers. Three roles: **User**, **Lawyer**, **Admin**.
 
-> **Scope:** Currently **Australia-only**. All visa data, categories, subclasses, and immigration links target the Australian Department of Home Affairs. International expansion is planned for later phases — do not build for other countries yet.
+> **Scope:** Primary focus is **Australia**, with initial expansion into **Canada** and the **United Kingdom**. Visa data and premium guides exist for all three countries. Future phases may add New Zealand, US, and others. Always cite official government immigration sources when adding content.
 
 ## Tech Stack
 - **Frontend:** React 18 + TypeScript + Vite + Tailwind CSS

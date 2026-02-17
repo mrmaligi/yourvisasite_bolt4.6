@@ -31,6 +31,7 @@ const Consultations = lazy(() => import('./pages/user/Consultations').then(m => 
 const UserPremiumContent = lazy(() => import('./pages/user/PremiumContent').then(m => ({ default: m.PremiumContent })));
 const UserMarketplacePurchases = lazy(() => import('./pages/user/MarketplacePurchases').then(m => ({ default: m.MarketplacePurchases })));
 const UserSettings = lazy(() => import('./pages/user/UserSettings').then(m => ({ default: m.UserSettings })));
+const SavedVisas = lazy(() => import('./pages/user/SavedVisas').then(m => ({ default: m.SavedVisas })));
 
 const PortalLanding = lazy(() => import('./pages/lawyer/PortalLanding').then(m => ({ default: m.PortalLanding })));
 const LawyerDashboard = lazy(() => import('./pages/lawyer/Dashboard').then(m => ({ default: m.LawyerDashboard })));
@@ -89,6 +90,7 @@ export default function App() {
               <Route path="dashboard" element={<ProtectedRoute><UserDashboardLayout /></ProtectedRoute>}>
                 <Route index element={<UserDashboard />} />
                 <Route path="visas" element={<MyVisas />} />
+                <Route path="saved" element={<SavedVisas />} />
                 <Route path="documents" element={<MyDocuments />} />
                 <Route path="consultations" element={<Consultations />} />
                 <Route path="premium" element={<UserPremiumContent />} />

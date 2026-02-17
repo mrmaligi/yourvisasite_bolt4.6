@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, FileText, ArrowUpRight } from 'lucide-react';
 import { useVisas } from '../../hooks/useVisas';
+import { useSavedVisas } from '../../hooks/useSavedVisas';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
+import { SaveVisaButton } from '../../components/ui/SaveVisaButton';
 import { CardSkeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
 
@@ -30,6 +32,7 @@ export function VisaSearch() {
   const [country, setCountry] = useState('');
   const [category, setCategory] = useState('');
   const { visas, loading } = useVisas(search, country || undefined, category || undefined);
+  const { isSaved, toggleSave } = useSavedVisas();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -105,7 +108,10 @@ export function VisaSearch() {
                       <Badge>{visa.subclass_number}</Badge>
                       <Badge variant="primary">{visa.category}</Badge>
                     </div>
-                    <ArrowUpRight className="w-4 h-4 text-neutral-400" />
+                    <div className="flex items-center gap-1">
+                      <SaveVisaButton visaId={visa.id} isSaved={isSaved(visa.id)} onToggle={toggleSave} />
+                      <ArrowUpRight className="w-4 h-4 text-neutral-400" />
+                    </div>
                   </div>
                   <h3 className="font-semibold text-neutral-900">{visa.name}</h3>
                   <p className="text-sm text-neutral-500">{visa.country}</p>

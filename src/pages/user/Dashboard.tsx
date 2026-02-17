@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, FolderOpen, Calendar, TrendingUp, ArrowRight, Scale } from 'lucide-react';
+import { FileText, Bookmark, FolderOpen, Calendar, TrendingUp, ArrowRight, Scale } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
@@ -8,19 +8,21 @@ import type { NewsArticle } from '../../types/database';
 
 export function UserDashboard() {
   const { profile } = useAuth();
-  const [counts, setCounts] = useState({ purchases: 0, documents: 0, bookings: 0, submissions: 0 });
+  const [counts, setCounts] = useState({ purchases: 0, saved: 0, documents: 0, bookings: 0, submissions: 0 });
   const [news, setNews] = useState<NewsArticle[]>([]);
 
   useEffect(() => {
     if (!profile) return;
     Promise.all([
       supabase.from('user_visa_purchases').select('id', { count: 'exact', head: true }).eq('user_id', profile.id),
+      supabase.from('saved_visas').select('id', { count: 'exact', head: true }).eq('user_id', profile.id),
       supabase.from('user_documents').select('id', { count: 'exact', head: true }).eq('user_id', profile.id),
       supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('user_id', profile.id),
       supabase.from('tracker_entries').select('id', { count: 'exact', head: true }).eq('submitted_by', profile.id),
-    ]).then(([purchases, docs, bookings, submissions]) => {
+    ]).then(([purchases, saved, docs, bookings, submissions]) => {
       setCounts({
         purchases: purchases.count ?? 0,
+        saved: saved.count ?? 0,
         documents: docs.count ?? 0,
         bookings: bookings.count ?? 0,
         submissions: submissions.count ?? 0,
@@ -38,6 +40,7 @@ export function UserDashboard() {
 
   const statCards = [
     { label: 'Visas Unlocked', value: counts.purchases, icon: FileText, to: '/dashboard/visas' },
+    { label: 'Saved Visas', value: counts.saved, icon: Bookmark, to: '/dashboard/saved' },
     { label: 'Documents', value: counts.documents, icon: FolderOpen, to: '/dashboard/documents' },
     { label: 'Consultations', value: counts.bookings, icon: Calendar, to: '/dashboard/consultations' },
     { label: 'Tracker Submissions', value: counts.submissions, icon: TrendingUp, to: '/tracker' },
@@ -52,7 +55,7 @@ export function UserDashboard() {
         <p className="text-neutral-500 mt-1">Here is an overview of your immigration journey.</p>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {statCards.map((stat) => (
           <Link key={stat.label} to={stat.to}>
             <Card hover>
