@@ -1,7 +1,9 @@
 # AGENTS.md — VisaBuild Project Guide
 
 ## What is VisaBuild?
-A comprehensive Australian visa management platform connecting applicants with immigration lawyers. Three roles: **User**, **Lawyer**, **Admin**.
+A comprehensive visa management platform connecting applicants with immigration lawyers. Three roles: **User**, **Lawyer**, **Admin**.
+
+> **Scope:** Currently **Australia-only**. All visa data, categories, subclasses, and immigration links target the Australian Department of Home Affairs. International expansion is planned for later phases — do not build for other countries yet.
 
 ## Tech Stack
 - **Frontend:** React 18 + TypeScript + Vite + Tailwind CSS
