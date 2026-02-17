@@ -1,50 +1,63 @@
-# VisaBuild Backlog – 18 Feb 2026
+# VisaBuild Backlog – 18 Feb 2026 (Cycle 2 Update)
 
-_Repo snapshot:_ main branch. Migrations 013-015 seeded with **8 Australian visas** covering skilled, regional, employer-sponsored, study, and visitor categories.
+_Repo snapshot:_ main branch. Migrations 013-016 now cover **11 visas** across Australia, Canada, and the United Kingdom.
 
-## Current Status (~45% Complete)
+## Current Status (~52% Complete)
 
 ### ✅ Completed Workstreams
-1. **User Experience:** My Visas dashboard connected to `user_visa_purchases`, Consultations page with booking management
-2. **Lawyer Experience:** Registration with document upload → Admin approval → Availability management → Public booking (end-to-end)
-3. **Admin Console:** Lawyer approval/rejection with notes, Premium content CRUD editor, Activity logs
-4. **Tracker:** Anonymous submission, weighted stats, trend charts on visa detail pages
-5. **Premium Content:** Structured step-by-step guides rendering with document categories
-6. **Data Layer:** 8 visas with requirements JSON, premium content, tracker entries, and official citations
+1. **User Experience:** My Visas dashboard, Consultations page, Document Vault with Supabase Storage upload/download/status tracking
+2. **Lawyer Experience:** Registration → Admin approval → Availability management → Public booking (end-to-end), Clients page, Marketing page, Settings
+3. **Admin Console:** Lawyer approval/rejection, Premium content CRUD, Activity logs, **Visa Management with Requirements JSON editor (new)**, Tracker management, Promo codes, Pricing
+4. **Tracker:** Anonymous submission, weighted stats, trend charts, processing speed ratings on visa detail pages
+5. **Premium Content:** Structured step-by-step guides with document categories and evidence callouts
+6. **Payment:** **Stripe checkout integration (new)** replacing demo provider — metadata pass-through for visa_id tracking, post-checkout verification
+7. **Data Layer:** 11 visas (8 AU + 2 CA + 1 UK) with requirements JSON, premium guides, tracker seed entries, and official citations
+8. **Visa Detail UI:** Eligibility criteria, categorized document checklists, official processing time estimates with source links, community tracker with trend charts
 
-### 📊 Seeded Visa Data (8 visas)
-| Subclass | Name | Category |
-|----------|------|----------|
-| 189 | Skilled Independent | Work (PR) |
-| 190 | Skilled Nominated | Work (PR) |
-| 491 | Skilled Work Regional | Work (Provisional) |
-| 494 | Skilled Employer Sponsored Regional | Work (Provisional) |
-| 482 | Temporary Skill Shortage | Work (Temporary) |
-| 186 | Employer Nomination Scheme | Work (PR) |
-| 500 | Student | Study |
-| 600 | Visitor | Visitor |
+### 📊 Seeded Visa Data (11 visas)
+| Subclass | Name | Country | Category |
+|----------|------|---------|----------|
+| 189 | Skilled Independent | Australia | Work (PR) |
+| 190 | Skilled Nominated | Australia | Work (PR) |
+| 491 | Skilled Work Regional | Australia | Work (Provisional) |
+| 494 | Skilled Employer Sponsored Regional | Australia | Work (Provisional) |
+| 482 | Temporary Skill Shortage | Australia | Work (Temporary) |
+| 186 | Employer Nomination Scheme | Australia | Work (PR) |
+| 500 | Student | Australia | Study |
+| 600 | Visitor | Australia | Visitor |
+| FSW | Federal Skilled Worker (Express Entry) | Canada | Work (PR) |
+| CEC | Canadian Experience Class (Express Entry) | Canada | Work (PR) |
+| SW-UK | Skilled Worker Visa | United Kingdom | Work |
+
+## What Changed This Cycle (Cycle 2)
+
+1. **Committed previous cycle's work:** Stripe checkout, VisaDetail UI overhaul, useVisas hook improvements
+2. **Admin Visa Management enhanced:** Tabbed modal with Details + Requirements JSON editor, inline JSON validation, toggle active/inactive, country search
+3. **Modal component:** Added size prop (sm/md/lg/xl) for larger content editing
+4. **Canada & UK visa data:** Migration 016 adds FSW, CEC, SW-UK with full requirements JSON, premium step-by-step guides, and tracker seed data
+5. **Visa Search:** Added country filter pills (🇦🇺 🇨🇦 🇬🇧) alongside category filters
 
 ## Workstream Backlog
 
 ### 1. User (applicants)
-- **Now:** Document upload helper in My Documents (OCR hints, progress tracking)
-- **Next:** Saved visas / recently viewed rail on `/visas`
-- **Later:** Notification preferences, email alerts for processing time changes
+- **Now:** Saved visas / recently viewed rail, notification preferences
+- **Next:** Email alerts for processing time changes, visa comparison tool
+- **Later:** Mobile-optimized document scan via camera
 
 ### 2. Lawyer experience
-- **Now:** Upcoming bookings detail view with client notes
-- **Next:** ICS calendar export for consultation slots
-- **Later:** Marketing page editor, review management
+- **Now:** Upcoming bookings detail view with client notes, ICS calendar export
+- **Next:** Marketing page editor, review/rating management
+- **Later:** Revenue analytics dashboard, client messaging
 
 ### 3. Admin console
-- **Now:** Visa management CRUD (add/edit visa metadata, requirements JSON)
-- **Next:** Tracker moderation (flag/remove spam entries)
+- **Now:** Admin Settings page (platform configuration, feature toggles, email templates)
+- **Next:** Tracker moderation (spam flagging/auto-detection), User analytics
 - **Later:** Pricing controls with promo code workflows
 
 ### 4. Tracker
-- **Now:** Admin spam detection and override tools
-- **Next:** Comparative analytics (occupation-based trends)
-- **Later:** Public API with rate limiting
+- **Now:** Comparative analytics (occupation-based trends, country comparison)
+- **Next:** Public API with rate limiting
+- **Later:** Automated data quality checks
 
 ### 5. Premium content
 - **Now:** Template-driven step scaffolding for faster content creation
@@ -52,20 +65,21 @@ _Repo snapshot:_ main branch. Migrations 013-015 seeded with **8 Australian visa
 - **Later:** Video walkthroughs, translation toggles
 
 ### 6. Consultation & marketplace
-- **Now:** Real payment integration (Stripe) for paid consultations
+- **Now:** Stripe payment for consultation bookings (connect to existing Stripe flow)
 - **Next:** Reschedule/cancel flows with notification emails
-- **Later:** Bundle consultations with premium guides
+- **Later:** Bundle consultations with premium guides, lawyer ratings
 
 ### 7. Data ingestion (immigration corpus)
-- **Now:** **DONE:** 8 Australian visas with structured JSON, premium guides, tracker seed data
-- **Next:** Canada Express Entry (FSW, CEC, FST), UK Skilled Worker visa
-- **Later:** Automated refresh jobs diffing against official sources
+- **Now:** ✅ 11 visas across 3 countries
+- **Next:** Canada FST (Federal Skilled Trades), Australia Partner (820/801), Australia Parent (143)
+- **Later:** New Zealand Skilled Migrant, automated refresh jobs diffing against official sources
 
-## Next Concrete Slice (Cycle Plan)
-**Focus:** Admin Visa Management + Document Upload
+## Next Concrete Slice (Cycle 3 Plan)
+**Focus:** Consultation Payments + Admin Settings + More Visa Data
 
-1. **Admin Visa CRUD:** Build interface to add/edit visa metadata and requirements JSON without SQL
-2. **User Document Upload:** Connect My Documents page to Supabase Storage with drag-drop, OCR hints
-3. **Payment Integration:** Replace demo provider with Stripe checkout for premium guide purchases
+1. **Consultation Stripe Integration:** Wire Stripe checkout for lawyer booking payments (connect consultation slots to Stripe)
+2. **Admin Settings Page:** Build real platform configuration (site name, default currency, feature toggles, email template management)
+3. **Visa Data Expansion:** Add Australia Partner visa (820/801) and Parent visa (143) with full requirements and guides
+4. **Saved Visas:** Add "Save" button on visa cards and a "Saved Visas" section in user dashboard
 
-**Deliverables:** Self-serve visa management, functional document storage, real payment flow.
+**Deliverables:** Paid consultations, platform configuration, 13+ total visas, user bookmarking.

@@ -7,6 +7,13 @@ import { Badge } from '../../components/ui/Badge';
 import { CardSkeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
 
+const COUNTRIES = [
+  { value: '', label: '🌍 All Countries' },
+  { value: 'Australia', label: '🇦🇺 Australia' },
+  { value: 'Canada', label: '🇨🇦 Canada' },
+  { value: 'United Kingdom', label: '🇬🇧 United Kingdom' },
+];
+
 const CATEGORIES = [
   { value: '', label: 'All Categories' },
   { value: 'work', label: 'Work' },
@@ -20,8 +27,9 @@ const CATEGORIES = [
 
 export function VisaSearch() {
   const [search, setSearch] = useState('');
+  const [country, setCountry] = useState('');
   const [category, setCategory] = useState('');
-  const { visas, loading } = useVisas(search, undefined, category || undefined);
+  const { visas, loading } = useVisas(search, country || undefined, category || undefined);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -32,18 +40,34 @@ export function VisaSearch() {
         </p>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 mb-8">
-        <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or subclass number..."
-            className="input-field pl-12 py-3"
-          />
+      <div className="space-y-4 mb-8">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name or subclass number..."
+              className="input-field pl-12 py-3"
+            />
+          </div>
         </div>
         <div className="flex gap-2 flex-wrap">
+          {COUNTRIES.map((c) => (
+            <button
+              key={c.value}
+              onClick={() => setCountry(c.value)}
+              className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                country === c.value
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50'
+              }`}
+            >
+              {c.label}
+            </button>
+          ))}
+          <div className="w-px bg-neutral-200 mx-1" />
           {CATEGORIES.map((cat) => (
             <button
               key={cat.value}
