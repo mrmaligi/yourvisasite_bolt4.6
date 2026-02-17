@@ -460,4 +460,81 @@ INSERT INTO visas (name, subclass, category, description, official_link, base_co
 -- Family - Parents
 INSERT INTO visas (name, subclass, category, description, official_link, base_cost_aud, processing_time_min_months, processing_time_max_months, is_active, is_open_new_applications, is_premium_content, display_order) VALUES
 ('Contributory Parent Visa', '143', 'Family', 'Permanent visa for parents of settled Australians. Faster processing, higher cost.', 'https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/contributory-parent-143', 4765.00, 72, 144, true, true, true, 20),
-('Contributory Parent (Temporary)', '173', 'Family', '2-year temporary visa for parents, can apply for 143 later.', 'https://immi.homeaffairs.gov.au/visas/getting-a
+('Contributory Parent (Temporary)', '173', 'Family', '2-year temporary visa for parents, can apply for 143 later.', 'https://immi.homeaffairs.gov.au/visas/getting-a-- Family - Parents (continued)
+('Parent Visa', '103', 'Family', 'Permanent visa for parents. Longer processing, lower cost.', 'https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/parent-103', 4990.00, 360, 600, true, true, true, 21),
+('Sponsored Parent (Temporary)', '870', 'Family', '3-5 year temporary visa for parents. No permanent pathway.', 'https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/sponsored-parent-temporary-870', 1000.00, 0, 1, true, true, true, 22);
+
+-- Global Talent
+INSERT INTO visas (name, subclass, category, description, official_link, base_cost_aud, processing_time_min_months, processing_time_max_months, is_active, is_open_new_applications, is_premium_content, display_order) VALUES
+('Global Talent Visa', '858', 'Global Talent', 'Permanent visa for internationally recognized talent.', 'https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/global-talent-visa-858', 4765.00, 2, 4, true, true, true, 30);
+
+-- Visitor Visas
+INSERT INTO visas (name, subclass, category, description, official_link, base_cost_aud, processing_time_min_months, processing_time_max_months, is_active, is_open_new_applications, is_premium_content, display_order) VALUES
+('Electronic Travel Authority', '601', 'Visitor', 'Electronic visa for eligible passport holders.', 'https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601', 20.00, 0, 0, true, true, true, 40),
+('eVisitor', '651', 'Visitor', 'Free visa for eligible passports for tourism/business.', 'https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651', 0.00, 0, 0, true, true, true, 41),
+('Medical Treatment Visa', '602', 'Visitor', 'Medical treatment in Australia.', 'https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/medical-treatment-602', 0.00, 1, 4, true, true, true, 42),
+('Transit Visa', '771', 'Visitor', 'Transit through Australia for up to 72 hours.', 'https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/transit-771', 0.00, 1, 2, true, true, true, 43);
+
+-- Business & Investment
+INSERT INTO visas (name, subclass, category, description, official_link, base_cost_aud, processing_time_min_months, processing_time_max_months, is_active, is_open_new_applications, is_closed_to_new_applicants, is_premium_content, display_order) VALUES
+('Business Innovation & Investment (Provisional)', '188', 'Business', '5-year provisional visa for business owners/investors.', 'https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/business-innovation-and-investment-188', 6270.00, 12, 24, true, true, false, true, 50),
+('Business Innovation & Investment (Permanent)', '888', 'Business', 'Permanent visa for 188 holders who met obligations.', 'https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/business-innovation-and-investment-888', 3490.00, 12, 24, true, true, false, true, 51),
+('Business Talent Visa', '132', 'Business', 'Permanent visa for high-calibre business owners. CLOSED.', 'https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/business-talent-132', 7855.00, 0, 0, true, false, true, true, 52);
+```
+
+---
+
+## MVP Priority
+
+### Tier 1 - MUST HAVE (8 visas) - 70% of applications
+| Priority | Subclass | Name | Why Priority |
+|----------|----------|------|--------------|
+| 1 | 189 | Skilled Independent | Most popular skilled visa |
+| 2 | 190 | Skilled Nominated | High volume |
+| 3 | 491 | Skilled Regional | Growing popularity |
+| 4 | 820/801 | Partner Onshore | High volume family |
+| 5 | 309/100 | Partner Offshore | High volume family |
+| 6 | 500 | Student | Very high volume |
+| 7 | 600 | Visitor | Very high volume |
+| 8 | 482 | TSS | High employer demand |
+
+### Tier 2 - IMPORTANT (6 visas)
+| Priority | Subclass | Name |
+|----------|----------|------|
+| 9 | 186 | Employer Nomination Scheme |
+| 10 | 300 | Prospective Marriage |
+| 11 | 485 | Temporary Graduate |
+| 12 | 494 | Regional Employer Sponsored |
+| 13 | 417 | Working Holiday |
+| 14 | 462 | Work and Holiday |
+
+### Tier 3 - NICE TO HAVE (10+ visas)
+- 191 Skilled Regional Permanent
+- 887 Skilled Regional
+- 143 Contributory Parent
+- 173 Contributory Parent Temporary
+- 103 Parent Visa
+- 870 Sponsored Parent Temporary
+- 858 Global Talent
+- 601 ETA
+- 651 eVisitor
+- 602 Medical Treatment
+- 188/888 Business & Investment
+
+### Recommended Implementation
+- **Week 1:** Implement Tier 1 (8 visas) - Core app
+- **Week 2:** Implement Tier 2 (6 visas) - Expand coverage
+- **Week 3+:** Add Tier 3 as needed based on user demand
+
+---
+
+## Official DHA Resources
+
+- **Visa Listing:** https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing
+- **Processing Times:** https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-processing-times
+- **Fees:** https://immi.homeaffairs.gov.au/visas/getting-a-visa/fees-and-charges
+- **Document Checklists:** Individual visa pages
+
+---
+
+*Complete catalog compiled for VisaBuild. For official requirements, always verify with DHA.*
