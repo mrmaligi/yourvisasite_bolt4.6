@@ -11,9 +11,10 @@ interface StripeCheckoutProps {
   product: StripeProduct;
   className?: string;
   children?: React.ReactNode;
+  metadata?: Record<string, string>;
 }
 
-export function StripeCheckout({ product, className, children }: StripeCheckoutProps) {
+export function StripeCheckout({ product, className, children, metadata }: StripeCheckoutProps) {
   const [loading, setLoading] = useState(false);
 
   const handleCheckout = async () => {
@@ -36,6 +37,10 @@ export function StripeCheckout({ product, className, children }: StripeCheckoutP
           mode: product.mode,
           successUrl: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
           cancelUrl: window.location.href,
+          metadata: {
+            user_id: user.id,
+            ...metadata,
+          },
         }),
       });
 
