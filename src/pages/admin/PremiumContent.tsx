@@ -15,6 +15,7 @@ export function PremiumContent() {
   const [docCategories, setDocCategories] = useState<DocumentCategory[]>([]);
   const [selectedVisaId, setSelectedVisaId] = useState(searchParams.get('visa_id') || '');
   const [steps, setSteps] = useState<VisaPremiumContent[]>([]);
+  const [jsonDrafts, setJsonDrafts] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -36,6 +37,7 @@ export function PremiumContent() {
   useEffect(() => {
     if (!selectedVisaId) { setSteps([]); return; }
     setLoading(true);
+    setJsonDrafts({});
     supabase.from('visa_premium_content').select('*').eq('visa_id', selectedVisaId).order('section_number')
       .then(({ data }) => { setSteps(data || []); setLoading(false); });
   }, [selectedVisaId]);
@@ -53,6 +55,7 @@ export function PremiumContent() {
       examples: null,
       estimated_minutes: null,
       required_documents: null,
+      application_example_json: null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }]);
@@ -82,7 +85,8 @@ export function PremiumContent() {
       common_mistakes: s.common_mistakes || null,
       estimated_minutes: s.estimated_minutes ? Number(s.estimated_minutes) : null,
       required_documents: s.required_documents && s.required_documents.length > 0 ? s.required_documents : null,
-      examples: s.examples // Persist if present, though we might not have a UI for it yet
+      examples: s.examples, // Persist if present, though we might not have a UI for it yet
+      application_example_json: s.application_example_json
     }));
 
     if (rows.length > 0) {
@@ -181,6 +185,23 @@ export function PremiumContent() {
                       placeholder="❌ Mistake: ..."
                     />
                   </div>
+
+                  <Textarea
+                    label="Application Examples (JSON: [{ field_name, field_description, example_value, tip }])"
+                    value={jsonDrafts[step.id] ?? (step.application_example_json ? JSON.stringify(step.application_example_json, null, 2) : '')}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setJsonDrafts(prev => ({ ...prev, [step.id]: val }));
+                      try {
+                        const parsed = JSON.parse(val);
+                        updateStep(idx, 'application_example_json', parsed);
+                      } catch (err) {
+                        // ignore invalid json during typing
+                      }
+                    }}
+                    rows={6}
+                    placeholder={'[\n  {\n    "field_name": "Full Name",\n    "field_description": "As per passport",\n    "example_value": "JOHN DOE",\n    "tip": "Use uppercase"\n  }\n]'}
+                  />
 
                   <div>
                     <label className="block text-sm font-medium text-neutral-700 mb-2">Required Documents</label>
