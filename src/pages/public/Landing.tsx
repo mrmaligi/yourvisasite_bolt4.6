@@ -75,20 +75,20 @@ export function Landing() {
       {/* Stats Bar */}
       <section className="bg-primary-50 dark:bg-primary-900/10 border-y border-primary-100 dark:border-primary-900/20 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-primary-200/50 dark:divide-primary-800/50">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center md:divide-x divide-primary-200/50 dark:divide-primary-800/50">
             <div className="space-y-1">
               <p className="text-3xl font-bold text-primary-700 dark:text-primary-400">{stats.visas}+</p>
               <p className="text-sm font-medium text-primary-600 dark:text-primary-300">Visa Subclasses</p>
             </div>
-            <div className="space-y-1 pl-4">
+            <div className="space-y-1 md:pl-4">
               <p className="text-3xl font-bold text-primary-700 dark:text-primary-400">19</p>
               <p className="text-sm font-medium text-primary-600 dark:text-primary-300">Document Categories</p>
             </div>
-            <div className="space-y-1 pl-4">
+            <div className="space-y-1 md:pl-4">
               <p className="text-3xl font-bold text-primary-700 dark:text-primary-400">Real</p>
               <p className="text-sm font-medium text-primary-600 dark:text-primary-300">Processing Data</p>
             </div>
-            <div className="space-y-1 pl-4">
+            <div className="space-y-1 md:pl-4">
               <p className="text-3xl font-bold text-primary-700 dark:text-primary-400">Expert</p>
               <p className="text-sm font-medium text-primary-600 dark:text-primary-300">Lawyers</p>
             </div>
