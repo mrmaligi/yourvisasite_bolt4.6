@@ -303,3 +303,61 @@ export interface ReviewWithUser extends LawyerReview {
     avatar_url: string | null;
   };
 }
+
+// Consultation slots for lawyer availability
+export interface ConsultationSlot {
+  id: string;
+  lawyer_id: string;
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  is_available: boolean;
+  created_at: string;
+}
+
+// Saved visas for users
+export interface SavedVisa {
+  id: string;
+  user_id: string;
+  visa_id: string;
+  created_at: string;
+}
+
+// Marketplace categories
+export interface MarketplaceCategory {
+  id: string;
+  name: string;
+  description: string | null;
+  icon: string | null;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Marketplace listings
+export interface MarketplaceListing {
+  id: string;
+  lawyer_id: string;
+  title: string;
+  description: string | null;
+  price_cents: number;
+  category_id: string | null;
+  visa_id: string | null;
+  file_url: string | null;
+  preview_url: string | null;
+  is_active: boolean;
+  download_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// Marketplace reviews
+export interface MarketplaceReview {
+  id: string;
+  listing_id: string;
+  user_id: string;
+  rating: number;
+  review_text: string | null;
+  created_at: string;
+}
