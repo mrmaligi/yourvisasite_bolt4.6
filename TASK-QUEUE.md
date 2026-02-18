@@ -12,22 +12,22 @@
 | T5: Landing + Search + Detail | 8309090833658564348 | 2026-02-18 16:00 | MERGED |
 | T6: Tracker + Submit | 7166305531339836140 | 2026-02-18 16:02 | MERGED |
 | T7: Lawyers + News + Pricing | 13245073353872056035 | 2026-02-18 16:04 | MERGED |
-| T11: Consultation Booking Flow | 7794485243225256080 | 2026-02-18 20:03 | FIRED |
+| T11: Consultation Booking Flow | 7794485243225256080 | 2026-02-18 20:03 | MERGED |
 
 ## TASK QUEUE (fire these next, in order)
 Each cron job picks the FIRST task with status=QUEUED, fires it to Jules, and marks it FIRED.
 
 | # | Task Name | Scope | Status |
 |---|-----------|-------|--------|
-| T8 | User Dashboard — All Sections | User dashboard with real data, My Visas (purchased list), Saved Visas page, User Settings page. Wire to Supabase. | FIRED |
-| T9 | Premium Content Viewer + Unlock Flow | After purchase: show step-by-step guide, progress tracking checkboxes, section navigation. Unlock button → Stripe checkout. | FIRED |
-| T10 | Document Upload + Checklist | MyDocuments page: upload to Supabase Storage, categorize by 19 types, list with status. Per-visa document checklist matching uploaded docs. | FIRED |
-| T11 | Consultation Booking Flow | From lawyer profile: select time slot → confirm → Stripe checkout → booking created. Consultations page listing upcoming/past. | FIRED |
-| T12 | Lawyer Registration + Pending | /register/lawyer form: bar number, jurisdiction, specializations, rate, credential upload. Pending page after submission. | FIRED |
-| T13 | Lawyer Dashboard + Clients | Lawyer dashboard with stats (clients, earnings, consultations). Clients page listing all booked clients with shared docs. | FIRED |
-| T14 | Lawyer Availability + Tracker + News + Settings | Availability calendar UI. Weighted tracker submissions. News comments. Lawyer settings page. | FIRED |
-| T11 | Consultation Booking Flow | From lawyer profile: select time slot → confirm → Stripe checkout → booking created. Consultations page listing upcoming/past. | FIRED |
-| T12 | Lawyer Registration + Pending | /register/lawyer form: bar number, jurisdiction, specializations, rate, credential upload. Pending page after submission. | QUEUED |
+| T8 | User Dashboard — All Sections | User dashboard with real data, My Visas (purchased list), Saved Visas page, User Settings page. Wire to Supabase. | MERGED |
+| T9 | Premium Content Viewer + Unlock Flow | After purchase: show step-by-step guide, progress tracking checkboxes, section navigation. Unlock button → Stripe checkout. | MERGED |
+| T10 | Document Upload + Checklist | MyDocuments page: upload to Supabase Storage, categorize by 19 types, list with status. Per-visa document checklist matching uploaded docs. | MERGED |
+| T11 | Consultation Booking Flow | From lawyer profile: select time slot → confirm → Stripe checkout → booking created. Consultations page listing upcoming/past. | MERGED |
+| T12 | Lawyer Registration + Pending | /register/lawyer form: bar number, jurisdiction, specializations, rate, credential upload. Pending page after submission. | MERGED |
+| T13 | Lawyer Dashboard + Clients | Lawyer dashboard with stats (clients, earnings, consultations). Clients page listing all booked clients with shared docs. | MERGED |
+| T14 | Lawyer Availability + Tracker + News + Settings | Availability calendar UI. Weighted tracker submissions. News comments. Lawyer settings page. | MERGED |
+| T11 | Consultation Booking Flow | From lawyer profile: select time slot → confirm → Stripe checkout → booking created. Consultations page listing upcoming/past. | MERGED |
+| T12 | Lawyer Registration + Pending | /register/lawyer form: bar number, jurisdiction, specializations, rate, credential upload. Pending page after submission. | MERGED |
 | T13 | Lawyer Dashboard + Clients | Lawyer dashboard with stats (clients, earnings, consultations). Clients page listing all booked clients with shared docs. | QUEUED |
 | T14 | Lawyer Availability + Tracker + News + Settings | Availability calendar UI. Weighted tracker submissions. News comments. Lawyer settings page. | QUEUED |
 | T15 | Admin Dashboard + User Management | Admin dashboard with platform stats/charts. User management: list, search, change roles, disable. | QUEUED |
