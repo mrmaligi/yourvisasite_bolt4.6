@@ -7,11 +7,14 @@ import {
   ArrowRight,
   CheckCircle,
   BarChart3,
-  BookOpen
+  BookOpen,
+  Phone
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/Button';
 import { Card, CardBody } from '../../components/ui/Card';
+import { QuickCallBanner } from '../../components/QuickCallBanner';
+import { YouTubeFeed } from '../../components/YouTubeFeed';
 
 export function Landing() {
   const [stats, setStats] = useState({
@@ -37,6 +40,7 @@ export function Landing() {
 
   return (
     <div className="bg-white dark:bg-neutral-900 transition-colors duration-300">
+      <QuickCallBanner />
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-neutral-900 py-24 sm:py-32">
         <div className="absolute inset-0 z-0 opacity-20">
@@ -60,6 +64,12 @@ export function Landing() {
               <Button size="lg" className="w-full sm:w-auto text-lg px-8">
                 Search Visas
                 <Search className="ml-2 w-5 h-5" />
+              </Button>
+            </Link>
+            <Link to="/lawyers?filter=available">
+              <Button size="lg" className="w-full sm:w-auto text-lg px-8 bg-emerald-600 hover:bg-emerald-700 text-white border-transparent">
+                Quick Call
+                <Phone className="ml-2 w-5 h-5" />
               </Button>
             </Link>
             <Link to="/tracker">
@@ -160,6 +170,8 @@ export function Landing() {
           </div>
         </div>
       </section>
+
+      <YouTubeFeed />
 
       {/* Testimonials */}
       <section className="py-24 bg-white dark:bg-neutral-900 transition-colors duration-300">

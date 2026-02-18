@@ -17,6 +17,16 @@ export interface Profile {
   updated_at: string;
 }
 
+export interface YouTubeFeed {
+  id: string;
+  title: string;
+  youtube_url: string;
+  thumbnail_url: string | null;
+  channel_name: string;
+  visa_id: string | null;
+  created_at: string;
+}
+
 export interface Visa {
   id: string;
   subclass: string;
