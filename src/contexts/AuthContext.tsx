@@ -9,11 +9,16 @@ interface AuthContextValue {
   profile: Profile | null;
   role: UserRole | null;
   isLoading: boolean;
-  signInWithGoogle: () => Promise<void>;
-  signInWithEmail: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-  signUpWithEmail: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
+  isAuthenticated: boolean;
+  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+
+  // Aliases/Compat
+  signInWithEmail: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signUpWithEmail: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
+  signInWithGoogle: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue>({
@@ -22,11 +27,14 @@ const AuthContext = createContext<AuthContextValue>({
   profile: null,
   role: null,
   isLoading: true,
-  signInWithGoogle: async () => {},
-  signInWithEmail: async () => ({ error: null }),
-  signUpWithEmail: async () => ({ error: null }),
+  isAuthenticated: false,
+  signIn: async () => ({ error: null }),
+  signUp: async () => ({ error: null }),
   signOut: async () => {},
   refreshProfile: async () => {},
+  signInWithEmail: async () => ({ error: null }),
+  signUpWithEmail: async () => ({ error: null }),
+  signInWithGoogle: async () => {},
 });
 
 export function useAuth() {
@@ -39,13 +47,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
-    setProfile(data);
+  const fetchOrCreateProfile = async (currentUser: User) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return;
+      }
+
+      if (data) {
+        setProfile(data);
+      } else {
+        const { data: createdProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert([{
+            user_id: currentUser.id,
+            role: 'user' as UserRole,
+            full_name: currentUser.user_metadata?.full_name || '',
+          }])
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('Error creating profile:', createError);
+        } else {
+          setProfile(createdProfile);
+        }
+      }
+    } catch (err) {
+      console.error('Unexpected error in fetchOrCreateProfile:', err);
+    }
   };
 
   useEffect(() => {
@@ -53,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
-        fetchProfile(s.user.id).finally(() => setIsLoading(false));
+        fetchOrCreateProfile(s.user).finally(() => setIsLoading(false));
       } else {
         setIsLoading(false);
       }
@@ -63,9 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
-        (async () => {
-          await fetchProfile(s.user.id);
-        })();
+        fetchOrCreateProfile(s.user);
       } else {
         setProfile(null);
       }
@@ -74,19 +108,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signInWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/login` },
-    });
-  };
-
-  const signInWithEmail = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error };
   };
 
-  const signUpWithEmail = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -98,20 +125,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     await supabase.auth.signOut();
     setProfile(null);
+    setUser(null);
+    setSession(null);
+  };
+
+  const signInWithGoogle = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/login` },
+    });
   };
 
   const refreshProfile = async () => {
-    if (user) await fetchProfile(user.id);
+    if (user) await fetchOrCreateProfile(user);
   };
 
-  const role = (user?.app_metadata?.role as UserRole) || profile?.role || null;
+  const role = profile?.role || null;
+  const isAuthenticated = !!user;
 
   return (
     <AuthContext.Provider
       value={{
-        session, user, profile, role, isLoading,
-        signInWithGoogle, signInWithEmail, signUpWithEmail,
-        signOut, refreshProfile,
+        session,
+        user,
+        profile,
+        role,
+        isLoading,
+        isAuthenticated,
+        signIn,
+        signUp,
+        signOut,
+        refreshProfile,
+        signInWithEmail: signIn,
+        signUpWithEmail: signUp,
+        signInWithGoogle,
       }}
     >
       {children}

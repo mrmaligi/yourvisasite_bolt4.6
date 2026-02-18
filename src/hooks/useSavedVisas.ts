@@ -13,12 +13,30 @@ export function useSavedVisas() {
       setLoading(false);
       return;
     }
-    const { data } = await supabase
-      .from('saved_visas')
-      .select('visa_id')
-      .eq('user_id', user.id);
-    setSavedVisaIds(new Set((data || []).map((d) => d.visa_id)));
-    setLoading(false);
+
+    try {
+      const { data, error } = await supabase
+        .from('saved_visas')
+        .select('visa_id')
+        .eq('user_id', user.id);
+
+      if (error) {
+        // Gracefully handle missing table
+        if (error.code === '42P01') {
+          console.warn('saved_visas table missing, treating as empty.');
+        } else {
+          console.error('Error fetching saved visas:', error);
+        }
+        setSavedVisaIds(new Set());
+      } else {
+        setSavedVisaIds(new Set((data || []).map((d) => d.visa_id)));
+      }
+    } catch (err) {
+      console.error('Unexpected error fetching saved visas:', err);
+      setSavedVisaIds(new Set());
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
 
   useEffect(() => {
@@ -28,44 +46,59 @@ export function useSavedVisas() {
   const toggleSave = useCallback(
     async (visaId: string) => {
       if (!user) return false;
+
       const isSaved = savedVisaIds.has(visaId);
-      if (isSaved) {
-        // Optimistic update
-        setSavedVisaIds((prev) => {
-          const next = new Set(prev);
-          next.delete(visaId);
-          return next;
-        });
-        const { error } = await supabase
-          .from('saved_visas')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('visa_id', visaId);
-        if (error) {
-          // Revert
-          setSavedVisaIds((prev) => new Set(prev).add(visaId));
-          return false;
-        }
-        return true;
-      } else {
-        // Optimistic update
-        setSavedVisaIds((prev) => new Set(prev).add(visaId));
-        const { error } = await supabase
-          .from('saved_visas')
-          .insert({ user_id: user.id, visa_id: visaId });
-        if (error) {
-          // Revert
+
+      try {
+        if (isSaved) {
+          // Optimistic update
           setSavedVisaIds((prev) => {
             const next = new Set(prev);
             next.delete(visaId);
             return next;
           });
-          return false;
+
+          const { error } = await supabase
+            .from('saved_visas')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('visa_id', visaId);
+
+          if (error) {
+            console.error('Error removing saved visa:', error);
+            // Revert
+            setSavedVisaIds((prev) => new Set(prev).add(visaId));
+            return false;
+          }
+          return true;
+        } else {
+          // Optimistic update
+          setSavedVisaIds((prev) => new Set(prev).add(visaId));
+
+          const { error } = await supabase
+            .from('saved_visas')
+            .insert({ user_id: user.id, visa_id: visaId });
+
+          if (error) {
+            console.error('Error saving visa:', error);
+            // Revert
+            setSavedVisaIds((prev) => {
+              const next = new Set(prev);
+              next.delete(visaId);
+              return next;
+            });
+            return false;
+          }
+          return true;
         }
-        return true;
+      } catch (err) {
+        console.error('Unexpected error in toggleSave:', err);
+        // Revert to safe state (fetch from server)
+        fetchSaved();
+        return false;
       }
     },
-    [user, savedVisaIds]
+    [user, savedVisaIds, fetchSaved]
   );
 
   const isSaved = useCallback(

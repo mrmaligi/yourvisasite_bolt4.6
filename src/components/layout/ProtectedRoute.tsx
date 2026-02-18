@@ -1,10 +1,10 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 import type { UserRole } from '../../types/database';
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   requiredRole?: UserRole;
 }
 
@@ -25,8 +25,15 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   }
 
   if (requiredRole && role !== requiredRole && role !== 'admin') {
-    return <Navigate to="/dashboard" replace />;
+    // Redirect based on the user's actual role
+    if (role === 'lawyer') {
+      return <Navigate to="/lawyer/dashboard" replace />;
+    } else if (role === 'user') {
+      return <Navigate to="/dashboard" replace />;
+    } else {
+      return <Navigate to="/" replace />;
+    }
   }
 
-  return <>{children}</>;
+  return children ? <>{children}</> : <Outlet />;
 }

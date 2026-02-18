@@ -7,13 +7,14 @@ export type VerificationStatus = 'pending' | 'approved' | 'rejected';
 
 export interface Profile {
   id: string;
+  user_id: string;
   role: UserRole;
   full_name: string | null;
-  avatar_url: string | null;
   phone: string | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  avatar_url: string | null;
+  created_at?: string;
+  updated_at?: string;
+  is_active?: boolean;
 }
 
 export interface Visa {
@@ -21,19 +22,23 @@ export interface Visa {
   subclass: string;
   name: string;
   country: string;
-  category: string;
-  official_link: string | null;
+  category: VisaCategory | string;
+  official_url: string | null;
   summary: string | null;
-  description: string | null;
-  base_cost_aud: number | null;
+  processing_fee_description: string | null;
+  is_active: boolean;
   cost_aud: string | null;
   processing_time_range: string | null;
   duration: string | null;
   key_requirements: string | null;
-  processing_fee_description: string | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
+
+  // Aliases for compatibility
+  official_link?: string | null; // Old name
+
+  description?: string | null;
+  base_cost_aud?: number | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface VisaPremiumContent {
@@ -44,16 +49,63 @@ export interface VisaPremiumContent {
   body: string;
   document_category: string | null;
   document_explanation: string | null;
-  document_example_url: string | null;
-  created_at: string;
-  updated_at: string;
+  document_example_url?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export interface VisaRequirement {
+export interface UserVisaPurchase {
   id: string;
+  user_id: string;
   visa_id: string;
-  requirements_json: Record<string, unknown>;
-  updated_at: string;
+  stripe_payment_id: string | null;
+  amount_cents: number;
+  purchased_at: string;
+  payment_provider?: string;
+}
+
+export interface DocumentCategory {
+  id: string;
+  name: string;
+  description: string | null;
+  icon: string | null;
+  sort_order: number;
+}
+
+export interface UserDocument {
+  id: string;
+  user_id: string;
+  category_id: string;
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  mime_type: string;
+  status: DocumentStatus;
+
+  // Old fields for compatibility if needed (mapped in hook?)
+  storage_path?: string; // Old name for file_path
+  document_category?: string; // Old string category
+
+  visa_id?: string;
+  uploaded_at?: string;
+}
+
+export interface Booking {
+  id: string;
+  user_id: string;
+  lawyer_id: string;
+  scheduled_at: string;
+  duration_minutes: number;
+  price_cents: number;
+  status: BookingStatus;
+
+  // Aliases
+  total_price_cents?: number; // Old name
+
+  slot_id?: string;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface TrackerEntry {
@@ -62,11 +114,11 @@ export interface TrackerEntry {
   submitted_by: string | null;
   submitter_role: UserRole | null;
   application_date: string;
-  decision_date: string;
-  processing_days: number;
-  outcome: TrackerOutcome;
+  decision_date: string | null;
+  processing_days: number | null;
+  outcome: TrackerOutcome | null;
   weight: number;
-  created_at: string;
+  created_at?: string;
 }
 
 export interface TrackerStats {
@@ -77,39 +129,7 @@ export interface TrackerStats {
   p25_days: number | null;
   p75_days: number | null;
   total_entries: number;
-  last_updated: string;
-}
-
-export interface NewsArticle {
-  id: string;
-  title: string;
-  slug: string;
-  body: string;
-  image_url: string | null;
-  author_id: string;
-  is_published: boolean;
-  published_at: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface NewsComment {
-  id: string;
-  article_id: string;
-  author_id: string;
-  body: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Product {
-  id: string;
-  visa_id: string;
-  stripe_product_id: string | null;
-  stripe_price_id: string | null;
-  price_cents: number;
-  is_active: boolean;
-  updated_at: string;
+  last_updated?: string;
 }
 
 export interface LawyerProfile {
@@ -123,12 +143,12 @@ export interface LawyerProfile {
   hourly_rate_cents: number | null;
   is_verified: boolean;
   verification_status: VerificationStatus;
-  verification_document_url: string | null;
-  rejection_reason: string | null;
-  verified_at: string | null;
-  verified_by: string | null;
-  created_at: string;
-  updated_at: string;
+  verification_document_url?: string | null;
+  rejection_reason?: string | null;
+  verified_at?: string | null;
+  verified_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ConsultationSlot {
@@ -137,41 +157,38 @@ export interface ConsultationSlot {
   start_time: string;
   end_time: string;
   is_booked: boolean;
-  created_at: string;
+  created_at?: string;
 }
 
-export interface Booking {
+export interface NewsArticle {
   id: string;
-  user_id: string;
-  lawyer_id: string;
-  slot_id: string;
-  duration_minutes: number;
-  total_price_cents: number;
-  status: BookingStatus;
-  notes: string | null;
-  created_at: string;
+  title: string;
+  slug: string;
+  body: string;
+  excerpt: string | null;
+  author_id: string;
+  category: string | null;
+  is_published: boolean;
+  published_at: string | null;
+  image_url?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface VisaRequirement {
+  id: string;
+  visa_id: string;
+  requirements_json: Record<string, unknown>;
   updated_at: string;
 }
 
-export interface UserVisaPurchase {
+export interface NewsComment {
   id: string;
-  user_id: string;
-  visa_id: string;
-  amount_cents: number;
-  payment_provider: string;
-  payment_id: string | null;
-  purchased_at: string;
-}
-
-export interface UserDocument {
-  id: string;
-  user_id: string;
-  visa_id: string;
-  document_category: string;
-  file_name: string;
-  storage_path: string;
-  status: DocumentStatus;
-  uploaded_at: string;
+  article_id: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface DocumentShare {
@@ -180,6 +197,21 @@ export interface DocumentShare {
   lawyer_id: string;
   shared_at: string;
   revoked_at: string | null;
+}
+
+export interface TrackerSummary extends Visa {
+  tracker_stats: TrackerStats | null;
+}
+
+// Missing types restored
+export interface Product {
+  id: string;
+  visa_id: string;
+  stripe_product_id: string | null;
+  stripe_price_id: string | null;
+  price_cents: number;
+  is_active: boolean;
+  updated_at: string;
 }
 
 export interface PromoCode {
@@ -195,8 +227,4 @@ export interface PlatformSetting {
   key: string;
   value: Record<string, unknown>;
   updated_at: string;
-}
-
-export interface TrackerSummary extends Visa {
-  tracker_stats: TrackerStats | null;
 }
