@@ -2,31 +2,43 @@ import { useEffect, useState } from 'react';
 import { Users, Scale, FileText, DollarSign, BarChart3, ShieldCheck } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
+import { CardSkeleton } from '../../components/ui/Skeleton';
 import { SubscriptionStatus } from '../../components/SubscriptionStatus';
 
 export function AdminDashboard() {
   const [counts, setCounts] = useState({
     users: 0, lawyers: 0, pendingLawyers: 0, visas: 0, purchases: 0, entries: 0,
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      supabase.from('profiles').select('id', { count: 'exact', head: true }),
-      supabase.schema('lawyer').from('profiles').select('id', { count: 'exact', head: true }).eq('is_verified', true),
-      supabase.schema('lawyer').from('profiles').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending'),
-      supabase.from('visas').select('id', { count: 'exact', head: true }),
-      supabase.from('user_visa_purchases').select('id', { count: 'exact', head: true }),
-      supabase.from('tracker_entries').select('id', { count: 'exact', head: true }),
-    ]).then(([users, lawyers, pending, visas, purchases, entries]) => {
-      setCounts({
-        users: users.count || 0,
-        lawyers: lawyers.count || 0,
-        pendingLawyers: pending.count || 0,
-        visas: visas.count || 0,
-        purchases: purchases.count || 0,
-        entries: entries.count || 0,
-      });
-    });
+    const fetchCounts = async () => {
+      try {
+        const [users, lawyers, pending, visas, purchases, entries] = await Promise.all([
+          supabase.from('profiles').select('id', { count: 'exact', head: true }),
+          supabase.schema('lawyer').from('profiles').select('id', { count: 'exact', head: true }).eq('is_verified', true),
+          supabase.schema('lawyer').from('profiles').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending'),
+          supabase.from('visas').select('id', { count: 'exact', head: true }),
+          supabase.from('user_visa_purchases').select('id', { count: 'exact', head: true }),
+          supabase.from('tracker_entries').select('id', { count: 'exact', head: true }),
+        ]);
+
+        setCounts({
+          users: users.count || 0,
+          lawyers: lawyers.count || 0,
+          pendingLawyers: pending.count || 0,
+          visas: visas.count || 0,
+          purchases: purchases.count || 0,
+          entries: entries.count || 0,
+        });
+      } catch (error) {
+        console.error('Error fetching admin stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCounts();
   }, []);
 
   const kpis = [
@@ -37,6 +49,21 @@ export function AdminDashboard() {
     { label: 'Guide Purchases', value: counts.purchases, icon: DollarSign, color: 'bg-accent-50 text-accent-600' },
     { label: 'Tracker Entries', value: counts.entries, icon: BarChart3, color: 'bg-neutral-100 text-neutral-600' },
   ];
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <div className="h-8 w-64 bg-neutral-200 rounded animate-pulse mb-2"></div>
+          <div className="h-4 w-48 bg-neutral-100 rounded animate-pulse"></div>
+        </div>
+        <div className="h-24 bg-neutral-100 rounded-xl animate-pulse"></div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3, 4, 5, 6].map(i => <CardSkeleton key={i} />)}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

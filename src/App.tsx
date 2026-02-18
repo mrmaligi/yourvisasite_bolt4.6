@@ -54,6 +54,7 @@ const TrackerManagement = lazy(() => import('./pages/admin/TrackerManagement').t
 const AdminPricing = lazy(() => import('./pages/admin/Pricing').then(m => ({ default: m.Pricing })));
 const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagement').then(m => ({ default: m.PromoCodeManagement })));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings').then(m => ({ default: m.AdminSettings })));
+const NotFound = lazy(() => import('./pages/NotFound').then(m => ({ default: m.NotFound })));
 
 function LoadingFallback() {
   return (
@@ -126,6 +127,7 @@ export default function App() {
                 <Route path="promos" element={<PromoCodeManagement />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Route>
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
         </BrowserRouter>

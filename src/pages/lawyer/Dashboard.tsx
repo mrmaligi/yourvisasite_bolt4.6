@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
+import { CardSkeleton } from '../../components/ui/Skeleton';
 import { SubscriptionStatus } from '../../components/SubscriptionStatus';
 
 interface LawyerProfileData {
@@ -22,21 +23,32 @@ export function LawyerDashboard() {
     notes: string | null;
     created_at: string;
   }[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!profile) return;
-    supabase
-      .schema('lawyer')
-      .from('profiles')
-      .select('id, is_verified, verification_status')
-      .eq('profile_id', profile.id)
-      .maybeSingle()
-      .then(({ data }) => {
+
+    const fetchData = async () => {
+      try {
+        const { data } = await supabase
+          .schema('lawyer')
+          .from('profiles')
+          .select('id, is_verified, verification_status')
+          .eq('profile_id', profile.id)
+          .maybeSingle();
+
         if (data) {
           setLawyerProfile(data);
-          fetchStats(data.id);
+          await fetchStats(data.id);
         }
-      });
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [profile]);
 
   const fetchStats = async (lawyerProfileId: string) => {
@@ -72,6 +84,21 @@ export function LawyerDashboard() {
     { label: 'Upcoming Sessions', value: counts.upcoming, icon: Calendar },
     { label: 'Estimated Earnings', value: `$${counts.earnings}`, icon: DollarSign },
   ];
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <div className="h-8 w-64 bg-neutral-200 rounded animate-pulse mb-2"></div>
+          <div className="h-4 w-48 bg-neutral-100 rounded animate-pulse"></div>
+        </div>
+        <div className="h-24 bg-neutral-100 rounded-xl animate-pulse"></div>
+        <div className="grid sm:grid-cols-3 gap-4">
+          {[1, 2, 3].map(i => <CardSkeleton key={i} />)}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

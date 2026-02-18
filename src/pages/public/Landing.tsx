@@ -19,6 +19,7 @@ export function Landing() {
     entries: 0,
     lawyers: 0
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Fetch real stats
@@ -32,6 +33,7 @@ export function Landing() {
         entries: entries.count || 0,
         lawyers: lawyers.count || 0
       });
+      setLoading(false);
     });
   }, []);
 
@@ -77,7 +79,11 @@ export function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-primary-200/50">
             <div className="space-y-1">
-              <p className="text-3xl font-bold text-primary-700">{stats.visas}+</p>
+              {loading ? (
+                <div className="h-9 w-24 bg-primary-200 rounded animate-pulse mx-auto mb-1"></div>
+              ) : (
+                <p className="text-3xl font-bold text-primary-700">{stats.visas}+</p>
+              )}
               <p className="text-sm font-medium text-primary-600">Visa Subclasses</p>
             </div>
             <div className="space-y-1 pl-4">
