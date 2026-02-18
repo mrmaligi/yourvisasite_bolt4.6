@@ -23,7 +23,7 @@ export function Landing() {
   useEffect(() => {
     // Fetch real stats
     Promise.all([
-      supabase.from('visas').select('id', { count: 'exact', head: true }).eq('is_active', true),
+      supabase.from('visas').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('country', 'Australia'),
       supabase.from('tracker_entries').select('id', { count: 'exact', head: true }),
       supabase.schema('lawyer').from('profiles').select('id', { count: 'exact', head: true }).eq('is_verified', true)
     ]).then(([visas, entries, lawyers]) => {

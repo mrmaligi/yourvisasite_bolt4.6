@@ -39,7 +39,8 @@ export function VisaSearch() {
       const { data, error } = await supabase
         .from('visas')
         .select('*')
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .eq('country', 'Australia');
 
       if (error) {
         console.error('Error fetching visas:', error);
@@ -80,7 +81,7 @@ export function VisaSearch() {
       <div className="mb-10">
         <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">Visa Search</h1>
         <p className="text-neutral-500 dark:text-neutral-400">
-          Find detailed information, processing times, and expert guides for visa types worldwide.
+          Find detailed information, processing times, and expert guides for Australian visas.
         </p>
       </div>
 
