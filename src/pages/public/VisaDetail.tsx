@@ -19,7 +19,7 @@ import { Button } from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
 import { StripeCheckout } from '../../components/StripeCheckout';
-import type { Visa, TrackerStats, VisaPremiumContent, Product, UserVisaPurchase, TrackerEntry } from '../../types/database';
+import type { Visa, TrackerStats, VisaPremiumContent, Product, UserVisaPurchase, TrackerEntry, NewsArticle } from '../../types/database';
 
 export function VisaDetail() {
   const { id } = useParams<{ id: string }>();
@@ -33,6 +33,7 @@ export function VisaDetail() {
   const [product, setProduct] = useState<Product | null>(null);
   const [purchase, setPurchase] = useState<UserVisaPurchase | null>(null);
   const [recentEntries, setRecentEntries] = useState<TrackerEntry[]>([]);
+  const [visaNews, setVisaNews] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -111,6 +112,16 @@ export function VisaDetail() {
         .order('created_at', { ascending: false })
         .limit(5);
       setRecentEntries(entriesData || []);
+
+      // 7. Fetch Visa-Specific News
+      const { data: newsData } = await supabase
+        .from('news_articles')
+        .select('*')
+        .contains('visa_ids', [id])
+        .eq('is_published', true)
+        .order('published_at', { ascending: false })
+        .limit(3);
+      setVisaNews(newsData || []);
 
       setLoading(false);
     };
@@ -441,6 +452,47 @@ export function VisaDetail() {
                       </div>
                     ))}
                   </div>
+                </CardBody>
+              </Card>
+            )}
+
+            {/* Visa-Specific News */}
+            {visaNews.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <h3 className="font-bold text-neutral-900 flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-primary-600" />
+                    Latest News
+                  </h3>
+                </CardHeader>
+                <CardBody>
+                  <div className="space-y-4">
+                    {visaNews.map((article) => (
+                      <Link
+                        key={article.id}
+                        to={`/news/${article.slug}`}
+                        className="block group"
+                      >
+                        <div className="border-b border-neutral-100 pb-3 last:border-0 last:pb-0">
+                          <h4 className="font-medium text-neutral-900 group-hover:text-primary-700 transition-colors line-clamp-2">
+                            {article.title}
+                          </h4>
+                          <p className="text-xs text-neutral-500 mt-1">
+                            {article.published_at
+                              ? new Date(article.published_at).toLocaleDateString()
+                              : new Date(article.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  <Link
+                    to="/news"
+                    className="inline-flex items-center text-sm text-primary-600 hover:text-primary-700 mt-4"
+                  >
+                    View all news
+                    <ArrowUpRight className="w-4 h-4 ml-1" />
+                  </Link>
                 </CardBody>
               </Card>
             )}
