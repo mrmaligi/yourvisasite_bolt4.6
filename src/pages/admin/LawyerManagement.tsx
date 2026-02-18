@@ -36,41 +36,111 @@ export function LawyerManagement() {
   useEffect(() => { fetchLawyers(); }, []);
 
   const handleApprove = async (lawyer: LawyerProfile) => {
-    await supabase.schema('lawyer').from('profiles').update({
+    // 1. Update Database
+    const { error } = await supabase.schema('lawyer').from('profiles').update({
       is_verified: true,
       verification_status: 'approved',
       verified_at: new Date().toISOString(),
       verified_by: user?.id,
     }).eq('id', lawyer.id);
 
+    if (error) {
+      toast('error', 'Failed to update database: ' + error.message);
+      return;
+    }
+
+    // 2. Call Edge Function
     try {
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-lawyer`;
-      await fetch(apiUrl, {
+      const session = await supabase.auth.getSession();
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          'Authorization': `Bearer ${session.data.session?.access_token}`,
           'Content-Type': 'application/json',
           'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
         },
         body: JSON.stringify({ lawyer_profile_id: lawyer.profile_id, action: 'approve' }),
       });
-    } catch {}
 
-    toast('success', 'Lawyer approved');
+      if (!response.ok) {
+        throw new Error(`Edge function failed: ${response.statusText}`);
+      }
+
+      toast('success', 'Lawyer approved and notified');
+    } catch (err) {
+      console.error('Edge function error:', err);
+      // We still consider it a success since the DB was updated, but we warn the admin
+      toast('warning', 'Lawyer approved, but notification failed.');
+    }
+
     fetchLawyers();
   };
 
   const handleReject = async () => {
     if (!rejectTarget) return;
-    await supabase.schema('lawyer').from('profiles').update({
+
+    // 1. Update Database
+    const { error } = await supabase.schema('lawyer').from('profiles').update({
       verification_status: 'rejected',
       rejection_reason: rejectReason,
+      is_verified: false,
     }).eq('id', rejectTarget.id);
+
+    if (error) {
+      toast('error', 'Failed to reject: ' + error.message);
+      return;
+    }
+
+    // 2. Call Edge Function (Optional for rejection, but good practice if needed)
+    try {
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-lawyer`;
+      const session = await supabase.auth.getSession();
+       await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.data.session?.access_token}`,
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ lawyer_profile_id: rejectTarget.profile_id, action: 'reject', reason: rejectReason }),
+      });
+    } catch (err) {
+       console.error('Edge function error:', err);
+    }
+
     toast('success', 'Lawyer rejected');
     setRejectTarget(null);
     setRejectReason('');
     fetchLawyers();
   };
+
+  const handleSuspend = async (lawyer: LawyerProfile) => {
+    if (!window.confirm(`Are you sure you want to suspend verification for this lawyer? They will lose access to lawyer features.`)) return;
+
+    const { error } = await supabase.schema('lawyer').from('profiles').update({
+      is_verified: false,
+      verification_status: 'pending', // Reset to pending so they can be reviewed again? Or 'rejected'? Let's say 'pending' or keep 'approved' but is_verified=false?
+      // Safest is to set is_verified false. Status can stay approved or move to a 'suspended' state if enum allowed.
+      // The type definition has 'pending' | 'approved' | 'rejected'.
+      // If we suspend, maybe we should set it to 'rejected' with a reason "Suspended by admin".
+    }).eq('id', lawyer.id);
+
+    // Actually, simply setting is_verified = false might be enough depending on RLS, but let's be consistent with status
+    await supabase.schema('lawyer').from('profiles').update({
+        is_verified: false,
+        verification_status: 'rejected',
+        rejection_reason: 'Suspended by administrator',
+    }).eq('id', lawyer.id);
+
+    if (error) {
+      toast('error', 'Failed to suspend lawyer: ' + error.message);
+    } else {
+      toast('success', 'Lawyer suspended');
+      fetchLawyers();
+    }
+  }
 
   const viewDocument = async (lawyer: LawyerProfile) => {
     if (!lawyer.verification_document_url) {
@@ -83,7 +153,11 @@ export function LawyerManagement() {
       .createSignedUrl(lawyer.verification_document_url, 300);
 
     if (data?.signedUrl) {
-      window.open(data.signedUrl, '_blank');
+      // Use window.open and check if it was blocked
+      const newWindow = window.open(data.signedUrl, '_blank');
+      if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+         toast('warning', 'Popup blocked. Please allow popups for this site.');
+      }
     } else {
       toast('error', 'Failed to load document');
     }
@@ -106,6 +180,9 @@ export function LawyerManagement() {
               <Button size="sm" onClick={() => handleApprove(r)}>Approve</Button>
               <Button size="sm" variant="danger" onClick={() => setRejectTarget(r)}>Reject</Button>
             </>
+          )}
+          {r.verification_status === 'approved' && (
+             <Button size="sm" variant="danger" onClick={() => handleSuspend(r)}>Suspend</Button>
           )}
         </div>
       ),

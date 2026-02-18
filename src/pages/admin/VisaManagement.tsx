@@ -1,14 +1,14 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Plus, FileJson, ToggleLeft, ToggleRight, ExternalLink, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Plus, FileJson, ToggleLeft, ToggleRight, ExternalLink, AlertTriangle, CheckCircle, Copy, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { DataTable, type Column } from '../../components/ui/DataTable';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { Input, Textarea, Select } from '../../components/ui/Input';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
+import { Card, CardBody } from '../../components/ui/Card';
 import { useToast } from '../../components/ui/Toast';
-import type { Visa, VisaCategory, VisaRequirement } from '../../types/database';
+import type { Visa, VisaCategory } from '../../types/database';
 
 const CATEGORY_OPTIONS = [
   { value: 'work', label: 'Work' },
@@ -109,6 +109,51 @@ export function VisaManagement() {
     setActiveTab('details');
     setShowModal(true);
     fetchRequirements(v.id);
+  };
+
+  const handleDuplicate = async (v: Visa) => {
+    setEditing(null); // It's a new entry
+    setForm({
+      subclass: v.subclass,
+      name: `${v.name} (Copy)`,
+      country: v.country,
+      category: v.category,
+      official_link: v.official_link || '',
+      summary: v.summary || '',
+      processing_fee_description: v.processing_fee_description || '',
+    });
+
+    // Fetch requirements to duplicate them too
+    setReqsLoading(true);
+    const { data } = await supabase
+      .from('visa_requirements')
+      .select('*')
+      .eq('visa_id', v.id)
+      .maybeSingle();
+
+    if (data?.requirements_json) {
+      setReqsJson(JSON.stringify(data.requirements_json, null, 2));
+    } else {
+      setReqsJson(REQUIREMENTS_TEMPLATE);
+    }
+    setJsonValid(true);
+    setJsonError('');
+    setReqsLoading(false);
+
+    setActiveTab('details');
+    setShowModal(true);
+  };
+
+  const handleDelete = async (v: Visa) => {
+    if (!window.confirm(`Are you sure you want to delete ${v.subclass} ${v.name}? This cannot be undone.`)) return;
+
+    const { error } = await supabase.from('visas').delete().eq('id', v.id);
+    if (error) {
+      toast('error', 'Delete failed: ' + error.message);
+    } else {
+      toast('success', 'Visa deleted');
+      fetchVisas();
+    }
   };
 
   const validateJson = (text: string) => {
@@ -228,6 +273,12 @@ export function VisaManagement() {
     { key: 'actions', header: '', render: (r) => (
       <div className="flex gap-1">
         <Button size="sm" variant="ghost" onClick={() => openEdit(r)}>Edit</Button>
+        <Button size="sm" variant="ghost" onClick={() => handleDuplicate(r)} title="Duplicate">
+          <Copy className="w-4 h-4 text-neutral-500" />
+        </Button>
+        <Button size="sm" variant="ghost" onClick={() => handleDelete(r)} title="Delete">
+           <Trash2 className="w-4 h-4 text-red-500" />
+        </Button>
       </div>
     )},
   ];
