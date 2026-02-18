@@ -4,7 +4,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
-import { CardSkeleton } from '../../components/ui/Skeleton';
 import { SubscriptionStatus } from '../../components/SubscriptionStatus';
 
 interface LawyerProfileData {
@@ -13,69 +12,106 @@ interface LawyerProfileData {
   verification_status: string;
 }
 
+interface BookingWithDetails {
+  id: string;
+  status: string;
+  notes: string | null;
+  created_at: string;
+  start_time: string;
+  user_name: string | null;
+}
+
 export function LawyerDashboard() {
   const { profile } = useAuth();
   const [lawyerProfile, setLawyerProfile] = useState<LawyerProfileData | null>(null);
   const [counts, setCounts] = useState({ clients: 0, upcoming: 0, earnings: 0 });
-  const [recentBookings, setRecentBookings] = useState<{
-    id: string;
-    status: string;
-    notes: string | null;
-    created_at: string;
-  }[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [upcomingConsultations, setUpcomingConsultations] = useState<BookingWithDetails[]>([]);
 
   useEffect(() => {
     if (!profile) return;
-
-    const fetchData = async () => {
-      try {
-        const { data } = await supabase
-          .schema('lawyer')
-          .from('profiles')
-          .select('id, is_verified, verification_status')
-          .eq('profile_id', profile.id)
-          .maybeSingle();
-
+    supabase
+      .schema('lawyer')
+      .from('profiles')
+      .select('id, is_verified, verification_status')
+      .eq('profile_id', profile.id)
+      .maybeSingle()
+      .then(({ data }) => {
         if (data) {
           setLawyerProfile(data);
-          await fetchStats(data.id);
+          fetchStats(data.id);
         }
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+      });
   }, [profile]);
 
   const fetchStats = async (lawyerProfileId: string) => {
     const { data: bookings } = await supabase
       .from('bookings')
-      .select('user_id, status, total_price_cents, created_at, notes')
+      .select('id, user_id, slot_id, status, total_price_cents, created_at, notes')
       .eq('lawyer_id', lawyerProfileId);
 
-    if (bookings) {
+    if (bookings && bookings.length > 0) {
       const uniqueClients = new Set(bookings.map(b => b.user_id)).size;
-      const upcoming = bookings.filter(b => b.status === 'pending' || b.status === 'confirmed').length;
+
       const totalEarnings = bookings
         .filter(b => b.status === 'completed')
         .reduce((sum, b) => sum + b.total_price_cents, 0);
 
+      // Fetch slot details (start_time)
+      const slotIds = bookings.map(b => b.slot_id);
+      const { data: slots } = await supabase
+        .schema('lawyer')
+        .from('consultation_slots')
+        .select('id, start_time')
+        .in('id', slotIds);
+
+      // Fetch user details
+      const userIds = bookings.map(b => b.user_id);
+      const { data: users } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', userIds);
+
+      const slotMap = new Map(slots?.map(s => [s.id, s]));
+      const userMap = new Map(users?.map(u => [u.id, u]));
+      const now = new Date();
+
+      const enrichedBookings = bookings.map(b => {
+        const slot = slotMap.get(b.slot_id);
+        const user = userMap.get(b.user_id);
+        return {
+          ...b,
+          start_time: slot?.start_time || b.created_at, // Fallback if slot missing
+          user_name: user?.full_name || 'Anonymous User',
+        };
+      });
+
+      const upcoming = enrichedBookings.filter(b =>
+        (b.status === 'pending' || b.status === 'confirmed') &&
+        new Date(b.start_time) > now
+      );
+
       setCounts({
         clients: uniqueClients,
-        upcoming,
+        upcoming: upcoming.length,
         earnings: Math.floor(totalEarnings / 100),
       });
 
-      setRecentBookings(
-        bookings
-          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      setUpcomingConsultations(
+        upcoming
+          .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
           .slice(0, 5)
-          .map(b => ({ id: b.created_at, status: b.status, notes: b.notes, created_at: b.created_at }))
+          .map(b => ({
+            id: b.id,
+            status: b.status,
+            notes: b.notes,
+            created_at: b.created_at,
+            start_time: b.start_time,
+            user_name: b.user_name
+          }))
       );
+    } else {
+       setCounts({ clients: 0, upcoming: 0, earnings: 0 });
+       setUpcomingConsultations([]);
     }
   };
 
@@ -84,21 +120,6 @@ export function LawyerDashboard() {
     { label: 'Upcoming Sessions', value: counts.upcoming, icon: Calendar },
     { label: 'Estimated Earnings', value: `$${counts.earnings}`, icon: DollarSign },
   ];
-
-  if (loading) {
-    return (
-      <div className="space-y-8">
-        <div>
-          <div className="h-8 w-64 bg-neutral-200 rounded animate-pulse mb-2"></div>
-          <div className="h-4 w-48 bg-neutral-100 rounded animate-pulse"></div>
-        </div>
-        <div className="h-24 bg-neutral-100 rounded-xl animate-pulse"></div>
-        <div className="grid sm:grid-cols-3 gap-4">
-          {[1, 2, 3].map(i => <CardSkeleton key={i} />)}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-8">
@@ -141,29 +162,50 @@ export function LawyerDashboard() {
         <Badge variant="success">Verified Lawyer</Badge>
       )}
 
-      {recentBookings.length > 0 && (
+      {upcomingConsultations.length > 0 ? (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-neutral-800">Recent Bookings</h2>
+          <h2 className="text-lg font-semibold text-neutral-800">Upcoming Consultations</h2>
           <Card>
             <CardBody className="divide-y divide-neutral-100">
-              {recentBookings.map((booking) => (
+              {upcomingConsultations.map((booking) => (
                 <div key={booking.id} className="py-3 first:pt-0 last:pb-0 flex items-start gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center flex-shrink-0">
                     <Clock className="w-4 h-4 text-primary-600" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="font-medium text-neutral-900 text-sm capitalize">{booking.status}</p>
-                      <span className="text-xs text-neutral-400 flex-shrink-0">
-                        {new Date(booking.created_at).toLocaleDateString()}
+                      <p className="font-medium text-neutral-900 text-sm">
+                        {booking.user_name}
+                      </p>
+                      <span className="text-xs text-neutral-500 flex-shrink-0">
+                        {new Date(booking.start_time).toLocaleString(undefined, {
+                          dateStyle: 'medium',
+                          timeStyle: 'short'
+                        })}
                       </span>
                     </div>
-                    <p className="text-sm text-neutral-500 truncate">
-                      {booking.notes || 'Consultation session'}
-                    </p>
+                    <div className="flex items-center justify-between mt-1">
+                       <p className="text-sm text-neutral-500 truncate pr-2">
+                        {booking.notes || 'Consultation session'}
+                      </p>
+                       <Badge variant={booking.status === 'confirmed' ? 'info' : 'warning'} className="text-[10px] px-1.5 py-0.5 h-auto">
+                        {booking.status}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
               ))}
+            </CardBody>
+          </Card>
+        </div>
+      ) : (
+         <div className="space-y-4">
+          <h2 className="text-lg font-semibold text-neutral-800">Upcoming Consultations</h2>
+          <Card>
+            <CardBody>
+               <p className="text-sm text-neutral-500 text-center py-4">
+                  No upcoming consultations scheduled.
+                </p>
             </CardBody>
           </Card>
         </div>
