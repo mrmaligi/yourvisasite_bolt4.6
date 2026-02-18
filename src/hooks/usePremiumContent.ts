@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import type { Visa, VisaPremiumContent } from '../types/database';
 
-interface UsePremiumContentResult {
+export interface UsePremiumContentResult {
   visa: Visa | null;
   content: VisaPremiumContent[];
   isPurchased: boolean;
@@ -12,7 +12,7 @@ interface UsePremiumContentResult {
   refresh: () => Promise<void>;
 }
 
-export function usePremiumContent(visaId: string | null): UsePremiumContentResult {
+export function usePremiumContent(visaId: string | null) {
   const { user } = useAuth();
   const [visa, setVisa] = useState<Visa | null>(null);
   const [content, setContent] = useState<VisaPremiumContent[]>([]);
@@ -26,21 +26,9 @@ export function usePremiumContent(visaId: string | null): UsePremiumContentResul
       return;
     }
 
-    // Don't start loading if no user yet (auth might be initializing)
-    // But if we want to show loading while auth checks...
-    // user can be null if not logged in.
-    if (!user) {
-      // If no user, we can't check purchase, so isPurchased = false.
-      // We can still fetch visa details.
-      setLoading(true);
-    } else {
-      setLoading(true);
-    }
+    setLoading(true);
 
     try {
-      setError(null);
-
-      // 1. Fetch Visa Details
       const { data: visaData, error: visaError } = await supabase
         .from('visas')
         .select('*')
@@ -50,40 +38,37 @@ export function usePremiumContent(visaId: string | null): UsePremiumContentResul
       if (visaError) throw visaError;
       setVisa(visaData);
 
-      let purchased = false;
+      let isOwned = false;
 
-      // 2. Check Purchase Status (only if user logged in)
       if (user) {
-        const { data: purchaseData, error: purchaseError } = await supabase
+        const { data: purchase } = await supabase
           .from('user_visa_purchases')
           .select('id')
           .eq('user_id', user.id)
           .eq('visa_id', visaId)
           .maybeSingle();
 
-        if (purchaseError) throw purchaseError;
-        purchased = !!purchaseData;
+        isOwned = !!purchase;
       }
 
-      setIsPurchased(purchased);
+      setIsPurchased(isOwned);
 
-      // 3. Fetch Premium Content (if purchased)
-      if (purchased) {
-        const { data: contentData, error: contentError } = await supabase
+      if (isOwned) {
+        const { data: steps, error: contentError } = await supabase
           .from('visa_premium_content')
           .select('*')
           .eq('visa_id', visaId)
-          .order('step_number');
+          .order('section_number');
 
         if (contentError) throw contentError;
-        setContent(contentData || []);
+        setContent(steps || []);
       } else {
         setContent([]);
       }
 
     } catch (err) {
-      console.error('Error fetching premium content:', err);
-      setError(err instanceof Error ? err : new Error('Failed to fetch content'));
+      console.error('Error fetching content:', err);
+      setError(err instanceof Error ? err : new Error('Unknown error'));
     } finally {
       setLoading(false);
     }
@@ -93,12 +78,5 @@ export function usePremiumContent(visaId: string | null): UsePremiumContentResul
     fetchData();
   }, [fetchData]);
 
-  return {
-    visa,
-    content,
-    isPurchased,
-    loading,
-    error,
-    refresh: fetchData
-  };
+  return { visa, content, isPurchased, loading, error, refresh: fetchData };
 }
