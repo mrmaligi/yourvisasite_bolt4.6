@@ -175,7 +175,7 @@ export function Consultations() {
                       </div>
                     )}
                     <span className="font-semibold text-neutral-900">
-                      ${(b.total_price_cents / 100).toFixed(0)}
+                      ${((b.price_cents || b.total_price_cents || 0) / 100).toFixed(0)}
                     </span>
                   </div>
                   {b.notes && (
