@@ -15,27 +15,49 @@ const statusVariant = {
   rejected: 'danger' as const,
 };
 
+type LawyerWithProfile = LawyerProfile & { full_name?: string };
+
 export function LawyerManagement() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [lawyers, setLawyers] = useState<LawyerProfile[]>([]);
+  const [lawyers, setLawyers] = useState<LawyerWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [rejectTarget, setRejectTarget] = useState<LawyerProfile | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<LawyerWithProfile | null>(null);
   const [rejectReason, setRejectReason] = useState('');
 
   const fetchLawyers = async () => {
-    const { data } = await supabase
+    const { data: lawyerData } = await supabase
       .schema('lawyer')
       .from('profiles')
       .select('*')
       .order('created_at', { ascending: false });
-    setLawyers(data || []);
+
+    if (!lawyerData) {
+      setLawyers([]);
+      setLoading(false);
+      return;
+    }
+
+    const profileIds = lawyerData.map((l) => l.profile_id);
+    const { data: userData } = await supabase
+      .from('profiles')
+      .select('id, full_name')
+      .in('id', profileIds);
+
+    const userMap = new Map(userData?.map((u) => [u.id, u]) || []);
+
+    const merged = lawyerData.map((l) => ({
+      ...l,
+      full_name: userMap.get(l.profile_id)?.full_name || 'Unknown',
+    }));
+
+    setLawyers(merged);
     setLoading(false);
   };
 
   useEffect(() => { fetchLawyers(); }, []);
 
-  const handleApprove = async (lawyer: LawyerProfile) => {
+  const handleApprove = async (lawyer: LawyerWithProfile) => {
     await supabase.schema('lawyer').from('profiles').update({
       is_verified: true,
       verification_status: 'approved',
@@ -44,7 +66,8 @@ export function LawyerManagement() {
     }).eq('id', lawyer.id);
 
     try {
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-lawyer`;
+      const baseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '');
+      const apiUrl = `${baseUrl}/functions/v1/verify-lawyer`;
       await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -72,7 +95,7 @@ export function LawyerManagement() {
     fetchLawyers();
   };
 
-  const viewDocument = async (lawyer: LawyerProfile) => {
+  const viewDocument = async (lawyer: LawyerWithProfile) => {
     if (!lawyer.verification_document_url) {
       toast('error', 'No verification document available');
       return;
@@ -83,17 +106,31 @@ export function LawyerManagement() {
       .createSignedUrl(lawyer.verification_document_url, 300);
 
     if (data?.signedUrl) {
-      window.open(data.signedUrl, '_blank');
+      window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
     } else {
       toast('error', 'Failed to load document');
     }
   };
 
-  const columns: Column<LawyerProfile>[] = [
+  const columns: Column<LawyerWithProfile>[] = [
+    { key: 'full_name', header: 'Name', render: (r) => r.full_name, sortable: true },
     { key: 'bar', header: 'Bar Number', render: (r) => r.bar_number },
     { key: 'jurisdiction', header: 'Jurisdiction', render: (r) => r.jurisdiction },
     { key: 'experience', header: 'Experience', render: (r) => `${r.years_experience} years` },
-    { key: 'status', header: 'Status', render: (r) => <Badge variant={statusVariant[r.verification_status]}>{r.verification_status}</Badge> },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (r) => (
+        <div className="flex flex-col gap-1">
+            <Badge variant={statusVariant[r.verification_status]}>{r.verification_status}</Badge>
+            {r.verification_status === 'rejected' && r.rejection_reason && (
+                <span className="text-xs text-red-600 max-w-[200px] truncate" title={r.rejection_reason}>
+                    {r.rejection_reason}
+                </span>
+            )}
+        </div>
+      )
+    },
     { key: 'rate', header: 'Rate', render: (r) => r.hourly_rate_cents ? `$${r.hourly_rate_cents / 100}/hr` : 'Not set' },
     {
       key: 'actions', header: 'Actions', render: (r) => (

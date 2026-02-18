@@ -13,7 +13,11 @@ const sizes = {
 
 export function Logo({ className = '', size = 'md', variant = 'dark', showText = true }: LogoProps) {
   const s = sizes[size];
-  const textColor = variant === 'dark' ? 'text-neutral-900' : 'text-white';
+<<<<<<< HEAD
+  const textColor = variant === 'dark' ? 'text-neutral-900 dark:text-neutral-50' : 'text-white';
+=======
+  const textColor = variant === 'dark' ? 'text-neutral-900 dark:text-white' : 'text-white';
+>>>>>>> origin/main
 
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>

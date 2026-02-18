@@ -93,6 +93,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setIsLoading(false);
       }
+    }).catch((err) => {
+      console.error('Error getting session:', err);
+      setIsLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {

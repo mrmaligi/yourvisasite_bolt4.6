@@ -36,7 +36,7 @@ export function Landing() {
   }, []);
 
   return (
-    <div className="bg-white dark:bg-neutral-900">
+    <div className="bg-white dark:bg-neutral-900 transition-colors duration-300">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-neutral-900 py-24 sm:py-32">
         <div className="absolute inset-0 z-0 opacity-20">
@@ -73,9 +73,9 @@ export function Landing() {
       </section>
 
       {/* Stats Bar */}
-      <section className="bg-primary-50 dark:bg-neutral-800/50 border-y border-primary-100 dark:border-neutral-800">
+      <section className="bg-primary-50 dark:bg-primary-900/10 border-y border-primary-100 dark:border-primary-900/20 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-primary-200/50 dark:divide-neutral-700">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-primary-200/50 dark:divide-primary-800/50">
             <div className="space-y-1">
               <p className="text-3xl font-bold text-primary-700 dark:text-primary-400">{stats.visas}+</p>
               <p className="text-sm font-medium text-primary-600 dark:text-primary-300">Visa Subclasses</p>
@@ -97,10 +97,10 @@ export function Landing() {
       </section>
 
       {/* Feature Cards */}
-      <section className="py-24 bg-neutral-50 dark:bg-neutral-900">
+      <section className="py-24 bg-neutral-50 dark:bg-neutral-900 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-neutral-900 dark:text-white mb-4">Everything you need to succeed</h2>
+            <h2 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-4">Everything you need to succeed</h2>
             <p className="text-neutral-500 dark:text-neutral-400 max-w-2xl mx-auto">
               We combine data, technology, and legal expertise to simplify your migration journey.
             </p>
@@ -112,12 +112,12 @@ export function Landing() {
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
                   <Search className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold text-neutral-900 dark:text-white">Visa Search Engine</h3>
+                <h3 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">Visa Search Engine</h3>
                 <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed">
                   Instantly find the right visa for your situation. Search by name, subclass, or category with our comprehensive database of 78+ Australian visas.
                 </p>
                 <div className="pt-4">
-                  <Link to="/visas" className="text-blue-600 dark:text-blue-400 font-medium hover:underline inline-flex items-center">
+                  <Link to="/visas" className="text-blue-600 font-medium hover:underline inline-flex items-center">
                     Start Searching <ArrowRight className="w-4 h-4 ml-1" />
                   </Link>
                 </div>
@@ -129,12 +129,12 @@ export function Landing() {
                 <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center text-purple-600 dark:text-purple-400">
                   <BarChart3 className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold text-neutral-900 dark:text-white">Processing Time Tracker</h3>
+                <h3 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">Processing Time Tracker</h3>
                 <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed">
                   Stop guessing. Access real-world processing times crowdsourced from thousands of actual applicants and verified by lawyers.
                 </p>
                 <div className="pt-4">
-                  <Link to="/tracker" className="text-purple-600 dark:text-purple-400 font-medium hover:underline inline-flex items-center">
+                  <Link to="/tracker" className="text-purple-600 font-medium hover:underline inline-flex items-center">
                     View Data <ArrowRight className="w-4 h-4 ml-1" />
                   </Link>
                 </div>
@@ -146,12 +146,12 @@ export function Landing() {
                 <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center text-primary-600 dark:text-primary-400">
                   <BookOpen className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold text-neutral-900 dark:text-white">Premium Guides</h3>
+                <h3 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">Premium Guides</h3>
                 <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed">
                   Unlock step-by-step application guides, document checklists, and expert tips for just $49. Save thousands on legal fees.
                 </p>
                 <div className="pt-4">
-                  <span className="text-primary-600 dark:text-primary-400 font-medium inline-flex items-center">
+                  <span className="text-primary-600 font-medium inline-flex items-center">
                     Available on Visa Pages <ArrowRight className="w-4 h-4 ml-1" />
                   </span>
                 </div>
@@ -162,9 +162,9 @@ export function Landing() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-24 bg-white dark:bg-neutral-900">
+      <section className="py-24 bg-white dark:bg-neutral-900 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center text-neutral-900 dark:text-white mb-16">Trusted by applicants</h2>
+          <h2 className="text-3xl font-bold text-center text-neutral-900 dark:text-neutral-100 mb-16">Trusted by applicants</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
@@ -183,13 +183,13 @@ export function Landing() {
                 role: "Student from India"
               }
             ].map((t, i) => (
-              <div key={i} className="bg-neutral-50 dark:bg-neutral-800 p-8 rounded-2xl border border-neutral-100 dark:border-neutral-700">
+              <div key={i} className="bg-neutral-50 dark:bg-neutral-800 p-8 rounded-2xl border border-neutral-100 dark:border-neutral-700 transition-colors duration-300">
                 <div className="flex gap-1 text-amber-400 mb-4">
                   {[...Array(5)].map((_, i) => <span key={i}>★</span>)}
                 </div>
                 <p className="text-neutral-600 dark:text-neutral-300 mb-6 italic">"{t.quote}"</p>
                 <div>
-                  <p className="font-bold text-neutral-900 dark:text-white">{t.author}</p>
+                  <p className="font-bold text-neutral-900 dark:text-neutral-100">{t.author}</p>
                   <p className="text-sm text-neutral-500 dark:text-neutral-400">{t.role}</p>
                 </div>
               </div>

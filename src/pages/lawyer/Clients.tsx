@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Users, Calendar, Phone } from 'lucide-react';
+import { Users, Calendar, Phone, Briefcase, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
@@ -13,6 +13,19 @@ interface ClientInfo {
   total_bookings: number;
   last_booking_date: string;
   total_spent_cents: number;
+  visa_types: string[];
+  shared_documents: {
+    id: string;
+    file_name: string;
+    uploaded_at: string;
+  }[];
+}
+
+interface SharedDoc {
+  id: string;
+  file_name: string;
+  uploaded_at: string;
+  user_id: string;
 }
 
 const statusVariant = {
@@ -36,6 +49,7 @@ export function Clients() {
   }[]>([]);
   const [loading, setLoading] = useState(true);
   const [lawyerProfileId, setLawyerProfileId] = useState<string | null>(null);
+  const [expandedClient, setExpandedClient] = useState<string | null>(null);
 
   useEffect(() => {
     if (!profile) return;
@@ -72,12 +86,64 @@ export function Clients() {
 
       const userIds = [...new Set(bookings.map(b => b.user_id))];
 
+      // Fetch Profiles
       const { data: profiles } = await supabase
         .from('profiles')
         .select('id, full_name, phone')
         .in('id', userIds);
 
+      // Fetch Visa Purchases
+      const { data: visaPurchases } = await supabase
+        .from('user_visa_purchases')
+        .select('user_id, visa:visas(name)')
+        .in('user_id', userIds);
+
+      // Fetch Shared Documents
+      // Note: We need to filter by lawyer_id, then get the document details
+      // Since supabase-js types can be tricky with deep joins, we'll cast or be careful
+      const { data: sharedDocsRaw } = await supabase
+        .from('document_shares')
+        .select('document:user_documents(id, file_name, uploaded_at, user_id)')
+        .eq('lawyer_id', lawyerProfileId);
+
+      // Filter out any where document might be null and ensure type safety
+      const sharedDocs: SharedDoc[] = (sharedDocsRaw || [])
+        .flatMap((s: any) => {
+             const doc = s.document;
+             if (Array.isArray(doc)) return doc;
+             return doc ? [doc] : [];
+        })
+        .filter((d: any): d is SharedDoc =>
+            d &&
+            typeof d === 'object' &&
+            'user_id' in d &&
+            userIds.includes(d.user_id)
+        );
+
       const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+
+      // Group Visas by User
+      const visaMap = new Map<string, Set<string>>();
+      if (visaPurchases) {
+        visaPurchases.forEach((p: any) => {
+          if (!visaMap.has(p.user_id)) {
+            visaMap.set(p.user_id, new Set());
+          }
+          if (p.visa?.name) {
+            visaMap.get(p.user_id)?.add(p.visa.name);
+          }
+        });
+      }
+
+      // Group Documents by User
+      const docMap = new Map<string, SharedDoc[]>();
+      sharedDocs.forEach((d) => {
+         if (!docMap.has(d.user_id)) {
+            docMap.set(d.user_id, []);
+         }
+         docMap.get(d.user_id)?.push(d);
+      });
+
 
       const clientMap = new Map<string, ClientInfo>();
       bookings.forEach(b => {
@@ -97,6 +163,8 @@ export function Clients() {
             total_bookings: 1,
             last_booking_date: b.created_at,
             total_spent_cents: b.total_price_cents,
+            visa_types: Array.from(visaMap.get(b.user_id) || []),
+            shared_documents: docMap.get(b.user_id) || [],
           });
         }
       });
@@ -159,39 +227,73 @@ export function Clients() {
             <div className="space-y-3">
               {clients.map((client) => (
                 <Card key={client.user_id}>
-                  <CardBody className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center">
-                        <span className="text-lg font-semibold text-primary-700">
-                          {client.full_name?.charAt(0)?.toUpperCase() || '?'}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-neutral-900">
-                          {client.full_name || 'Anonymous Client'}
-                        </p>
-                        <div className="flex items-center gap-3 mt-1 text-sm text-neutral-500">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-3.5 h-3.5" />
-                            {client.total_bookings} session{client.total_bookings !== 1 ? 's' : ''}
+                  <CardBody>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center">
+                          <span className="text-lg font-semibold text-primary-700">
+                            {client.full_name?.charAt(0)?.toUpperCase() || '?'}
                           </span>
-                          {client.phone && (
+                        </div>
+                        <div>
+                          <p className="font-medium text-neutral-900">
+                            {client.full_name || 'Anonymous Client'}
+                          </p>
+                          <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-neutral-500">
                             <span className="flex items-center gap-1">
-                              <Phone className="w-3.5 h-3.5" />
-                              {client.phone}
+                              <Calendar className="w-3.5 h-3.5" />
+                              {client.total_bookings} session{client.total_bookings !== 1 ? 's' : ''}
                             </span>
-                          )}
+                            {client.phone && (
+                              <span className="flex items-center gap-1">
+                                <Phone className="w-3.5 h-3.5" />
+                                {client.phone}
+                              </span>
+                            )}
+                            {client.visa_types.length > 0 && (
+                                <span className="flex items-center gap-1 text-primary-700 font-medium bg-primary-50 px-2 py-0.5 rounded-full text-xs">
+                                  <Briefcase className="w-3 h-3" />
+                                  {client.visa_types[0]}
+                                  {client.visa_types.length > 1 && ` +${client.visa_types.length - 1}`}
+                                </span>
+                            )}
+                          </div>
                         </div>
                       </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-neutral-900">
+                          ${(client.total_spent_cents / 100).toFixed(0)}
+                        </p>
+                        <p className="text-xs text-neutral-400">
+                          Last: {new Date(client.last_booking_date).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-neutral-900">
-                        ${(client.total_spent_cents / 100).toFixed(0)}
-                      </p>
-                      <p className="text-xs text-neutral-400">
-                        Last: {new Date(client.last_booking_date).toLocaleDateString()}
-                      </p>
-                    </div>
+
+                    {/* Expandable Section for Documents */}
+                    {client.shared_documents.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-neutral-100">
+                             <button
+                                onClick={() => setExpandedClient(expandedClient === client.user_id ? null : client.user_id)}
+                                className="flex items-center gap-2 text-sm text-neutral-600 hover:text-primary-600 transition-colors w-full"
+                             >
+                                <FileText className="w-4 h-4" />
+                                <span className="font-medium">{client.shared_documents.length} Shared Document{client.shared_documents.length !== 1 ? 's' : ''}</span>
+                                {expandedClient === client.user_id ? <ChevronUp className="w-4 h-4 ml-auto" /> : <ChevronDown className="w-4 h-4 ml-auto" />}
+                             </button>
+
+                             {expandedClient === client.user_id && (
+                                 <div className="mt-3 space-y-2 pl-6">
+                                     {client.shared_documents.map(doc => (
+                                         <div key={doc.id} className="flex items-center justify-between text-sm p-2 bg-neutral-50 rounded-lg">
+                                             <span className="text-neutral-700 truncate">{doc.file_name}</span>
+                                             <span className="text-xs text-neutral-400 whitespace-nowrap">{new Date(doc.uploaded_at).toLocaleDateString()}</span>
+                                         </div>
+                                     ))}
+                                 </div>
+                             )}
+                        </div>
+                    )}
                   </CardBody>
                 </Card>
               ))}

@@ -54,14 +54,12 @@ export interface DocumentCategory {
 export interface VisaPremiumContent {
   id: string;
   visa_id: string;
-  section_number: number;
-  section_title: string;
-  content: string;
-  tips: string | null;
-  common_mistakes: string | null;
-  examples: any | null;
-  estimated_minutes: number | null;
-  required_documents: string[] | null; // Array of document category keys
+  step_number: number;
+  title: string;
+  body: string;
+  document_category: string | null;
+  document_explanation: string | null;
+  document_example_url: string | null;
   created_at: string;
   updated_at: string;
 }
