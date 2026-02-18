@@ -78,15 +78,15 @@ export function VisaSearch() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="mb-10">
-        <h1 className="text-3xl font-bold text-neutral-900 mb-2">Visa Search</h1>
-        <p className="text-neutral-500">
+        <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">Visa Search</h1>
+        <p className="text-neutral-500 dark:text-neutral-400">
           Find detailed information, processing times, and expert guides for visa types worldwide.
         </p>
       </div>
 
       <div className="grid md:grid-cols-[1fr_200px_200px] gap-4 mb-8">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 dark:text-neutral-500" />
           <Input
             placeholder="Search by name or subclass..."
             value={search}
@@ -120,7 +120,7 @@ export function VisaSearch() {
         />
       ) : (
         <>
-            <p className="text-sm text-neutral-500 mb-4">
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
                 Showing {filteredVisas.length} of {visas.length} visas
             </p>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -137,20 +137,20 @@ export function VisaSearch() {
                     </div>
 
                     <div>
-                        <h3 className="font-semibold text-neutral-900 mb-1 group-hover:text-primary-700 transition-colors">
+                        <h3 className="font-semibold text-neutral-900 dark:text-white mb-1 group-hover:text-primary-700 dark:group-hover:text-primary-400 transition-colors">
                             {visa.name}
                         </h3>
-                        <p className="text-sm text-neutral-500 line-clamp-2">
+                        <p className="text-sm text-neutral-500 dark:text-neutral-400 line-clamp-2">
                             {visa.summary}
                         </p>
                     </div>
 
-                    <div className="pt-4 border-t border-neutral-100 flex items-center justify-between text-sm">
-                        <span className="text-neutral-600 font-medium">
+                    <div className="pt-4 border-t border-neutral-100 dark:border-neutral-700 flex items-center justify-between text-sm">
+                        <span className="text-neutral-600 dark:text-neutral-300 font-medium">
                             {visa.cost_aud ? visa.cost_aud : 'Free / Varies'}
                         </span>
                         {visa.processing_time_range && (
-                             <span className="text-neutral-500">
+                             <span className="text-neutral-500 dark:text-neutral-400">
                                 {visa.processing_time_range}
                              </span>
                         )}

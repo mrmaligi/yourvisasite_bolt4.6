@@ -1,7 +1,9 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { PublicLayout } from './components/layout/PublicLayout';
 import { UserDashboardLayout } from './components/layout/UserDashboardLayout';
 import { LawyerDashboardLayout } from './components/layout/LawyerDashboardLayout';
@@ -57,7 +59,7 @@ const AdminSettings = lazy(() => import('./pages/admin/AdminSettings').then(m =>
 
 function LoadingFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
       <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
     </div>
   );
@@ -66,11 +68,13 @@ function LoadingFallback() {
 export default function App() {
   return (
     <AuthProvider>
-      <ToastProvider>
-        <BrowserRouter>
-          <Suspense fallback={<LoadingFallback />}>
-            <Routes>
-              <Route element={<PublicLayout />}>
+      <ThemeProvider>
+        <ToastProvider>
+          <BrowserRouter>
+            <ErrorBoundary>
+              <Suspense fallback={<LoadingFallback />}>
+                <Routes>
+                  <Route element={<PublicLayout />}>
                 <Route index element={<Landing />} />
                 <Route path="login" element={<Login />} />
                 <Route path="register" element={<Register />} />
@@ -125,11 +129,13 @@ export default function App() {
                 <Route path="pricing" element={<AdminPricing />} />
                 <Route path="promos" element={<PromoCodeManagement />} />
                 <Route path="settings" element={<AdminSettings />} />
-              </Route>
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-      </ToastProvider>
+                  </Route>
+                </Routes>
+              </Suspense>
+            </ErrorBoundary>
+          </BrowserRouter>
+        </ToastProvider>
+      </ThemeProvider>
     </AuthProvider>
   );
 }
