@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, ExternalLink } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { DataTable, type Column } from '../../components/ui/DataTable';
@@ -70,7 +70,16 @@ export function NewsManagement() {
     { key: 'title', header: 'Title', render: (r) => <span className="font-medium">{r.title}</span>, sortable: true },
     { key: 'status', header: 'Status', render: (r) => <Badge variant={r.is_published ? 'success' : 'default'}>{r.is_published ? 'Published' : 'Draft'}</Badge> },
     { key: 'date', header: 'Date', render: (r) => new Date(r.created_at).toLocaleDateString(), sortable: true },
-    { key: 'actions', header: '', render: (r) => <Button size="sm" variant="ghost" onClick={() => openEdit(r)}>Edit</Button> },
+    { key: 'actions', header: '', render: (r) => (
+      <div className="flex gap-1 items-center">
+        <Button size="sm" variant="ghost" onClick={() => openEdit(r)}>Edit</Button>
+        {r.is_published && (
+          <a href={`/news/${r.slug}`} target="_blank" rel="noopener noreferrer" className="p-1 text-neutral-400 hover:text-primary-600 transition-colors" title="View article">
+            <ExternalLink className="w-4 h-4" />
+          </a>
+        )}
+      </div>
+    )},
   ];
 
   return (
