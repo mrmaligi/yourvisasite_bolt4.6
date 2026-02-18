@@ -12,6 +12,7 @@
 | T5: Landing + Search + Detail | 8309090833658564348 | 2026-02-18 16:00 | MERGED |
 | T6: Tracker + Submit | 7166305531339836140 | 2026-02-18 16:02 | MERGED |
 | T7: Lawyers + News + Pricing | 13245073353872056035 | 2026-02-18 16:04 | MERGED |
+| T11: Consultation Booking Flow | 7794485243225256080 | 2026-02-18 20:03 | FIRED |
 
 ## TASK QUEUE (fire these next, in order)
 Each cron job picks the FIRST task with status=QUEUED, fires it to Jules, and marks it FIRED.
@@ -25,7 +26,7 @@ Each cron job picks the FIRST task with status=QUEUED, fires it to Jules, and ma
 | T12 | Lawyer Registration + Pending | /register/lawyer form: bar number, jurisdiction, specializations, rate, credential upload. Pending page after submission. | FIRED |
 | T13 | Lawyer Dashboard + Clients | Lawyer dashboard with stats (clients, earnings, consultations). Clients page listing all booked clients with shared docs. | FIRED |
 | T14 | Lawyer Availability + Tracker + News + Settings | Availability calendar UI. Weighted tracker submissions. News comments. Lawyer settings page. | FIRED |
-| T11 | Consultation Booking Flow | From lawyer profile: select time slot → confirm → Stripe checkout → booking created. Consultations page listing upcoming/past. | QUEUED |
+| T11 | Consultation Booking Flow | From lawyer profile: select time slot → confirm → Stripe checkout → booking created. Consultations page listing upcoming/past. | FIRED |
 | T12 | Lawyer Registration + Pending | /register/lawyer form: bar number, jurisdiction, specializations, rate, credential upload. Pending page after submission. | QUEUED |
 | T13 | Lawyer Dashboard + Clients | Lawyer dashboard with stats (clients, earnings, consultations). Clients page listing all booked clients with shared docs. | QUEUED |
 | T14 | Lawyer Availability + Tracker + News + Settings | Availability calendar UI. Weighted tracker submissions. News comments. Lawyer settings page. | QUEUED |
