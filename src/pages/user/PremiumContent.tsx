@@ -87,6 +87,7 @@ function PremiumContentList() {
       .from('visas')
       .select('id, name, description, premium_guide_url, country')
       .not('premium_guide_url', 'is', null)
+      .eq('country', 'Australia')
       .order('name');
 
     const purchasedIds = new Set(purchases?.map((p) => p.visa_id) || []);
@@ -180,9 +181,6 @@ function PremiumContentList() {
                       </div>
                       <div>
                         <h3 className="font-semibold text-neutral-900">{guide.name}</h3>
-                        {guide.country && (
-                          <p className="text-xs text-neutral-500 mt-0.5">{guide.country}</p>
-                        )}
                       </div>
                     </div>
                     <Badge variant="warning">$49</Badge>
