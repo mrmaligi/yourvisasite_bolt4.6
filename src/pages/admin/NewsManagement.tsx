@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, ExternalLink } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { DataTable, type Column } from '../../components/ui/DataTable';
@@ -42,18 +42,6 @@ export function NewsManagement() {
     setShowModal(true);
   };
 
-  const handleDelete = async (a: NewsArticle) => {
-    if (!window.confirm(`Are you sure you want to delete "${a.title}"?`)) return;
-
-    const { error } = await supabase.from('news_articles').delete().eq('id', a.id);
-    if (error) {
-      toast('error', 'Delete failed: ' + error.message);
-    } else {
-      toast('success', 'Article deleted');
-      fetchArticles();
-    }
-  };
-
   const handleSave = async () => {
     if (!user) return;
     setSaving(true);
@@ -83,11 +71,13 @@ export function NewsManagement() {
     { key: 'status', header: 'Status', render: (r) => <Badge variant={r.is_published ? 'success' : 'default'}>{r.is_published ? 'Published' : 'Draft'}</Badge> },
     { key: 'date', header: 'Date', render: (r) => new Date(r.created_at).toLocaleDateString(), sortable: true },
     { key: 'actions', header: '', render: (r) => (
-      <div className="flex gap-1">
+      <div className="flex gap-1 items-center">
         <Button size="sm" variant="ghost" onClick={() => openEdit(r)}>Edit</Button>
-        <Button size="sm" variant="ghost" onClick={() => handleDelete(r)} title="Delete">
-          <Trash2 className="w-4 h-4 text-red-500" />
-        </Button>
+        {r.is_published && (
+          <a href={`/news/${r.slug}`} target="_blank" rel="noopener noreferrer" className="p-1 text-neutral-400 hover:text-primary-600 transition-colors" title="View article">
+            <ExternalLink className="w-4 h-4" />
+          </a>
+        )}
       </div>
     )},
   ];
@@ -105,22 +95,8 @@ export function NewsManagement() {
       >
         <div className="space-y-4">
           <Input label="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-          <Textarea label="Body" value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} rows={6} />
-
-          <div className="space-y-2">
-            <Input label="Image URL" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
-            {form.image_url && (
-              <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50">
-                <img
-                  src={form.image_url}
-                  alt="Preview"
-                  className="h-full w-full object-cover"
-                  onError={(e) => (e.currentTarget.style.display = 'none')}
-                />
-              </div>
-            )}
-          </div>
-
+          <Textarea label="Body" value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} />
+          <Input label="Image URL" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={form.is_published} onChange={(e) => setForm({ ...form, is_published: e.target.checked })} className="rounded border-neutral-300" />
             Publish immediately

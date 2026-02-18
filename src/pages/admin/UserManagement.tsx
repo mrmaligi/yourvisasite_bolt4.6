@@ -1,49 +1,37 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { DataTable, type Column } from '../../components/ui/DataTable';
-import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
-import { Modal } from '../../components/ui/Modal';
-import { Select } from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
 import type { Profile, UserRole } from '../../types/database';
 
-const roleVariant = {
-  user: 'primary' as const,
-  lawyer: 'info' as const,
-  admin: 'danger' as const,
-};
-
-const ROLE_OPTIONS = [
-  { value: 'user', label: 'User' },
-  { value: 'admin', label: 'Admin' },
-  // Lawyer role is managed separately via Lawyer profile creation
-];
-
 export function UserManagement() {
-  const { toast } = useToast();
   const [users, setUsers] = useState<Profile[]>([]);
   const [filtered, setFiltered] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Edit State
-  const [editingUser, setEditingUser] = useState<Profile | null>(null);
-  const [newRole, setNewRole] = useState<UserRole>('user');
-  const [saving, setSaving] = useState(false);
-
-  const fetchUsers = async () => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
-    setUsers(data || []);
-    setFiltered(data || []);
-    setLoading(false);
-  };
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setUsers(data || []);
+      setFiltered(data || []);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast('error', 'Failed to fetch users');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearch = (q: string) => {
     if (!q) {
@@ -56,64 +44,102 @@ export function UserManagement() {
     ));
   };
 
-  const openEdit = (user: Profile) => {
-    setEditingUser(user);
-    setNewRole(user.role);
-  };
+  const updateRole = async (userId: string, newRole: UserRole) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: newRole })
+        .eq('id', userId);
 
-  const handleSaveRole = async () => {
-    if (!editingUser) return;
-    setSaving(true);
-    const { error } = await supabase
-      .from('profiles')
-      .update({ role: newRole })
-      .eq('id', editingUser.id);
+      if (error) throw error;
 
-    setSaving(false);
-    if (error) {
-      toast('error', 'Failed to update role: ' + error.message);
-    } else {
-      toast('success', 'User role updated');
-      setEditingUser(null);
-      fetchUsers();
+      toast('success', 'User role updated successfully');
+
+      const updateState = (prev: Profile[]) =>
+        prev.map(u => u.id === userId ? { ...u, role: newRole } : u);
+
+      setUsers(updateState);
+      setFiltered(updateState);
+
+    } catch (error) {
+      console.error('Error updating role:', error);
+      toast('error', 'Failed to update user role');
     }
   };
 
-  const handleToggleStatus = async (user: Profile) => {
-    const action = user.is_active ? 'deactivate' : 'activate';
-    if (!window.confirm(`Are you sure you want to ${action} this user?`)) return;
+  const toggleStatus = async (user: Profile) => {
+    const newStatus = !user.is_active;
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_active: newStatus })
+        .eq('id', user.id);
 
-    const { error } = await supabase
-      .from('profiles')
-      .update({ is_active: !user.is_active })
-      .eq('id', user.id);
+      if (error) throw error;
 
-    if (error) {
-      toast('error', `Failed to ${action} user: ` + error.message);
-    } else {
-      toast('success', `User ${action}d`);
-      fetchUsers();
+      toast('success', `User ${newStatus ? 'activated' : 'deactivated'} successfully`);
+
+      const updateState = (prev: Profile[]) =>
+        prev.map(u => u.id === user.id ? { ...u, is_active: newStatus } : u);
+
+      setUsers(updateState);
+      setFiltered(updateState);
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast('error', 'Failed to update user status');
     }
   };
 
   const columns: Column<Profile>[] = [
-    { key: 'name', header: 'Name', render: (r) => r.full_name || 'Unnamed', sortable: true },
-    { key: 'role', header: 'Role', render: (r) => <Badge variant={roleVariant[r.role]}>{r.role}</Badge>, sortable: true },
-    { key: 'status', header: 'Status', render: (r) => <Badge variant={r.is_active ? 'success' : 'default'}>{r.is_active ? 'Active' : 'Inactive'}</Badge> },
-    { key: 'joined', header: 'Joined', render: (r) => new Date(r.created_at).toLocaleDateString(), sortable: true },
-    { key: 'actions', header: 'Actions', render: (r) => (
-      <div className="flex gap-2">
-        <Button size="sm" variant="ghost" onClick={() => openEdit(r)}>Edit Role</Button>
-        <Button
-          size="sm"
-          variant={r.is_active ? 'danger' : 'secondary'}
-          className={!r.is_active ? 'bg-emerald-600 text-white hover:bg-emerald-700' : ''}
-          onClick={() => handleToggleStatus(r)}
+    {
+      key: 'name',
+      header: 'Name',
+      render: (r) => (
+        <div>
+          <div className="font-medium text-neutral-900">{r.full_name || 'Unnamed'}</div>
+          <div className="text-xs text-neutral-500">{r.id.slice(0, 8)}...</div>
+        </div>
+      ),
+      sortable: true
+    },
+    {
+      key: 'role',
+      header: 'Role',
+      render: (r) => (
+        <select
+          value={r.role}
+          onChange={(e) => updateRole(r.id, e.target.value as UserRole)}
+          className="text-sm border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 py-1 pl-2 pr-8 bg-white"
         >
-          {r.is_active ? 'Ban' : 'Unban'}
-        </Button>
-      </div>
-    )},
+          <option value="user">User</option>
+          <option value="lawyer">Lawyer</option>
+          <option value="admin">Admin</option>
+        </select>
+      ),
+      sortable: true
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (r) => (
+        <button
+          onClick={() => toggleStatus(r)}
+          className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+            r.is_active
+              ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+              : 'bg-red-100 text-red-800 hover:bg-red-200'
+          }`}
+        >
+          {r.is_active ? 'Active' : 'Inactive'}
+        </button>
+      )
+    },
+    {
+      key: 'joined',
+      header: 'Joined',
+      render: (r) => new Date(r.created_at).toLocaleDateString(),
+      sortable: true
+    },
   ];
 
   return (
@@ -128,35 +154,6 @@ export function UserManagement() {
         searchPlaceholder="Search users..."
         onSearch={handleSearch}
       />
-
-      <Modal
-        isOpen={!!editingUser}
-        onClose={() => setEditingUser(null)}
-        title="Edit User Role"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setEditingUser(null)}>Cancel</Button>
-            <Button loading={saving} onClick={handleSaveRole}>Save Changes</Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          <p className="text-sm text-neutral-600">
-            Changing the role for <strong>{editingUser?.full_name}</strong>.
-          </p>
-          <Select
-            label="Role"
-            value={newRole}
-            options={ROLE_OPTIONS}
-            onChange={(e) => setNewRole(e.target.value as UserRole)}
-          />
-          {newRole === 'lawyer' && (
-            <p className="text-xs text-amber-600">
-              Note: Setting role to 'lawyer' does not automatically create a lawyer profile. This should typically be done via the lawyer registration flow.
-            </p>
-          )}
-        </div>
-      </Modal>
     </div>
   );
 }
