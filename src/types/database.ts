@@ -13,6 +13,7 @@ export interface Profile {
   avatar_url: string | null;
   phone: string | null;
   is_active: boolean;
+  is_featured?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -192,6 +193,7 @@ export interface Booking {
   payment_status: PaymentStatus;
   payment_intent_id: string | null;
   stripe_checkout_session_id: string | null;
+  file_takeover_status: 'requested' | 'accepted' | 'rejected' | null;
   confirmed_at: string | null;
   notes: string | null;
   created_at: string;
