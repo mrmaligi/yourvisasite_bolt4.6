@@ -14,10 +14,19 @@ export function NewsManagement() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [articles, setArticles] = useState<NewsArticle[]>([]);
+  const [visas, setVisas] = useState<{ id: string; name: string; subclass: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<NewsArticle | null>(null);
-  const [form, setForm] = useState({ title: '', body: '', excerpt: '', category: 'general', image_url: '', is_published: false });
+  const [form, setForm] = useState({
+    title: '',
+    body: '',
+    excerpt: '',
+    category: 'general',
+    image_url: '',
+    is_published: false,
+    visa_ids: [] as string[]
+  });
   const [saving, setSaving] = useState(false);
 
   const fetchArticles = async () => {
@@ -26,13 +35,33 @@ export function NewsManagement() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchArticles(); }, []);
+  const fetchVisas = async () => {
+    const { data } = await supabase
+      .from('visas')
+      .select('id, name, subclass')
+      .eq('is_active', true)
+      .order('subclass');
+    setVisas(data || []);
+  };
+
+  useEffect(() => {
+    fetchArticles();
+    fetchVisas();
+  }, []);
 
   const slugify = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ title: '', body: '', excerpt: '', category: 'general', image_url: '', is_published: false });
+    setForm({
+      title: '',
+      body: '',
+      excerpt: '',
+      category: 'general',
+      image_url: '',
+      is_published: false,
+      visa_ids: []
+    });
     setShowModal(true);
   };
 
@@ -44,7 +73,8 @@ export function NewsManagement() {
       excerpt: a.excerpt || '',
       category: a.category || 'general',
       image_url: a.image_url || '',
-      is_published: a.is_published
+      is_published: a.is_published,
+      visa_ids: a.visa_ids || []
     });
     setShowModal(true);
   };
@@ -59,6 +89,7 @@ export function NewsManagement() {
       image_url: form.image_url || null,
       published_at: form.is_published ? (editing?.published_at || new Date().toISOString()) : null,
       author_id: editing?.author_id || user.id,
+      visa_ids: form.visa_ids
     };
     if (editing) {
       const { error } = await supabase.from('news_articles').update(payload).eq('id', editing.id);
@@ -107,7 +138,33 @@ export function NewsManagement() {
           <Textarea label="Excerpt" value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} />
           <Textarea label="Body" value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} />
           <Input label="Image URL" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
-          <label className="flex items-center gap-2 text-sm">
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-neutral-700">Related Visas</label>
+            <div className="max-h-48 overflow-y-auto border border-neutral-200 rounded-md p-2 space-y-1 bg-white">
+              {visas.map((v) => (
+                <label key={v.id} className="flex items-center gap-2 text-sm hover:bg-neutral-50 p-1 rounded cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.visa_ids.includes(v.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setForm((f) => ({ ...f, visa_ids: [...f.visa_ids, v.id] }));
+                      } else {
+                        setForm((f) => ({ ...f, visa_ids: f.visa_ids.filter((id) => id !== v.id) }));
+                      }
+                    }}
+                    className="rounded border-neutral-300"
+                  />
+                  <Badge variant="secondary" className="w-16 justify-center">{v.subclass}</Badge>
+                  <span className="text-neutral-600 truncate">{v.name}</span>
+                </label>
+              ))}
+              {visas.length === 0 && <p className="text-sm text-neutral-400 p-2">No active visas found.</p>}
+            </div>
+          </div>
+
+          <label className="flex items-center gap-2 text-sm pt-2">
             <input type="checkbox" checked={form.is_published} onChange={(e) => setForm({ ...form, is_published: e.target.checked })} className="rounded border-neutral-300" />
             Publish immediately
           </label>

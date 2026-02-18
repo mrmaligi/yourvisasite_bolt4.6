@@ -13,6 +13,7 @@ export interface Profile {
   avatar_url: string | null;
   phone: string | null;
   is_active: boolean;
+  is_featured?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -53,8 +54,6 @@ export interface DocumentCategory {
   name: string;
   description: string | null;
   tips: string | null;
-  explanation: string | null;
-  examples: string[] | null;
   icon: string;
   is_active: boolean;
   display_order: number;
@@ -62,20 +61,26 @@ export interface DocumentCategory {
   updated_at: string;
 }
 
+export interface ApplicationExampleField {
+  field_name: string;
+  field_description: string;
+  example_value: string;
+  tip: string;
+}
+
 // Premium content for a visa, organized by sections/steps
 export interface VisaPremiumContent {
   id: string;
   visa_id: string;
-  section_number: number; // Replaces step_number
-  section_title: string; // Replaces title
-  content: string; // Replaces body
+  section_number: number;
+  section_title: string;
+  content: string;
   tips: string | null;
   common_mistakes: string | null;
+  examples: Record<string, any> | null;
   estimated_minutes: number | null;
   required_documents: string[] | null;
-  document_category: string | null; // Legacy?
-  document_explanation: string | null;
-  document_example_url: string | null;
+  application_example_json: ApplicationExampleField[] | null;
   created_at: string;
   updated_at: string;
 }
@@ -123,6 +128,7 @@ export interface NewsArticle {
   category: string;
   is_published: boolean;
   published_at: string | null;
+  visa_ids: string[] | null;
   created_at: string;
   updated_at: string;
 }
@@ -187,6 +193,7 @@ export interface Booking {
   payment_status: PaymentStatus;
   payment_intent_id: string | null;
   stripe_checkout_session_id: string | null;
+  file_takeover_status: 'requested' | 'accepted' | 'rejected' | null;
   confirmed_at: string | null;
   notes: string | null;
   created_at: string;
