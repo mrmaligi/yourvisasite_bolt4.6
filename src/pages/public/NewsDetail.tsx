@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, MessageSquare, Send, Scale, Shield } from 'lucide-react';
+import { ArrowLeft, Calendar, MessageSquare, Send, Scale, Shield, User } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
@@ -15,11 +15,16 @@ interface CommentWithAuthor extends NewsComment {
   author_role: string | null;
 }
 
+interface ArticleWithAuthor extends NewsArticle {
+  author_name: string | null;
+}
+
 export function NewsDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { user, role } = useAuth();
   const { toast } = useToast();
-  const [article, setArticle] = useState<NewsArticle | null>(null);
+  const [article, setArticle] = useState<ArticleWithAuthor | null>(null);
+  const [relatedArticles, setRelatedArticles] = useState<NewsArticle[]>([]);
   const [comments, setComments] = useState<CommentWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
   const [commentBody, setCommentBody] = useState('');
@@ -28,7 +33,8 @@ export function NewsDetail() {
   useEffect(() => {
     if (!slug) return;
 
-    async function fetchArticle() {
+    async function fetchArticleAndRelated() {
+      setLoading(true);
       const { data: articleRow } = await supabase
         .from('news_articles')
         .select('*')
@@ -36,16 +42,42 @@ export function NewsDetail() {
         .eq('is_published', true)
         .maybeSingle();
 
-      setArticle(articleRow);
-
-      if (articleRow) {
-        await fetchComments(articleRow.id);
+      if (!articleRow) {
+        setArticle(null);
+        setLoading(false);
+        return;
       }
 
+      // Fetch author
+      const { data: authorProfile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', articleRow.author_id)
+        .maybeSingle();
+
+      setArticle({
+        ...articleRow,
+        author_name: authorProfile?.full_name || null,
+      });
+
+      // Fetch comments
+      await fetchComments(articleRow.id);
+
+      // Fetch related articles
+      const { data: related } = await supabase
+        .from('news_articles')
+        .select('id, title, slug, published_at, category')
+        .eq('category', articleRow.category)
+        .eq('is_published', true)
+        .neq('id', articleRow.id)
+        .order('published_at', { ascending: false })
+        .limit(3);
+
+      setRelatedArticles(related || []);
       setLoading(false);
     }
 
-    fetchArticle();
+    fetchArticleAndRelated();
   }, [slug]);
 
   const fetchComments = async (articleId: string) => {
@@ -103,12 +135,21 @@ export function NewsDetail() {
 
   if (loading) {
     return (
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-        <Skeleton className="h-6 w-24" />
-        <Skeleton className="h-10 w-3/4" />
-        <Skeleton className="h-4 w-1/4" />
-        <Skeleton className="h-64 w-full rounded-2xl" />
-        <Skeleton className="h-40 w-full" />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+         <div className="grid md:grid-cols-3 gap-8">
+           <div className="md:col-span-2 space-y-6">
+              <Skeleton className="h-6 w-24" />
+              <Skeleton className="h-10 w-3/4" />
+              <Skeleton className="h-4 w-1/4" />
+              <Skeleton className="h-64 w-full rounded-2xl" />
+              <Skeleton className="h-40 w-full" />
+           </div>
+           <div className="space-y-4">
+              <Skeleton className="h-8 w-1/2" />
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+           </div>
+         </div>
       </div>
     );
   }
@@ -117,7 +158,7 @@ export function NewsDetail() {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
         <h2 className="text-2xl font-bold text-neutral-900 mb-2">Article not found</h2>
-        <Link to="/" className="text-primary-600 hover:underline">Go home</Link>
+        <Link to="/news" className="text-primary-600 hover:underline">Go back to news</Link>
       </div>
     );
   }
@@ -125,132 +166,175 @@ export function NewsDetail() {
   const canComment = role === 'lawyer' || role === 'admin';
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-primary-600 hover:underline mb-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <Link to="/news" className="inline-flex items-center gap-1.5 text-sm text-primary-600 hover:underline mb-8">
         <ArrowLeft className="w-3.5 h-3.5" />
-        Back to Home
+        Back to News
       </Link>
 
-      <article>
-        <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4 leading-tight">
-          {article.title}
-        </h1>
+      <div className="grid md:grid-cols-3 gap-8">
+        {/* Main Content */}
+        <div className="md:col-span-2">
+          <article>
+            <div className="flex items-center gap-2 mb-4">
+               <Badge variant="default" className="capitalize">{article.category}</Badge>
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4 leading-tight">
+              {article.title}
+            </h1>
 
-        <div className="flex items-center gap-3 text-sm text-neutral-400 mb-8">
-          <Calendar className="w-4 h-4" />
-          {article.published_at && new Date(article.published_at).toLocaleDateString('en-US', {
-            month: 'long', day: 'numeric', year: 'numeric',
-          })}
+            <div className="flex items-center gap-4 text-sm text-neutral-500 mb-8 border-b border-neutral-100 pb-6">
+              <span className="flex items-center gap-1.5">
+                <Calendar className="w-4 h-4" />
+                {article.published_at && new Date(article.published_at).toLocaleDateString('en-US', {
+                  month: 'long', day: 'numeric', year: 'numeric',
+                })}
+              </span>
+              {article.author_name && (
+                <span className="flex items-center gap-1.5">
+                  <User className="w-4 h-4" />
+                  {article.author_name}
+                </span>
+              )}
+            </div>
+
+            {article.image_url && (
+              <div className="rounded-2xl overflow-hidden mb-8">
+                <img
+                  src={article.image_url}
+                  alt=""
+                  className="w-full h-auto max-h-[400px] object-cover"
+                />
+              </div>
+            )}
+
+            <div className="prose prose-neutral max-w-none mb-12">
+              {(article.body || '').split('\n').map((paragraph, i) => (
+                paragraph.trim() ? (
+                  <p key={i} className="text-neutral-700 leading-relaxed mb-4">{paragraph}</p>
+                ) : null
+              ))}
+            </div>
+          </article>
+
+          {/* Comments Section */}
+          <div className="mt-12 pt-8 border-t border-neutral-200">
+            <h2 className="text-xl font-bold text-neutral-900 mb-6 flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-primary-600" />
+              Professional Commentary
+              <span className="text-sm font-normal text-neutral-400">({comments.length})</span>
+            </h2>
+
+            {canComment && (
+              <Card className="mb-8">
+                <CardBody>
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      {role === 'admin' ? (
+                        <Shield className="w-4 h-4 text-white" />
+                      ) : (
+                        <Scale className="w-4 h-4 text-white" />
+                      )}
+                    </div>
+                    <div className="flex-1 space-y-3">
+                      <textarea
+                        value={commentBody}
+                        onChange={(e) => setCommentBody(e.target.value)}
+                        placeholder="Share your professional insight on this article..."
+                        className="input-field min-h-[80px]"
+                      />
+                      <div className="flex justify-end">
+                        <Button
+                          size="sm"
+                          loading={submittingComment}
+                          disabled={!commentBody.trim()}
+                          onClick={handlePostComment}
+                        >
+                          <Send className="w-3.5 h-3.5" />
+                          Post Comment
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+            )}
+
+            {comments.length === 0 ? (
+              <div className="text-center py-12">
+                <MessageSquare className="w-8 h-8 text-neutral-300 mx-auto mb-3" />
+                <p className="text-neutral-500">{canComment ? 'Be the first to share your insight.' : 'Verified lawyers and admins can comment on articles.'}</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {comments.map((comment) => (
+                  <div key={comment.id} className="flex items-start gap-3">
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                      comment.author_role === 'admin'
+                        ? 'bg-gradient-to-br from-red-400 to-red-600'
+                        : comment.author_role === 'lawyer'
+                        ? 'bg-gradient-to-br from-teal-400 to-teal-600'
+                        : 'bg-neutral-200'
+                    }`}>
+                      {comment.author_role === 'admin' ? (
+                        <Shield className="w-4 h-4 text-white" />
+                      ) : comment.author_role === 'lawyer' ? (
+                        <Scale className="w-4 h-4 text-white" />
+                      ) : (
+                        <MessageSquare className="w-4 h-4 text-neutral-500" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-semibold text-neutral-900">
+                          {comment.author_name || 'Anonymous'}
+                        </span>
+                        {comment.author_role === 'lawyer' && (
+                          <Badge variant="success">Lawyer</Badge>
+                        )}
+                        {comment.author_role === 'admin' && (
+                          <Badge variant="danger">Admin</Badge>
+                        )}
+                        <span className="text-xs text-neutral-400">
+                          {new Date(comment.created_at).toLocaleDateString('en-US', {
+                            month: 'short', day: 'numeric',
+                          })}
+                        </span>
+                      </div>
+                      <p className="text-sm text-neutral-600 leading-relaxed whitespace-pre-wrap">{comment.body}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {article.image_url && (
-          <div className="rounded-2xl overflow-hidden mb-8">
-            <img
-              src={article.image_url}
-              alt=""
-              className="w-full h-auto max-h-[400px] object-cover"
-            />
-          </div>
-        )}
-
-        <div className="prose prose-neutral max-w-none">
-          {article.body.split('\n').map((paragraph, i) => (
-            paragraph.trim() ? (
-              <p key={i} className="text-neutral-700 leading-relaxed mb-4">{paragraph}</p>
-            ) : null
-          ))}
+        {/* Sidebar */}
+        <div className="md:col-span-1">
+           <h3 className="text-lg font-bold text-neutral-900 mb-4">Related Articles</h3>
+           {relatedArticles.length > 0 ? (
+             <div className="space-y-4">
+               {relatedArticles.map(rel => (
+                 <Link key={rel.id} to={`/news/${rel.slug}`} className="block group">
+                   <Card hover className="h-full">
+                     <CardBody className="p-4">
+                       <span className="text-xs text-primary-600 font-semibold mb-1 block uppercase tracking-wider">{rel.category}</span>
+                       <h4 className="font-semibold text-neutral-900 group-hover:text-primary-700 transition-colors line-clamp-2 mb-2">
+                         {rel.title}
+                       </h4>
+                       <span className="text-xs text-neutral-400">
+                         {rel.published_at && new Date(rel.published_at).toLocaleDateString()}
+                       </span>
+                     </CardBody>
+                   </Card>
+                 </Link>
+               ))}
+             </div>
+           ) : (
+             <p className="text-neutral-500 text-sm">No related articles found.</p>
+           )}
         </div>
-      </article>
-
-      <div className="mt-12 pt-8 border-t border-neutral-200">
-        <h2 className="text-xl font-bold text-neutral-900 mb-6 flex items-center gap-2">
-          <MessageSquare className="w-5 h-5 text-primary-600" />
-          Professional Commentary
-          <span className="text-sm font-normal text-neutral-400">({comments.length})</span>
-        </h2>
-
-        {canComment && (
-          <Card className="mb-8">
-            <CardBody>
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  {role === 'admin' ? (
-                    <Shield className="w-4 h-4 text-white" />
-                  ) : (
-                    <Scale className="w-4 h-4 text-white" />
-                  )}
-                </div>
-                <div className="flex-1 space-y-3">
-                  <textarea
-                    value={commentBody}
-                    onChange={(e) => setCommentBody(e.target.value)}
-                    placeholder="Share your professional insight on this article..."
-                    className="input-field min-h-[80px]"
-                  />
-                  <div className="flex justify-end">
-                    <Button
-                      size="sm"
-                      loading={submittingComment}
-                      disabled={!commentBody.trim()}
-                      onClick={handlePostComment}
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                      Post Comment
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        )}
-
-        {comments.length === 0 ? (
-          <div className="text-center py-12">
-            <MessageSquare className="w-8 h-8 text-neutral-300 mx-auto mb-3" />
-            <p className="text-neutral-500">{canComment ? 'Be the first to share your insight.' : 'Verified lawyers and admins can comment on articles.'}</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {comments.map((comment) => (
-              <div key={comment.id} className="flex items-start gap-3">
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                  comment.author_role === 'admin'
-                    ? 'bg-gradient-to-br from-red-400 to-red-600'
-                    : comment.author_role === 'lawyer'
-                    ? 'bg-gradient-to-br from-teal-400 to-teal-600'
-                    : 'bg-neutral-200'
-                }`}>
-                  {comment.author_role === 'admin' ? (
-                    <Shield className="w-4 h-4 text-white" />
-                  ) : comment.author_role === 'lawyer' ? (
-                    <Scale className="w-4 h-4 text-white" />
-                  ) : (
-                    <MessageSquare className="w-4 h-4 text-neutral-500" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-semibold text-neutral-900">
-                      {comment.author_name || 'Anonymous'}
-                    </span>
-                    {comment.author_role === 'lawyer' && (
-                      <Badge variant="success">Lawyer</Badge>
-                    )}
-                    {comment.author_role === 'admin' && (
-                      <Badge variant="danger">Admin</Badge>
-                    )}
-                    <span className="text-xs text-neutral-400">
-                      {new Date(comment.created_at).toLocaleDateString('en-US', {
-                        month: 'short', day: 'numeric',
-                      })}
-                    </span>
-                  </div>
-                  <p className="text-sm text-neutral-600 leading-relaxed whitespace-pre-wrap">{comment.body}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

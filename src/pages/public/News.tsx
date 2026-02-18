@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Newspaper, ArrowRight, Calendar, Lock } from 'lucide-react';
+import { Newspaper, ArrowRight, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
@@ -9,11 +9,11 @@ import { Button } from '../../components/ui/Button';
 interface NewsItem {
   id: string;
   title: string;
-  summary: string;
+  slug: string;
+  excerpt: string | null;
+  body: string | null;
   category: string;
   published_at: string;
-  is_premium: boolean;
-  author: string | null;
 }
 
 export function News() {
@@ -30,18 +30,28 @@ export function News() {
   const fetchNews = async () => {
     let query = supabase
       .from('news_articles')
-      .select('id, title, summary, category, published_at, is_premium, author')
+      .select('id, title, slug, excerpt, body, category, published_at')
+      .eq('is_published', true)
       .order('published_at', { ascending: false });
 
     if (filter !== 'all') {
       query = query.eq('category', filter);
     }
 
-    const { data } = await query;
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching news:', error);
+      setLoading(false);
+      return;
+    }
 
     if (data && data.length > 0) {
       setFeaturedNews(data[0]);
       setNews(data.slice(1));
+    } else {
+      setFeaturedNews(null);
+      setNews([]);
     }
 
     setLoading(false);
@@ -53,6 +63,14 @@ export function News() {
     { value: 'processing', label: 'Processing Updates' },
     { value: 'regulation', label: 'Regulations' },
   ];
+
+  const getExcerpt = (item: NewsItem) => {
+    if (item.excerpt) return item.excerpt;
+    if (item.body) {
+      return item.body.substring(0, 150) + '...';
+    }
+    return '';
+  };
 
   if (loading) {
     return (
@@ -78,7 +96,7 @@ export function News() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-100 mb-6">
             <Newspaper className="w-8 h-8 text-primary-600" />
           </div>
-          <h1 className="text-4xl font-bold text-neutral-900 mb-4">Immigration News</h1>
+          <h1 className="text-4xl font-bold text-neutral-900 mb-4">Immigration News & Updates</h1>
           <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
             Stay informed with the latest immigration policy updates, processing times, and regulatory changes.
           </p>
@@ -100,7 +118,7 @@ export function News() {
         {featuredNews && (
           <Card
             className="mb-12 overflow-hidden hover:shadow-2xl transition-all cursor-pointer border-2 border-primary-100"
-            onClick={() => navigate(`/news/${featuredNews.id}`)}
+            onClick={() => navigate(`/news/${featuredNews.slug}`)}
           >
             <CardBody className="p-0">
               <div className="bg-gradient-to-r from-primary-500 to-primary-600 h-2" />
@@ -112,15 +130,9 @@ export function News() {
                   <Badge variant="default" className="capitalize">
                     {featuredNews.category}
                   </Badge>
-                  {featuredNews.is_premium && (
-                    <Badge variant="warning" className="flex items-center gap-1">
-                      <Lock className="w-3 h-3" />
-                      Premium
-                    </Badge>
-                  )}
                 </div>
                 <h2 className="text-3xl font-bold text-neutral-900 mb-4">{featuredNews.title}</h2>
-                <p className="text-lg text-neutral-600 mb-6 line-clamp-3">{featuredNews.summary}</p>
+                <p className="text-lg text-neutral-600 mb-6 line-clamp-3">{getExcerpt(featuredNews)}</p>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4 text-sm text-neutral-500">
                     <span className="flex items-center gap-1.5">
@@ -131,7 +143,6 @@ export function News() {
                         day: 'numeric',
                       })}
                     </span>
-                    {featuredNews.author && <span>By {featuredNews.author}</span>}
                   </div>
                   <Button variant="secondary" size="sm">
                     Read More
@@ -148,22 +159,16 @@ export function News() {
             <Card
               key={item.id}
               className="hover:shadow-xl transition-all cursor-pointer"
-              onClick={() => navigate(`/news/${item.id}`)}
+              onClick={() => navigate(`/news/${item.slug}`)}
             >
               <CardBody>
                 <div className="flex items-center gap-2 mb-3">
                   <Badge variant="default" className="capitalize text-xs">
                     {item.category}
                   </Badge>
-                  {item.is_premium && (
-                    <Badge variant="warning" className="flex items-center gap-1 text-xs">
-                      <Lock className="w-3 h-3" />
-                      Premium
-                    </Badge>
-                  )}
                 </div>
                 <h3 className="text-xl font-semibold text-neutral-900 mb-3 line-clamp-2">{item.title}</h3>
-                <p className="text-sm text-neutral-600 line-clamp-3 mb-4">{item.summary}</p>
+                <p className="text-sm text-neutral-600 line-clamp-3 mb-4">{getExcerpt(item)}</p>
                 <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
                   <span className="text-xs text-neutral-400 flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5" />
@@ -182,8 +187,8 @@ export function News() {
         {news.length === 0 && !featuredNews && (
           <div className="text-center py-16">
             <Newspaper className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-neutral-700 mb-2">No articles found</h3>
-            <p className="text-neutral-500">Check back later for immigration news and updates.</p>
+            <h3 className="text-xl font-semibold text-neutral-700 mb-2">Stay tuned for immigration news and updates</h3>
+            <p className="text-neutral-500">We are working on bringing you the latest updates.</p>
           </div>
         )}
       </div>
