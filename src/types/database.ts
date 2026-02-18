@@ -1,6 +1,6 @@
 export type UserRole = 'user' | 'lawyer' | 'admin';
 export type VisaCategory = 'work' | 'family' | 'student' | 'visitor' | 'humanitarian' | 'business' | 'other';
-export type TrackerOutcome = 'approved' | 'refused' | 'withdrawn' | 'pending';
+export type TrackerOutcome = 'approved' | 'refused' | 'withdrawn';
 export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 export type DocumentStatus = 'pending' | 'verified' | 'rejected';
 export type VerificationStatus = 'pending' | 'approved' | 'rejected';
@@ -56,8 +56,8 @@ export interface TrackerEntry {
   submitted_by: string | null;
   submitter_role: UserRole | null;
   application_date: string;
-  decision_date: string | null;
-  processing_days: number | null;
+  decision_date: string;
+  processing_days: number;
   outcome: TrackerOutcome;
   weight: number;
   created_at: string;
