@@ -19,7 +19,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           id={inputId}
-          className={`input-field ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''} ${className}`}
+          className={`input-field ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 dark:border-red-500/50' : ''} ${className}`}
           {...props}
         />
         {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
@@ -49,7 +49,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         <textarea
           ref={ref}
           id={inputId}
-          className={`input-field min-h-[100px] ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''} ${className}`}
+          className={`input-field min-h-[100px] ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 dark:border-red-500/50' : ''} ${className}`}
           {...props}
         />
         {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
@@ -79,7 +79,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         <select
           ref={ref}
           id={inputId}
-          className={`input-field ${error ? 'border-red-500' : ''} ${className}`}
+          className={`input-field ${error ? 'border-red-500 dark:border-red-500/50' : ''} ${className}`}
           {...props}
         >
           {options.map((opt) => (

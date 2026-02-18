@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { type LucideIcon } from 'lucide-react';
+import { type LucideIcon, Menu } from 'lucide-react';
 import { Sidebar } from './Sidebar';
-import { Navbar } from './Navbar';
-import { DashboardHeader } from './DashboardHeader';
+import { UserMenu } from './UserMenu';
+import { ThemeToggle } from '../ui/ThemeToggle';
+import { Logo } from '../ui/Logo';
 
 interface DashboardLayoutProps {
   sidebarItems: { to: string; label: string; icon: LucideIcon }[];
@@ -10,16 +12,43 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ sidebarItems, title }: DashboardLayoutProps) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   return (
-    <div className="min-h-screen flex flex-col bg-neutral-50 dark:bg-neutral-900 transition-colors duration-300">
-      <div className="lg:hidden">
-        <Navbar />
+    <div className="min-h-screen flex flex-col bg-neutral-50 dark:bg-neutral-950 transition-colors">
+      {/* Mobile Header */}
+      <div className="lg:hidden sticky top-0 z-40 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 px-4 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="p-2 -ml-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-300 transition-colors"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <Logo size="sm" />
+        </div>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <UserMenu />
+        </div>
       </div>
-      <div className="flex flex-1">
-        <Sidebar items={sidebarItems} title={title} />
-        <main className="flex-1 overflow-y-auto">
-          <DashboardHeader />
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+      <div className="flex flex-1 relative">
+        <Sidebar
+          items={sidebarItems}
+          title={title}
+          mobileOpen={mobileOpen}
+          onMobileClose={() => setMobileOpen(false)}
+        />
+
+        <main className="flex-1 w-full overflow-y-auto overflow-x-hidden">
+          {/* Desktop Header Actions */}
+          <header className="hidden lg:flex items-center justify-end px-8 py-4 bg-transparent gap-3">
+             <ThemeToggle />
+             <UserMenu />
+          </header>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <Outlet />
           </div>
         </main>

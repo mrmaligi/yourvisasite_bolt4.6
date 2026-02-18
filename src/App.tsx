@@ -59,8 +59,11 @@ const AdminSettings = lazy(() => import('./pages/admin/AdminSettings').then(m =>
 
 function LoadingFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+    <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 transition-colors">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-10 h-10 border-4 border-primary-200 dark:border-primary-900/30 border-t-primary-600 dark:border-t-primary-500 rounded-full animate-spin" />
+        <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400 animate-pulse">Loading...</p>
+      </div>
     </div>
   );
 }
@@ -70,10 +73,10 @@ export default function App() {
     <AuthProvider>
       <ThemeProvider>
         <ToastProvider>
-          <ErrorBoundary>
-            <BrowserRouter>
+          <BrowserRouter>
+            <ErrorBoundary>
               <Suspense fallback={<LoadingFallback />}>
-            <Routes>
+                <Routes>
               <Route element={<PublicLayout />}>
                 <Route index element={<Landing />} />
                 <Route path="login" element={<Login />} />
@@ -130,10 +133,10 @@ export default function App() {
                 <Route path="promos" element={<PromoCodeManagement />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Route>
-              </Routes>
-            </Suspense>
+                </Routes>
+              </Suspense>
+            </ErrorBoundary>
           </BrowserRouter>
-          </ErrorBoundary>
         </ToastProvider>
       </ThemeProvider>
     </AuthProvider>

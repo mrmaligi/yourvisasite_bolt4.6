@@ -1,9 +1,9 @@
-import { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { Component, type ReactNode } from 'react';
 import { Button } from './Button';
+import { AlertTriangle } from 'lucide-react';
 
 interface Props {
-  children?: ReactNode;
+  children: ReactNode;
 }
 
 interface State {
@@ -13,40 +13,48 @@ interface State {
 
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
-    hasError: false
+    hasError: false,
   };
 
   public static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  public componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Uncaught error:', error, errorInfo);
   }
+
+  private handleReset = () => {
+    this.setState({ hasError: false, error: undefined });
+    window.location.reload();
+  };
 
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900 p-4">
-          <div className="max-w-md w-full bg-white dark:bg-neutral-800 rounded-2xl shadow-elevated p-8 text-center border border-neutral-200 dark:border-neutral-700">
-            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
+        <div className="min-h-screen flex items-center justify-center p-4 bg-neutral-50 dark:bg-neutral-950">
+          <div className="max-w-md w-full text-center space-y-6">
+            <div className="w-16 h-16 rounded-2xl bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-8 h-8" />
             </div>
-            <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">Something went wrong</h1>
-            <p className="text-neutral-500 dark:text-neutral-400 mb-6 text-sm">
-              We encountered an unexpected error. Please try refreshing the page or contact support if the problem persists.
-            </p>
-            {this.state.error && (
-               <div className="mb-6 p-3 bg-neutral-100 dark:bg-neutral-900 rounded-lg text-left overflow-auto max-h-32 text-xs font-mono text-neutral-600 dark:text-neutral-400">
-                 {this.state.error.message}
-               </div>
-            )}
-            <div className="flex justify-center">
-              <Button onClick={() => window.location.reload()}>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Refresh Page
-              </Button>
+
+            <div>
+              <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">Something went wrong</h1>
+              <p className="text-neutral-500 dark:text-neutral-400">
+                An unexpected error occurred. Please try reloading the page.
+              </p>
+              {this.state.error && (
+                <div className="mt-4 p-4 rounded-lg bg-neutral-100 dark:bg-neutral-900 text-left overflow-auto max-h-40">
+                  <p className="text-xs font-mono text-neutral-600 dark:text-neutral-400">
+                    {this.state.error.message}
+                  </p>
+                </div>
+              )}
             </div>
+
+            <Button onClick={this.handleReset} className="w-full sm:w-auto">
+              Reload Page
+            </Button>
           </div>
         </div>
       );

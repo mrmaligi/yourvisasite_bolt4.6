@@ -1,6 +1,5 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { Check, X, HelpCircle } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
 export function Pricing() {

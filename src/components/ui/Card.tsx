@@ -22,7 +22,7 @@ export function Card({ children, className = '', hover = false, onClick }: CardP
 }
 
 export function CardHeader({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`px-6 py-4 border-b border-neutral-100 ${className}`}>{children}</div>;
+  return <div className={`px-6 py-4 border-b border-neutral-100 dark:border-neutral-800 ${className}`}>{children}</div>;
 }
 
 export function CardBody({ children, className = '' }: { children: ReactNode; className?: string }) {
@@ -30,5 +30,5 @@ export function CardBody({ children, className = '' }: { children: ReactNode; cl
 }
 
 export function CardFooter({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`px-6 py-4 border-t border-neutral-100 bg-neutral-50/50 rounded-b-2xl ${className}`}>{children}</div>;
+  return <div className={`px-6 py-4 border-t border-neutral-100 bg-neutral-50/50 rounded-b-2xl dark:border-neutral-800 dark:bg-neutral-800/50 ${className}`}>{children}</div>;
 }

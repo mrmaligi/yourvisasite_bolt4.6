@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, FileJson, ToggleLeft, ToggleRight, ExternalLink, AlertTriangle, CheckCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { DataTable, type Column } from '../../components/ui/DataTable';
@@ -6,9 +7,9 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { Input, Textarea, Select } from '../../components/ui/Input';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
+import { Card, CardBody } from '../../components/ui/Card';
 import { useToast } from '../../components/ui/Toast';
-import type { Visa, VisaCategory, VisaRequirement } from '../../types/database';
+import type { Visa, VisaCategory } from '../../types/database';
 
 const CATEGORY_OPTIONS = [
   { value: 'work', label: 'Work' },
@@ -46,6 +47,7 @@ const REQUIREMENTS_TEMPLATE = JSON.stringify({
 type ModalTab = 'details' | 'requirements';
 
 export function VisaManagement() {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [visas, setVisas] = useState<Visa[]>([]);
   const [filtered, setFiltered] = useState<Visa[]>([]);
@@ -228,6 +230,7 @@ export function VisaManagement() {
     { key: 'actions', header: '', render: (r) => (
       <div className="flex gap-1">
         <Button size="sm" variant="ghost" onClick={() => openEdit(r)}>Edit</Button>
+        <Button size="sm" variant="ghost" onClick={() => navigate(`/admin/premium?visa_id=${r.id}`)}>Content</Button>
       </div>
     )},
   ];

@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   BookOpen,
-  Download,
   Lock,
   CheckCircle,
   Calendar,
