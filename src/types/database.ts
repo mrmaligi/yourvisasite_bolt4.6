@@ -43,6 +43,8 @@ export interface DocumentCategory {
   name: string;
   description: string | null;
   tips: string | null;
+  explanation: string | null;
+  examples: string[] | null;
   icon: string;
   is_active: boolean;
   display_order: number;
@@ -54,10 +56,14 @@ export interface DocumentCategory {
 export interface VisaPremiumContent {
   id: string;
   visa_id: string;
-  step_number: number;
-  title: string;
-  body: string;
-  document_category: string | null;
+  section_number: number; // Replaces step_number
+  section_title: string; // Replaces title
+  content: string; // Replaces body
+  tips: string | null;
+  common_mistakes: string | null;
+  estimated_minutes: number | null;
+  required_documents: string[] | null;
+  document_category: string | null; // Legacy?
   document_explanation: string | null;
   document_example_url: string | null;
   created_at: string;

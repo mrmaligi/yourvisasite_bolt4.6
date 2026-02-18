@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   FolderOpen,
   Trash2,
@@ -77,6 +78,7 @@ const statusConfig = {
 export function MyDocuments() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const {
     documents: docs,
     categories,
@@ -86,31 +88,67 @@ export function MyDocuments() {
     loading: docsLoading
   } = useDocuments();
 
-  const [uploadCategoryKey, setUploadCategoryKey] = useState<string | null>(null);
+  const [modalCategoryKey, setModalCategoryKey] = useState<string | null>(null);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [helpCategory, setHelpCategory] = useState<DocumentCategory | null>(null);
+  const [inlineUploadCategory, setInlineUploadCategory] = useState<string | null>(null);
+  const [expandedHelp, setExpandedHelp] = useState<Record<string, boolean>>({});
+  const [highlightedCategory, setHighlightedCategory] = useState<string | null>(null);
 
   // Filters
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
 
-  const handleUpload = async () => {
-    if (!user || !uploadFile || !uploadCategoryKey) return;
+  useEffect(() => {
+    const categoryKey = searchParams.get('category');
+    if (categoryKey && categories.length > 0) {
+      const el = document.getElementById(`category-${categoryKey}`);
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setExpandedHelp(prev => ({ ...prev, [categoryKey]: true }));
+          setHighlightedCategory(categoryKey);
+          // Remove highlight after 2 seconds
+          setTimeout(() => setHighlightedCategory(null), 2000);
+        }, 500); // Delay slightly to ensure render
+      }
+    }
+  }, [searchParams, categories]);
+
+  const handleModalUpload = async () => {
+    if (!user || !uploadFile || !modalCategoryKey) return;
     setUploading(true);
 
     try {
-      const { error } = await uploadDocument(uploadFile, uploadCategoryKey);
+      const { error } = await uploadDocument(uploadFile, modalCategoryKey);
       if (error) throw error;
 
       toast('success', 'Document uploaded successfully');
-      setUploadCategoryKey(null);
+      setModalCategoryKey(null);
       setUploadFile(null);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Upload failed';
       toast('error', message);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleInlineUpload = async (file: File, categoryKey: string) => {
+    if (!user) return;
+    setInlineUploadCategory(categoryKey);
+    setUploading(true);
+
+    try {
+      const { error } = await uploadDocument(file, categoryKey);
+      if (error) throw error;
+      toast('success', 'Document uploaded successfully');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Upload failed';
+      toast('error', message);
+    } finally {
+      setUploading(false);
+      setInlineUploadCategory(null);
     }
   };
 
@@ -151,7 +189,7 @@ export function MyDocuments() {
         </div>
         <div className="flex items-center gap-2">
            <Badge variant="info">{docs.length} documents</Badge>
-           <Button onClick={() => setUploadCategoryKey(categories[0]?.key || '')}>
+           <Button onClick={() => setModalCategoryKey(categories[0]?.key || '')}>
              <Upload className="w-4 h-4 mr-2" />
              Upload
            </Button>
@@ -222,8 +260,9 @@ export function MyDocuments() {
 
             return (
               <Card
+                id={`category-${category.key}`}
                 key={category.key}
-                className="hover:shadow-md transition-shadow group h-full flex flex-col"
+                className={`hover:shadow-md transition-shadow group h-full flex flex-col ${highlightedCategory === category.key ? 'ring-2 ring-primary-500 ring-offset-2' : ''}`}
               >
                 <CardHeader className="pb-3 flex-none">
                   <div className="flex items-start justify-between">
@@ -236,13 +275,36 @@ export function MyDocuments() {
                         </h3>
                     </div>
                     <button
-                      onClick={() => setHelpCategory(category)}
-                      className="p-1 rounded hover:bg-neutral-100 text-neutral-400 hover:text-neutral-600"
+                      onClick={() => setExpandedHelp(prev => ({ ...prev, [category.key]: !prev[category.key] }))}
+                      className={`p-1 rounded hover:bg-neutral-100 transition-colors ${expandedHelp[category.key] ? 'text-primary-600 bg-primary-50' : 'text-neutral-400 hover:text-neutral-600'}`}
+                      title="View details and examples"
                     >
                       <HelpCircle className="w-4 h-4" />
                     </button>
                   </div>
-                  <p className="text-xs text-neutral-500 mt-2 line-clamp-2 min-h-[2.5em]">{category.description}</p>
+
+                  {expandedHelp[category.key] ? (
+                    <div className="mt-3 p-3 bg-neutral-50 rounded-lg text-sm border border-neutral-100 animate-in fade-in slide-in-from-top-1">
+                      <p className="text-neutral-700 mb-2 text-xs">{category.explanation || category.description}</p>
+                      {category.examples && category.examples.length > 0 && (
+                        <div className="mb-2">
+                          <p className="font-semibold text-neutral-900 text-[10px] uppercase tracking-wider mb-1">Examples</p>
+                          <ul className="list-disc pl-4 space-y-0.5 text-neutral-600 text-xs">
+                            {category.examples.map((ex, i) => (
+                              <li key={i}>{ex}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {category.tips && (
+                        <div className="mt-2 pt-2 border-t border-neutral-200">
+                          <p className="text-[10px] text-neutral-500 italic">💡 {category.tips}</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-neutral-500 mt-2 line-clamp-2 min-h-[2.5em]">{category.description}</p>
+                  )}
                 </CardHeader>
                 <CardBody className="pt-3 border-t border-neutral-100 flex-1 flex flex-col">
                   <div className="space-y-2 flex-1">
@@ -303,15 +365,13 @@ export function MyDocuments() {
                       {rejected > 0 && <Badge variant="danger" className="text-[10px] py-0">{rejected} rejected</Badge>}
                     </div>
 
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="w-full"
-                      onClick={() => setUploadCategoryKey(category.key)}
-                    >
-                      <Upload className="w-3.5 h-3.5" />
-                      Upload
-                    </Button>
+                    <FileUpload
+                      key={`${category.key}-${docs.length}`} // Force reset after upload or doc change
+                      compact
+                      onFileSelect={(file) => handleInlineUpload(file, category.key)}
+                      uploading={uploading && inlineUploadCategory === category.key}
+                      className="mt-2"
+                    />
                   </div>
                 </CardBody>
               </Card>
@@ -321,21 +381,21 @@ export function MyDocuments() {
       )}
 
       <Modal
-        isOpen={!!uploadCategoryKey}
+        isOpen={!!modalCategoryKey}
         onClose={() => {
-          setUploadCategoryKey(null);
+          setModalCategoryKey(null);
           setUploadFile(null);
         }}
         title="Upload Document"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setUploadCategoryKey(null)}>
+            <Button variant="secondary" onClick={() => setModalCategoryKey(null)}>
               Cancel
             </Button>
             <Button
               loading={uploading}
               disabled={!uploadFile}
-              onClick={handleUpload}
+              onClick={handleModalUpload}
             >
               Upload
             </Button>
@@ -349,8 +409,8 @@ export function MyDocuments() {
               </label>
               <select
                 className="w-full rounded-lg border-neutral-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                value={uploadCategoryKey || ''}
-                onChange={(e) => setUploadCategoryKey(e.target.value)}
+                value={modalCategoryKey || ''}
+                onChange={(e) => setModalCategoryKey(e.target.value)}
               >
                   {categories.map(c => (
                       <option key={c.key} value={c.key}>{c.name}</option>
@@ -363,7 +423,7 @@ export function MyDocuments() {
                 File
             </label>
             <FileUpload
-                key={uploadCategoryKey || 'new'}
+                key={modalCategoryKey || 'new'}
                 onFileSelect={setUploadFile}
             />
           </div>
@@ -377,21 +437,6 @@ export function MyDocuments() {
         </div>
       </Modal>
 
-      <Modal
-        isOpen={!!helpCategory}
-        onClose={() => setHelpCategory(null)}
-        title={helpCategory?.name || ''}
-      >
-        <div className="space-y-4">
-          <p className="text-sm text-neutral-600">{helpCategory?.description}</p>
-          {helpCategory?.tips && (
-             <div className="bg-primary-50 p-3 rounded-lg border border-primary-100">
-                 <h4 className="text-xs font-bold text-primary-800 mb-1">Tip</h4>
-                 <p className="text-sm text-primary-700">{helpCategory.tips}</p>
-             </div>
-          )}
-        </div>
-      </Modal>
     </div>
   );
 }

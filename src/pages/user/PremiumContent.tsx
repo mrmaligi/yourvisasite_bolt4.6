@@ -490,7 +490,16 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                                     </h3>
                                     <div className="flex flex-wrap gap-2">
                                         {currentStep.required_documents.map(doc => (
-                                            <Badge key={doc} variant="warning">{doc}</Badge>
+                                            <a
+                                                key={doc}
+                                                href={`/dashboard/documents?category=${doc}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="hover:opacity-80 transition-opacity no-underline"
+                                                title={`View and upload ${doc} documents`}
+                                            >
+                                                <Badge variant="warning" className="cursor-pointer">{doc}</Badge>
+                                            </a>
                                         ))}
                                     </div>
                                     {currentStep.tips && (
