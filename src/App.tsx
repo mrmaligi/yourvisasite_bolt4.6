@@ -59,6 +59,7 @@ const TrackerManagement = lazy(() => import('./pages/admin/TrackerManagement').t
 const AdminPricing = lazy(() => import('./pages/admin/Pricing').then(m => ({ default: m.Pricing })));
 const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagement').then(m => ({ default: m.PromoCodeManagement })));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings').then(m => ({ default: m.AdminSettings })));
+const YouTubeManagement = lazy(() => import('./pages/admin/YouTubeManagement').then(m => ({ default: m.YouTubeManagement })));
 
 export default function App() {
   return (
@@ -122,6 +123,7 @@ export default function App() {
                     <Route path="visas" element={<VisaManagement />} />
                     <Route path="premium" element={<PremiumContent />} />
                     <Route path="news" element={<NewsManagement />} />
+                    <Route path="youtube" element={<YouTubeManagement />} />
                     <Route path="tracker" element={<TrackerManagement />} />
                     <Route path="pricing" element={<AdminPricing />} />
                     <Route path="promos" element={<PromoCodeManagement />} />

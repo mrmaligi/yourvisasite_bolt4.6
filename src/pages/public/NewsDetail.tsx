@@ -163,7 +163,7 @@ export function NewsDetail() {
     );
   }
 
-  const canComment = role === 'lawyer' || role === 'admin';
+  const canComment = !!user;
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -221,7 +221,7 @@ export function NewsDetail() {
           <div className="mt-12 pt-8 border-t border-neutral-200">
             <h2 className="text-xl font-bold text-neutral-900 mb-6 flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-primary-600" />
-              Professional Commentary
+              Comments
               <span className="text-sm font-normal text-neutral-400">({comments.length})</span>
             </h2>
 
@@ -229,18 +229,26 @@ export function NewsDetail() {
               <Card className="mb-8">
                 <CardBody>
                   <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                      role === 'admin'
+                        ? 'bg-gradient-to-br from-red-400 to-red-600'
+                        : role === 'lawyer'
+                        ? 'bg-gradient-to-br from-teal-400 to-teal-600'
+                        : 'bg-neutral-200'
+                    }`}>
                       {role === 'admin' ? (
                         <Shield className="w-4 h-4 text-white" />
-                      ) : (
+                      ) : role === 'lawyer' ? (
                         <Scale className="w-4 h-4 text-white" />
+                      ) : (
+                        <User className="w-4 h-4 text-neutral-500" />
                       )}
                     </div>
                     <div className="flex-1 space-y-3">
                       <textarea
                         value={commentBody}
                         onChange={(e) => setCommentBody(e.target.value)}
-                        placeholder="Share your professional insight on this article..."
+                        placeholder="Share your thoughts on this article..."
                         className="input-field min-h-[80px]"
                       />
                       <div className="flex justify-end">
@@ -263,7 +271,7 @@ export function NewsDetail() {
             {comments.length === 0 ? (
               <div className="text-center py-12">
                 <MessageSquare className="w-8 h-8 text-neutral-300 mx-auto mb-3" />
-                <p className="text-neutral-500">{canComment ? 'Be the first to share your insight.' : 'Verified lawyers and admins can comment on articles.'}</p>
+                <p className="text-neutral-500">{canComment ? 'Be the first to comment.' : 'Log in to join the discussion.'}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -281,7 +289,7 @@ export function NewsDetail() {
                       ) : comment.author_role === 'lawyer' ? (
                         <Scale className="w-4 h-4 text-white" />
                       ) : (
-                        <MessageSquare className="w-4 h-4 text-neutral-500" />
+                        <User className="w-4 h-4 text-neutral-500" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">

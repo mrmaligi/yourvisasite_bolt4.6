@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, MapPin, Briefcase, Clock, Scale, Users, Star } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Search, MapPin, Briefcase, Clock, Scale, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
@@ -17,15 +17,16 @@ interface LawyerListItem {
   hourly_rate_cents: number | null;
   full_name: string | null;
   avatar_url: string | null;
-  is_featured: boolean;
   slot_count: number;
 }
 
 export function LawyerDirectory() {
+  const [searchParams] = useSearchParams();
   const [lawyers, setLawyers] = useState<LawyerListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [jurisdictionFilter, setJurisdictionFilter] = useState('');
+  const filter = searchParams.get('filter');
 
   useEffect(() => {
     async function fetchLawyers() {
@@ -52,7 +53,7 @@ export function LawyerDirectory() {
         const profileIds = lawyerRows.map((l) => l.profile_id);
         const { data: profileRows, error: profileError } = await supabase
           .from('profiles')
-          .select('id, full_name, avatar_url, is_featured')
+          .select('id, full_name, avatar_url')
           .in('id', profileIds);
 
         if (profileError) {
@@ -86,16 +87,8 @@ export function LawyerDirectory() {
             ...l,
             full_name: p?.full_name || null,
             avatar_url: p?.avatar_url || null,
-            is_featured: p?.is_featured || false,
             slot_count: slotCounts[l.id] || 0,
           };
-        });
-
-        // Sort: Featured first, then by slot count, then random/id
-        merged.sort((a, b) => {
-            if (a.is_featured && !b.is_featured) return -1;
-            if (!a.is_featured && b.is_featured) return 1;
-            return b.slot_count - a.slot_count;
         });
 
         setLawyers(merged);
@@ -118,7 +111,8 @@ export function LawyerDirectory() {
       (l.practice_areas || []).some((a) => a.toLowerCase().includes(search.toLowerCase())) ||
       l.jurisdiction.toLowerCase().includes(search.toLowerCase());
     const matchJurisdiction = !jurisdictionFilter || l.jurisdiction === jurisdictionFilter;
-    return matchSearch && matchJurisdiction;
+    const matchAvailability = filter === 'available' ? l.slot_count > 0 : true;
+    return matchSearch && matchJurisdiction && matchAvailability;
   });
 
   return (
@@ -132,6 +126,13 @@ export function LawyerDirectory() {
         <p className="text-neutral-500 max-w-2xl">
           Find top-rated immigration lawyers to help with your visa application. Browse by specialization, reviews, and availability.
         </p>
+        {filter === 'available' && (
+          <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-md text-sm border border-emerald-100">
+            <Clock className="w-4 h-4" />
+            Showing lawyers available for immediate consultation
+            <Link to="/lawyers" className="ml-2 hover:text-emerald-900 font-medium">Clear filter</Link>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-8">
@@ -199,7 +200,7 @@ export function LawyerDirectory() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((lawyer) => (
             <Link key={lawyer.id} to={`/lawyers/${lawyer.id}`}>
-              <Card hover className="h-full group border-l-4 border-l-transparent hover:border-l-primary-500">
+              <Card hover className="h-full group">
                 <CardBody className="space-y-4">
                   <div className="flex items-center gap-4">
                     {lawyer.avatar_url ? (
@@ -213,18 +214,10 @@ export function LawyerDirectory() {
                         <Scale className="w-6 h-6 text-white" />
                       </div>
                     )}
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-2">
-                          <h3 className="font-semibold text-neutral-900 truncate group-hover:text-primary-700 transition-colors">
-                            {lawyer.full_name || 'Immigration Lawyer'}
-                          </h3>
-                          {lawyer.is_featured && (
-                              <Badge variant="warning" className="text-[10px] px-1.5 py-0 h-5 flex items-center gap-1 shrink-0">
-                                <Star className="w-3 h-3 fill-current" />
-                                Featured
-                              </Badge>
-                          )}
-                      </div>
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-neutral-900 truncate group-hover:text-primary-700 transition-colors">
+                        {lawyer.full_name || 'Immigration Lawyer'}
+                      </h3>
                       <div className="flex items-center gap-1.5 text-sm text-neutral-500 mt-0.5">
                         <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
                         <span className="truncate">{lawyer.jurisdiction}</span>

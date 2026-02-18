@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Newspaper, ExternalLink, Calendar } from 'lucide-react';
+import { Newspaper, ExternalLink, Calendar, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
@@ -15,6 +15,7 @@ interface NewsItem {
   published_at: string;
   is_premium: boolean;
   slug: string;
+  news_comments: { count: number }[];
 }
 
 export function LawyerNews() {
@@ -30,7 +31,7 @@ export function LawyerNews() {
   const fetchNews = async () => {
     let query = supabase
       .from('news_articles')
-      .select('id, title, summary, category, published_at, is_premium')
+      .select('id, title, summary, category, published_at, is_premium, news_comments(count)')
       .order('published_at', { ascending: false })
       .limit(20);
 
@@ -112,6 +113,10 @@ export function LawyerNews() {
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3.5 h-3.5" />
                         {new Date(item.published_at).toLocaleDateString()}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        {item.news_comments?.[0]?.count || 0}
                       </span>
                     </div>
                   </div>
