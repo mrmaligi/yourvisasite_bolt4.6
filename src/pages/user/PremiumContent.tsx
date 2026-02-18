@@ -440,11 +440,11 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                                         ? 'bg-primary-100 text-primary-700'
                                         : 'bg-neutral-100 text-neutral-500'
                                 }`}>
-                                    {isCompleted ? <CheckCircle className="w-4 h-4" /> : step.section_number}
+                                    {isCompleted ? <CheckCircle className="w-4 h-4" /> : step.step_number}
                                 </div>
                                 <div>
                                     <p className={`text-sm font-medium ${isActive ? 'text-primary-900' : 'text-neutral-700'}`}>
-                                        {step.section_title}
+                                        {step.title}
                                     </p>
                                 </div>
                             </button>
@@ -463,9 +463,9 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                         <div className="flex items-center justify-between mb-6 pb-6 border-b border-neutral-100">
                              <div>
                                 <span className="text-xs font-bold tracking-wider text-primary-600 uppercase mb-1 block">
-                                    Step {currentStep.section_number}
+                                    Step {currentStep.step_number}
                                 </span>
-                                <h2 className="text-2xl font-bold text-neutral-900">{currentStep.section_title}</h2>
+                                <h2 className="text-2xl font-bold text-neutral-900">{currentStep.title}</h2>
                              </div>
                              <button
                                 onClick={() => toggleStep(currentStep.id)}
@@ -490,20 +490,21 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                         </div>
 
                         {/* Document Requirement */}
-                        {currentStep.required_documents && currentStep.required_documents.length > 0 && (
+                        {currentStep.document_category && (
                             <div className="mb-8 p-4 bg-amber-50 rounded-lg border border-amber-100 flex gap-4">
                                 <FileText className="w-6 h-6 text-amber-600 flex-shrink-0 mt-1" />
                                 <div>
                                     <h3 className="font-semibold text-amber-900 mb-1">
                                         Required Documents
                                     </h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {currentStep.required_documents.map(doc => (
-                                            <Badge key={doc} variant="warning">{doc}</Badge>
-                                        ))}
-                                    </div>
-                                    {currentStep.tips && (
-                                        <p className="text-sm text-amber-800 mt-2">{currentStep.tips}</p>
+                                    <Badge variant="warning">{currentStep.document_category}</Badge>
+                                    {currentStep.document_explanation && (
+                                        <p className="text-sm text-amber-800 mt-2">{currentStep.document_explanation}</p>
+                                    )}
+                                     {currentStep.document_example_url && (
+                                        <a href={currentStep.document_example_url} target="_blank" rel="noopener noreferrer" className="text-sm text-amber-900 underline mt-2 block hover:text-amber-700">
+                                            View Example
+                                        </a>
                                     )}
                                 </div>
                             </div>
@@ -512,7 +513,7 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                         {/* Content Body */}
                         <div
                             className="prose prose-neutral max-w-none mb-12"
-                            dangerouslySetInnerHTML={{ __html: currentStep.content }}
+                            dangerouslySetInnerHTML={{ __html: currentStep.body }}
                         />
 
                         {/* Example Application */}
