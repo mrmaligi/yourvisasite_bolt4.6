@@ -36,12 +36,17 @@ Deno.serve(async (req) => {
       return new Response(`Webhook signature verification failed: ${error.message}`, { status: 400 });
     }
 
+    console.log(`Received event type: ${event.type}`);
+
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
       await handleCheckoutSessionCompleted(session);
     } else if (event.type === 'checkout.session.expired' || event.type === 'checkout.session.async_payment_failed') {
       const session = event.data.object as Stripe.Checkout.Session;
       await handleCheckoutSessionExpired(session);
+    } else if (event.type === 'payment_intent.payment_failed') {
+       const paymentIntent = event.data.object as Stripe.PaymentIntent;
+       await handlePaymentIntentFailed(paymentIntent);
     }
 
     return Response.json({ received: true });
@@ -67,11 +72,11 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   if (type === 'premium') {
     const visaId = metadata?.visa_id;
 
-    if (userId) {
-       // Insert into user_visa_purchases
+    if (userId && visaId) {
+       // Upsert into user_visa_purchases
        const purchaseData = {
          user_id: userId,
-         visa_id: visaId || null,
+         visa_id: visaId,
          stripe_payment_intent_id: typeof payment_intent === 'string' ? payment_intent : payment_intent?.id,
          stripe_checkout_session_id: sessionId,
          amount_cents: amount_total,
@@ -82,10 +87,10 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
        const { error } = await supabase
          .from('user_visa_purchases')
-         .insert(purchaseData);
+         .upsert(purchaseData, { onConflict: 'user_id, visa_id' });
 
        if (error) {
-         console.error('Error inserting user_visa_purchase:', error);
+         console.error('Error upserting user_visa_purchase:', error);
        } else {
          console.log('Successfully recorded premium purchase for user', userId);
        }
@@ -102,7 +107,8 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
           status: 'confirmed',
           payment_status: 'paid',
           confirmed_at: new Date().toISOString(),
-          payment_intent_id: typeof payment_intent === 'string' ? payment_intent : payment_intent?.id
+          payment_intent_id: typeof payment_intent === 'string' ? payment_intent : payment_intent?.id,
+          stripe_checkout_session_id: sessionId
         })
         .eq('id', bookingId);
 
@@ -154,4 +160,33 @@ async function handleCheckoutSessionExpired(session: Stripe.Checkout.Session) {
          .eq('id', slotId);
     }
   }
+}
+
+async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
+    const { metadata, last_payment_error } = paymentIntent;
+    const type = metadata?.type;
+
+    console.log(`Handling payment failure for type ${type}, error: ${last_payment_error?.message}`);
+
+    if (type === 'consultation') {
+        const bookingId = metadata?.booking_id;
+        const slotId = metadata?.slot_id;
+
+        if (bookingId) {
+            await supabase.from('bookings').update({ status: 'cancelled', payment_status: 'failed' }).eq('id', bookingId);
+        }
+
+        if (slotId) {
+            await supabase
+             .schema('lawyer')
+             .from('consultation_slots')
+             .update({ is_reserved: false, reserved_until: null })
+             .eq('id', slotId);
+        }
+    } else if (type === 'premium') {
+        // Just log it, user can try again
+        const userId = metadata?.user_id;
+        const visaId = metadata?.visa_id;
+        console.log(`Premium purchase failed for user ${userId}, visa ${visaId}`);
+    }
 }
