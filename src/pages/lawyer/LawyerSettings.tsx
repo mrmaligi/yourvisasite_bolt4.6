@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Save, User, Briefcase, DollarSign } from 'lucide-react';
+import { Save, User, Briefcase, Star } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
+import { ReviewManagement } from '../../components/ReviewManagement';
 
 export function LawyerSettings() {
   const { profile, user, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [lawyerId, setLawyerId] = useState<string | null>(null);
 
   const [profileData, setProfileData] = useState({
     full_name: '',
@@ -28,9 +28,6 @@ export function LawyerSettings() {
     bio: '',
     hourly_rate_cents: '',
   });
-
-  const [visas, setVisas] = useState<{id: string, name: string, subclass: string}[]>([]);
-  const [visaPrices, setVisaPrices] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!profile) return;
@@ -55,7 +52,6 @@ export function LawyerSettings() {
       .maybeSingle();
 
     if (data) {
-      setLawyerId(data.id);
       setLawyerData({
         jurisdiction: data.jurisdiction || '',
         bar_number: data.bar_number || '',
@@ -64,30 +60,6 @@ export function LawyerSettings() {
         bio: data.bio || '',
         hourly_rate_cents: data.hourly_rate_cents ? (data.hourly_rate_cents / 100).toString() : '',
       });
-
-      // Fetch Visas
-      const { data: visaList } = await supabase
-        .from('visas')
-        .select('id, name, subclass')
-        .eq('is_active', true)
-        .order('name');
-
-      setVisas(visaList || []);
-
-      // Fetch existing visa prices
-      const { data: prices } = await supabase
-        .schema('lawyer')
-        .from('visa_prices')
-        .select('visa_id, hourly_rate_cents')
-        .eq('lawyer_id', data.id);
-
-      const priceMap: Record<string, string> = {};
-      prices?.forEach(p => {
-        if (p.hourly_rate_cents !== null) {
-          priceMap[p.visa_id] = (p.hourly_rate_cents / 100).toString();
-        }
-      });
-      setVisaPrices(priceMap);
     }
 
     setLoading(false);
@@ -147,37 +119,6 @@ export function LawyerSettings() {
     }
 
     toast('success', 'Lawyer profile updated successfully');
-    setSaving(false);
-  };
-
-  const handleSaveVisaPrices = async () => {
-    if (!lawyerId) return;
-    setSaving(true);
-
-    const updates = visas.map(visa => {
-       const priceStr = visaPrices[visa.id];
-       // Treat empty string as null (remove override)
-       const cents = priceStr && priceStr.trim() !== '' ? Math.round(parseFloat(priceStr) * 100) : null;
-       return {
-          lawyer_id: lawyerId,
-          visa_id: visa.id,
-          hourly_rate_cents: cents
-       };
-    });
-
-    const { error } = await supabase
-       .schema('lawyer')
-       .from('visa_prices')
-       .upsert(updates, { onConflict: 'lawyer_id, visa_id' });
-
-    if (error) {
-      console.error(error);
-      toast('error', 'Failed to update visa prices');
-      setSaving(false);
-      return;
-    }
-
-    toast('success', 'Visa prices updated successfully');
     setSaving(false);
   };
 
@@ -271,12 +212,11 @@ export function LawyerSettings() {
           />
 
           <Input
-            label="Default Hourly Rate (USD)"
+            label="Hourly Rate (USD)"
             type="number"
             value={lawyerData.hourly_rate_cents}
             onChange={(e) => setLawyerData({ ...lawyerData, hourly_rate_cents: e.target.value })}
             placeholder="e.g., 250"
-            helperText="This rate applies if no specific visa rate is set below."
           />
 
           <div>
@@ -316,41 +256,12 @@ export function LawyerSettings() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <DollarSign className="w-5 h-5 text-neutral-400" />
-            <h2 className="text-lg font-semibold text-neutral-900">Visa Specific Pricing</h2>
+            <Star className="w-5 h-5 text-neutral-400" />
+            <h2 className="text-lg font-semibold text-neutral-900">Reviews & Reputation</h2>
           </div>
         </CardHeader>
-        <CardBody className="space-y-6">
-          <p className="text-sm text-neutral-500">
-            Set specific hourly rates for different visa types. If left blank, your default hourly rate will apply.
-          </p>
-
-          <div className="space-y-4">
-            {visas.map((visa) => (
-              <div key={visa.id} className="flex items-center gap-4 p-3 bg-neutral-50 rounded-lg">
-                <div className="flex-1">
-                  <p className="font-medium text-neutral-900">{visa.name}</p>
-                  <p className="text-xs text-neutral-500">Subclass {visa.subclass}</p>
-                </div>
-                <div className="w-40">
-                  <Input
-                    type="number"
-                    placeholder="Default"
-                    value={visaPrices[visa.id] || ''}
-                    onChange={(e) => setVisaPrices({ ...visaPrices, [visa.id]: e.target.value })}
-                    className="h-10 text-right"
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex justify-end">
-            <Button onClick={handleSaveVisaPrices} disabled={saving}>
-              <Save className="w-4 h-4 mr-2" />
-              Save Prices
-            </Button>
-          </div>
+        <CardBody>
+          <ReviewManagement />
         </CardBody>
       </Card>
     </div>

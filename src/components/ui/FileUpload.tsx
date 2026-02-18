@@ -7,6 +7,8 @@ interface FileUploadProps {
   maxSizeMb?: number;
   uploading?: boolean;
   progress?: number;
+  className?: string;
+  compact?: boolean;
 }
 
 export function FileUpload({
@@ -15,6 +17,8 @@ export function FileUpload({
   maxSizeMb = 10,
   uploading = false,
   progress = 0,
+  className = '',
+  compact = false,
 }: FileUploadProps) {
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,16 +60,17 @@ export function FileUpload({
   };
 
   return (
-    <div className="space-y-2">
+    <div className={`space-y-2 ${className}`}>
       <div
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
         className={`
-          relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200
+          relative border-2 border-dashed rounded-xl text-center cursor-pointer transition-all duration-200
           ${dragOver ? 'border-primary-500 bg-primary-50' : 'border-neutral-300 hover:border-neutral-400 hover:bg-neutral-50'}
           ${uploading ? 'pointer-events-none opacity-60' : ''}
+          ${compact ? 'p-3 flex items-center justify-center gap-2' : 'p-8'}
         `}
       >
         <input
@@ -75,13 +80,22 @@ export function FileUpload({
           onChange={handleChange}
           className="hidden"
         />
-        <Upload className="w-8 h-8 text-neutral-400 mx-auto mb-3" />
-        <p className="text-sm font-medium text-neutral-700">
-          Drag and drop your file here, or click to browse
-        </p>
-        <p className="text-xs text-neutral-400 mt-1">
-          PDF, JPG, PNG up to {maxSizeMb}MB
-        </p>
+        {compact ? (
+            <>
+                <Upload className="w-4 h-4 text-neutral-400" />
+                <span className="text-xs text-neutral-500 font-medium">Drop file or click to upload</span>
+            </>
+        ) : (
+            <>
+                <Upload className="w-8 h-8 text-neutral-400 mx-auto mb-3" />
+                <p className="text-sm font-medium text-neutral-700">
+                Drag and drop your file here, or click to browse
+                </p>
+                <p className="text-xs text-neutral-400 mt-1">
+                PDF, JPG, PNG up to {maxSizeMb}MB
+                </p>
+            </>
+        )}
       </div>
 
       {selectedFile && !error && (

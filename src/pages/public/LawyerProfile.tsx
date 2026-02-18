@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   MapPin, Briefcase, Clock, Scale, Calendar,
-  CheckCircle, ArrowLeft, Star, Shield, DollarSign
+  CheckCircle, ArrowLeft, Star, Shield, MessageSquare
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -24,6 +24,17 @@ interface LawyerData {
   avatar_url: string | null;
 }
 
+interface LawyerReview {
+  id: string;
+  user_id: string;
+  rating: number;
+  review_text: string;
+  reply_text: string | null;
+  replied_at: string | null;
+  created_at: string;
+  user_full_name?: string;
+}
+
 interface SlotData {
   id: string;
   lawyer_id: string;
@@ -39,8 +50,8 @@ export function LawyerProfile() {
   const navigate = useNavigate();
   const [lawyer, setLawyer] = useState<LawyerData | null>(null);
   const [slots, setSlots] = useState<SlotData[]>([]);
+  const [reviews, setReviews] = useState<LawyerReview[]>([]);
   const [loading, setLoading] = useState(true);
-  const [visaPrices, setVisaPrices] = useState<{name: string, price: number}[]>([]);
 
   useEffect(() => {
     if (!id) return;
@@ -84,31 +95,28 @@ export function LawyerProfile() {
 
       setSlots(slotRows || []);
 
-      // Fetch Visa Prices
-      const { data: prices } = await supabase
-        .schema('lawyer')
-        .from('visa_prices')
-        .select('visa_id, hourly_rate_cents')
-        .eq('lawyer_id', lawyerRow.id);
+      // Fetch reviews
+      const { data: reviewRows } = await supabase
+        .from('lawyer_reviews')
+        .select('*')
+        .eq('lawyer_id', lawyerRow.id)
+        .order('created_at', { ascending: false });
 
-      if (prices && prices.length > 0) {
-          const visaIds = prices.map(p => p.visa_id);
-          const { data: visaNames } = await supabase
-              .from('visas')
-              .select('id, name')
-              .in('id', visaIds);
+      if (reviewRows && reviewRows.length > 0) {
+        const userIds = [...new Set(reviewRows.map(r => r.user_id))];
+        const { data: users } = await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .in('id', userIds);
 
-          const nameMap = new Map(visaNames?.map(v => [v.id, v.name]) || []);
+        const userMap = new Map(users?.map(u => [u.id, u.full_name]) || []);
 
-          const formattedPrices = prices
-            .filter(p => p.hourly_rate_cents)
-            .map(p => ({
-                name: nameMap.get(p.visa_id) || 'Unknown Visa',
-                price: p.hourly_rate_cents!
-            }))
-            .filter(p => p.name !== 'Unknown Visa');
-
-          setVisaPrices(formattedPrices);
+        setReviews(reviewRows.map(r => ({
+          ...r,
+          user_full_name: userMap.get(r.user_id) || 'Anonymous'
+        })));
+      } else {
+        setReviews([]);
       }
 
       setLoading(false);
@@ -155,6 +163,9 @@ export function LawyerProfile() {
   }
 
   const slotGroups = groupSlotsByDate(slots);
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+    : 0;
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -186,6 +197,12 @@ export function LawyerProfile() {
             </Badge>
           </div>
           <div className="flex items-center gap-4 text-sm text-neutral-500 mt-1.5 flex-wrap">
+            {reviews.length > 0 && (
+              <span className="flex items-center gap-1.5 text-yellow-600 font-medium">
+                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                {averageRating.toFixed(1)} ({reviews.length} reviews)
+              </span>
+            )}
             <span className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4" />
               {lawyer.jurisdiction}
@@ -214,26 +231,6 @@ export function LawyerProfile() {
             <p className="text-neutral-600 leading-relaxed whitespace-pre-wrap">{lawyer.bio}</p>
           </CardBody>
         </Card>
-      )}
-
-      {/* Visa Pricing */}
-      {visaPrices.length > 0 && (
-          <Card className="mb-6">
-              <CardBody>
-                  <h2 className="text-sm font-semibold text-neutral-900 mb-3 flex items-center gap-2">
-                      <DollarSign className="w-4 h-4 text-primary-600" />
-                      Specialized Visa Rates
-                  </h2>
-                  <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
-                      {visaPrices.map((vp, i) => (
-                          <div key={i} className="flex justify-between items-center p-2.5 bg-neutral-50 rounded-lg text-sm border border-neutral-100">
-                              <span className="font-medium text-neutral-700">{vp.name}</span>
-                              <span className="text-neutral-900 font-semibold">${(vp.price / 100).toFixed(0)}/hr</span>
-                          </div>
-                      ))}
-                  </div>
-              </CardBody>
-          </Card>
       )}
 
       <Card className="mb-6">
@@ -308,9 +305,46 @@ export function LawyerProfile() {
               </h2>
             </CardHeader>
             <CardBody>
-               <div className="text-center py-8">
+              {reviews.length === 0 ? (
+                <div className="text-center py-8">
+                  <MessageSquare className="w-8 h-8 text-neutral-300 mx-auto mb-3" />
                   <p className="text-sm text-neutral-500">No reviews yet.</p>
-               </div>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {reviews.map((review) => (
+                    <div key={review.id} className="border-b border-neutral-100 last:border-0 pb-6 last:pb-0">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <p className="font-semibold text-sm text-neutral-900">{review.user_full_name}</p>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-3 h-3 ${
+                                  i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-neutral-200'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <span className="text-xs text-neutral-400">
+                          {new Date(review.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-sm text-neutral-600 leading-relaxed mb-3">
+                        {review.review_text}
+                      </p>
+                      {review.reply_text && (
+                        <div className="bg-neutral-50 rounded-lg p-3 text-xs">
+                          <p className="font-semibold text-neutral-900 mb-1">Lawyer Response</p>
+                          <p className="text-neutral-600">{review.reply_text}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardBody>
           </Card>
         </div>
