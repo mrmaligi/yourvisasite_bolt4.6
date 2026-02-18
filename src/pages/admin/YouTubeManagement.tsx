@@ -5,12 +5,18 @@ import { Button } from '../../components/ui/Button';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
-import type { YouTubeFeed, Visa } from '../../types/database';
+import type { YouTubeFeed } from '../../types/database';
+
+interface VisaOption {
+  id: string;
+  subclass: string;
+  name: string;
+}
 
 export function YouTubeManagement() {
   const [feeds, setFeeds] = useState<YouTubeFeed[]>([]);
-  const [visas, setVisas] = useState<Visa[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [visas, setVisas] = useState<VisaOption[]>([]);
+  const [, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     title: '',
     youtube_url: '',

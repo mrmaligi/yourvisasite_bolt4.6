@@ -40,7 +40,7 @@ import { Modal } from '../../components/ui/Modal';
 import { FileUpload } from '../../components/ui/FileUpload';
 import { useToast } from '../../components/ui/Toast';
 import { useDocuments } from '../../hooks/useDocuments';
-import type { UserDocument, DocumentCategory } from '../../types/database';
+import type { UserDocument } from '../../types/database';
 
 // Map icon strings from DB to Lucide components
 const ICON_MAP: Record<string, any> = {
@@ -260,7 +260,6 @@ export function MyDocuments() {
 
             return (
               <Card
-                id={`category-${category.key}`}
                 key={category.key}
                 className={`hover:shadow-md transition-shadow group h-full flex flex-col ${highlightedCategory === category.key ? 'ring-2 ring-primary-500 ring-offset-2' : ''}`}
               >

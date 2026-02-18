@@ -253,7 +253,7 @@ export function LawyerTracker() {
             type="date"
             value={formData.decision_date}
             onChange={(e) => setFormData({ ...formData, decision_date: e.target.value })}
-            description={formData.outcome === 'pending' ? 'Optional for pending applications' : 'Required for completed applications'}
+            helperText={formData.outcome === 'pending' ? 'Optional for pending applications' : 'Required for completed applications'}
           />
         </div>
       </Modal>

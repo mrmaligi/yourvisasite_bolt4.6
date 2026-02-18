@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, Download, Shield, Ban, CheckCircle, MoreHorizontal, Edit, AlertTriangle } from 'lucide-react';
+import { Search, Download, Ban, CheckCircle, Edit, AlertTriangle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
@@ -190,7 +190,7 @@ export function UserManagement() {
                     </Badge>
                   </td>
                   <td className="px-6 py-4">
-                    <Badge variant={user.is_active ? 'success' : 'neutral'}>
+                    <Badge variant={user.is_active ? 'success' : 'secondary'}>
                       {user.is_active ? 'Active' : 'Disabled'}
                     </Badge>
                   </td>

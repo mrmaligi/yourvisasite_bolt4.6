@@ -57,6 +57,8 @@ export interface DocumentCategory {
   icon: string;
   is_active: boolean;
   display_order: number;
+  explanation: string | null;
+  examples: string[] | null;
   created_at: string;
   updated_at: string;
 }
@@ -81,6 +83,13 @@ export interface VisaPremiumContent {
   estimated_minutes: number | null;
   required_documents: string[] | null;
   application_example_json: ApplicationExampleField[] | null;
+  // New fields for document guidance
+  step_number: number | null;
+  title: string | null;
+  body: string | null;
+  document_category: string | null;
+  document_explanation: string | null;
+  document_example_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -272,4 +281,25 @@ export interface Message {
   message_text: string;
   is_read: boolean;
   created_at: string;
+}
+
+export interface LawyerReview {
+  id: string;
+  lawyer_id: string;
+  user_id: string;
+  booking_id: string;
+  rating: number;
+  review_text: string | null;
+  reply_text: string | null;
+  replied_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReviewWithUser extends LawyerReview {
+  user: {
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+  };
 }

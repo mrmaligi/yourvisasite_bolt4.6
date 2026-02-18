@@ -41,7 +41,7 @@ export function PremiumContent() {
   }, [selectedVisaId]);
 
   const addStep = () => {
-    const next = steps.length > 0 ? Math.max(...steps.map((s) => s.step_number)) + 1 : 1;
+    const next = steps.length > 0 ? Math.max(...steps.map((s) => s.step_number || 0)) + 1 : 1;
     setSteps([...steps, {
       id: `new-${Date.now()}`,
       visa_id: selectedVisaId,
@@ -53,7 +53,16 @@ export function PremiumContent() {
       document_example_url: null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-    }]);
+      section_number: next,
+      section_title: '',
+      content: '',
+      tips: null,
+      common_mistakes: null,
+      examples: null,
+      estimated_minutes: null,
+      required_documents: null,
+      application_example_json: null,
+    } as VisaPremiumContent]);
   };
 
   const updateStep = (idx: number, field: keyof VisaPremiumContent, value: any) => {
@@ -130,7 +139,7 @@ export function PremiumContent() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
                       label="Section Title"
-                      value={step.title}
+                      value={step.title || ''}
                       onChange={(e) => updateStep(idx, 'title', e.target.value)}
                       placeholder="e.g. Personal Details"
                     />
@@ -144,7 +153,7 @@ export function PremiumContent() {
 
                   <Textarea
                     label="Content (Markdown)"
-                    value={step.body}
+                    value={step.body || ''}
                     onChange={(e) => updateStep(idx, 'body', e.target.value)}
                     rows={6}
                     placeholder="# Heading&#10;Content goes here..."

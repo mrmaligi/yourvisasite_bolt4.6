@@ -9,6 +9,7 @@ import { Card, CardBody } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
+import { useAuth } from '../../hooks/useAuth';
 
 interface LawyerData {
   id: string;
@@ -34,6 +35,7 @@ export function BookConsultation() {
   const { lawyerId } = useParams<{ lawyerId: string }>();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [lawyer, setLawyer] = useState<LawyerData | null>(null);
   const [slots, setSlots] = useState<SlotData[]>([]);

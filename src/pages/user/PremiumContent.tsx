@@ -513,7 +513,7 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                         {/* Content Body */}
                         <div
                             className="prose prose-neutral max-w-none mb-12"
-                            dangerouslySetInnerHTML={{ __html: currentStep.body }}
+                            dangerouslySetInnerHTML={{ __html: currentStep.body || '' }}
                         />
 
                         {/* Example Application */}

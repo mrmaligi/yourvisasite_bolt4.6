@@ -17,6 +17,8 @@ interface BookingCardProps {
   onReschedule?: (id: string) => void;
   onReview?: (id: string) => void;
   hasReview?: boolean;
+  onAcceptTakeover?: (id: string) => Promise<void>;
+  onRejectTakeover?: (id: string) => Promise<void>;
 }
 
 const statusVariant = {
@@ -35,7 +37,9 @@ export function BookingCard({
   onJoin,
   onReschedule,
   onReview,
-  hasReview
+  hasReview,
+  onAcceptTakeover,
+  onRejectTakeover
 }: BookingCardProps) {
   const isPast = booking.start_time ? new Date(booking.start_time) < new Date() : false;
   const showJoin = booking.status === 'confirmed' && !isPast; // Simplified logic for join button
@@ -159,6 +163,18 @@ export function BookingCard({
                   <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => onCancel(booking.id)}>
                     Cancel
                   </Button>
+                )}
+                {/* File Takeover Actions */}
+                {booking.file_takeover_status === 'requested' && onAcceptTakeover && onRejectTakeover && (
+                  <>
+                    <Button size="sm" onClick={() => onAcceptTakeover(booking.id)}>
+                      <CheckCircle className="w-4 h-4 mr-1.5" />
+                      Accept Takeover
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => onRejectTakeover(booking.id)}>
+                      Reject
+                    </Button>
+                  </>
                 )}
               </>
             )}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   Users, Scale, FileText, DollarSign, BarChart3, ShieldCheck,
-  ExternalLink, UserPlus, FileEdit, CheckCircle2, AlertCircle
+  ExternalLink, UserPlus, FileEdit, AlertCircle
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -9,7 +9,6 @@ import {
 } from 'recharts';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
 import { Link } from 'react-router-dom';
 import { Loading } from '../../components/ui/Loading';
 
@@ -130,7 +129,7 @@ export function AdminDashboard() {
       recentPurchases.data?.forEach(p => activities.push({
         id: p.id,
         type: 'purchase',
-        description: `Purchase: ${p.visas?.name || 'Visa'} by ${(p.profiles as any)?.full_name || 'User'}`,
+        description: `Purchase: ${(p.visas as any)?.name || 'Visa'} by ${(p.profiles as any)?.full_name || 'User'}`,
         date: p.purchased_at
       }));
 
@@ -282,7 +281,7 @@ export function AdminDashboard() {
                     paddingAngle={5}
                     dataKey="value"
                   >
-                    {bookingStatusData.map((entry, index) => (
+                    {bookingStatusData.map((_entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
