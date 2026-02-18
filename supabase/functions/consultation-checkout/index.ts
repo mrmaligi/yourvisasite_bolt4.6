@@ -167,7 +167,7 @@ Deno.serve(async (req: Request) => {
     // Update booking with payment intent
     await supabase
       .from('bookings')
-      .update({ payment_intent_id: session.id })
+      .update({ stripe_checkout_session_id: session.id })
       .eq('id', booking.id);
 
     // Mark slot as reserved (not booked until payment confirmed)
