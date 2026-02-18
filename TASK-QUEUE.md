@@ -28,14 +28,14 @@ Each cron job picks the FIRST task with status=QUEUED, fires it to Jules, and ma
 | T14 | Lawyer Availability + Tracker + News + Settings | Availability calendar UI. Weighted tracker submissions. News comments. Lawyer settings page. | MERGED |
 | T11 | Consultation Booking Flow | From lawyer profile: select time slot → confirm → Stripe checkout → booking created. Consultations page listing upcoming/past. | MERGED |
 | T12 | Lawyer Registration + Pending | /register/lawyer form: bar number, jurisdiction, specializations, rate, credential upload. Pending page after submission. | MERGED |
-| T13 | Lawyer Dashboard + Clients | Lawyer dashboard with stats (clients, earnings, consultations). Clients page listing all booked clients with shared docs. | QUEUED |
-| T14 | Lawyer Availability + Tracker + News + Settings | Availability calendar UI. Weighted tracker submissions. News comments. Lawyer settings page. | QUEUED |
-| T15 | Admin Dashboard + User Management | Admin dashboard with platform stats/charts. User management: list, search, change roles, disable. | QUEUED |
-| T16 | Admin Lawyer + Visa + News + Tracker Management | Approve/reject lawyers. Visa CRUD. News publish/edit. Tracker moderation. Premium content management. | QUEUED |
-| T17 | Error Handling + Loading States + Empty States | Every page: loading skeleton, error boundary, empty state, toast notifications. 404 page. Network error handling. | QUEUED |
-| T18 | Responsive Design + UI Polish | Test all pages mobile/tablet/desktop. Fix layouts. Consistent spacing/colors/typography. Accessibility basics. | QUEUED |
-| T19 | Build Fix — Zero TypeScript Errors | npm run build with zero errors. Fix ALL TS errors. Verify all imports. Remove dead code. | QUEUED |
-| T20 | Integration Test — All Routes Working | Verify every route renders. Check Supabase queries work. Test auth flow. Test role-based access. Document any issues. | QUEUED |
+| T13 | Lawyer Dashboard + Clients | Lawyer dashboard with stats (clients, earnings, consultations). Clients page listing all booked clients with shared docs. | MERGED |
+| T14 | Lawyer Availability + Tracker + News + Settings | Availability calendar UI. Weighted tracker submissions. News comments. Lawyer settings page. | MERGED |
+| T15 | Admin Dashboard + User Management | Admin dashboard with platform stats/charts. User management: list, search, change roles, disable. | MERGED |
+| T16 | Admin Lawyer + Visa + News + Tracker Management | Approve/reject lawyers. Visa CRUD. News publish/edit. Tracker moderation. Premium content management. | MERGED |
+| T17 | Error Handling + Loading States + Empty States | Every page: loading skeleton, error boundary, empty state, toast notifications. 404 page. Network error handling. | MERGED |
+| T18 | Responsive Design + UI Polish | Test all pages mobile/tablet/desktop. Fix layouts. Consistent spacing/colors/typography. Accessibility basics. | MERGED |
+| T19 | Build Fix — Zero TypeScript Errors | npm run build with zero errors. Fix ALL TS errors. Verify all imports. Remove dead code. | VERIFIED |
+| T20 | Integration Test — All Routes Working | Verify every route renders. Check Supabase queries work. Test auth flow. Test role-based access. Document any issues. | IN_PROGRESS |
 
 ## DAILY SCHEDULE (12 cron jobs per day)
 
