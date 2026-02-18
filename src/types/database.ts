@@ -60,16 +60,26 @@ export interface DocumentCategory {
   updated_at: string;
 }
 
+export interface ApplicationExampleField {
+  field_name: string;
+  field_description: string;
+  example_value: string;
+  tip: string;
+}
+
 // Premium content for a visa, organized by sections/steps
 export interface VisaPremiumContent {
   id: string;
   visa_id: string;
-  step_number: number;
-  title: string;
-  body: string;
-  document_category: string | null;
-  document_explanation: string | null;
-  document_example_url: string | null;
+  section_number: number;
+  section_title: string;
+  content: string;
+  tips: string | null;
+  common_mistakes: string | null;
+  examples: Record<string, any> | null;
+  estimated_minutes: number | null;
+  required_documents: string[] | null;
+  application_example_json: ApplicationExampleField[] | null;
   created_at: string;
   updated_at: string;
 }
