@@ -191,7 +191,6 @@ export function VisaDetail() {
         <div className="flex flex-wrap items-center gap-3 mb-4">
             <Badge className="text-sm px-3 py-1">{visa.subclass}</Badge>
             <Badge variant="primary" className="text-sm px-3 py-1">{visa.category}</Badge>
-            {visa.country && <Badge variant="info" className="text-sm px-3 py-1">{visa.country}</Badge>}
         </div>
         <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-6">{visa.name}</h1>
 

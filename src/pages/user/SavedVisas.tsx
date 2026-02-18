@@ -127,7 +127,6 @@ export function SavedVisas() {
                     <div className="space-y-1 pr-8">
                        <div className="flex items-center gap-2 mb-2">
                         <Badge>{sv.visa.subclass}</Badge>
-                        <Badge variant="info" className="capitalize">{sv.visa.country}</Badge>
                       </div>
                       <h3 className="text-lg font-bold text-neutral-900 line-clamp-1" title={sv.visa.name}>
                         {sv.visa.name}
