@@ -4,10 +4,8 @@ import {
   Calendar, Clock, Shield, MapPin, Briefcase, CreditCard, AlertCircle, ArrowLeft,
   FileText, CheckSquare, Square, ChevronDown, ChevronUp
 } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
-import { Badge } from '../../components/ui/Badge';
+import { Card, CardBody } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
@@ -34,7 +32,6 @@ interface SlotData {
 
 export function BookConsultation() {
   const { lawyerId } = useParams<{ lawyerId: string }>();
-  const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 

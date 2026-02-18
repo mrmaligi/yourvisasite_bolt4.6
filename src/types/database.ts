@@ -17,14 +17,14 @@ export interface Profile {
   updated_at: string;
 }
 
-export interface LawyerVisaPrice {
+export interface YouTubeFeed {
   id: string;
-  lawyer_id: string;
-  visa_id: string;
-  hourly_rate_cents: number | null;
-  consultation_fee_cents: number | null;
+  title: string;
+  youtube_url: string;
+  thumbnail_url: string | null;
+  channel_name: string;
+  visa_id: string | null;
   created_at: string;
-  updated_at: string;
 }
 
 export interface Visa {
@@ -183,7 +183,6 @@ export interface Booking {
   stripe_checkout_session_id: string | null;
   confirmed_at: string | null;
   notes: string | null;
-  questions: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -250,4 +249,14 @@ export interface NotificationPreferences {
   push_processing_time_alert: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface Message {
+  id: string;
+  booking_id: string;
+  sender_id: string;
+  sender_role: UserRole;
+  message_text: string;
+  is_read: boolean;
+  created_at: string;
 }

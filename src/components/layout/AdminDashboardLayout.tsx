@@ -10,6 +10,7 @@ import {
   DollarSign,
   Tag,
   Settings,
+  Youtube,
 } from 'lucide-react';
 import { DashboardLayout } from './DashboardLayout';
 
@@ -21,6 +22,7 @@ const sidebarItems = [
   { to: '/admin/visas', label: 'Visas', icon: FileText },
   { to: '/admin/premium', label: 'Premium Content', icon: BookOpen },
   { to: '/admin/news', label: 'News', icon: Newspaper },
+  { to: '/admin/youtube', label: 'YouTube Feed', icon: Youtube },
   { to: '/admin/tracker', label: 'Tracker', icon: BarChart3 },
   { to: '/admin/pricing', label: 'Pricing', icon: DollarSign },
   { to: '/admin/promos', label: 'Promo Codes', icon: Tag },

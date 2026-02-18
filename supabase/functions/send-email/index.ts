@@ -12,7 +12,7 @@ interface EmailRequest {
 
 interface NotificationPayload {
   userId: string;
-  type: 'booking_confirmation' | 'booking_reminder' | 'consultation_cancelled' | 'processing_time_alert' | 'welcome' | 'premium_purchase';
+  type: 'booking_confirmation' | 'booking_reminder' | 'consultation_cancelled' | 'processing_time_alert' | 'welcome' | 'premium_purchase' | 'lawyer_approved' | 'lawyer_rejected' | 'payment_receipt' | 'new_message';
   data: Record<string, any>;
 }
 
@@ -182,6 +182,102 @@ const templates = {
       </div>
     `,
     text: `Premium guide unlocked for ${data.visaName}. Amount: $${data.amount}. Access: ${data.guideUrl}`
+  }),
+
+  lawyer_approved: (data: any) => ({
+    subject: 'Your Lawyer Profile is Approved!',
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #15803d;">Welcome to the Directory!</h1>
+        <p>Hi ${data.userName},</p>
+        <p>Great news! Your lawyer profile has been verified and approved.</p>
+
+        <div style="background: #f0fdf4; border: 1px solid #86efac; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #166534;">What Happens Next?</h3>
+          <ul style="padding-left: 20px;">
+            <li>Your profile is now visible to potential clients</li>
+            <li>You can set up consultation slots</li>
+            <li>You can accept booking requests</li>
+          </ul>
+        </div>
+
+        <a href="${data.dashboardUrl}" style="display: inline-block; background: #1a56db; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 10px;">Go to Dashboard</a>
+
+        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+        <p style="color: #6b7280; font-size: 12px;">You're receiving this because you're a registered lawyer on VisaBuild. <a href="${data.preferencesUrl}">Manage preferences</a></p>
+      </div>
+    `,
+    text: `Your lawyer profile has been approved! Log in to set up your consultation slots: ${data.dashboardUrl}`
+  }),
+
+  lawyer_rejected: (data: any) => ({
+    subject: 'Update on Your Lawyer Profile Application',
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #92400e;">Application Update</h1>
+        <p>Hi ${data.userName},</p>
+        <p>Thank you for your interest in joining VisaBuild as a lawyer.</p>
+
+        <div style="background: #fffbeb; border: 1px solid #fbbf24; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #92400e;">Status: Further Action Required</h3>
+          <p>Unfortunately, we couldn't verify your profile at this time.</p>
+          ${data.reason ? `<p><strong>Reason:</strong> ${data.reason}</p>` : ''}
+          <p>You may need to upload additional documents or update your information.</p>
+        </div>
+
+        <a href="${data.settingsUrl}" style="display: inline-block; background: #1a56db; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 10px;">Review Application</a>
+
+        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+        <p style="color: #6b7280; font-size: 12px;">Questions? Reply to this email. <a href="${data.preferencesUrl}">Manage preferences</a></p>
+      </div>
+    `,
+    text: `We couldn't verify your lawyer profile. Reason: ${data.reason || 'Not specified'}. Please review your application: ${data.settingsUrl}`
+  }),
+
+  payment_receipt: (data: any) => ({
+    subject: `Payment Receipt`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #1a56db;">Payment Receipt</h1>
+        <p>Hi ${data.userName},</p>
+        <p>This email confirms your recent payment.</p>
+
+        <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0;">Payment Details</h3>
+          <p><strong>Description:</strong> ${data.description}</p>
+          <p><strong>Date:</strong> ${data.date}</p>
+          <p><strong>Amount:</strong> $${data.amount}</p>
+          ${data.paymentMethod ? `<p><strong>Payment Method:</strong> ${data.paymentMethod}</p>` : ''}
+        </div>
+
+        <a href="${data.receiptUrl || data.dashboardUrl}" style="display: inline-block; background: #1a56db; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 10px;">View in Dashboard</a>
+
+        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+        <p style="color: #6b7280; font-size: 12px;">This is an automated receipt. <a href="${data.preferencesUrl}">Manage preferences</a></p>
+      </div>
+    `,
+    text: `Payment Receipt. Description: ${data.description}. Amount: $${data.amount}. Date: ${data.date}. View: ${data.dashboardUrl}`
+  }),
+
+  new_message: (data: any) => ({
+    subject: `New Message from ${data.senderName}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #1a56db;">New Message</h1>
+        <p>Hi ${data.userName},</p>
+        <p>You have received a new message from <strong>${data.senderName}</strong>.</p>
+
+        <div style="background: #eff6ff; border: 1px solid #93c5fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <p style="font-style: italic;">"${data.preview || 'Click to view message...'}"</p>
+        </div>
+
+        <a href="${data.messageUrl}" style="display: inline-block; background: #1a56db; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 10px;">Reply Now</a>
+
+        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+        <p style="color: #6b7280; font-size: 12px;">This message was sent via VisaBuild. <a href="${data.preferencesUrl}">Manage preferences</a></p>
+      </div>
+    `,
+    text: `You have a new message from ${data.senderName}. "${data.preview || '...'}" Reply: ${data.messageUrl}`
   })
 };
 
@@ -264,12 +360,21 @@ Deno.serve(async (req) => {
       .eq('user_id', userId)
       .single();
 
-    const emailPrefKey = `email_${type}` as keyof typeof prefs;
-    if (prefs && prefs[emailPrefKey] === false) {
-      return new Response(
-        JSON.stringify({ skipped: true, reason: 'User preferences disabled' }),
-        { headers: { 'Content-Type': 'application/json' } }
-      );
+    if (prefs) {
+      let emailPrefKey = `email_${type}`;
+
+      // Map complex types to preference keys
+      if (type === 'lawyer_approved' || type === 'lawyer_rejected') {
+        emailPrefKey = 'email_lawyer_status_update';
+      }
+
+      // Check if preference exists and is disabled
+      if (prefs[emailPrefKey as keyof typeof prefs] === false) {
+        return new Response(
+          JSON.stringify({ skipped: true, reason: 'User preferences disabled' }),
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
     // Generate email content from template
@@ -284,6 +389,7 @@ Deno.serve(async (req) => {
     const emailContent = template({
       ...data,
       userName: userData.full_name || 'there',
+      preferencesUrl: `${Deno.env.get('VITE_APP_URL') || 'https://visabuild.com'}/settings/notifications`, // fallback
     });
 
     // Send email

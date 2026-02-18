@@ -7,11 +7,14 @@ import {
   ArrowRight,
   CheckCircle,
   BarChart3,
-  BookOpen
+  BookOpen,
+  Phone
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/Button';
 import { Card, CardBody } from '../../components/ui/Card';
+import { QuickCallBanner } from '../../components/QuickCallBanner';
+import { YouTubeFeed } from '../../components/YouTubeFeed';
 
 export function Landing() {
   const [stats, setStats] = useState({
@@ -37,6 +40,7 @@ export function Landing() {
 
   return (
     <div className="bg-white dark:bg-neutral-900 transition-colors duration-300">
+      <QuickCallBanner />
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-neutral-900 py-24 sm:py-32">
         <div className="absolute inset-0 z-0 opacity-20">
@@ -62,6 +66,12 @@ export function Landing() {
                 <Search className="ml-2 w-5 h-5" />
               </Button>
             </Link>
+            <Link to="/lawyers?filter=available">
+              <Button size="lg" className="w-full sm:w-auto text-lg px-8 bg-emerald-600 hover:bg-emerald-700 text-white border-transparent">
+                Quick Call
+                <Phone className="ml-2 w-5 h-5" />
+              </Button>
+            </Link>
             <Link to="/tracker">
               <Button variant="secondary" size="lg" className="w-full sm:w-auto text-lg px-8 bg-white/10 text-white border-white/20 hover:bg-white/20">
                 Track Processing Times
@@ -75,20 +85,20 @@ export function Landing() {
       {/* Stats Bar */}
       <section className="bg-primary-50 dark:bg-primary-900/10 border-y border-primary-100 dark:border-primary-900/20 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-primary-200/50 dark:divide-primary-800/50">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center md:divide-x divide-primary-200/50 dark:divide-primary-800/50">
             <div className="space-y-1">
               <p className="text-3xl font-bold text-primary-700 dark:text-primary-400">{stats.visas}+</p>
               <p className="text-sm font-medium text-primary-600 dark:text-primary-300">Visa Subclasses</p>
             </div>
-            <div className="space-y-1 pl-4">
+            <div className="space-y-1 md:pl-4">
               <p className="text-3xl font-bold text-primary-700 dark:text-primary-400">19</p>
               <p className="text-sm font-medium text-primary-600 dark:text-primary-300">Document Categories</p>
             </div>
-            <div className="space-y-1 pl-4">
+            <div className="space-y-1 md:pl-4">
               <p className="text-3xl font-bold text-primary-700 dark:text-primary-400">Real</p>
               <p className="text-sm font-medium text-primary-600 dark:text-primary-300">Processing Data</p>
             </div>
-            <div className="space-y-1 pl-4">
+            <div className="space-y-1 md:pl-4">
               <p className="text-3xl font-bold text-primary-700 dark:text-primary-400">Expert</p>
               <p className="text-sm font-medium text-primary-600 dark:text-primary-300">Lawyers</p>
             </div>
@@ -160,6 +170,8 @@ export function Landing() {
           </div>
         </div>
       </section>
+
+      <YouTubeFeed />
 
       {/* Testimonials */}
       <section className="py-24 bg-white dark:bg-neutral-900 transition-colors duration-300">
