@@ -42,27 +42,22 @@ export function StripeCheckout({
         throw new Error('Please sign in to continue');
       }
 
-      let functionName = 'stripe-checkout';
-      let body: any = {
+      const functionName = 'stripe-checkout';
+      const body: any = {
         type,
-        user_id: user.id,
         redirect_path: redirectPath,
       };
 
       if (type === 'premium') {
-        functionName = 'stripe-checkout';
         body.visa_id = visaId;
-        body.amount = amount; // Although backend might ignore it for premium
+        // amount is ignored by backend for premium as it uses server-side constant
       } else if (type === 'consultation') {
         if (!lawyerId || !slotId) {
           throw new Error('Missing required details for consultation booking');
         }
-        functionName = 'consultation-checkout';
-        body.lawyerId = lawyerId;
-        body.slotId = slotId;
+        body.lawyer_id = lawyerId;
+        body.slot_id = slotId;
         body.notes = notes;
-        // consultation-checkout calculates price on server, so we don't pass amount
-        // but we might want to pass success/cancel URLs if we want to override defaults
       }
 
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${functionName}`, {
@@ -81,9 +76,6 @@ export function StripeCheckout({
 
       const { sessionId, url } = await response.json();
       
-      // If we got a URL (e.g. from stripe-checkout which returns url directly, or consultation-checkout which returns sessionId and url)
-      // We can redirect using window.location or stripe.redirectToCheckout
-
       if (onSuccess) {
         onSuccess();
       }
@@ -93,7 +85,7 @@ export function StripeCheckout({
         return;
       }
 
-      // Fallback to redirectToCheckout if only sessionId is returned (though my functions return url too)
+      // Fallback to redirectToCheckout if only sessionId is returned
       const stripe = await getStripePromise();
       if (!stripe) {
         throw new Error('Stripe failed to load');

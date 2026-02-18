@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import { Calendar, History } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { useToast } from '../../components/ui/Toast';
 import { useBookings } from '../../hooks/useBookings';
 import { BookingCard } from '../../components/BookingCard';
-import { Card, CardBody } from '../../components/ui/Card';
 
 export function Consultations() {
   const { bookings, loading, refetch } = useBookings();
@@ -29,12 +27,12 @@ export function Consultations() {
     }
   };
 
-  const handleReschedule = (id: string) => {
+  const handleReschedule = () => {
     // For now, just show a message. Ideally this would open a reschedule flow.
     toast('info', 'Please contact the lawyer directly to reschedule.');
   };
 
-  const handleJoin = (id: string) => {
+  const handleJoin = () => {
       // Logic to join call (e.g. open video link if available)
       // Since video link isn't in schema yet, we'll just show a toast or placeholder
       toast('info', 'Joining consultation room...');
