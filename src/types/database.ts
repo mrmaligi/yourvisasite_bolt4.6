@@ -36,6 +36,7 @@ export interface Visa {
   updated_at: string;
 }
 
+// Premium content for a visa, organized by steps
 export interface VisaPremiumContent {
   id: string;
   visa_id: string;
