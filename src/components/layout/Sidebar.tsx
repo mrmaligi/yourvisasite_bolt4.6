@@ -21,123 +21,102 @@ export function Sidebar({ items, title, mobileOpen = false, onMobileClose }: Sid
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
 
-<<<<<<< HEAD
-  return (
-    <aside
-      className={`hidden lg:flex flex-col bg-white dark:bg-neutral-900 border-r border-neutral-200/80 dark:border-neutral-700/80 transition-all duration-300 ease-out ${
-        collapsed ? 'w-[72px]' : 'w-64'
-      }`}
-    >
-      <div className="flex items-center justify-between h-16 px-4 border-b border-neutral-100 dark:border-neutral-800">
-=======
-  const sidebarContent = (
-    <div className="flex flex-col h-full bg-white dark:bg-neutral-900 border-r border-neutral-200/80 dark:border-neutral-800 transition-all duration-300 ease-out">
-      <div className="flex items-center justify-between h-16 px-4 border-b border-neutral-100 dark:border-neutral-800 flex-shrink-0">
->>>>>>> origin/main
-        {!collapsed && (
-          <Link to="/" onClick={onMobileClose}>
-            <Logo size="sm" />
-          </Link>
-        )}
-        {collapsed && (
-          <Link to="/" className="mx-auto" onClick={onMobileClose}>
-            <Logo size="sm" showText={false} />
-          </Link>
-        )}
-<<<<<<< HEAD
-        {!collapsed && (
-          <button
-            onClick={() => setCollapsed(true)}
-            className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-=======
+  const renderContent = (isMobile: boolean) => {
+    const isCollapsed = isMobile ? false : collapsed;
 
-        {/* Desktop Collapse Button */}
-        <div className="hidden lg:block">
-          {!collapsed && (
-            <button
-              onClick={() => setCollapsed(true)}
-              className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
+    return (
+      <div className="flex flex-col h-full bg-white dark:bg-neutral-900 border-r border-neutral-200/80 dark:border-neutral-800 transition-all duration-300 ease-out">
+        <div className="flex items-center justify-between h-16 px-4 border-b border-neutral-100 dark:border-neutral-800 flex-shrink-0">
+          {!isCollapsed && (
+            <Link to="/" onClick={onMobileClose}>
+              <Logo size="sm" />
+            </Link>
+          )}
+          {isCollapsed && (
+            <Link to="/" className="mx-auto" onClick={onMobileClose}>
+              <Logo size="sm" showText={false} />
+            </Link>
+          )}
+
+          {/* Desktop Collapse Button */}
+          {!isMobile && (
+            <div className="hidden lg:block">
+              {!isCollapsed && (
+                <button
+                  onClick={() => setCollapsed(true)}
+                  className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Mobile Close Button */}
+          {isMobile && (
+            <div className="lg:hidden">
+              <button
+                onClick={onMobileClose}
+                className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           )}
         </div>
 
-        {/* Mobile Close Button */}
-        <div className="lg:hidden">
-           <button
-            onClick={onMobileClose}
-            className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
->>>>>>> origin/main
+        {isCollapsed && !isMobile && (
+          <button
+            onClick={() => setCollapsed(false)}
+            className="mx-auto mt-3 p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors hidden lg:block"
           >
-            <X className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4" />
           </button>
+        )}
+
+        {!isCollapsed && title && (
+          <div className="px-5 pt-5 pb-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">{title}</p>
+          </div>
+        )}
+
+        <nav className="flex-1 py-3 px-3 space-y-0.5 overflow-y-auto">
+          {items.map((item) => {
+            const active = location.pathname === item.to || (item.to !== '/admin' && item.to !== '/lawyer' && item.to !== '/dashboard' && location.pathname.startsWith(item.to + '/'));
+            const exactActive = location.pathname === item.to;
+            const isActive = active || exactActive;
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                title={isCollapsed ? item.label : undefined}
+                onClick={onMobileClose}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  isActive
+                    ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 shadow-sm'
+                    : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-neutral-200'
+                }`}
+              >
+                <Icon className={`w-[18px] h-[18px] flex-shrink-0 ${isActive ? 'text-primary-600 dark:text-primary-400' : ''}`} />
+                {!isCollapsed && <span>{item.label}</span>}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className={`p-4 border-t border-neutral-100 dark:border-neutral-800 ${isCollapsed ? 'flex justify-center' : ''}`}>
+          <ThemeToggle className={isCollapsed ? 'flex-col' : ''} />
         </div>
       </div>
-
-      {collapsed && (
-        <button
-          onClick={() => setCollapsed(false)}
-<<<<<<< HEAD
-          className="mx-auto mt-3 p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-=======
-          className="mx-auto mt-3 p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors hidden lg:block"
->>>>>>> origin/main
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      )}
-
-      {!collapsed && title && (
-        <div className="px-5 pt-5 pb-2">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">{title}</p>
-        </div>
-      )}
-
-      <nav className="flex-1 py-3 px-3 space-y-0.5 overflow-y-auto">
-        {items.map((item) => {
-          const active = location.pathname === item.to || (item.to !== '/admin' && item.to !== '/lawyer' && item.to !== '/dashboard' && location.pathname.startsWith(item.to + '/'));
-          const exactActive = location.pathname === item.to;
-          const isActive = active || exactActive;
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.to}
-              to={item.to}
-              title={collapsed ? item.label : undefined}
-              onClick={onMobileClose}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                isActive
-<<<<<<< HEAD
-                  ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 shadow-sm'
-                  : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200'
-=======
-                  ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 shadow-sm'
-                  : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-neutral-200'
->>>>>>> origin/main
-              }`}
-            >
-              <Icon className={`w-[18px] h-[18px] flex-shrink-0 ${isActive ? 'text-primary-600 dark:text-primary-400' : ''}`} />
-              {!collapsed && <span>{item.label}</span>}
-            </Link>
-          );
-        })}
-      </nav>
-<<<<<<< HEAD
-
-      <div className={`p-4 border-t border-neutral-100 dark:border-neutral-800 ${collapsed ? 'flex justify-center' : ''}`}>
-        <ThemeToggle className={collapsed ? 'flex-col' : ''} />
-      </div>
-    </aside>
-=======
-    </div>
-  );
+    );
+  };
 
   return (
     <>
       {/* Desktop Sidebar */}
       <aside className={`hidden lg:flex h-screen sticky top-0 flex-col ${collapsed ? 'w-[72px]' : 'w-64'}`}>
-        {sidebarContent}
+        {renderContent(false)}
       </aside>
 
       {/* Mobile Sidebar Overlay */}
@@ -151,11 +130,10 @@ export function Sidebar({ items, title, mobileOpen = false, onMobileClose }: Sid
 
           {/* Drawer */}
           <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white dark:bg-neutral-900 shadow-xl animate-slide-in-right">
-            {sidebarContent}
+            {renderContent(true)}
           </div>
         </div>
       )}
     </>
->>>>>>> origin/main
   );
 }

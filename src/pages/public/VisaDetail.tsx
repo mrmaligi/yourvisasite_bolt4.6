@@ -8,7 +8,8 @@ import {
   ArrowUpRight,
   ChevronRight,
   ArrowLeft,
-  AlertCircle
+  AlertCircle,
+  TrendingUp
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -18,7 +19,7 @@ import { Button } from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
 import { StripeCheckout } from '../../components/StripeCheckout';
-import type { Visa, TrackerStats, VisaPremiumContent, Product, UserVisaPurchase } from '../../types/database';
+import type { Visa, TrackerStats, VisaPremiumContent, Product, UserVisaPurchase, TrackerEntry } from '../../types/database';
 
 export function VisaDetail() {
   const { id } = useParams<{ id: string }>();
@@ -31,6 +32,7 @@ export function VisaDetail() {
   const [premiumContent, setPremiumContent] = useState<VisaPremiumContent[]>([]);
   const [product, setProduct] = useState<Product | null>(null);
   const [purchase, setPurchase] = useState<UserVisaPurchase | null>(null);
+  const [recentEntries, setRecentEntries] = useState<TrackerEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -96,10 +98,19 @@ export function VisaDetail() {
               .from('visa_premium_content')
               .select('*')
               .eq('visa_id', id)
-              .order('section_number');
+              .order('step_number');
             setPremiumContent(contentData || []);
          }
       }
+
+      // 6. Fetch Recent Entries
+      const { data: entriesData } = await supabase
+        .from('tracker_entries')
+        .select('*')
+        .eq('visa_id', id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      setRecentEntries(entriesData || []);
 
       setLoading(false);
     };
@@ -128,7 +139,7 @@ export function VisaDetail() {
               .from('visa_premium_content')
               .select('*')
               .eq('visa_id', id)
-              .order('section_number');
+              .order('step_number');
             setPremiumContent(content || []);
             toast('success', 'Payment successful! Guide unlocked.');
             window.history.replaceState({}, '', window.location.pathname);
@@ -191,7 +202,6 @@ export function VisaDetail() {
         <div className="flex flex-wrap items-center gap-3 mb-4">
             <Badge className="text-sm px-3 py-1">{visa.subclass}</Badge>
             <Badge variant="primary" className="text-sm px-3 py-1">{visa.category}</Badge>
-            {visa.country && <Badge variant="info" className="text-sm px-3 py-1">{visa.country}</Badge>}
         </div>
         <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-6">{visa.name}</h1>
 
@@ -259,31 +269,23 @@ export function VisaDetail() {
                                 <CardHeader className="bg-primary-50/50 border-b border-primary-100">
                                     <h3 className="font-semibold text-primary-900 flex items-center">
                                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary-100 text-primary-700 text-xs font-bold mr-3">
-                                            {step.section_number}
+                                            {step.step_number}
                                         </span>
-                                        {step.section_title}
+                                        {step.title}
                                     </h3>
                                 </CardHeader>
                                 <CardBody>
                                     <div className="prose prose-sm max-w-none text-neutral-600 whitespace-pre-wrap">
-                                        {step.content}
+                                        {step.body}
                                     </div>
 
-                                    {step.required_documents && step.required_documents.length > 0 && (
+                                    {step.document_category && (
                                         <div className="mt-4 p-3 bg-neutral-50 rounded-lg border border-neutral-100 text-sm">
-                                            <span className="font-medium text-neutral-700">Required Documents: </span>
-                                            <div className="flex flex-wrap gap-2 mt-2">
-                                                {step.required_documents.map(doc => (
-                                                    <Badge key={doc} variant="info">{doc}</Badge>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {step.tips && (
-                                        <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-100 text-sm">
-                                            <span className="font-medium text-yellow-800">Tip: </span>
-                                            <span className="text-yellow-700">{step.tips}</span>
+                                            <span className="font-medium text-neutral-700">Required Document: </span>
+                                            <Badge variant="info" className="ml-2">{step.document_category}</Badge>
+                                            {step.document_explanation && (
+                                                <p className="mt-2 text-neutral-600">{step.document_explanation}</p>
+                                            )}
                                         </div>
                                     )}
                                 </CardBody>
@@ -405,6 +407,43 @@ export function VisaDetail() {
                     )}
                 </CardBody>
             </Card>
+
+            {/* Recent Reports */}
+            {recentEntries.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <h3 className="font-bold text-neutral-900 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-primary-600" />
+                    Recent Reports
+                  </h3>
+                </CardHeader>
+                <CardBody>
+                  <div className="space-y-4">
+                    {recentEntries.map((entry) => (
+                      <div key={entry.id} className="flex items-center justify-between border-b border-neutral-100 pb-3 last:border-0 last:pb-0">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-neutral-900 capitalize">{entry.outcome}</span>
+                            {entry.submitter_role === 'lawyer' && (
+                              <Badge variant="primary" className="flex items-center gap-1">
+                                <CheckCircle className="w-3 h-3" />
+                                Verified Lawyer
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-neutral-500 mt-0.5">
+                            {entry.processing_days} days processing
+                          </p>
+                        </div>
+                        <span className="text-xs text-neutral-400">
+                          {new Date(entry.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardBody>
+              </Card>
+            )}
 
             {/* Related Visas */}
             {relatedVisas.length > 0 && (

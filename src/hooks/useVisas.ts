@@ -63,9 +63,8 @@ export function useVisas(
           .select('*, tracker_stats(*)', { count: 'exact' })
           .eq('is_active', true);
 
-        if (country) {
-          query = query.eq('country', country);
-        }
+        // Always filter by Australia
+        query = query.eq('country', 'Australia');
         if (category) {
           query = query.eq('category', category);
         }

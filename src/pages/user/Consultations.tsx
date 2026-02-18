@@ -1,208 +1,127 @@
-import { useEffect, useState } from 'react';
-import { Calendar, Clock, Scale, Download } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useState } from 'react';
+import { Calendar, History } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody } from '../../components/ui/Card';
-import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { useToast } from '../../components/ui/Toast';
-import type { Booking } from '../../types/database';
-
-interface BookingWithDetails extends Booking {
-  lawyer_name?: string;
-  lawyer_jurisdiction?: string;
-  slot_time?: string;
-}
-
-const statusVariant = {
-  pending: 'warning' as const,
-  confirmed: 'info' as const,
-  completed: 'success' as const,
-  cancelled: 'default' as const,
-};
+import { useBookings } from '../../hooks/useBookings';
+import { BookingCard } from '../../components/BookingCard';
 
 export function Consultations() {
-  const { user } = useAuth();
+  const { bookings, loading, refetch } = useBookings();
   const { toast } = useToast();
-  const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchBookings = async () => {
-    if (!user) return;
-
-    const { data: bookingsData } = await supabase
-      .from('bookings')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
-
-    if (!bookingsData || bookingsData.length === 0) {
-      setBookings([]);
-      setLoading(false);
-      return;
-    }
-
-    const lawyerIds = [...new Set(bookingsData.map(b => b.lawyer_id))];
-    const slotIds = [...new Set(bookingsData.map(b => b.slot_id).filter(Boolean))];
-
-    const { data: lawyerProfiles } = await supabase
-      .schema('lawyer')
-      .from('profiles')
-      .select('id, profile_id, jurisdiction')
-      .in('id', lawyerIds);
-
-    const profileIds = lawyerProfiles?.map(lp => lp.profile_id) || [];
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('id, full_name')
-      .in('id', profileIds);
-
-    const { data: slots } = await supabase
-      .schema('lawyer')
-      .from('consultation_slots')
-      .select('id, start_time')
-      .in('id', slotIds);
-
-    const lawyerMap = new Map(lawyerProfiles?.map(lp => {
-      const profile = profiles?.find(p => p.id === lp.profile_id);
-      return [lp.id, { name: profile?.full_name, jurisdiction: lp.jurisdiction }];
-    }) || []);
-
-    const slotMap = new Map(slots?.map(s => [s.id, s.start_time]) || []);
-
-    const enrichedBookings = bookingsData.map(b => ({
-      ...b,
-      lawyer_name: lawyerMap.get(b.lawyer_id)?.name || 'Unknown Lawyer',
-      lawyer_jurisdiction: lawyerMap.get(b.lawyer_id)?.jurisdiction || '',
-      slot_time: slotMap.get(b.slot_id) || undefined,
-    }));
-
-    setBookings(enrichedBookings);
-    setLoading(false);
-  };
-
-  useEffect(() => { fetchBookings(); }, [user]);
+  const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
 
   const handleCancel = async (id: string) => {
-    await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', id);
-    toast('success', 'Consultation cancelled');
-    fetchBookings();
-  };
-
-  const handleExportCalendar = async (bookingId: string) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast('error', 'Please sign in to export calendar');
-        return;
-      }
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: 'cancelled' })
+        .eq('id', id);
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calendar-export/${bookingId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-          },
-        }
-      );
+      if (error) throw error;
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to export calendar');
-      }
-
-      const icsContent = await response.text();
-      const blob = new Blob([icsContent], { type: 'text/calendar' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `consultation-${bookingId}.ics`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      toast('success', 'Calendar file downloaded');
-    } catch (error: any) {
-      toast('error', error.message || 'Failed to export calendar');
+      toast('success', 'Consultation cancelled');
+      refetch();
+    } catch (error) {
+      toast('error', 'Failed to cancel consultation');
     }
   };
+
+  const handleReschedule = () => {
+    // For now, just show a message. Ideally this would open a reschedule flow.
+    toast('info', 'Please contact the lawyer directly to reschedule.');
+  };
+
+  const handleJoin = () => {
+      // Logic to join call (e.g. open video link if available)
+      // Since video link isn't in schema yet, we'll just show a toast or placeholder
+      toast('info', 'Joining consultation room...');
+      // window.open(`/consultation-room/${id}`, '_blank');
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-8 w-48 bg-neutral-200 rounded animate-pulse" />
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-40 bg-neutral-200 rounded-xl animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const now = new Date();
+  const upcomingBookings = bookings.filter(b => {
+    const time = b.start_time ? new Date(b.start_time) : new Date(b.created_at);
+    return time >= now && b.status !== 'cancelled' && b.status !== 'completed';
+  });
+
+  const pastBookings = bookings.filter(b => {
+    const time = b.start_time ? new Date(b.start_time) : new Date(b.created_at);
+    return time < now || b.status === 'cancelled' || b.status === 'completed';
+  });
+
+  const displayBookings = activeTab === 'upcoming' ? upcomingBookings : pastBookings;
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-neutral-900">Consultations</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-neutral-900">My Consultations</h1>
+      </div>
 
-      {loading ? (
-        <div className="animate-pulse space-y-4">
-          {Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-20 bg-neutral-200 rounded-xl" />)}
-        </div>
-      ) : bookings.length === 0 ? (
+      {/* Tabs */}
+      <div className="flex border-b border-neutral-200">
+        <button
+          onClick={() => setActiveTab('upcoming')}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === 'upcoming'
+              ? 'border-primary-600 text-primary-600'
+              : 'border-transparent text-neutral-500 hover:text-neutral-700'
+          }`}
+        >
+          Upcoming ({upcomingBookings.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('past')}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === 'past'
+              ? 'border-primary-600 text-primary-600'
+              : 'border-transparent text-neutral-500 hover:text-neutral-700'
+          }`}
+        >
+          Past ({pastBookings.length})
+        </button>
+      </div>
+
+      {displayBookings.length === 0 ? (
         <EmptyState
-          icon={Calendar}
-          title="No consultations"
-          description="Book a consultation with a verified immigration lawyer from a visa detail page."
+          icon={activeTab === 'upcoming' ? Calendar : History}
+          title={`No ${activeTab} consultations`}
+          description={
+            activeTab === 'upcoming'
+              ? "You don't have any upcoming consultations scheduled."
+              : "You haven't completed any consultations yet."
+          }
+          action={
+             activeTab === 'upcoming' ? {
+                 label: "Find a Lawyer",
+                 onClick: () => window.location.href = '/lawyers' // Or use navigate
+             } : undefined
+          }
         />
       ) : (
         <div className="space-y-4">
-          {bookings.map((b) => (
-            <Card key={b.id}>
-              <CardBody className="p-0">
-                <div className="p-4 border-b border-neutral-100">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                        <Scale className="w-5 h-5 text-primary-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-neutral-900">{b.lawyer_name}</p>
-                        <p className="text-sm text-neutral-500">{b.lawyer_jurisdiction}</p>
-                      </div>
-                    </div>
-                    <Badge variant={statusVariant[b.status]}>{b.status}</Badge>
-                  </div>
-                </div>
-                <div className="p-4 bg-neutral-50">
-                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-                    <div className="flex items-center gap-1.5 text-neutral-600">
-                      <Clock className="w-4 h-4" />
-                      <span>{b.duration_minutes} minutes</span>
-                    </div>
-                    {b.slot_time && (
-                      <div className="flex items-center gap-1.5 text-neutral-600">
-                        <Calendar className="w-4 h-4" />
-                        <span>{new Date(b.slot_time).toLocaleDateString()} at {new Date(b.slot_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      </div>
-                    )}
-                    <span className="font-semibold text-neutral-900">
-                      ${((b.total_price_cents || 0) / 100).toFixed(0)}
-                    </span>
-                  </div>
-                  {b.notes && (
-                    <p className="mt-3 text-sm text-neutral-500 bg-white p-3 rounded-lg border border-neutral-200">
-                      {b.notes}
-                    </p>
-                  )}
-                  <div className="mt-3 flex justify-end gap-2">
-                    {b.status === 'confirmed' && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleExportCalendar(b.id)}
-                      >
-                        <Download className="w-4 h-4 mr-1.5" />
-                        Add to Calendar
-                      </Button>
-                    )}
-                    {(b.status === 'pending' || b.status === 'confirmed') && (
-                      <Button variant="secondary" size="sm" onClick={() => handleCancel(b.id)}>
-                        Cancel
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
+          {displayBookings.map((booking) => (
+            <BookingCard
+              key={booking.id}
+              booking={booking}
+              userType="user"
+              onCancel={booking.status === 'pending' || booking.status === 'confirmed' ? handleCancel : undefined}
+              onReschedule={booking.status === 'pending' || booking.status === 'confirmed' ? handleReschedule : undefined}
+              onJoin={booking.status === 'confirmed' ? handleJoin : undefined}
+            />
           ))}
         </div>
       )}

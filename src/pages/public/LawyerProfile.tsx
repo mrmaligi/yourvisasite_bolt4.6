@@ -2,14 +2,12 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   MapPin, Briefcase, Clock, Scale, Calendar,
-  CheckCircle, ArrowLeft, CreditCard, Star, Shield
+  CheckCircle, ArrowLeft, Star, Shield
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
-import { Modal } from '../../components/ui/Modal';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
 
@@ -42,9 +40,6 @@ export function LawyerProfile() {
   const [lawyer, setLawyer] = useState<LawyerData | null>(null);
   const [slots, setSlots] = useState<SlotData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedSlot, setSelectedSlot] = useState<SlotData | null>(null);
-  const [bookingNotes, setBookingNotes] = useState('');
-  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -92,57 +87,6 @@ export function LawyerProfile() {
 
     fetchLawyer();
   }, [id]);
-
-  const handleBook = async () => {
-    if (!user) {
-      // Redirect to login if not logged in
-      toast('info', 'Please sign in to book a consultation');
-      navigate('/login', { state: { from: `/lawyers/${id}` } });
-      return;
-    }
-
-    if (!selectedSlot || !lawyer) return;
-    setSubmitting(true);
-
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast('error', 'Please sign in to book a consultation');
-        setSubmitting(false);
-        return;
-      }
-
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/consultation-checkout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          slotId: selectedSlot.id,
-          lawyerId: lawyer.id,
-          notes: bookingNotes,
-          successUrl: `${window.location.origin}/success?type=consultation`,
-          cancelUrl: `${window.location.origin}/lawyers/${lawyer.id}`,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to initiate checkout');
-      }
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error('No checkout URL received');
-      }
-    } catch (error: any) {
-      toast('error', error.message || 'Failed to start checkout. Please try again.');
-      setSubmitting(false);
-    }
-  };
 
   const groupSlotsByDate = (slotList: SlotData[]) => {
     const groups: Record<string, SlotData[]> = {};
@@ -286,10 +230,10 @@ export function LawyerProfile() {
                               onClick={() => {
                                 if (!user) {
                                   toast('info', 'Please sign in to book a consultation');
-                                  navigate('/login', { state: { from: `/lawyers/${id}` } });
+                                  navigate('/login', { state: { from: `/dashboard/book-consultation/${id}` } });
                                   return;
                                 }
-                                setSelectedSlot(slot);
+                                navigate(`/dashboard/book-consultation/${id}`);
                               }}
                               className="px-4 py-2.5 rounded-xl border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200"
                             >
@@ -322,71 +266,6 @@ export function LawyerProfile() {
           </Card>
         </div>
       </div>
-
-      <Modal
-        isOpen={!!selectedSlot}
-        onClose={() => { setSelectedSlot(null); setBookingNotes(''); }}
-        title="Book Consultation"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => { setSelectedSlot(null); setBookingNotes(''); }}>
-              Cancel
-            </Button>
-            <Button loading={submitting} onClick={handleBook}>
-              <CreditCard className="w-4 h-4 mr-2" />
-              Proceed to Payment
-            </Button>
-          </>
-        }
-      >
-        {selectedSlot && (
-          <div className="space-y-5">
-            <div className="p-4 bg-neutral-50 rounded-xl space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-neutral-500">Lawyer</span>
-                <span className="font-medium text-neutral-900">{lawyer.full_name}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-neutral-500">Date</span>
-                <span className="font-medium text-neutral-900">
-                  {new Date(selectedSlot.start_time).toLocaleDateString('en-US', {
-                    weekday: 'short', month: 'short', day: 'numeric',
-                  })}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-neutral-500">Time</span>
-                <span className="font-medium text-neutral-900">
-                  {new Date(selectedSlot.start_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                  {' - '}
-                  {new Date(selectedSlot.end_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                </span>
-              </div>
-              {lawyer.hourly_rate_cents && (
-                <div className="flex justify-between text-sm pt-2 border-t border-neutral-200">
-                  <span className="text-neutral-500">Estimated cost</span>
-                  <span className="font-semibold text-neutral-900">
-                    ${(
-                      (lawyer.hourly_rate_cents / 60) *
-                      Math.round((new Date(selectedSlot.end_time).getTime() - new Date(selectedSlot.start_time).getTime()) / 60000) /
-                      100
-                    ).toFixed(0)}
-                  </span>
-                </div>
-              )}
-            </div>
-            <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-neutral-700">Notes (optional)</label>
-              <textarea
-                value={bookingNotes}
-                onChange={(e) => setBookingNotes(e.target.value)}
-                placeholder="Briefly describe your visa situation or questions..."
-                className="input-field min-h-[80px]"
-              />
-            </div>
-          </div>
-        )}
-      </Modal>
     </div>
   );
 }

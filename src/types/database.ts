@@ -1,6 +1,6 @@
 export type UserRole = 'user' | 'lawyer' | 'admin';
 export type VisaCategory = 'work' | 'family' | 'student' | 'visitor' | 'humanitarian' | 'business' | 'other';
-export type TrackerOutcome = 'approved' | 'refused' | 'withdrawn';
+export type TrackerOutcome = 'approved' | 'refused' | 'withdrawn' | 'pending';
 export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
 export type DocumentStatus = 'pending' | 'verified' | 'rejected';
@@ -15,6 +15,16 @@ export interface Profile {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface YouTubeFeed {
+  id: string;
+  title: string;
+  youtube_url: string;
+  thumbnail_url: string | null;
+  channel_name: string;
+  visa_id: string | null;
+  created_at: string;
 }
 
 export interface Visa {
@@ -77,10 +87,11 @@ export interface TrackerEntry {
   submitted_by: string | null;
   submitter_role: UserRole | null;
   application_date: string;
-  decision_date: string;
-  processing_days: number;
+  decision_date: string | null;
+  processing_days: number | null;
   outcome: TrackerOutcome;
   weight: number;
+  status: 'pending' | 'completed';
   created_at: string;
 }
 
@@ -238,4 +249,14 @@ export interface NotificationPreferences {
   push_processing_time_alert: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface Message {
+  id: string;
+  booking_id: string;
+  sender_id: string;
+  sender_role: UserRole;
+  message_text: string;
+  is_read: boolean;
+  created_at: string;
 }

@@ -48,8 +48,7 @@ export function LawyerRegister() {
         verificationUrl = path;
       }
 
-      const { error: insertError } = await supabase.schema('lawyer').from('profiles').insert({
-        profile_id: user.id,
+      const { error: updateError } = await supabase.from('profiles').update({
         bar_number: barNumber,
         jurisdiction,
         practice_areas: practiceAreas.split(',').map((s) => s.trim()).filter(Boolean),
@@ -57,13 +56,10 @@ export function LawyerRegister() {
         bio: bio || null,
         hourly_rate_cents: hourlyRate ? Math.round(parseFloat(hourlyRate) * 100) : null,
         verification_document_url: verificationUrl || null,
-      });
+      }).eq('id', user.id);
 
-      if (insertError) {
-        if (insertError.code === '23505') {
-          throw new Error('You have already submitted a lawyer registration');
-        }
-        throw new Error(insertError.message);
+      if (updateError) {
+        throw new Error(updateError.message);
       }
 
       await refreshProfile();
