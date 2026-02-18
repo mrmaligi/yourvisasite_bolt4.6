@@ -105,7 +105,7 @@ export function VisaSearch() {
                 <CardBody className="space-y-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
-                      <Badge>{visa.subclass_number}</Badge>
+                      <Badge>{visa.subclass}</Badge>
                       <Badge variant="primary">{visa.category}</Badge>
                     </div>
                     <div className="flex items-center gap-1">

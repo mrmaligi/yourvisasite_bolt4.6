@@ -18,12 +18,18 @@ export interface Profile {
 
 export interface Visa {
   id: string;
-  subclass_number: string;
+  subclass: string;
   name: string;
   country: string;
-  category: VisaCategory;
-  official_url: string | null;
+  category: string;
+  official_link: string | null;
   summary: string | null;
+  description: string | null;
+  base_cost_aud: number | null;
+  cost_aud: string | null;
+  processing_time_range: string | null;
+  duration: string | null;
+  key_requirements: string | null;
   processing_fee_description: string | null;
   is_active: boolean;
   created_at: string;

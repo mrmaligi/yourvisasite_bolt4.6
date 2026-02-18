@@ -23,7 +23,7 @@ export function Tracker() {
   const filtered = stats.filter(
     (v) =>
       v.name.toLowerCase().includes(search.toLowerCase()) ||
-      v.subclass_number.toLowerCase().includes(search.toLowerCase())
+      v.subclass.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -85,7 +85,7 @@ export function Tracker() {
                   <CardBody className="space-y-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <Badge variant="default">{v.subclass_number}</Badge>
+                        <Badge variant="default">{v.subclass}</Badge>
                         <h3 className="font-semibold text-neutral-900 mt-2">{v.name}</h3>
                         <p className="text-sm text-neutral-500">{v.country}</p>
                       </div>

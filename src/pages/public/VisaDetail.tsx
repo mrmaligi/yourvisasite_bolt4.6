@@ -137,14 +137,14 @@ export function VisaDetail() {
 
       <div className="mb-8">
         <div className="flex flex-wrap items-center gap-2 mb-3">
-          <Badge>{visa.subclass_number}</Badge>
+          <Badge>{visa.subclass}</Badge>
           <Badge variant="primary">{visa.category}</Badge>
           <Badge variant="info">{visa.country}</Badge>
         </div>
         <h1 className="text-3xl font-bold text-neutral-900 mb-3">{visa.name}</h1>
-        {visa.official_url && (
+        {visa.official_link && (
           <a
-            href={visa.official_url}
+            href={visa.official_link}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-sm text-primary-600 hover:underline"
@@ -273,7 +273,7 @@ export function VisaDetail() {
             </Card>
             
             {!entriesLoading && trackerEntries.length > 0 && (
-              <ProcessingTrendChart entries={trackerEntries} visaName={visa.subclass_number} />
+              <ProcessingTrendChart entries={trackerEntries} visaName={visa.subclass} />
             )}
           </div>
         )}

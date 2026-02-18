@@ -74,7 +74,7 @@ export function PremiumContent() {
         label="Select Visa"
         value={selectedVisaId}
         onChange={(e) => setSelectedVisaId((e.target as HTMLSelectElement).value)}
-        options={[{ value: '', label: 'Choose a visa...' }, ...visas.map((v) => ({ value: v.id, label: `${v.subclass_number} - ${v.name}` }))]}
+        options={[{ value: '', label: 'Choose a visa...' }, ...visas.map((v) => ({ value: v.id, label: `${v.subclass} - ${v.name}` }))]}
       />
 
       {selectedVisaId && (

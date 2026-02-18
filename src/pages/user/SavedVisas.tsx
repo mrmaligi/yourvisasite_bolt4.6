@@ -106,7 +106,7 @@ export function SavedVisas() {
               <Link to={`/visas/${sv.visa.id}`}>
                 <CardBody className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <Badge>{sv.visa.subclass_number}</Badge>
+                    <Badge>{sv.visa.subclass}</Badge>
                     <Badge variant="info">{sv.visa.country}</Badge>
                   </div>
                   <h3 className="font-semibold text-neutral-900 pr-8">
