@@ -8,7 +8,8 @@ import {
   ArrowUpRight,
   ChevronRight,
   ArrowLeft,
-  AlertCircle
+  AlertCircle,
+  TrendingUp
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -18,7 +19,7 @@ import { Button } from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
 import { StripeCheckout } from '../../components/StripeCheckout';
-import type { Visa, TrackerStats, VisaPremiumContent, Product, UserVisaPurchase } from '../../types/database';
+import type { Visa, TrackerStats, VisaPremiumContent, Product, UserVisaPurchase, TrackerEntry } from '../../types/database';
 
 export function VisaDetail() {
   const { id } = useParams<{ id: string }>();
@@ -31,6 +32,7 @@ export function VisaDetail() {
   const [premiumContent, setPremiumContent] = useState<VisaPremiumContent[]>([]);
   const [product, setProduct] = useState<Product | null>(null);
   const [purchase, setPurchase] = useState<UserVisaPurchase | null>(null);
+  const [recentEntries, setRecentEntries] = useState<TrackerEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -100,6 +102,15 @@ export function VisaDetail() {
             setPremiumContent(contentData || []);
          }
       }
+
+      // 6. Fetch Recent Entries
+      const { data: entriesData } = await supabase
+        .from('tracker_entries')
+        .select('*')
+        .eq('visa_id', id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      setRecentEntries(entriesData || []);
 
       setLoading(false);
     };
@@ -404,6 +415,43 @@ export function VisaDetail() {
                     )}
                 </CardBody>
             </Card>
+
+            {/* Recent Reports */}
+            {recentEntries.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <h3 className="font-bold text-neutral-900 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-primary-600" />
+                    Recent Reports
+                  </h3>
+                </CardHeader>
+                <CardBody>
+                  <div className="space-y-4">
+                    {recentEntries.map((entry) => (
+                      <div key={entry.id} className="flex items-center justify-between border-b border-neutral-100 pb-3 last:border-0 last:pb-0">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-neutral-900 capitalize">{entry.outcome}</span>
+                            {entry.submitter_role === 'lawyer' && (
+                              <Badge variant="primary" className="flex items-center gap-1">
+                                <CheckCircle className="w-3 h-3" />
+                                Verified Lawyer
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-neutral-500 mt-0.5">
+                            {entry.processing_days} days processing
+                          </p>
+                        </div>
+                        <span className="text-xs text-neutral-400">
+                          {new Date(entry.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardBody>
+              </Card>
+            )}
 
             {/* Related Visas */}
             {relatedVisas.length > 0 && (
