@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Store, Plus, Edit, Trash2, Eye, EyeOff, DollarSign, Package } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
+import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
