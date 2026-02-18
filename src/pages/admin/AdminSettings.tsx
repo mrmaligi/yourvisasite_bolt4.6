@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Save, RefreshCw, ToggleLeft, ToggleRight, Globe, DollarSign, Mail, Settings2 } from 'lucide-react';
+import { Save, RefreshCw, ToggleLeft, ToggleRight, Globe, DollarSign, Settings2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';

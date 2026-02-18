@@ -146,3 +146,25 @@ All new data sourced from official government sources:
 - UK Gov – Family visas guidance (accessed 18 Feb 2026)
 
 Citations embedded in each visa's `requirements_json.citations` array for audit trail.
+
+## Integration Testing Report (Feb 2026)
+
+### Summary
+Integration tests were added using Playwright to verify the integrity of the application routes and authentication flows. The tests now include mocked Supabase responses to verify UI logic independently of the backend connection.
+
+### Results
+- **Public Routes:** All public pages (Landing, Visa Search, Tracker, Lawyers, News, Marketplace, Pricing) load successfully.
+- **Data Rendering:** Mocked data tests confirm that Visa Search and Tracker pages correctly render data fetched from the backend (e.g., visa names, processing times).
+- **Authentication:**
+    - Login and Register pages render correctly.
+    - Error handling logic (e.g., invalid credentials toast) is verified using mocked failure responses.
+- **Role-Based Access:** Protected routes (`/dashboard`, `/lawyer/dashboard`, `/admin`) correctly redirect unauthenticated users to the login page.
+- **Error Handling:**
+    - Visa Detail page gracefully handles "not found" states (mocked network failure).
+    - Login page correctly displays error messages on mocked authentication failure.
+
+### Infrastructure
+- **Playwright:** Configured to run against local development server.
+- **Mocks:** Network interception used to mock Supabase Auth and Database queries.
+- **Environment:** Placeholder environment variables provided to allow application startup during testing.
+- **Artifacts:** Test reports and results are excluded from the repository via `.gitignore` to prevent bloat.
