@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
-import { CheckCircle, ArrowRight, Download, Calendar, Scale } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { CheckCircle, ArrowRight, Download, Calendar, Scale, XCircle } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 
 export function Success() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const sessionId = searchParams.get('session_id');
   const type = searchParams.get('type');
   const [loading, setLoading] = useState(true);
@@ -15,9 +16,10 @@ export function Success() {
 
   useEffect(() => {
     if (sessionId) {
+      // In a real app, we might verify the session here
       setTimeout(() => {
         setOrderDetails({
-          amount: isConsultation ? 0 : 49.00,
+          amount: isConsultation ? 'Variable' : 49.00,
           currency: 'AUD',
           product: isConsultation ? 'Lawyer Consultation' : 'VisaBuild Premium'
         });
@@ -32,6 +34,19 @@ export function Success() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (!sessionId) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Invalid Request</h1>
+          <p className="text-gray-600 mb-8">No payment session found.</p>
+          <Button onClick={() => navigate('/')}>Return Home</Button>
+        </div>
       </div>
     );
   }
@@ -64,7 +79,9 @@ export function Success() {
               <div className="flex justify-between">
                 <span className="text-gray-600">Amount:</span>
                 <span className="font-medium">
-                  A${orderDetails.amount} {orderDetails.currency}
+                  {typeof orderDetails.amount === 'number'
+                    ? `A$${orderDetails.amount.toFixed(2)}`
+                    : orderDetails.amount} {orderDetails.currency}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -87,7 +104,7 @@ export function Success() {
                   View details, add to calendar, or reschedule your consultation.
                 </p>
                 <Link to="/dashboard/consultations">
-                  <Button variant="outline" className="w-full">
+                  <Button variant="secondary" className="w-full">
                     View Consultations
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
@@ -103,7 +120,7 @@ export function Success() {
                   Browse our comprehensive visa guides and premium resources.
                 </p>
                 <Link to="/dashboard/my-visas">
-                  <Button variant="outline" className="w-full">
+                  <Button variant="secondary" className="w-full">
                     View My Visas
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
@@ -123,7 +140,7 @@ export function Success() {
                   Browse premium visa guides and document templates.
                 </p>
                 <Link to="/dashboard">
-                  <Button variant="outline" className="w-full">
+                  <Button variant="secondary" className="w-full">
                     Go to Dashboard
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
@@ -139,7 +156,7 @@ export function Success() {
                   Schedule a consultation with our expert immigration lawyers.
                 </p>
                 <Link to="/lawyers">
-                  <Button variant="outline" className="w-full">
+                  <Button variant="secondary" className="w-full">
                     Find Lawyers
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>

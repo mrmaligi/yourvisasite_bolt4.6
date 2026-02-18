@@ -1,20 +1,34 @@
 import React, { useState } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
 import { supabase } from '../lib/supabase';
 import { Button } from './ui/Button';
 import { Loader2 } from 'lucide-react';
-import type { StripeProduct } from '../stripe-config';
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY!);
+import { getStripePromise } from '../stripe-config';
 
 interface StripeCheckoutProps {
-  product: StripeProduct;
+  type: 'premium' | 'consultation';
+  visaId?: string;
+  lawyerId?: string;
+  slotId?: string; // Required for consultation
+  notes?: string; // Optional for consultation
+  amount: number; // For premium, this is 4900 (cents). For consultation, it might be an estimate or calculated by backend.
+  onSuccess?: () => void;
+  onCancel?: () => void;
   className?: string;
   children?: React.ReactNode;
-  metadata?: Record<string, string>;
 }
 
-export function StripeCheckout({ product, className, children, metadata }: StripeCheckoutProps) {
+export function StripeCheckout({
+  type,
+  visaId,
+  lawyerId,
+  slotId,
+  notes,
+  amount,
+  onSuccess,
+  onCancel,
+  className,
+  children
+}: StripeCheckoutProps) {
   const [loading, setLoading] = useState(false);
 
   const handleCheckout = async () => {
@@ -26,31 +40,58 @@ export function StripeCheckout({ product, className, children, metadata }: Strip
         throw new Error('Please sign in to continue');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout`, {
+      let functionName = 'stripe-checkout';
+      let body: any = {
+        type,
+        user_id: user.id,
+      };
+
+      if (type === 'premium') {
+        functionName = 'stripe-checkout';
+        body.visa_id = visaId;
+        body.amount = amount; // Although backend might ignore it for premium
+      } else if (type === 'consultation') {
+        if (!lawyerId || !slotId) {
+          throw new Error('Missing required details for consultation booking');
+        }
+        functionName = 'consultation-checkout';
+        body.lawyerId = lawyerId;
+        body.slotId = slotId;
+        body.notes = notes;
+        // consultation-checkout calculates price on server, so we don't pass amount
+        // but we might want to pass success/cancel URLs if we want to override defaults
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${functionName}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          priceId: product.priceId,
-          mode: product.mode,
-          successUrl: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
-          cancelUrl: window.location.href,
-          metadata: {
-            user_id: user.id,
-            ...metadata,
-          },
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create checkout session');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create checkout session');
       }
 
-      const { sessionId } = await response.json();
+      const { sessionId, url } = await response.json();
       
-      const stripe = await stripePromise;
+      // If we got a URL (e.g. from stripe-checkout which returns url directly, or consultation-checkout which returns sessionId and url)
+      // We can redirect using window.location or stripe.redirectToCheckout
+
+      if (onSuccess) {
+        onSuccess();
+      }
+
+      if (url) {
+        window.location.href = url;
+        return;
+      }
+
+      // Fallback to redirectToCheckout if only sessionId is returned (though my functions return url too)
+      const stripe = await getStripePromise();
       if (!stripe) {
         throw new Error('Stripe failed to load');
       }
@@ -62,9 +103,19 @@ export function StripeCheckout({ product, className, children, metadata }: Strip
     } catch (error) {
       console.error('Checkout error:', error);
       alert(error instanceof Error ? error.message : 'Checkout failed');
+      if (onCancel) {
+        onCancel();
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const formatPrice = (cents: number) => {
+    return new Intl.NumberFormat('en-AU', {
+      style: 'currency',
+      currency: 'AUD',
+    }).format(cents / 100);
   };
 
   return (
@@ -79,7 +130,7 @@ export function StripeCheckout({ product, className, children, metadata }: Strip
           Processing...
         </>
       ) : (
-        children || `Buy for ${product.currencySymbol}${product.price}`
+        children || `Pay ${formatPrice(amount)}`
       )}
     </Button>
   );
