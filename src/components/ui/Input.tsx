@@ -1,4 +1,4 @@
-import { type InputHTMLAttributes, type TextareaHTMLAttributes, type SelectHTMLAttributes, forwardRef } from 'react';
+import { type InputHTMLAttributes, type TextareaHTMLAttributes, type SelectHTMLAttributes, forwardRef, useId } from 'react';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -8,7 +8,11 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, helperText, className = '', id, ...props }, ref) => {
-    const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
+    const generatedId = useId();
+    const inputId = id || generatedId;
+    const errorId = `${inputId}-error`;
+    const helperId = `${inputId}-helper`;
+
     return (
       <div className="space-y-1.5">
         {label && (
@@ -19,11 +23,18 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           id={inputId}
+          aria-invalid={!!error}
+          aria-describedby={
+            [
+              error ? errorId : undefined,
+              helperText && !error ? helperId : undefined
+            ].filter(Boolean).join(' ') || undefined
+          }
           className={`input-field ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 dark:border-red-500/50' : ''} ${className}`}
           {...props}
         />
-        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
-        {helperText && !error && <p className="text-sm text-neutral-500 dark:text-neutral-400">{helperText}</p>}
+        {error && <p id={errorId} className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {helperText && !error && <p id={helperId} className="text-sm text-neutral-500 dark:text-neutral-400">{helperText}</p>}
       </div>
     );
   }
@@ -38,7 +49,10 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ label, error, className = '', id, ...props }, ref) => {
-    const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
+    const generatedId = useId();
+    const inputId = id || generatedId;
+    const errorId = `${inputId}-error`;
+
     return (
       <div className="space-y-1.5">
         {label && (
@@ -49,10 +63,12 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         <textarea
           ref={ref}
           id={inputId}
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
           className={`input-field min-h-[100px] ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 dark:border-red-500/50' : ''} ${className}`}
           {...props}
         />
-        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {error && <p id={errorId} className="text-sm text-red-600 dark:text-red-400">{error}</p>}
       </div>
     );
   }
@@ -68,7 +84,10 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, error, options, className = '', id, ...props }, ref) => {
-    const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
+    const generatedId = useId();
+    const inputId = id || generatedId;
+    const errorId = `${inputId}-error`;
+
     return (
       <div className="space-y-1.5">
         {label && (
@@ -79,6 +98,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         <select
           ref={ref}
           id={inputId}
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
           className={`input-field ${error ? 'border-red-500 dark:border-red-500/50' : ''} ${className}`}
           {...props}
         >
@@ -88,7 +109,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             </option>
           ))}
         </select>
-        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {error && <p id={errorId} className="text-sm text-red-600 dark:text-red-400">{error}</p>}
       </div>
     );
   }
