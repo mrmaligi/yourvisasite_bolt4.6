@@ -39,6 +39,9 @@ Deno.serve(async (req) => {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
       await handleCheckoutSessionCompleted(session);
+    } else if (event.type === 'checkout.session.expired' || event.type === 'checkout.session.async_payment_failed') {
+      const session = event.data.object as Stripe.Checkout.Session;
+      await handleCheckoutSessionExpired(session);
     }
 
     return Response.json({ received: true });
@@ -89,6 +92,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     }
   } else if (type === 'consultation') {
     const bookingId = metadata?.booking_id;
+    const slotId = metadata?.slot_id;
 
     if (bookingId) {
       // Update booking status
@@ -106,11 +110,48 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
         console.error('Error updating booking status:', error);
       } else {
         console.log('Successfully confirmed booking', bookingId);
+
+        // Mark slot as booked
+        if (slotId) {
+          const { error: slotError } = await supabase
+            .schema('lawyer')
+            .from('consultation_slots')
+            .update({ is_booked: true, is_reserved: false, reserved_until: null })
+            .eq('id', slotId);
+
+          if (slotError) {
+            console.error('Error updating consultation slot:', slotError);
+          }
+        }
       }
     } else {
       console.error('No booking_id found in metadata for consultation');
     }
   } else {
     console.log('Unknown checkout type:', type);
+  }
+}
+
+async function handleCheckoutSessionExpired(session: Stripe.Checkout.Session) {
+  const { metadata } = session;
+  const type = metadata?.type;
+
+  if (type === 'consultation') {
+    const bookingId = metadata?.booking_id;
+    const slotId = metadata?.slot_id;
+
+    console.log(`Handling expired/failed session for booking ${bookingId}`);
+
+    if (bookingId) {
+       await supabase.from('bookings').update({ status: 'cancelled', payment_status: 'failed' }).eq('id', bookingId);
+    }
+
+    if (slotId) {
+       await supabase
+         .schema('lawyer')
+         .from('consultation_slots')
+         .update({ is_reserved: false, reserved_until: null })
+         .eq('id', slotId);
+    }
   }
 }

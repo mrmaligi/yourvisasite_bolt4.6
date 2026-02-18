@@ -18,6 +18,7 @@ export function LawyerRegister() {
   const [jurisdiction, setJurisdiction] = useState('');
   const [practiceAreas, setPracticeAreas] = useState('');
   const [yearsExperience, setYearsExperience] = useState('');
+  const [hourlyRate, setHourlyRate] = useState('');
   const [bio, setBio] = useState('');
   const [verificationFile, setVerificationFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -54,6 +55,7 @@ export function LawyerRegister() {
         practice_areas: practiceAreas.split(',').map((s) => s.trim()).filter(Boolean),
         years_experience: parseInt(yearsExperience) || 0,
         bio: bio || null,
+        hourly_rate_cents: hourlyRate ? Math.round(parseFloat(hourlyRate) * 100) : null,
         verification_document_url: verificationUrl || null,
       });
 
@@ -62,26 +64,6 @@ export function LawyerRegister() {
           throw new Error('You have already submitted a lawyer registration');
         }
         throw new Error(insertError.message);
-      }
-
-      try {
-        const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevate-role`;
-        const session = await supabase.auth.getSession();
-
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.data.session?.access_token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ user_id: user.id, role: 'lawyer' }),
-        });
-
-        if (!response.ok) {
-          console.error('Failed to elevate role:', await response.text());
-        }
-      } catch (roleError) {
-        console.error('Role elevation error:', roleError);
       }
 
       await refreshProfile();
@@ -135,9 +117,10 @@ export function LawyerRegister() {
             <Input label="Jurisdiction" value={jurisdiction} onChange={(e) => setJurisdiction(e.target.value)} />
             <Input label="Practice Areas" value={practiceAreas} onChange={(e) => setPracticeAreas(e.target.value)} helperText="Comma-separated" />
             <Input label="Years of Experience" type="number" value={yearsExperience} onChange={(e) => setYearsExperience(e.target.value)} />
+            <Input label="Hourly Rate ($/hr)" type="number" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} />
             <Textarea label="Professional Bio" value={bio} onChange={(e) => setBio(e.target.value)} />
             <div className="flex justify-end">
-              <Button onClick={() => setStep(2)} disabled={!barNumber || !jurisdiction}>Next</Button>
+              <Button onClick={() => setStep(2)} disabled={!barNumber || !jurisdiction || !hourlyRate}>Next</Button>
             </div>
           </CardBody>
         </Card>
@@ -166,6 +149,7 @@ export function LawyerRegister() {
               <p><span className="font-medium text-neutral-700">Jurisdiction:</span> {jurisdiction}</p>
               <p><span className="font-medium text-neutral-700">Practice Areas:</span> {practiceAreas}</p>
               <p><span className="font-medium text-neutral-700">Experience:</span> {yearsExperience} years</p>
+              <p><span className="font-medium text-neutral-700">Hourly Rate:</span> ${hourlyRate}/hr</p>
               <p><span className="font-medium text-neutral-700">Document:</span> {verificationFile?.name}</p>
             </div>
             <div className="flex justify-between">

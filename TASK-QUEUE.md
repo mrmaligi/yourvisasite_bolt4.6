@@ -6,21 +6,25 @@
 ## CURRENT JULES SESSIONS (check these first)
 | Task | Session ID | Fired At | Status |
 |------|-----------|----------|--------|
-| T2: Premium Content | 968936226952679464 | 2026-02-18 15:45 | PENDING_REVIEW |
-| T3: Auth + Hooks | 12128341203887328535 | 2026-02-18 15:55 | PENDING_REVIEW |
-| T4: Stripe + Edge Fns | 7963435567493555491 | 2026-02-18 15:58 | PENDING_REVIEW |
-| T5: Landing + Search + Detail | 8309090833658564348 | 2026-02-18 16:00 | PENDING_REVIEW |
-| T6: Tracker + Submit | 7166305531339836140 | 2026-02-18 16:02 | PENDING_REVIEW |
-| T7: Lawyers + News + Pricing | 13245073353872056035 | 2026-02-18 16:04 | PENDING_REVIEW |
+| T2: Premium Content | 968936226952679464 | 2026-02-18 15:45 | MERGED |
+| T3: Auth + Hooks | 12128341203887328535 | 2026-02-18 15:55 | MERGED |
+| T4: Stripe + Edge Fns | 7963435567493555491 | 2026-02-18 15:58 | MERGED |
+| T5: Landing + Search + Detail | 8309090833658564348 | 2026-02-18 16:00 | MERGED |
+| T6: Tracker + Submit | 7166305531339836140 | 2026-02-18 16:02 | MERGED |
+| T7: Lawyers + News + Pricing | 13245073353872056035 | 2026-02-18 16:04 | MERGED |
 
 ## TASK QUEUE (fire these next, in order)
 Each cron job picks the FIRST task with status=QUEUED, fires it to Jules, and marks it FIRED.
 
 | # | Task Name | Scope | Status |
 |---|-----------|-------|--------|
-| T8 | User Dashboard — All Sections | User dashboard with real data, My Visas (purchased list), Saved Visas page, User Settings page. Wire to Supabase. | QUEUED |
-| T9 | Premium Content Viewer + Unlock Flow | After purchase: show step-by-step guide, progress tracking checkboxes, section navigation. Unlock button → Stripe checkout. | QUEUED |
-| T10 | Document Upload + Checklist | MyDocuments page: upload to Supabase Storage, categorize by 19 types, list with status. Per-visa document checklist matching uploaded docs. | QUEUED |
+| T8 | User Dashboard — All Sections | User dashboard with real data, My Visas (purchased list), Saved Visas page, User Settings page. Wire to Supabase. | FIRED |
+| T9 | Premium Content Viewer + Unlock Flow | After purchase: show step-by-step guide, progress tracking checkboxes, section navigation. Unlock button → Stripe checkout. | FIRED |
+| T10 | Document Upload + Checklist | MyDocuments page: upload to Supabase Storage, categorize by 19 types, list with status. Per-visa document checklist matching uploaded docs. | FIRED |
+| T11 | Consultation Booking Flow | From lawyer profile: select time slot → confirm → Stripe checkout → booking created. Consultations page listing upcoming/past. | FIRED |
+| T12 | Lawyer Registration + Pending | /register/lawyer form: bar number, jurisdiction, specializations, rate, credential upload. Pending page after submission. | FIRED |
+| T13 | Lawyer Dashboard + Clients | Lawyer dashboard with stats (clients, earnings, consultations). Clients page listing all booked clients with shared docs. | FIRED |
+| T14 | Lawyer Availability + Tracker + News + Settings | Availability calendar UI. Weighted tracker submissions. News comments. Lawyer settings page. | FIRED |
 | T11 | Consultation Booking Flow | From lawyer profile: select time slot → confirm → Stripe checkout → booking created. Consultations page listing upcoming/past. | QUEUED |
 | T12 | Lawyer Registration + Pending | /register/lawyer form: bar number, jurisdiction, specializations, rate, credential upload. Pending page after submission. | QUEUED |
 | T13 | Lawyer Dashboard + Clients | Lawyer dashboard with stats (clients, earnings, consultations). Clients page listing all booked clients with shared docs. | QUEUED |

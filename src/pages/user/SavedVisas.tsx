@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bookmark, ArrowUpRight, Trash2 } from 'lucide-react';
+import { Bookmark, ArrowUpRight, Heart } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { CardSkeleton } from '../../components/ui/Skeleton';
 import type { Visa } from '../../types/database';
@@ -25,35 +24,40 @@ export function SavedVisas() {
 
   const fetchSaved = async () => {
     if (!user) return;
-    const { data } = await supabase
-      .from('saved_visas')
-      .select('id, visa_id, created_at')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+    try {
+      const { data } = await supabase
+        .from('saved_visas')
+        .select('id, visa_id, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-    if (!data || data.length === 0) {
-      setSavedVisas([]);
+      if (!data || data.length === 0) {
+        setSavedVisas([]);
+        setLoading(false);
+        return;
+      }
+
+      const visaIds = data.map((d) => d.visa_id);
+      const { data: visas } = await supabase
+        .from('visas')
+        .select('*')
+        .in('id', visaIds);
+
+      const visaMap = new Map(visas?.map((v) => [v.id, v]) || []);
+
+      const enriched = data
+        .filter((d) => visaMap.has(d.visa_id))
+        .map((d) => ({
+          ...d,
+          visa: visaMap.get(d.visa_id)!,
+        }));
+
+      setSavedVisas(enriched);
+    } catch (err) {
+      console.error('Error fetching saved visas:', err);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const visaIds = data.map((d) => d.visa_id);
-    const { data: visas } = await supabase
-      .from('visas')
-      .select('*')
-      .in('id', visaIds);
-
-    const visaMap = new Map(visas?.map((v) => [v.id, v]) || []);
-
-    const enriched = data
-      .filter((d) => visaMap.has(d.visa_id))
-      .map((d) => ({
-        ...d,
-        visa: visaMap.get(d.visa_id)!,
-      }));
-
-    setSavedVisas(enriched);
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -84,8 +88,8 @@ export function SavedVisas() {
       </div>
 
       {loading ? (
-        <div className="grid sm:grid-cols-2 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 3 }).map((_, i) => (
             <CardSkeleton key={i} />
           ))}
         </div>
@@ -100,22 +104,42 @@ export function SavedVisas() {
           }}
         />
       ) : (
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {savedVisas.map((sv) => (
-            <Card key={sv.id} hover className="relative group">
-              <Link to={`/visas/${sv.visa.id}`}>
-                <CardBody className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Badge>{sv.visa.subclass}</Badge>
-                    <Badge variant="info">{sv.visa.country}</Badge>
+            <Card key={sv.id} hover className="group flex flex-col h-full relative">
+               <div className="absolute top-4 right-4 z-10">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleRemove(sv.id, sv.visa_id);
+                    }}
+                    disabled={removing === sv.id}
+                    className="p-2 rounded-full bg-white/80 backdrop-blur-sm text-red-500 hover:bg-red-50 transition-colors shadow-sm border border-neutral-100"
+                    title="Remove from saved"
+                  >
+                    <Heart className="w-4 h-4 fill-current" />
+                  </button>
+                </div>
+              <Link to={`/visas/${sv.visa.id}`} className="flex-1 flex flex-col">
+                <CardBody className="flex-1 space-y-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1 pr-8">
+                       <div className="flex items-center gap-2 mb-2">
+                        <Badge>{sv.visa.subclass}</Badge>
+                        <Badge variant="info" className="capitalize">{sv.visa.country}</Badge>
+                      </div>
+                      <h3 className="text-lg font-bold text-neutral-900 line-clamp-1" title={sv.visa.name}>
+                        {sv.visa.name}
+                      </h3>
+                    </div>
                   </div>
-                  <h3 className="font-semibold text-neutral-900 pr-8">
-                    {sv.visa.name}
-                  </h3>
+
                   <p className="text-sm text-neutral-500 line-clamp-2">
                     {sv.visa.description}
                   </p>
-                  <div className="flex items-center justify-between text-xs text-neutral-400 pt-2 border-t border-neutral-100">
+
+                  <div className="flex items-center justify-between text-xs text-neutral-400 pt-4 border-t border-neutral-100 mt-auto">
                     <span>
                       Saved{' '}
                       {new Date(sv.created_at).toLocaleDateString('en-AU', {
@@ -128,18 +152,6 @@ export function SavedVisas() {
                   </div>
                 </CardBody>
               </Link>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleRemove(sv.id, sv.visa_id);
-                }}
-                disabled={removing === sv.id}
-                className="absolute top-3 right-3 p-1.5 rounded-lg text-neutral-300 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
-                title="Remove from saved"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
             </Card>
           ))}
         </div>

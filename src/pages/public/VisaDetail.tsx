@@ -8,8 +8,7 @@ import {
   ArrowUpRight,
   ChevronRight,
   ArrowLeft,
-  AlertCircle,
-  FileText
+  AlertCircle
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -19,15 +18,12 @@ import { Button } from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
 import { StripeCheckout } from '../../components/StripeCheckout';
-import { STRIPE_PRODUCTS } from '../../stripe-config';
-import { useDocuments } from '../../hooks/useDocuments';
 import type { Visa, TrackerStats, VisaPremiumContent, Product, UserVisaPurchase } from '../../types/database';
 
 export function VisaDetail() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const { toast } = useToast();
-  const { documents: userDocs, categories: docCategories } = useDocuments();
 
   const [visa, setVisa] = useState<Visa | null>(null);
   const [stats, setStats] = useState<TrackerStats | null>(null);
@@ -100,7 +96,7 @@ export function VisaDetail() {
               .from('visa_premium_content')
               .select('*')
               .eq('visa_id', id)
-              .order('section_number');
+              .order('step_number');
             setPremiumContent(contentData || []);
          }
       }
@@ -132,7 +128,7 @@ export function VisaDetail() {
               .from('visa_premium_content')
               .select('*')
               .eq('visa_id', id)
-              .order('section_number');
+              .order('step_number');
             setPremiumContent(content || []);
             toast('success', 'Payment successful! Guide unlocked.');
             window.history.replaceState({}, '', window.location.pathname);
@@ -173,21 +169,6 @@ export function VisaDetail() {
 
   const hasPurchased = !!purchase;
   const price = product?.price_cents ? product.price_cents / 100 : 49;
-
-  // Calculate Progress
-  const totalRequiredDocs = premiumContent.reduce((acc, step) => {
-    return acc + (step.required_documents?.length || 0);
-  }, 0);
-
-  const uploadedRequiredDocsCount = premiumContent.reduce((acc, step) => {
-     if (!step.required_documents) return acc;
-     const uploadedForStep = step.required_documents.filter(reqKey =>
-        userDocs.some(doc => doc.document_category === reqKey)
-     ).length;
-     return acc + uploadedForStep;
-  }, 0);
-
-  const progressPercent = totalRequiredDocs > 0 ? Math.round((uploadedRequiredDocsCount / totalRequiredDocs) * 100) : 0;
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -273,85 +254,28 @@ export function VisaDetail() {
 
                  {hasPurchased && premiumContent.length > 0 ? (
                     <div className="space-y-6">
-                        {/* Progress Bar */}
-                        {totalRequiredDocs > 0 && (
-                          <Card className="bg-primary-50 border-primary-100">
-                              <CardBody className="flex items-center gap-4">
-                                <div className="flex-1">
-                                    <div className="flex justify-between text-sm mb-1">
-                                      <span className="font-medium text-primary-900">Document Checklist Progress</span>
-                                      <span className="font-bold text-primary-700">{uploadedRequiredDocsCount}/{totalRequiredDocs}</span>
-                                    </div>
-                                    <div className="h-2 bg-primary-200 rounded-full overflow-hidden">
-                                      <div className="h-full bg-primary-600 transition-all duration-500" style={{ width: `${progressPercent}%` }} />
-                                    </div>
-                                </div>
-                                <Link to="/documents">
-                                    <Button size="sm" variant="secondary">Manage Documents</Button>
-                                </Link>
-                              </CardBody>
-                          </Card>
-                        )}
-
                         {premiumContent.map((step) => (
                             <Card key={step.id} className="overflow-hidden">
                                 <CardHeader className="bg-primary-50/50 border-b border-primary-100">
                                     <h3 className="font-semibold text-primary-900 flex items-center">
                                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary-100 text-primary-700 text-xs font-bold mr-3">
-                                            {step.section_number}
+                                            {step.step_number}
                                         </span>
-                                        {step.section_title}
+                                        {step.title}
                                     </h3>
                                 </CardHeader>
                                 <CardBody>
                                     <div className="prose prose-sm max-w-none text-neutral-600 whitespace-pre-wrap">
-                                        {step.content}
+                                        {step.body}
                                     </div>
-
-                                    {/* Tips */}
-                                    {step.tips && (
-                                       <div className="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-100 text-sm">
-                                           <span className="font-bold text-amber-800 block mb-1">💡 Lawyer Tip:</span>
-                                           <span className="text-amber-700 whitespace-pre-wrap">{step.tips}</span>
-                                       </div>
-                                    )}
-
-                                    {/* Common Mistakes */}
-                                    {step.common_mistakes && (
-                                       <div className="mt-4 p-3 bg-red-50 rounded-lg border border-red-100 text-sm">
-                                           <span className="font-bold text-red-800 block mb-1">❌ Common Mistakes:</span>
-                                           <span className="text-red-700 whitespace-pre-wrap">{step.common_mistakes}</span>
-                                       </div>
-                                    )}
-
-                                    {/* Required Documents */}
-                                    {step.required_documents && step.required_documents.length > 0 && (
-                                      <div className="mt-6 pt-4 border-t border-neutral-100 space-y-3">
-                                          <h4 className="text-sm font-medium text-neutral-900">Required Documents:</h4>
-                                          {step.required_documents.map(reqKey => {
-                                              const isUploaded = userDocs.some(d => d.document_category === reqKey);
-                                              const categoryName = docCategories.find(c => c.key === reqKey)?.name || reqKey;
-                                              return (
-                                                <div key={reqKey} className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${isUploaded ? 'bg-green-50 border-green-200' : 'bg-neutral-50 border-neutral-200'}`}>
-                                                    <div className="flex items-center gap-3">
-                                                      <div className={`p-1.5 rounded-full ${isUploaded ? 'bg-green-100' : 'bg-neutral-200'}`}>
-                                                          <FileText className={`w-4 h-4 ${isUploaded ? 'text-green-600' : 'text-neutral-500'}`} />
-                                                      </div>
-                                                      <span className={`text-sm ${isUploaded ? 'text-green-900 font-medium' : 'text-neutral-700'}`}>
-                                                          {categoryName}
-                                                      </span>
-                                                    </div>
-                                                    {isUploaded ? (
-                                                      <Badge variant="success" className="gap-1 pl-1.5"><CheckCircle className="w-3 h-3" /> Uploaded</Badge>
-                                                    ) : (
-                                                      <Link to="/documents">
-                                                          <Button size="xs" variant="secondary" className="h-8">Upload</Button>
-                                                      </Link>
-                                                    )}
-                                                </div>
-                                              );
-                                          })}
-                                      </div>
+                                    {step.document_category && (
+                                        <div className="mt-4 p-3 bg-neutral-50 rounded-lg border border-neutral-100 text-sm">
+                                            <span className="font-medium text-neutral-700">Required Document: </span>
+                                            <span className="text-neutral-600">{step.document_category}</span>
+                                            {step.document_explanation && (
+                                                <p className="mt-1 text-xs text-neutral-500">{step.document_explanation}</p>
+                                            )}
+                                        </div>
                                     )}
                                 </CardBody>
                             </Card>
@@ -387,7 +311,9 @@ export function VisaDetail() {
 
                             {user ? (
                                 <StripeCheckout
-                                    product={STRIPE_PRODUCTS.visasite} // Using default product for now as per code
+                                    type="premium"
+                                    visaId={visa.id}
+                                    amount={product?.price_cents || 4900}
                                     className="w-full sm:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-primary-900/20"
                                 >
                                     Unlock Now — ${price}
