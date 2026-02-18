@@ -240,3 +240,13 @@ export interface NotificationPreferences {
   created_at: string;
   updated_at: string;
 }
+
+export interface Message {
+  id: string;
+  booking_id: string;
+  sender_id: string;
+  sender_role: UserRole;
+  message_text: string;
+  is_read: boolean;
+  created_at: string;
+}
