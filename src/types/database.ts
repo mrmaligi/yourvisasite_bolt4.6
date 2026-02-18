@@ -36,16 +36,31 @@ export interface Visa {
   updated_at: string;
 }
 
-// Premium content for a visa, organized by steps
+export interface DocumentCategory {
+  id: string;
+  key: string;
+  name: string;
+  description: string | null;
+  tips: string | null;
+  icon: string;
+  is_active: boolean;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// Premium content for a visa, organized by sections/steps
 export interface VisaPremiumContent {
   id: string;
   visa_id: string;
-  step_number: number;
-  title: string;
-  body: string;
-  document_category: string | null;
-  document_explanation: string | null;
-  document_example_url: string | null;
+  section_number: number;
+  section_title: string;
+  content: string;
+  tips: string | null;
+  common_mistakes: string | null;
+  examples: any | null;
+  estimated_minutes: number | null;
+  required_documents: string[] | null; // Array of document category keys
   created_at: string;
   updated_at: string;
 }
@@ -169,8 +184,8 @@ export interface UserVisaPurchase {
 export interface UserDocument {
   id: string;
   user_id: string;
-  visa_id: string;
-  document_category: string;
+  visa_id: string | null;
+  document_category: string; // matches DocumentCategory.key
   file_name: string;
   storage_path: string;
   status: DocumentStatus;
