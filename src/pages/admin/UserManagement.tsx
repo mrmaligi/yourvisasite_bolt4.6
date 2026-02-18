@@ -1,34 +1,37 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { DataTable, type Column } from '../../components/ui/DataTable';
-import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
 import { useToast } from '../../components/ui/Toast';
-import type { Profile } from '../../types/database';
-
-const roleVariant = {
-  user: 'primary' as const,
-  lawyer: 'info' as const,
-  admin: 'danger' as const,
-};
+import type { Profile, UserRole } from '../../types/database';
 
 export function UserManagement() {
-  const { toast } = useToast();
   const [users, setUsers] = useState<Profile[]>([]);
   const [filtered, setFiltered] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        setUsers(data || []);
-        setFiltered(data || []);
-        setLoading(false);
-      });
+    fetchUsers();
   }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setUsers(data || []);
+      setFiltered(data || []);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast('error', 'Failed to fetch users');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearch = (q: string) => {
     if (!q) {
@@ -41,45 +44,101 @@ export function UserManagement() {
     ));
   };
 
-  const handleToggleStatus = async (user: Profile) => {
-    const newStatus = !user.is_active;
-    const { error } = await supabase
-      .from('profiles')
-      .update({ is_active: newStatus })
-      .eq('id', user.id);
+  const updateRole = async (userId: string, newRole: UserRole) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: newRole })
+        .eq('id', userId);
 
-    if (error) {
-      toast('error', 'Failed to update user status');
-      return;
+      if (error) throw error;
+
+      toast('success', 'User role updated successfully');
+
+      const updateState = (prev: Profile[]) =>
+        prev.map(u => u.id === userId ? { ...u, role: newRole } : u);
+
+      setUsers(updateState);
+      setFiltered(updateState);
+
+    } catch (error) {
+      console.error('Error updating role:', error);
+      toast('error', 'Failed to update user role');
     }
+  };
 
-    toast('success', `User ${newStatus ? 'activated' : 'deactivated'}`);
+  const toggleStatus = async (user: Profile) => {
+    const newStatus = !user.is_active;
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_active: newStatus })
+        .eq('id', user.id);
 
-    const updatedUsers = users.map(u => u.id === user.id ? { ...u, is_active: newStatus } : u);
-    setUsers(updatedUsers);
+      if (error) throw error;
 
-    // Also update filtered list if necessary, preserving the filter logic is complex,
-    // but re-applying filter on full list is safer or just map over filtered too
-    setFiltered(filtered.map(u => u.id === user.id ? { ...u, is_active: newStatus } : u));
+      toast('success', `User ${newStatus ? 'activated' : 'deactivated'} successfully`);
+
+      const updateState = (prev: Profile[]) =>
+        prev.map(u => u.id === user.id ? { ...u, is_active: newStatus } : u);
+
+      setUsers(updateState);
+      setFiltered(updateState);
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast('error', 'Failed to update user status');
+    }
   };
 
   const columns: Column<Profile>[] = [
-    { key: 'name', header: 'Name', render: (r) => r.full_name || 'Unnamed', sortable: true },
-    { key: 'role', header: 'Role', render: (r) => <Badge variant={roleVariant[r.role]}>{r.role}</Badge>, sortable: true },
-    { key: 'status', header: 'Status', render: (r) => <Badge variant={r.is_active ? 'success' : 'default'}>{r.is_active ? 'Active' : 'Inactive'}</Badge> },
-    { key: 'joined', header: 'Joined', render: (r) => new Date(r.created_at).toLocaleDateString(), sortable: true },
     {
-      key: 'actions',
-      header: 'Actions',
+      key: 'name',
+      header: 'Name',
       render: (r) => (
-        <Button
-          size="sm"
-          variant={r.is_active ? 'danger' : 'secondary'}
-          onClick={() => handleToggleStatus(r)}
+        <div>
+          <div className="font-medium text-neutral-900">{r.full_name || 'Unnamed'}</div>
+          <div className="text-xs text-neutral-500">{r.id.slice(0, 8)}...</div>
+        </div>
+      ),
+      sortable: true
+    },
+    {
+      key: 'role',
+      header: 'Role',
+      render: (r) => (
+        <select
+          value={r.role}
+          onChange={(e) => updateRole(r.id, e.target.value as UserRole)}
+          className="text-sm border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 py-1 pl-2 pr-8 bg-white"
         >
-          {r.is_active ? 'Deactivate' : 'Activate'}
-        </Button>
+          <option value="user">User</option>
+          <option value="lawyer">Lawyer</option>
+          <option value="admin">Admin</option>
+        </select>
+      ),
+      sortable: true
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (r) => (
+        <button
+          onClick={() => toggleStatus(r)}
+          className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+            r.is_active
+              ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+              : 'bg-red-100 text-red-800 hover:bg-red-200'
+          }`}
+        >
+          {r.is_active ? 'Active' : 'Inactive'}
+        </button>
       )
+    },
+    {
+      key: 'joined',
+      header: 'Joined',
+      render: (r) => new Date(r.created_at).toLocaleDateString(),
+      sortable: true
     },
   ];
 

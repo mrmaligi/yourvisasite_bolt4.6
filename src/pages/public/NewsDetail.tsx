@@ -24,7 +24,7 @@ export function NewsDetail() {
   const { user, role } = useAuth();
   const { toast } = useToast();
   const [article, setArticle] = useState<ArticleWithAuthor | null>(null);
-  const [relatedArticles, setRelatedArticles] = useState<NewsArticle[]>([]);
+  const [relatedArticles, setRelatedArticles] = useState<Pick<NewsArticle, 'id' | 'title' | 'slug' | 'published_at' | 'category'>[]>([]);
   const [comments, setComments] = useState<CommentWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
   const [commentBody, setCommentBody] = useState('');
