@@ -85,8 +85,10 @@ export interface NewsArticle {
   title: string;
   slug: string;
   body: string;
+  excerpt: string | null;
   image_url: string | null;
   author_id: string;
+  category: string;
   is_published: boolean;
   published_at: string | null;
   created_at: string;
