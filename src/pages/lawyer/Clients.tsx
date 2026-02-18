@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Users, Calendar, Phone, Briefcase, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { Users, Calendar, Phone, Briefcase, FileText, ChevronDown, ChevronUp, MessageSquare } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { Button } from '../../components/ui/Button';
+import { ChatInterface } from '../../components/chat/ChatInterface';
 
 interface ClientInfo {
   user_id: string;
@@ -18,6 +20,11 @@ interface ClientInfo {
     id: string;
     file_name: string;
     uploaded_at: string;
+  }[];
+  bookings: {
+    id: string;
+    created_at: string;
+    status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
   }[];
 }
 
@@ -50,6 +57,7 @@ export function Clients() {
   const [loading, setLoading] = useState(true);
   const [lawyerProfileId, setLawyerProfileId] = useState<string | null>(null);
   const [expandedClient, setExpandedClient] = useState<string | null>(null);
+  const [activeChatBookingId, setActiveChatBookingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!profile) return;
@@ -76,7 +84,7 @@ export function Clients() {
     const fetchClients = async () => {
       const { data: bookings } = await supabase
         .from('bookings')
-        .select('user_id, total_price_cents, status, created_at')
+        .select('id, user_id, total_price_cents, status, created_at')
         .eq('lawyer_id', lawyerProfileId);
 
       if (!bookings || bookings.length === 0) {
@@ -149,12 +157,15 @@ export function Clients() {
       bookings.forEach(b => {
         const existing = clientMap.get(b.user_id);
         const prof = profileMap.get(b.user_id);
+        const bookingInfo = { id: b.id, created_at: b.created_at, status: b.status as any };
+
         if (existing) {
           existing.total_bookings += 1;
           existing.total_spent_cents += b.total_price_cents;
           if (b.created_at > existing.last_booking_date) {
             existing.last_booking_date = b.created_at;
           }
+          existing.bookings.push(bookingInfo);
         } else {
           clientMap.set(b.user_id, {
             user_id: b.user_id,
@@ -165,9 +176,15 @@ export function Clients() {
             total_spent_cents: b.total_price_cents,
             visa_types: Array.from(visaMap.get(b.user_id) || []),
             shared_documents: docMap.get(b.user_id) || [],
+            bookings: [bookingInfo]
           });
         }
       });
+
+      // Sort bookings inside client
+       Array.from(clientMap.values()).forEach(client => {
+          client.bookings.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+       });
 
       setClients(Array.from(clientMap.values()).sort((a, b) =>
         new Date(b.last_booking_date).getTime() - new Date(a.last_booking_date).getTime()
@@ -270,26 +287,74 @@ export function Clients() {
                       </div>
                     </div>
 
-                    {/* Expandable Section for Documents */}
-                    {client.shared_documents.length > 0 && (
+                    {/* Expandable Section */}
+                    {(client.shared_documents.length > 0 || client.bookings.length > 0) && (
                         <div className="mt-4 pt-4 border-t border-neutral-100">
                              <button
                                 onClick={() => setExpandedClient(expandedClient === client.user_id ? null : client.user_id)}
                                 className="flex items-center gap-2 text-sm text-neutral-600 hover:text-primary-600 transition-colors w-full"
                              >
-                                <FileText className="w-4 h-4" />
-                                <span className="font-medium">{client.shared_documents.length} Shared Document{client.shared_documents.length !== 1 ? 's' : ''}</span>
+                                <div className="flex items-center gap-4">
+                                    <span className="flex items-center gap-1">
+                                        <FileText className="w-4 h-4" />
+                                        <span className="font-medium">{client.shared_documents.length} Document{client.shared_documents.length !== 1 ? 's' : ''}</span>
+                                    </span>
+                                </div>
                                 {expandedClient === client.user_id ? <ChevronUp className="w-4 h-4 ml-auto" /> : <ChevronDown className="w-4 h-4 ml-auto" />}
                              </button>
 
                              {expandedClient === client.user_id && (
-                                 <div className="mt-3 space-y-2 pl-6">
-                                     {client.shared_documents.map(doc => (
-                                         <div key={doc.id} className="flex items-center justify-between text-sm p-2 bg-neutral-50 rounded-lg">
-                                             <span className="text-neutral-700 truncate">{doc.file_name}</span>
-                                             <span className="text-xs text-neutral-400 whitespace-nowrap">{new Date(doc.uploaded_at).toLocaleDateString()}</span>
-                                         </div>
-                                     ))}
+                                 <div className="mt-3 space-y-4 pl-6 animate-in slide-in-from-top-2">
+                                    {/* Bookings List */}
+                                    <div>
+                                        <h4 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">Consultations</h4>
+                                        <div className="space-y-2">
+                                            {client.bookings.map(booking => (
+                                                <div key={booking.id} className="bg-neutral-50 rounded-lg p-3 border border-neutral-100">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-sm font-medium text-neutral-900">
+                                                                {new Date(booking.created_at).toLocaleDateString()}
+                                                            </span>
+                                                            <Badge variant={statusVariant[booking.status]} className="text-[10px] px-1.5 py-0">
+                                                                {booking.status}
+                                                            </Badge>
+                                                        </div>
+                                                        <Button
+                                        size="sm"
+                                        className="text-xs px-2 py-1 h-auto"
+                                                            variant={activeChatBookingId === booking.id ? "primary" : "secondary"}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setActiveChatBookingId(activeChatBookingId === booking.id ? null : booking.id);
+                                                            }}
+                                                        >
+                                                            <MessageSquare className="w-3 h-3 mr-1" />
+                                                            {activeChatBookingId === booking.id ? 'Close' : 'Chat'}
+                                                        </Button>
+                                                    </div>
+                                                    {activeChatBookingId === booking.id && (
+                                                         <div className="mt-2 bg-white rounded border border-neutral-200">
+                                                             <ChatInterface bookingId={booking.id} />
+                                                         </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Documents List */}
+                                    {client.shared_documents.length > 0 && (
+                                        <div>
+                                            <h4 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">Shared Documents</h4>
+                                             {client.shared_documents.map(doc => (
+                                                 <div key={doc.id} className="flex items-center justify-between text-sm p-2 bg-neutral-50 rounded-lg mb-2">
+                                                     <span className="text-neutral-700 truncate">{doc.file_name}</span>
+                                                     <span className="text-xs text-neutral-400 whitespace-nowrap">{new Date(doc.uploaded_at).toLocaleDateString()}</span>
+                                                 </div>
+                                             ))}
+                                        </div>
+                                    )}
                                  </div>
                              )}
                         </div>
@@ -329,10 +394,26 @@ export function Clients() {
                         {booking.notes}
                       </p>
                     )}
-                    <div className="flex items-center justify-between text-xs text-neutral-400">
-                      <span>{new Date(booking.created_at).toLocaleDateString()}</span>
-                      <span>${(booking.total_price_cents / 100).toFixed(0)}</span>
+                    <div className="flex items-center justify-between text-xs text-neutral-400 mt-2">
+                      <div className="flex gap-4">
+                          <span>{new Date(booking.created_at).toLocaleDateString()}</span>
+                          <span>${(booking.total_price_cents / 100).toFixed(0)}</span>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant={activeChatBookingId === booking.id ? "primary" : "ghost"}
+                        className={activeChatBookingId === booking.id ? "" : "text-primary-600 hover:text-primary-700 p-0 h-auto"}
+                        onClick={() => setActiveChatBookingId(activeChatBookingId === booking.id ? null : booking.id)}
+                      >
+                        <MessageSquare className="w-3 h-3 mr-1" />
+                        Chat
+                      </Button>
                     </div>
+                    {activeChatBookingId === booking.id && (
+                        <div className="mt-3 border-t border-neutral-100 pt-3">
+                            <ChatInterface bookingId={booking.id} />
+                        </div>
+                    )}
                   </CardBody>
                 </Card>
               ))}
