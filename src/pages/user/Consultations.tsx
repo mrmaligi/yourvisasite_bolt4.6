@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Calendar, Clock, Scale } from 'lucide-react';
+import { Calendar, Clock, Scale, Download } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
@@ -90,6 +90,45 @@ export function Consultations() {
     fetchBookings();
   };
 
+  const handleExportCalendar = async (bookingId: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast('error', 'Please sign in to export calendar');
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calendar-export/${bookingId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to export calendar');
+      }
+
+      const icsContent = await response.text();
+      const blob = new Blob([icsContent], { type: 'text/calendar' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `consultation-${bookingId}.ics`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast('success', 'Calendar file downloaded');
+    } catch (error: any) {
+      toast('error', error.message || 'Failed to export calendar');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-neutral-900">Consultations</h1>
@@ -144,13 +183,23 @@ export function Consultations() {
                       {b.notes}
                     </p>
                   )}
-                  {(b.status === 'pending' || b.status === 'confirmed') && (
-                    <div className="mt-3 flex justify-end">
-                      <Button variant="secondary" size="sm" onClick={() => handleCancel(b.id)}>
-                        Cancel Consultation
+                  <div className="mt-3 flex justify-end gap-2">
+                    {b.status === 'confirmed' && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handleExportCalendar(b.id)}
+                      >
+                        <Download className="w-4 h-4 mr-1.5" />
+                        Add to Calendar
                       </Button>
-                    </div>
-                  )}
+                    )}
+                    {(b.status === 'pending' || b.status === 'confirmed') && (
+                      <Button variant="secondary" size="sm" onClick={() => handleCancel(b.id)}>
+                        Cancel
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </CardBody>
             </Card>

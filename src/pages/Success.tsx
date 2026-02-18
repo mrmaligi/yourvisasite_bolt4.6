@@ -1,30 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { CheckCircle, ArrowRight, Download, Calendar } from 'lucide-react';
+import { CheckCircle, ArrowRight, Download, Calendar, Scale } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 
 export function Success() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id');
+  const type = searchParams.get('type');
   const [loading, setLoading] = useState(true);
   const [orderDetails, setOrderDetails] = useState<any>(null);
 
+  const isConsultation = type === 'consultation';
+
   useEffect(() => {
     if (sessionId) {
-      // Simulate loading order details
       setTimeout(() => {
         setOrderDetails({
-          amount: 49.00,
+          amount: isConsultation ? 0 : 49.00,
           currency: 'AUD',
-          product: 'VisaBuild Premium'
+          product: isConsultation ? 'Lawyer Consultation' : 'VisaBuild Premium'
         });
         setLoading(false);
       }, 1000);
     } else {
       setLoading(false);
     }
-  }, [sessionId]);
+  }, [sessionId, isConsultation]);
 
   if (loading) {
     return (
@@ -40,10 +42,12 @@ export function Success() {
         <div className="text-center mb-8">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Payment Successful!
+            {isConsultation ? 'Consultation Booked!' : 'Payment Successful!'}
           </h1>
           <p className="text-lg text-gray-600">
-            Thank you for your purchase. Your premium access is now active.
+            {isConsultation
+              ? 'Your consultation has been confirmed. You will receive a confirmation email shortly.'
+              : 'Thank you for your purchase. Your premium access is now active.'}
           </p>
         </div>
 
@@ -73,35 +77,75 @@ export function Success() {
 
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <Card className="p-6">
-            <Download className="w-8 h-8 text-indigo-600 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Access Premium Content
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Browse our comprehensive visa guides and premium resources.
-            </p>
-            <Link to="/dashboard/my-visas">
-              <Button variant="outline" className="w-full">
-                View My Visas
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
+            {isConsultation ? (
+              <>
+                <Calendar className="w-8 h-8 text-indigo-600 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Manage Your Booking
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  View details, add to calendar, or reschedule your consultation.
+                </p>
+                <Link to="/dashboard/consultations">
+                  <Button variant="outline" className="w-full">
+                    View Consultations
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Download className="w-8 h-8 text-indigo-600 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Access Premium Content
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Browse our comprehensive visa guides and premium resources.
+                </p>
+                <Link to="/dashboard/my-visas">
+                  <Button variant="outline" className="w-full">
+                    View My Visas
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </>
+            )}
           </Card>
 
           <Card className="p-6">
-            <Calendar className="w-8 h-8 text-indigo-600 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Book Consultation
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Schedule a consultation with our expert immigration lawyers.
-            </p>
-            <Link to="/lawyers">
-              <Button variant="outline" className="w-full">
-                Find Lawyers
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
+            {isConsultation ? (
+              <>
+                <Scale className="w-8 h-8 text-indigo-600 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Explore More Services
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Browse premium visa guides and document templates.
+                </p>
+                <Link to="/dashboard">
+                  <Button variant="outline" className="w-full">
+                    Go to Dashboard
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Calendar className="w-8 h-8 text-indigo-600 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Book Consultation
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Schedule a consultation with our expert immigration lawyers.
+                </p>
+                <Link to="/lawyers">
+                  <Button variant="outline" className="w-full">
+                    Find Lawyers
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </>
+            )}
           </Card>
         </div>
 

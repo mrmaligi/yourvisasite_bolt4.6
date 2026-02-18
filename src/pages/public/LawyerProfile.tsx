@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   MapPin, Briefcase, Clock, Scale, Calendar,
-  CheckCircle, ArrowLeft,
+  CheckCircle, ArrowLeft, CreditCard,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -81,6 +81,7 @@ export function LawyerProfile() {
         .select('*')
         .eq('lawyer_id', lawyerRow.id)
         .eq('is_booked', false)
+        .or(`is_reserved.eq.false,reserved_until.lt.${now}`)
         .gte('start_time', now)
         .order('start_time');
 
@@ -95,39 +96,47 @@ export function LawyerProfile() {
     if (!user || !selectedSlot || !lawyer) return;
     setSubmitting(true);
 
-    const start = new Date(selectedSlot.start_time);
-    const end = new Date(selectedSlot.end_time);
-    const durationMinutes = Math.round((end.getTime() - start.getTime()) / 60000);
-    const rateCents = lawyer.hourly_rate_cents || 0;
-    const totalCents = Math.round((rateCents / 60) * durationMinutes);
+    try {
+      // Get current session for auth token
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast('error', 'Please sign in to book a consultation');
+        setSubmitting(false);
+        return;
+      }
 
-    const { error: bookingError } = await supabase.from('bookings').insert({
-      user_id: user.id,
-      lawyer_id: lawyer.id,
-      slot_id: selectedSlot.id,
-      duration_minutes: durationMinutes,
-      total_price_cents: totalCents,
-      status: 'pending',
-      notes: bookingNotes || null,
-    });
+      // Call consultation checkout function
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/consultation-checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          slotId: selectedSlot.id,
+          lawyerId: lawyer.id,
+          notes: bookingNotes,
+          successUrl: `${window.location.origin}/success?type=consultation`,
+          cancelUrl: `${window.location.origin}/lawyers/${lawyer.id}`,
+        }),
+      });
 
-    if (bookingError) {
-      toast('error', 'Failed to book consultation. Please try again.');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to initiate checkout');
+      }
+
+      // Redirect to Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (error: any) {
+      toast('error', error.message || 'Failed to start checkout. Please try again.');
       setSubmitting(false);
-      return;
     }
-
-    await supabase
-      .schema('lawyer')
-      .from('consultation_slots')
-      .update({ is_booked: true })
-      .eq('id', selectedSlot.id);
-
-    toast('success', 'Consultation booked! You can manage it from your dashboard.');
-    setSelectedSlot(null);
-    setBookingNotes('');
-    setSubmitting(false);
-    navigate('/dashboard/consultations');
   };
 
   const groupSlotsByDate = (slotList: SlotData[]) => {
@@ -294,7 +303,8 @@ export function LawyerProfile() {
               Cancel
             </Button>
             <Button loading={submitting} onClick={handleBook}>
-              Confirm Booking
+              <CreditCard className="w-4 h-4 mr-2" />
+              Proceed to Payment
             </Button>
           </>
         }
