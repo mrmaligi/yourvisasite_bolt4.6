@@ -17,6 +17,16 @@ export interface Profile {
   updated_at: string;
 }
 
+export interface LawyerVisaPrice {
+  id: string;
+  lawyer_id: string;
+  visa_id: string;
+  hourly_rate_cents: number | null;
+  consultation_fee_cents: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Visa {
   id: string;
   subclass: string;
@@ -173,6 +183,7 @@ export interface Booking {
   stripe_checkout_session_id: string | null;
   confirmed_at: string | null;
   notes: string | null;
+  questions: string | null;
   created_at: string;
   updated_at: string;
 }

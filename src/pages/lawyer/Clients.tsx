@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Users, Calendar, Phone, Briefcase, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { Users, Calendar, Phone, Briefcase, FileText, ChevronDown, ChevronUp, MessageSquare, StickyNote } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
@@ -19,6 +19,8 @@ interface ClientInfo {
     file_name: string;
     uploaded_at: string;
   }[];
+  notes: string[];
+  questions: string[];
 }
 
 interface SharedDoc {
@@ -44,6 +46,7 @@ export function Clients() {
     full_name: string | null;
     status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
     notes: string | null;
+    questions: string | null;
     created_at: string;
     total_price_cents: number;
   }[]>([]);
@@ -76,7 +79,7 @@ export function Clients() {
     const fetchClients = async () => {
       const { data: bookings } = await supabase
         .from('bookings')
-        .select('user_id, total_price_cents, status, created_at')
+        .select('user_id, total_price_cents, status, created_at, notes, questions')
         .eq('lawyer_id', lawyerProfileId);
 
       if (!bookings || bookings.length === 0) {
@@ -99,14 +102,11 @@ export function Clients() {
         .in('user_id', userIds);
 
       // Fetch Shared Documents
-      // Note: We need to filter by lawyer_id, then get the document details
-      // Since supabase-js types can be tricky with deep joins, we'll cast or be careful
       const { data: sharedDocsRaw } = await supabase
         .from('document_shares')
         .select('document:user_documents(id, file_name, uploaded_at, user_id)')
         .eq('lawyer_id', lawyerProfileId);
 
-      // Filter out any where document might be null and ensure type safety
       const sharedDocs: SharedDoc[] = (sharedDocsRaw || [])
         .flatMap((s: any) => {
              const doc = s.document;
@@ -122,7 +122,6 @@ export function Clients() {
 
       const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
 
-      // Group Visas by User
       const visaMap = new Map<string, Set<string>>();
       if (visaPurchases) {
         visaPurchases.forEach((p: any) => {
@@ -135,7 +134,6 @@ export function Clients() {
         });
       }
 
-      // Group Documents by User
       const docMap = new Map<string, SharedDoc[]>();
       sharedDocs.forEach((d) => {
          if (!docMap.has(d.user_id)) {
@@ -155,6 +153,8 @@ export function Clients() {
           if (b.created_at > existing.last_booking_date) {
             existing.last_booking_date = b.created_at;
           }
+          if (b.notes) existing.notes.push(b.notes);
+          if (b.questions) existing.questions.push(b.questions);
         } else {
           clientMap.set(b.user_id, {
             user_id: b.user_id,
@@ -165,6 +165,8 @@ export function Clients() {
             total_spent_cents: b.total_price_cents,
             visa_types: Array.from(visaMap.get(b.user_id) || []),
             shared_documents: docMap.get(b.user_id) || [],
+            notes: b.notes ? [b.notes] : [],
+            questions: b.questions ? [b.questions] : [],
           });
         }
       });
@@ -175,7 +177,7 @@ export function Clients() {
 
       const { data: recent } = await supabase
         .from('bookings')
-        .select('id, user_id, status, notes, created_at, total_price_cents')
+        .select('id, user_id, status, notes, questions, created_at, total_price_cents')
         .eq('lawyer_id', lawyerProfileId)
         .order('created_at', { ascending: false })
         .limit(5);
@@ -270,30 +272,70 @@ export function Clients() {
                       </div>
                     </div>
 
-                    {/* Expandable Section for Documents */}
-                    {client.shared_documents.length > 0 && (
-                        <div className="mt-4 pt-4 border-t border-neutral-100">
-                             <button
-                                onClick={() => setExpandedClient(expandedClient === client.user_id ? null : client.user_id)}
-                                className="flex items-center gap-2 text-sm text-neutral-600 hover:text-primary-600 transition-colors w-full"
-                             >
-                                <FileText className="w-4 h-4" />
-                                <span className="font-medium">{client.shared_documents.length} Shared Document{client.shared_documents.length !== 1 ? 's' : ''}</span>
-                                {expandedClient === client.user_id ? <ChevronUp className="w-4 h-4 ml-auto" /> : <ChevronDown className="w-4 h-4 ml-auto" />}
-                             </button>
+                    <div className="mt-4 pt-4 border-t border-neutral-100">
+                         <button
+                            onClick={() => setExpandedClient(expandedClient === client.user_id ? null : client.user_id)}
+                            className="flex items-center gap-2 text-sm text-neutral-600 hover:text-primary-600 transition-colors w-full"
+                         >
+                            <span className="font-medium">Details & Documents</span>
+                            {expandedClient === client.user_id ? <ChevronUp className="w-4 h-4 ml-auto" /> : <ChevronDown className="w-4 h-4 ml-auto" />}
+                         </button>
 
-                             {expandedClient === client.user_id && (
-                                 <div className="mt-3 space-y-2 pl-6">
-                                     {client.shared_documents.map(doc => (
-                                         <div key={doc.id} className="flex items-center justify-between text-sm p-2 bg-neutral-50 rounded-lg">
-                                             <span className="text-neutral-700 truncate">{doc.file_name}</span>
-                                             <span className="text-xs text-neutral-400 whitespace-nowrap">{new Date(doc.uploaded_at).toLocaleDateString()}</span>
+                         {expandedClient === client.user_id && (
+                             <div className="mt-4 space-y-4 pl-4">
+                                 {/* Documents */}
+                                 <div>
+                                     <h4 className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2 flex items-center gap-1">
+                                        <FileText className="w-3 h-3" /> Shared Documents
+                                     </h4>
+                                     {client.shared_documents.length === 0 ? (
+                                         <p className="text-sm text-neutral-400 italic">No shared documents.</p>
+                                     ) : (
+                                         <div className="space-y-2">
+                                             {client.shared_documents.map(doc => (
+                                                 <div key={doc.id} className="flex items-center justify-between text-sm p-2 bg-neutral-50 rounded-lg">
+                                                     <span className="text-neutral-700 truncate">{doc.file_name}</span>
+                                                     <span className="text-xs text-neutral-400 whitespace-nowrap">{new Date(doc.uploaded_at).toLocaleDateString()}</span>
+                                                 </div>
+                                             ))}
                                          </div>
-                                     ))}
+                                     )}
                                  </div>
-                             )}
-                        </div>
-                    )}
+
+                                 {/* Questions */}
+                                 {client.questions.length > 0 && (
+                                     <div>
+                                         <h4 className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2 flex items-center gap-1">
+                                            <MessageSquare className="w-3 h-3" /> Questions
+                                         </h4>
+                                         <div className="space-y-2">
+                                             {client.questions.map((q, idx) => (
+                                                 <div key={idx} className="text-sm p-2 bg-neutral-50 rounded-lg text-neutral-700">
+                                                     "{q}"
+                                                 </div>
+                                             ))}
+                                         </div>
+                                     </div>
+                                 )}
+
+                                 {/* Notes */}
+                                 {client.notes.length > 0 && (
+                                     <div>
+                                         <h4 className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2 flex items-center gap-1">
+                                            <StickyNote className="w-3 h-3" /> Application Notes
+                                         </h4>
+                                         <div className="space-y-2">
+                                             {client.notes.map((n, idx) => (
+                                                 <div key={idx} className="text-sm p-2 bg-neutral-50 rounded-lg text-neutral-700 italic">
+                                                     "{n}"
+                                                 </div>
+                                             ))}
+                                         </div>
+                                     </div>
+                                 )}
+                             </div>
+                         )}
+                    </div>
                   </CardBody>
                 </Card>
               ))}
@@ -326,10 +368,15 @@ export function Clients() {
                     </div>
                     {booking.notes && (
                       <p className="text-xs text-neutral-500 line-clamp-2 mb-2">
-                        {booking.notes}
+                        <span className="font-medium">Note:</span> {booking.notes}
                       </p>
                     )}
-                    <div className="flex items-center justify-between text-xs text-neutral-400">
+                    {booking.questions && (
+                      <p className="text-xs text-neutral-500 line-clamp-2 mb-2">
+                        <span className="font-medium">Question:</span> {booking.questions}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between text-xs text-neutral-400 mt-2">
                       <span>{new Date(booking.created_at).toLocaleDateString()}</span>
                       <span>${(booking.total_price_cents / 100).toFixed(0)}</span>
                     </div>

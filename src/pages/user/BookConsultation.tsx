@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Calendar, Clock, Shield, MapPin, Briefcase, CreditCard, AlertCircle, ArrowLeft
+  Calendar, Clock, Shield, MapPin, Briefcase, CreditCard, AlertCircle, ArrowLeft,
+  FileText, CheckSquare, Square, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -43,6 +44,16 @@ export function BookConsultation() {
   const [selectedSlot, setSelectedSlot] = useState<SlotData | null>(null);
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // New states
+  const [visas, setVisas] = useState<{id: string, name: string}[]>([]);
+  const [userDocuments, setUserDocuments] = useState<{id: string, file_name: string}[]>([]);
+  const [visaPrices, setVisaPrices] = useState<Record<string, number>>({});
+
+  const [selectedVisaId, setSelectedVisaId] = useState<string>('');
+  const [questions, setQuestions] = useState('');
+  const [selectedDocIds, setSelectedDocIds] = useState<string[]>([]);
+  const [showDocs, setShowDocs] = useState(false);
 
   useEffect(() => {
     if (!lawyerId) {
@@ -87,6 +98,40 @@ export function BookConsultation() {
           .order('start_time');
 
         setSlots(slotRows || []);
+
+        // Fetch Visas
+        const { data: visaList } = await supabase
+            .from('visas')
+            .select('id, name')
+            .eq('is_active', true)
+            .order('name');
+        setVisas(visaList || []);
+
+        // Fetch User Documents
+        if (user) {
+            const { data: docs } = await supabase
+                .from('user_documents')
+                .select('id, file_name')
+                .eq('user_id', user.id)
+                .neq('status', 'rejected'); // Only show valid docs
+            setUserDocuments(docs || []);
+        }
+
+        // Fetch Lawyer Visa Prices
+        const { data: prices } = await supabase
+            .schema('lawyer')
+            .from('visa_prices')
+            .select('visa_id, hourly_rate_cents')
+            .eq('lawyer_id', lawyerId);
+
+        const pMap: Record<string, number> = {};
+        prices?.forEach(p => {
+            if(p.hourly_rate_cents !== null) {
+                pMap[p.visa_id] = p.hourly_rate_cents;
+            }
+        });
+        setVisaPrices(pMap);
+
       } catch (error) {
         console.error('Error fetching data:', error);
         toast('error', 'Failed to load booking details');
@@ -97,7 +142,7 @@ export function BookConsultation() {
     };
 
     fetchData();
-  }, [lawyerId, navigate, toast]);
+  }, [lawyerId, navigate, toast, user]);
 
   const groupSlotsByDate = (slotList: SlotData[]) => {
     const groups: Record<string, SlotData[]> = {};
@@ -123,6 +168,25 @@ export function BookConsultation() {
         return;
       }
 
+      // Share Documents
+      if (selectedDocIds.length > 0) {
+        const shares = selectedDocIds.map(docId => ({
+            document_id: docId,
+            lawyer_id: lawyer.id
+        }));
+
+        // We use upsert to avoid errors if already shared
+        const { error: shareError } = await supabase
+            .from('document_shares')
+            .upsert(shares, { onConflict: 'document_id, lawyer_id' });
+
+        if (shareError) {
+            console.error('Error sharing documents:', shareError);
+            // Continue anyway? Or warn?
+            // toast('warning', 'Failed to share some documents, but proceeding with booking.');
+        }
+      }
+
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/consultation-checkout`, {
         method: 'POST',
         headers: {
@@ -133,8 +197,10 @@ export function BookConsultation() {
           slotId: selectedSlot.id,
           lawyerId: lawyer.id,
           notes,
+          questions,
+          visaId: selectedVisaId || null,
           successUrl: `${window.location.origin}/success?type=consultation`,
-          cancelUrl: `${window.location.origin}/lawyers/${lawyer.id}`, // Return to profile on cancel
+          cancelUrl: `${window.location.origin}/lawyers/${lawyer.id}`,
         }),
       });
 
@@ -153,6 +219,14 @@ export function BookConsultation() {
       toast('error', error.message || 'Failed to start payment');
       setSubmitting(false);
     }
+  };
+
+  const toggleDoc = (id: string) => {
+      if (selectedDocIds.includes(id)) {
+          setSelectedDocIds(selectedDocIds.filter(d => d !== id));
+      } else {
+          setSelectedDocIds([...selectedDocIds, id]);
+      }
   };
 
   if (loading) {
@@ -182,8 +256,12 @@ export function BookConsultation() {
     ? Math.round((new Date(selectedSlot.end_time).getTime() - new Date(selectedSlot.start_time).getTime()) / 60000)
     : 0;
 
-  const estimatedPrice = selectedSlot && lawyer.hourly_rate_cents
-    ? ((lawyer.hourly_rate_cents / 60) * durationMinutes)
+  const hourlyRateCents = selectedVisaId && visaPrices[selectedVisaId]
+      ? visaPrices[selectedVisaId]
+      : (lawyer.hourly_rate_cents || 5000);
+
+  const estimatedPrice = selectedSlot
+    ? ((hourlyRateCents / 60) * durationMinutes)
     : 0;
 
   return (
@@ -311,7 +389,34 @@ export function BookConsultation() {
                         <span className="text-neutral-500">Duration</span>
                         <span className="font-medium text-neutral-900">{durationMinutes} min</span>
                       </div>
+
+                      {/* Visa Selection */}
+                      <div className="py-2">
+                        <label className="block text-xs font-medium text-neutral-500 mb-1">
+                          Visa Type (Optional)
+                        </label>
+                        <select
+                          value={selectedVisaId}
+                          onChange={(e) => setSelectedVisaId(e.target.value)}
+                          className="w-full text-sm rounded-lg border-neutral-200 focus:ring-primary-500 focus:border-primary-500"
+                        >
+                          <option value="">Select a visa...</option>
+                          {visas.map(visa => (
+                            <option key={visa.id} value={visa.id}>
+                                {visa.name} {visaPrices[visa.id] ? `($${(visaPrices[visa.id]/100).toFixed(0)}/hr)` : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
                       <div className="flex justify-between text-sm pt-2">
+                        <span className="text-neutral-900 font-semibold">Hourly Rate</span>
+                        <span className="text-neutral-900">
+                          ${(hourlyRateCents / 100).toFixed(0)}/hr
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between text-sm pt-2 border-t border-neutral-100 mt-2">
                         <span className="text-neutral-900 font-semibold">Total Price</span>
                         <span className="text-xl font-bold text-primary-600">
                           ${(estimatedPrice / 100).toFixed(2)}
@@ -319,16 +424,67 @@ export function BookConsultation() {
                       </div>
                     </div>
 
-                    <div className="py-4 space-y-2 flex-1">
-                      <label className="block text-sm font-medium text-neutral-700">
-                        Notes for Lawyer (Optional)
-                      </label>
-                      <textarea
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        placeholder="Briefly describe what you'd like to discuss..."
-                        className="w-full rounded-lg border-neutral-200 text-sm focus:ring-primary-500 focus:border-primary-500 min-h-[100px] resize-none p-3 bg-neutral-50"
-                      />
+                    <div className="py-4 space-y-3 flex-1 overflow-y-auto max-h-[400px]">
+
+                      {/* Document Sharing */}
+                      {userDocuments.length > 0 && (
+                          <div className="space-y-2">
+                              <button
+                                type="button"
+                                onClick={() => setShowDocs(!showDocs)}
+                                className="flex items-center justify-between w-full text-sm font-medium text-neutral-700 hover:text-primary-600"
+                              >
+                                  <span className="flex items-center gap-2">
+                                    <FileText className="w-4 h-4" />
+                                    Share Documents ({selectedDocIds.length})
+                                  </span>
+                                  {showDocs ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                              </button>
+
+                              {showDocs && (
+                                  <div className="bg-neutral-50 rounded-lg p-2 space-y-1 max-h-40 overflow-y-auto custom-scrollbar border border-neutral-100">
+                                      {userDocuments.map(doc => (
+                                          <div key={doc.id}
+                                            onClick={() => toggleDoc(doc.id)}
+                                            className="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer text-sm"
+                                          >
+                                              {selectedDocIds.includes(doc.id)
+                                                ? <CheckSquare className="w-4 h-4 text-primary-600" />
+                                                : <Square className="w-4 h-4 text-neutral-400" />
+                                              }
+                                              <span className="truncate flex-1 text-neutral-700">{doc.file_name}</span>
+                                          </div>
+                                      ))}
+                                  </div>
+                              )}
+                          </div>
+                      )}
+
+                      {/* Questions */}
+                       <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-1">
+                          Questions for Lawyer
+                        </label>
+                        <textarea
+                          value={questions}
+                          onChange={(e) => setQuestions(e.target.value)}
+                          placeholder="List specific questions you'd like answered..."
+                          className="w-full rounded-lg border-neutral-200 text-sm focus:ring-primary-500 focus:border-primary-500 min-h-[80px] resize-none p-3 bg-neutral-50"
+                        />
+                      </div>
+
+                      {/* Notes */}
+                      <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-1">
+                          Notes / Context (Optional)
+                        </label>
+                        <textarea
+                          value={notes}
+                          onChange={(e) => setNotes(e.target.value)}
+                          placeholder="Briefly describe your situation..."
+                          className="w-full rounded-lg border-neutral-200 text-sm focus:ring-primary-500 focus:border-primary-500 min-h-[80px] resize-none p-3 bg-neutral-50"
+                        />
+                      </div>
                     </div>
 
                     <div className="pt-4 border-t border-neutral-100">

@@ -40,7 +40,7 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const { slotId, lawyerId, notes, successUrl, cancelUrl } = await req.json();
+    const { slotId, lawyerId, notes, questions, visaId, successUrl, cancelUrl } = await req.json();
 
     if (!slotId || !lawyerId) {
       return new Response(JSON.stringify({ error: 'Missing required parameters' }), {
@@ -86,7 +86,24 @@ Deno.serve(async (req: Request) => {
     const start = new Date(slot.start_time);
     const end = new Date(slot.end_time);
     const durationMinutes = Math.round((end.getTime() - start.getTime()) / 60000);
-    const rateCents = lawyer.hourly_rate_cents || 5000; // Default $50/hr
+
+    let rateCents = lawyer.hourly_rate_cents || 5000; // Default $50/hr
+
+    // Check for visa-specific price if visaId is provided
+    if (visaId) {
+      const { data: visaPrice } = await supabase
+        .schema('lawyer')
+        .from('visa_prices')
+        .select('hourly_rate_cents')
+        .eq('lawyer_id', lawyerId)
+        .eq('visa_id', visaId)
+        .maybeSingle();
+
+      if (visaPrice && visaPrice.hourly_rate_cents) {
+        rateCents = visaPrice.hourly_rate_cents;
+      }
+    }
+
     const totalCents = Math.round((rateCents / 60) * durationMinutes);
 
     // Create pending booking record
@@ -100,6 +117,7 @@ Deno.serve(async (req: Request) => {
         total_price_cents: totalCents,
         status: 'pending',
         notes: notes || null,
+        questions: questions || null,
       })
       .select()
       .single();

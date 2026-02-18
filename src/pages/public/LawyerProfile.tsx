@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   MapPin, Briefcase, Clock, Scale, Calendar,
-  CheckCircle, ArrowLeft, Star, Shield
+  CheckCircle, ArrowLeft, Star, Shield, DollarSign
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -40,6 +40,7 @@ export function LawyerProfile() {
   const [lawyer, setLawyer] = useState<LawyerData | null>(null);
   const [slots, setSlots] = useState<SlotData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [visaPrices, setVisaPrices] = useState<{name: string, price: number}[]>([]);
 
   useEffect(() => {
     if (!id) return;
@@ -82,6 +83,34 @@ export function LawyerProfile() {
         .order('start_time');
 
       setSlots(slotRows || []);
+
+      // Fetch Visa Prices
+      const { data: prices } = await supabase
+        .schema('lawyer')
+        .from('visa_prices')
+        .select('visa_id, hourly_rate_cents')
+        .eq('lawyer_id', lawyerRow.id);
+
+      if (prices && prices.length > 0) {
+          const visaIds = prices.map(p => p.visa_id);
+          const { data: visaNames } = await supabase
+              .from('visas')
+              .select('id, name')
+              .in('id', visaIds);
+
+          const nameMap = new Map(visaNames?.map(v => [v.id, v.name]) || []);
+
+          const formattedPrices = prices
+            .filter(p => p.hourly_rate_cents)
+            .map(p => ({
+                name: nameMap.get(p.visa_id) || 'Unknown Visa',
+                price: p.hourly_rate_cents!
+            }))
+            .filter(p => p.name !== 'Unknown Visa');
+
+          setVisaPrices(formattedPrices);
+      }
+
       setLoading(false);
     }
 
@@ -185,6 +214,26 @@ export function LawyerProfile() {
             <p className="text-neutral-600 leading-relaxed whitespace-pre-wrap">{lawyer.bio}</p>
           </CardBody>
         </Card>
+      )}
+
+      {/* Visa Pricing */}
+      {visaPrices.length > 0 && (
+          <Card className="mb-6">
+              <CardBody>
+                  <h2 className="text-sm font-semibold text-neutral-900 mb-3 flex items-center gap-2">
+                      <DollarSign className="w-4 h-4 text-primary-600" />
+                      Specialized Visa Rates
+                  </h2>
+                  <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
+                      {visaPrices.map((vp, i) => (
+                          <div key={i} className="flex justify-between items-center p-2.5 bg-neutral-50 rounded-lg text-sm border border-neutral-100">
+                              <span className="font-medium text-neutral-700">{vp.name}</span>
+                              <span className="text-neutral-900 font-semibold">${(vp.price / 100).toFixed(0)}/hr</span>
+                          </div>
+                      ))}
+                  </div>
+              </CardBody>
+          </Card>
       )}
 
       <Card className="mb-6">
