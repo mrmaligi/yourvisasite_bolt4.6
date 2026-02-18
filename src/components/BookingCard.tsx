@@ -12,6 +12,8 @@ interface BookingCardProps {
   onComplete?: (id: string) => void;
   onJoin?: (id: string) => void;
   onReschedule?: (id: string) => void;
+  onReview?: (id: string) => void;
+  hasReview?: boolean;
 }
 
 const statusVariant = {
@@ -28,7 +30,9 @@ export function BookingCard({
   onConfirm,
   onComplete,
   onJoin,
-  onReschedule
+  onReschedule,
+  onReview,
+  hasReview
 }: BookingCardProps) {
   const isPast = booking.start_time ? new Date(booking.start_time) < new Date() : false;
   const showJoin = booking.status === 'confirmed' && !isPast; // Simplified logic for join button
@@ -106,6 +110,11 @@ export function BookingCard({
                 {(booking.status === 'pending' || booking.status === 'confirmed') && !isPast && onCancel && (
                   <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => onCancel(booking.id)}>
                     Cancel
+                  </Button>
+                )}
+                {booking.status === 'completed' && onReview && !hasReview && (
+                  <Button size="sm" variant="secondary" onClick={() => onReview(booking.id)}>
+                    Leave Review
                   </Button>
                 )}
               </>

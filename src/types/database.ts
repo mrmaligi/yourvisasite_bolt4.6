@@ -240,3 +240,22 @@ export interface NotificationPreferences {
   created_at: string;
   updated_at: string;
 }
+
+export interface LawyerReview {
+  id: string;
+  lawyer_id: string;
+  user_id: string;
+  booking_id: string;
+  rating: number;
+  review_text: string;
+  reply_text: string | null;
+  replied_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LawyerRating {
+  lawyer_id: string;
+  review_count: number;
+  average_rating: number;
+}

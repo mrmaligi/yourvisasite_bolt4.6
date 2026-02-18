@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Save, User, Briefcase } from 'lucide-react';
+import { Save, User, Briefcase, Star } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
+import { ReviewManagement } from '../../components/ReviewManagement';
 
 export function LawyerSettings() {
   const { profile, user, refreshProfile } = useAuth();
@@ -249,6 +250,18 @@ export function LawyerSettings() {
               Save Professional Info
             </Button>
           </div>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Star className="w-5 h-5 text-neutral-400" />
+            <h2 className="text-lg font-semibold text-neutral-900">Reviews & Reputation</h2>
+          </div>
+        </CardHeader>
+        <CardBody>
+          <ReviewManagement />
         </CardBody>
       </Card>
     </div>

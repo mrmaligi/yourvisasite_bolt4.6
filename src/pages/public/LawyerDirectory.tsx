@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, MapPin, Briefcase, Clock, Scale, Users } from 'lucide-react';
+import { Search, MapPin, Briefcase, Clock, Scale, Users, Star } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
@@ -18,6 +18,8 @@ interface LawyerListItem {
   full_name: string | null;
   avatar_url: string | null;
   slot_count: number;
+  average_rating: number;
+  review_count: number;
 }
 
 export function LawyerDirectory() {
@@ -72,20 +74,33 @@ export function LawyerDirectory() {
            console.error('Error fetching slots:', slotError);
         }
 
+        const { data: ratingRows, error: ratingError } = await supabase
+          .from('lawyer_ratings')
+          .select('lawyer_id, average_rating, review_count')
+          .in('lawyer_id', lawyerIds);
+
+        if (ratingError) {
+          console.error('Error fetching ratings:', ratingError);
+        }
+
         const slotCounts: Record<string, number> = {};
         slotRows?.forEach((s) => {
           slotCounts[s.lawyer_id] = (slotCounts[s.lawyer_id] || 0) + 1;
         });
 
+        const ratingMap = new Map(ratingRows?.map((r) => [r.lawyer_id, r]) || []);
         const profileMap = new Map(profileRows?.map((p) => [p.id, p]) || []);
 
         const merged: LawyerListItem[] = lawyerRows.map((l) => {
           const p = profileMap.get(l.profile_id);
+          const r = ratingMap.get(l.id);
           return {
             ...l,
             full_name: p?.full_name || null,
             avatar_url: p?.avatar_url || null,
             slot_count: slotCounts[l.id] || 0,
+            average_rating: r?.average_rating || 0,
+            review_count: r?.review_count || 0,
           };
         });
 
@@ -218,6 +233,18 @@ export function LawyerDirectory() {
                   {lawyer.bio && (
                     <p className="text-sm text-neutral-500 line-clamp-2 leading-relaxed">{lawyer.bio}</p>
                   )}
+
+                  <div className="flex items-center gap-1">
+                    <Star className={`w-4 h-4 ${lawyer.average_rating > 0 ? 'text-yellow-400 fill-yellow-400' : 'text-neutral-300'}`} />
+                    <span className="text-sm font-medium text-neutral-900">
+                      {lawyer.average_rating > 0 ? lawyer.average_rating.toFixed(1) : 'New'}
+                    </span>
+                    {lawyer.review_count > 0 && (
+                      <span className="text-xs text-neutral-500">
+                        ({lawyer.review_count} review{lawyer.review_count !== 1 ? 's' : ''})
+                      </span>
+                    )}
+                  </div>
 
                   <div className="flex flex-wrap gap-1.5">
                     {lawyer.practice_areas.slice(0, 3).map((area) => (
