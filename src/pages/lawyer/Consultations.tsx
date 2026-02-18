@@ -1,45 +1,35 @@
 import { useState } from 'react';
 import { Calendar, History } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { useToast } from '../../components/ui/Toast';
 import { useBookings } from '../../hooks/useBookings';
 import { BookingCard } from '../../components/BookingCard';
-import { Card, CardBody } from '../../components/ui/Card';
 
-export function Consultations() {
+export function LawyerConsultations() {
   const { bookings, loading, refetch } = useBookings();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
 
-  const handleCancel = async (id: string) => {
+  const updateStatus = async (id: string, status: string) => {
     try {
       const { error } = await supabase
         .from('bookings')
-        .update({ status: 'cancelled' })
+        .update({ status })
         .eq('id', id);
 
       if (error) throw error;
 
-      toast('success', 'Consultation cancelled');
+      toast('success', `Consultation marked as ${status}`);
       refetch();
     } catch (error) {
-      toast('error', 'Failed to cancel consultation');
+      toast('error', `Failed to update status`);
     }
   };
 
-  const handleReschedule = (id: string) => {
-    // For now, just show a message. Ideally this would open a reschedule flow.
-    toast('info', 'Please contact the lawyer directly to reschedule.');
-  };
-
-  const handleJoin = (id: string) => {
-      // Logic to join call (e.g. open video link if available)
-      // Since video link isn't in schema yet, we'll just show a toast or placeholder
-      toast('info', 'Joining consultation room...');
-      // window.open(`/consultation-room/${id}`, '_blank');
-  };
+  const handleConfirm = (id: string) => updateStatus(id, 'confirmed');
+  const handleComplete = (id: string) => updateStatus(id, 'completed');
+  const handleCancel = (id: string) => updateStatus(id, 'cancelled');
 
   if (loading) {
     return (
@@ -70,7 +60,7 @@ export function Consultations() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-neutral-900">My Consultations</h1>
+        <h1 className="text-2xl font-bold text-neutral-900">Manage Consultations</h1>
       </div>
 
       {/* Tabs */}
@@ -93,24 +83,18 @@ export function Consultations() {
               : 'border-transparent text-neutral-500 hover:text-neutral-700'
           }`}
         >
-          Past ({pastBookings.length})
+          History ({pastBookings.length})
         </button>
       </div>
 
       {displayBookings.length === 0 ? (
         <EmptyState
           icon={activeTab === 'upcoming' ? Calendar : History}
-          title={`No ${activeTab} consultations`}
+          title={`No ${activeTab} bookings`}
           description={
             activeTab === 'upcoming'
               ? "You don't have any upcoming consultations scheduled."
-              : "You haven't completed any consultations yet."
-          }
-          action={
-             activeTab === 'upcoming' ? {
-                 label: "Find a Lawyer",
-                 onClick: () => window.location.href = '/lawyers' // Or use navigate
-             } : undefined
+              : "No past consultations found."
           }
         />
       ) : (
@@ -119,10 +103,10 @@ export function Consultations() {
             <BookingCard
               key={booking.id}
               booking={booking}
-              userType="user"
+              userType="lawyer"
+              onConfirm={booking.status === 'pending' ? handleConfirm : undefined}
+              onComplete={booking.status === 'confirmed' ? handleComplete : undefined}
               onCancel={booking.status === 'pending' || booking.status === 'confirmed' ? handleCancel : undefined}
-              onReschedule={booking.status === 'pending' || booking.status === 'confirmed' ? handleReschedule : undefined}
-              onJoin={booking.status === 'confirmed' ? handleJoin : undefined}
             />
           ))}
         </div>

@@ -31,6 +31,7 @@ const UserDashboard = lazy(() => import('./pages/user/Dashboard').then(m => ({ d
 const MyVisas = lazy(() => import('./pages/user/MyVisas').then(m => ({ default: m.MyVisas })));
 const MyDocuments = lazy(() => import('./pages/user/MyDocuments').then(m => ({ default: m.MyDocuments })));
 const Consultations = lazy(() => import('./pages/user/Consultations').then(m => ({ default: m.Consultations })));
+const BookConsultation = lazy(() => import('./pages/user/BookConsultation').then(m => ({ default: m.BookConsultation })));
 const UserPremiumContent = lazy(() => import('./pages/user/PremiumContent').then(m => ({ default: m.PremiumContent })));
 const UserMarketplacePurchases = lazy(() => import('./pages/user/MarketplacePurchases').then(m => ({ default: m.MarketplacePurchases })));
 const UserSettings = lazy(() => import('./pages/user/UserSettings').then(m => ({ default: m.UserSettings })));
@@ -39,6 +40,7 @@ const SavedVisas = lazy(() => import('./pages/user/SavedVisas').then(m => ({ def
 const PortalLanding = lazy(() => import('./pages/lawyer/PortalLanding').then(m => ({ default: m.PortalLanding })));
 const LawyerDashboard = lazy(() => import('./pages/lawyer/Dashboard').then(m => ({ default: m.LawyerDashboard })));
 const LawyerClients = lazy(() => import('./pages/lawyer/Clients').then(m => ({ default: m.Clients })));
+const LawyerConsultations = lazy(() => import('./pages/lawyer/Consultations').then(m => ({ default: m.LawyerConsultations })));
 const Availability = lazy(() => import('./pages/lawyer/Availability').then(m => ({ default: m.Availability })));
 const Marketing = lazy(() => import('./pages/lawyer/Marketing').then(m => ({ default: m.Marketing })));
 const LawyerTracker = lazy(() => import('./pages/lawyer/LawyerTracker').then(m => ({ default: m.LawyerTracker })));
@@ -90,6 +92,7 @@ export default function App() {
                     <Route path="saved" element={<SavedVisas />} />
                     <Route path="documents" element={<MyDocuments />} />
                     <Route path="consultations" element={<Consultations />} />
+                    <Route path="book-consultation/:lawyerId" element={<BookConsultation />} />
                     <Route path="premium" element={<UserPremiumContent />} />
                     <Route path="marketplace" element={<UserMarketplacePurchases />} />
                     <Route path="settings" element={<UserSettings />} />
@@ -101,6 +104,7 @@ export default function App() {
                     <Route element={<ProtectedRoute requiredRole="lawyer"><LawyerDashboardLayout /></ProtectedRoute>}>
                       <Route path="dashboard" element={<LawyerDashboard />} />
                       <Route path="clients" element={<LawyerClients />} />
+                      <Route path="consultations" element={<LawyerConsultations />} />
                       <Route path="availability" element={<Availability />} />
                       <Route path="marketing" element={<Marketing />} />
                       <Route path="tracker" element={<LawyerTracker />} />
