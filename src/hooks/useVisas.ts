@@ -120,19 +120,39 @@ export function useTrackerStats() {
   useEffect(() => {
     const fetch = async () => {
       const { data, error } = await supabase
-        .from('visas')
-        .select('*, tracker_stats!inner(*)')
+        .from('tracker_summary')
+        .select('*')
         .eq('is_active', true)
         .order('name');
-        
+
       if (error) {
         console.error('Error fetching tracker stats:', error);
       }
 
       setStats(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (data || []).map((v: any) => ({
-          ...v,
-          tracker_stats: Array.isArray(v.tracker_stats) ? v.tracker_stats[0] : v.tracker_stats,
+          id: v.id,
+          subclass_number: v.subclass_number,
+          name: v.name,
+          country: v.country,
+          category: v.category,
+          official_url: v.official_url,
+          summary: v.summary,
+          processing_fee_description: v.processing_fee_description,
+          is_active: v.is_active,
+          created_at: v.created_at,
+          updated_at: v.updated_at,
+          tracker_stats: {
+            visa_id: v.id,
+            weighted_avg_days: v.weighted_avg_days,
+            ewma_days: v.ewma_days,
+            median_days: v.median_days,
+            p25_days: v.p25_days,
+            p75_days: v.p75_days,
+            total_entries: v.total_entries || 0,
+            last_updated: v.stats_last_updated || v.updated_at,
+          },
         })) as (Visa & { tracker_stats: TrackerStats })[]
       );
       setLoading(false);

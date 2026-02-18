@@ -32,8 +32,13 @@ export function TrackerSubmitForm({ onSuccess, preselectedVisaId }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!visaId || !applicationDate || !decisionDate) {
-      toast('error', 'Please fill in all fields');
+    if (!visaId || !applicationDate) {
+      toast('error', 'Please fill in the visa type and application date');
+      return;
+    }
+
+    if (outcome !== 'pending' && !decisionDate) {
+      toast('error', 'Please enter a decision date for completed applications');
       return;
     }
 
@@ -43,7 +48,7 @@ export function TrackerSubmitForm({ onSuccess, preselectedVisaId }: Props) {
       submitted_by: user?.id || null,
       submitter_role: role || null,
       application_date: applicationDate,
-      decision_date: decisionDate,
+      decision_date: decisionDate || null,
       outcome,
     });
 
@@ -76,11 +81,16 @@ export function TrackerSubmitForm({ onSuccess, preselectedVisaId }: Props) {
         <Select
           label="Outcome"
           value={outcome}
-          onChange={(e) => setOutcome((e.target as HTMLSelectElement).value as TrackerOutcome)}
+          onChange={(e) => {
+            const val = (e.target as HTMLSelectElement).value as TrackerOutcome;
+            setOutcome(val);
+            if (val === 'pending') setDecisionDate('');
+          }}
           options={[
             { value: 'approved', label: 'Approved' },
             { value: 'refused', label: 'Refused' },
             { value: 'withdrawn', label: 'Withdrawn' },
+            { value: 'pending', label: 'Still Waiting (Pending)' },
           ]}
         />
         <Input
@@ -93,7 +103,12 @@ export function TrackerSubmitForm({ onSuccess, preselectedVisaId }: Props) {
           label="Decision Date"
           type="date"
           value={decisionDate}
-          onChange={(e) => setDecisionDate(e.target.value)}
+          onChange={(e) => {
+            setDecisionDate(e.target.value);
+            if (e.target.value && outcome === 'pending') setOutcome('approved');
+          }}
+          disabled={outcome === 'pending'}
+          className={outcome === 'pending' ? 'bg-neutral-50 text-neutral-400' : ''}
         />
       </div>
       <div className="flex justify-end gap-3">
