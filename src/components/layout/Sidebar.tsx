@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { type LucideIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Logo } from '../ui/Logo';
+import { ThemeToggle } from '../ui/ThemeToggle';
 
 interface SidebarItem {
   to: string;
@@ -20,11 +21,11 @@ export function Sidebar({ items, title }: SidebarProps) {
 
   return (
     <aside
-      className={`hidden lg:flex flex-col bg-white border-r border-neutral-200/80 transition-all duration-300 ease-out ${
+      className={`hidden lg:flex flex-col bg-white dark:bg-neutral-900 border-r border-neutral-200/80 dark:border-neutral-700/80 transition-all duration-300 ease-out ${
         collapsed ? 'w-[72px]' : 'w-64'
       }`}
     >
-      <div className="flex items-center justify-between h-16 px-4 border-b border-neutral-100">
+      <div className="flex items-center justify-between h-16 px-4 border-b border-neutral-100 dark:border-neutral-800">
         {!collapsed && (
           <Link to="/">
             <Logo size="sm" />
@@ -38,7 +39,7 @@ export function Sidebar({ items, title }: SidebarProps) {
         {!collapsed && (
           <button
             onClick={() => setCollapsed(true)}
-            className="p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-400 hover:text-neutral-600 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -48,7 +49,7 @@ export function Sidebar({ items, title }: SidebarProps) {
       {collapsed && (
         <button
           onClick={() => setCollapsed(false)}
-          className="mx-auto mt-3 p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-400 hover:text-neutral-600 transition-colors"
+          className="mx-auto mt-3 p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
         >
           <ChevronRight className="w-4 h-4" />
         </button>
@@ -56,7 +57,7 @@ export function Sidebar({ items, title }: SidebarProps) {
 
       {!collapsed && title && (
         <div className="px-5 pt-5 pb-2">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400">{title}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">{title}</p>
         </div>
       )}
 
@@ -73,16 +74,20 @@ export function Sidebar({ items, title }: SidebarProps) {
               title={collapsed ? item.label : undefined}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                 isActive
-                  ? 'bg-primary-50 text-primary-700 shadow-sm'
-                  : 'text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900'
+                  ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 shadow-sm'
+                  : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200'
               }`}
             >
-              <Icon className={`w-[18px] h-[18px] flex-shrink-0 ${isActive ? 'text-primary-600' : ''}`} />
+              <Icon className={`w-[18px] h-[18px] flex-shrink-0 ${isActive ? 'text-primary-600 dark:text-primary-400' : ''}`} />
               {!collapsed && <span>{item.label}</span>}
             </Link>
           );
         })}
       </nav>
+
+      <div className={`p-4 border-t border-neutral-100 dark:border-neutral-800 ${collapsed ? 'flex justify-center' : ''}`}>
+        <ThemeToggle className={collapsed ? 'flex-col' : ''} />
+      </div>
     </aside>
   );
 }

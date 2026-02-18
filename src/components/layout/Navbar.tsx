@@ -4,6 +4,7 @@ import { Menu, X, ChevronDown, LogOut, LayoutDashboard, User } from 'lucide-reac
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
 import { Logo } from '../ui/Logo';
+import { ThemeToggle } from '../ui/ThemeToggle';
 
 export function Navbar() {
   const { user, profile, role, signOut, isLoading } = useAuth();
@@ -34,15 +35,15 @@ export function Navbar() {
             <Logo size="sm" />
           </Link>
 
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-1">
             {publicLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                   location.pathname === link.to
-                    ? 'text-primary-700 bg-primary-50'
-                    : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100/80'
+                    ? 'text-primary-700 bg-primary-50 dark:bg-primary-900/20 dark:text-primary-400'
+                    : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100/80 dark:text-neutral-400 dark:hover:text-neutral-200 dark:hover:bg-neutral-800'
                 }`}
               >
                 {link.label}
@@ -50,30 +51,32 @@ export function Navbar() {
             ))}
           </div>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3">
+            <ThemeToggle />
+
             {isLoading ? (
-              <div className="w-8 h-8 rounded-full bg-neutral-200 animate-pulse" />
+              <div className="w-8 h-8 rounded-full bg-neutral-200 animate-pulse dark:bg-neutral-700" />
             ) : user ? (
               <div className="relative">
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl hover:bg-neutral-100/80 transition-all duration-200"
+                  className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl hover:bg-neutral-100/80 dark:hover:bg-neutral-800 transition-all duration-200"
                 >
                   {profile?.avatar_url ? (
-                    <img src={profile.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover ring-2 ring-neutral-100" />
+                    <img src={profile.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover ring-2 ring-neutral-100 dark:ring-neutral-700" />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
                       <User className="w-4 h-4 text-white" />
                     </div>
                   )}
-                  <span className="text-sm font-medium text-neutral-700 max-w-[120px] truncate">
+                  <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200 max-w-[120px] truncate">
                     {profile?.full_name || 'User'}
                   </span>
                   {role && role !== 'user' && (
                     <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-lg ${
                       role === 'admin'
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-teal-100 text-teal-700'
+                        ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                        : 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400'
                     }`}>
                       {role}
                     </span>
@@ -83,23 +86,23 @@ export function Navbar() {
                 {dropdownOpen && (
                   <>
                     <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-elevated border border-neutral-200/80 py-2 z-20 animate-scale-in">
-                      <div className="px-4 py-2.5 border-b border-neutral-100 mb-1">
-                        <p className="text-sm font-semibold text-neutral-900 truncate">{profile?.full_name || 'User'}</p>
+                    <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-neutral-800 rounded-2xl shadow-elevated border border-neutral-200/80 dark:border-neutral-700 py-2 z-20 animate-scale-in">
+                      <div className="px-4 py-2.5 border-b border-neutral-100 dark:border-neutral-700 mb-1">
+                        <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 truncate">{profile?.full_name || 'User'}</p>
                         <p className="text-xs text-neutral-400 truncate">{user.email}</p>
                       </div>
                       <Link
                         to={getDashboardPath()}
                         onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors mx-1.5 rounded-lg"
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors mx-1.5 rounded-lg"
                       >
                         <LayoutDashboard className="w-4 h-4 text-neutral-400" />
                         Dashboard
                       </Link>
-                      <div className="border-t border-neutral-100 mt-1 pt-1 mx-1.5">
+                      <div className="border-t border-neutral-100 dark:border-neutral-700 mt-1 pt-1 mx-1.5">
                         <button
                           onClick={() => { setDropdownOpen(false); signOut(); }}
-                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 w-full rounded-lg transition-colors"
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 w-full rounded-lg transition-colors"
                         >
                           <LogOut className="w-4 h-4" />
                           Sign out
@@ -116,40 +119,43 @@ export function Navbar() {
             )}
           </div>
 
-          <button
-            className="md:hidden p-2 rounded-xl hover:bg-neutral-100 transition-colors"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          <div className="flex items-center gap-2 lg:hidden">
+             <ThemeToggle />
+             <button
+              className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-neutral-700 dark:text-neutral-200"
+              onClick={() => setMobileOpen(!mobileOpen)}
+            >
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden border-t border-neutral-200/60 bg-white/95 backdrop-blur-xl px-4 py-4 space-y-1 animate-fade-in">
+        <div className="lg:hidden border-t border-neutral-200/60 dark:border-neutral-700/60 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl px-4 py-4 space-y-1 animate-fade-in">
           {publicLinks.map((link) => (
             <Link
               key={link.to}
               to={link.to}
               onClick={() => setMobileOpen(false)}
-              className="block px-4 py-3 rounded-xl text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition-colors"
+              className="block px-4 py-3 rounded-xl text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
             >
               {link.label}
             </Link>
           ))}
-          <hr className="border-neutral-100 my-2" />
+          <hr className="border-neutral-100 dark:border-neutral-700 my-2" />
           {user ? (
             <>
               <Link
                 to={getDashboardPath()}
                 onClick={() => setMobileOpen(false)}
-                className="block px-4 py-3 rounded-xl text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition-colors"
+                className="block px-4 py-3 rounded-xl text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
               >
                 Dashboard
               </Link>
               <button
                 onClick={() => { setMobileOpen(false); signOut(); }}
-                className="block w-full text-left px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                className="block w-full text-left px-4 py-3 rounded-xl text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
               >
                 Sign out
               </button>
