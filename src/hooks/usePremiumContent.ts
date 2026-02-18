@@ -1,68 +1,104 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { useAuth } from './useAuth';
-import type { VisaPremiumContent } from '../types/database';
+import type { Visa, VisaPremiumContent } from '../types/database';
 
-export function usePremiumContent(visaId: string | undefined) {
+interface UsePremiumContentResult {
+  visa: Visa | null;
+  content: VisaPremiumContent[];
+  isPurchased: boolean;
+  loading: boolean;
+  error: Error | null;
+  refresh: () => Promise<void>;
+}
+
+export function usePremiumContent(visaId: string | null): UsePremiumContentResult {
   const { user } = useAuth();
-  const [sections, setSections] = useState<VisaPremiumContent[]>([]);
+  const [visa, setVisa] = useState<Visa | null>(null);
+  const [content, setContent] = useState<VisaPremiumContent[]>([]);
   const [isPurchased, setIsPurchased] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
+  const fetchData = useCallback(async () => {
     if (!visaId) {
       setLoading(false);
       return;
     }
 
-    const fetchContent = async () => {
+    // Don't start loading if no user yet (auth might be initializing)
+    // But if we want to show loading while auth checks...
+    // user can be null if not logged in.
+    if (!user) {
+      // If no user, we can't check purchase, so isPurchased = false.
+      // We can still fetch visa details.
       setLoading(true);
+    } else {
+      setLoading(true);
+    }
+
+    try {
       setError(null);
-      try {
-        // 1. Check purchase status if logged in
-        let purchased = false;
-        if (user) {
-          const { data: purchaseData, error: purchaseError } = await supabase
-            .from('user_visa_purchases')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('visa_id', visaId)
-            .maybeSingle();
 
-          if (purchaseError) {
-             console.error('Error checking purchase:', purchaseError);
-             // Don't throw, just assume not purchased
-          }
-          purchased = !!purchaseData;
-        }
-        setIsPurchased(purchased);
+      // 1. Fetch Visa Details
+      const { data: visaData, error: visaError } = await supabase
+        .from('visas')
+        .select('*')
+        .eq('id', visaId)
+        .single();
 
-        // 2. Fetch content
-        // Note: Row Level Security (RLS) should ideally prevent fetching the body if not purchased,
-        // but here we might just fetch what we can.
-        // If the API returns partial data or we handle it here.
-        // The prompt implies we fetch "sections".
+      if (visaError) throw visaError;
+      setVisa(visaData);
 
-        const { data, error: contentError } = await supabase
+      let purchased = false;
+
+      // 2. Check Purchase Status (only if user logged in)
+      if (user) {
+        const { data: purchaseData, error: purchaseError } = await supabase
+          .from('user_visa_purchases')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('visa_id', visaId)
+          .maybeSingle();
+
+        if (purchaseError) throw purchaseError;
+        purchased = !!purchaseData;
+      }
+
+      setIsPurchased(purchased);
+
+      // 3. Fetch Premium Content (if purchased)
+      if (purchased) {
+        const { data: contentData, error: contentError } = await supabase
           .from('visa_premium_content')
           .select('*')
           .eq('visa_id', visaId)
           .order('step_number');
 
         if (contentError) throw contentError;
-        setSections(data || []);
-
-      } catch (err: any) {
-        console.error('Error fetching premium content:', err);
-        setError(err);
-      } finally {
-        setLoading(false);
+        setContent(contentData || []);
+      } else {
+        setContent([]);
       }
-    };
 
-    fetchContent();
+    } catch (err) {
+      console.error('Error fetching premium content:', err);
+      setError(err instanceof Error ? err : new Error('Failed to fetch content'));
+    } finally {
+      setLoading(false);
+    }
   }, [visaId, user]);
 
-  return { sections, isPurchased, loading, error };
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return {
+    visa,
+    content,
+    isPurchased,
+    loading,
+    error,
+    refresh: fetchData
+  };
 }

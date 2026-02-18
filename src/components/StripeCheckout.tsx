@@ -11,6 +11,7 @@ interface StripeCheckoutProps {
   slotId?: string; // Required for consultation
   notes?: string; // Optional for consultation
   amount: number; // For premium, this is 4900 (cents). For consultation, it might be an estimate or calculated by backend.
+  redirectPath?: string; // Optional path to redirect to on success (e.g. "/dashboard/premium?visa_id=...")
   onSuccess?: () => void;
   onCancel?: () => void;
   className?: string;
@@ -24,6 +25,7 @@ export function StripeCheckout({
   slotId,
   notes,
   amount,
+  redirectPath,
   onSuccess,
   onCancel,
   className,
@@ -44,6 +46,7 @@ export function StripeCheckout({
       let body: any = {
         type,
         user_id: user.id,
+        redirect_path: redirectPath,
       };
 
       if (type === 'premium') {

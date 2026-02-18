@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { type, visa_id, lawyer_id, amount } = await req.json();
+    const { type, visa_id, lawyer_id, amount, redirect_path } = await req.json();
 
     if (!type) {
       return new Response(
@@ -77,6 +77,13 @@ Deno.serve(async (req) => {
 
     const origin = req.headers.get('origin') || 'http://localhost:5173';
     let successUrl = `${origin}/success?session_id={CHECKOUT_SESSION_ID}&type=${type}`;
+
+    if (redirect_path) {
+      successUrl = `${origin}${redirect_path}`;
+      successUrl += successUrl.includes('?') ? '&' : '?';
+      successUrl += `session_id={CHECKOUT_SESSION_ID}&type=${type}`;
+    }
+
     let cancelUrl = origin;
 
     if (type === 'premium') {
