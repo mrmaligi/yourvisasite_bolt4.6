@@ -34,7 +34,8 @@ export function TrackerManagement() {
   const handleRefreshAll = async () => {
     setRefreshing(true);
     try {
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/refresh-tracker`;
+      const baseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '');
+      const apiUrl = `${baseUrl}/functions/v1/refresh-tracker`;
       await fetch(apiUrl, {
         method: 'POST',
         headers: {
