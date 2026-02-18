@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Search, TrendingUp, Filter, BarChart3, AlertCircle } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { Search, TrendingUp, Filter, BarChart3, AlertCircle, Pencil } from 'lucide-react';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
 import { CardSkeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { Modal } from '../../components/ui/Modal';
 import { TrackerSubmitForm } from './TrackerSubmitForm';
 import { TRACKER_THRESHOLDS } from '../../lib/constants';
-import type { TrackerStats, VisaCategory } from '../../types/database';
+import type { TrackerStats, VisaCategory, TrackerEntry } from '../../types/database';
 
 interface VisaInfo {
   subclass: string;
@@ -18,6 +20,10 @@ interface VisaInfo {
 
 interface TrackerData extends TrackerStats {
   visas: VisaInfo;
+}
+
+interface PendingEntry extends TrackerEntry {
+  visas: Pick<VisaInfo, 'subclass' | 'name'>;
 }
 
 function getSpeedBadge(days: number) {
@@ -72,12 +78,15 @@ function VisualBar({ p25, median, p75, avg }: { p25: number; median: number; p75
 }
 
 export function Tracker() {
+  const { user } = useAuth();
   const [stats, setStats] = useState<TrackerData[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string>('');
   const [sortBy, setSortBy] = useState<'name' | 'avg' | 'entries'>('name');
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [pendingEntries, setPendingEntries] = useState<PendingEntry[]>([]);
+  const [editingEntry, setEditingEntry] = useState<TrackerEntry | undefined>(undefined);
 
   // Categories derived from data
   const categories = Array.from(new Set(stats.map(s => s.visas.category))).sort();
@@ -85,6 +94,14 @@ export function Tracker() {
   useEffect(() => {
     fetchStats();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchPendingEntries();
+    } else {
+      setPendingEntries([]);
+    }
+  }, [user]);
 
   const fetchStats = async () => {
     setLoading(true);
@@ -98,6 +115,21 @@ export function Tracker() {
       setStats(data as unknown as TrackerData[]);
     }
     setLoading(false);
+  };
+
+  const fetchPendingEntries = async () => {
+    const { data, error } = await supabase
+      .from('tracker_entries')
+      .select('*, visas(subclass, name)')
+      .eq('submitted_by', user!.id)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching pending entries:', error);
+    } else {
+      setPendingEntries(data as unknown as PendingEntry[]);
+    }
   };
 
   const filteredStats = stats
@@ -125,13 +157,53 @@ export function Tracker() {
           </p>
         </div>
         <button
-          onClick={() => setShowSubmitModal(true)}
+          onClick={() => {
+              setEditingEntry(undefined);
+              setShowSubmitModal(true);
+          }}
           className="btn-primary whitespace-nowrap flex items-center gap-2"
         >
           <TrendingUp className="w-4 h-4" />
           Submit Your Processing Time
         </button>
       </div>
+
+      {user && pendingEntries.length > 0 && (
+        <div className="mb-12">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-8 w-1 bg-primary-600 rounded-full"></div>
+            <h2 className="text-xl font-bold text-neutral-900">My Pending Applications</h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {pendingEntries.map((entry) => (
+              <Card key={entry.id} className="border-l-4 border-l-primary-500">
+                <CardBody>
+                  <div className="flex justify-between items-start mb-2">
+                    <Badge variant="default">{entry.visas.subclass}</Badge>
+                    <Badge variant="warning">Pending</Badge>
+                  </div>
+                  <h3 className="font-bold text-neutral-900 mb-4">{entry.visas.name}</h3>
+                  <div className="space-y-1 mb-4">
+                    <p className="text-sm text-neutral-500">Applied: {new Date(entry.application_date).toLocaleDateString()}</p>
+                    <p className="text-xs text-neutral-400">Waiting for {Math.floor((Date.now() - new Date(entry.application_date).getTime()) / (1000 * 60 * 60 * 24))} days</p>
+                  </div>
+                  <Button
+                    variant="secondary"
+                    className="w-full justify-center"
+                    onClick={() => {
+                        setEditingEntry(entry);
+                        setShowSubmitModal(true);
+                    }}
+                  >
+                    <Pencil className="w-3 h-3 mr-2" />
+                    Update Status
+                  </Button>
+                </CardBody>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-4 mb-8">
         <div className="relative flex-1">
@@ -242,15 +314,21 @@ export function Tracker() {
 
       <Modal
         isOpen={showSubmitModal}
-        onClose={() => setShowSubmitModal(false)}
-        title="Submit Processing Time"
+        onClose={() => {
+            setShowSubmitModal(false);
+            setEditingEntry(undefined);
+        }}
+        title={editingEntry ? "Update Application" : "Submit Processing Time"}
         size="lg"
       >
         <TrackerSubmitForm
           onSuccess={() => {
             setShowSubmitModal(false);
+            setEditingEntry(undefined);
             fetchStats();
+            if (user) fetchPendingEntries();
           }}
+          initialEntry={editingEntry}
         />
       </Modal>
     </div>
