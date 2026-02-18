@@ -8,6 +8,26 @@ const corsHeaders = {
     "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
+async function sendNotification(userId: string, type: string, data: any) {
+  try {
+    console.log(`Sending notification (${type}) to user ${userId}`);
+    await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-email`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId,
+        type,
+        data,
+      }),
+    });
+  } catch (error) {
+    console.error(`Failed to send notification (${type}):`, error);
+  }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
@@ -46,7 +66,7 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const { lawyer_profile_id, action } = await req.json();
+    const { lawyer_profile_id, action, rejection_reason } = await req.json();
     if (!lawyer_profile_id || !["approve", "reject"].includes(action)) {
       return new Response(
         JSON.stringify({ error: "lawyer_profile_id and action (approve/reject) required" }),
@@ -71,6 +91,38 @@ Deno.serve(async (req: Request) => {
         .from("profiles")
         .update({ role: "lawyer" })
         .eq("id", lawyer_profile_id);
+
+      // Update lawyer schema profile
+      await serviceClient
+        .schema('lawyer')
+        .from('profiles')
+        .update({
+            is_verified: true,
+            verification_status: 'verified',
+            verified_at: new Date().toISOString()
+        })
+        .eq('profile_id', lawyer_profile_id);
+
+      await sendNotification(lawyer_profile_id, 'lawyer_approved', {
+           dashboardUrl: `${Deno.env.get('VITE_APP_URL') || 'https://visabuild.com'}/lawyer/dashboard`,
+      });
+
+    } else if (action === "reject") {
+      // Update lawyer schema profile
+      await serviceClient
+        .schema('lawyer')
+        .from('profiles')
+        .update({
+            is_verified: false,
+            verification_status: 'rejected',
+            rejection_reason: rejection_reason || null
+        })
+        .eq('profile_id', lawyer_profile_id);
+
+      await sendNotification(lawyer_profile_id, 'lawyer_rejected', {
+           reason: rejection_reason,
+           settingsUrl: `${Deno.env.get('VITE_APP_URL') || 'https://visabuild.com'}/settings/profile`,
+      });
     }
 
     return new Response(

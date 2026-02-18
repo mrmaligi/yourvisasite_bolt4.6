@@ -51,6 +51,26 @@ Deno.serve(async (req) => {
   }
 });
 
+async function sendNotification(userId: string, type: string, data: any) {
+  try {
+    console.log(`Sending notification (${type}) to user ${userId}`);
+    await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-email`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId,
+        type,
+        data,
+      }),
+    });
+  } catch (error) {
+    console.error(`Failed to send notification (${type}):`, error);
+  }
+}
+
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   const { metadata, id: sessionId, payment_intent, amount_total, currency, payment_status } = session;
 
@@ -88,6 +108,21 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
          console.error('Error inserting user_visa_purchase:', error);
        } else {
          console.log('Successfully recorded premium purchase for user', userId);
+
+         // Fetch Visa Name
+         let visaName = 'Premium Guide';
+         if (visaId) {
+             const { data: visa } = await supabase.from('visas').select('name').eq('id', visaId).single();
+             if (visa?.name) visaName = visa.name;
+         }
+
+         // Send Email
+         await sendNotification(userId, 'premium_purchase', {
+             visaName: visaName,
+             amount: (amount_total ? amount_total / 100 : 0).toFixed(2),
+             guideUrl: `${Deno.env.get('VITE_APP_URL') || 'https://visabuild.com'}/premium/${visaId || ''}`,
+             date: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+         });
        }
     }
   } else if (type === 'consultation') {
@@ -122,6 +157,45 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
           if (slotError) {
             console.error('Error updating consultation slot:', slotError);
           }
+        }
+
+        // Fetch booking details for email
+        // We need: lawyerName, date, time, duration, amount
+        try {
+            const { data: booking } = await supabase.from('bookings').select('*').eq('id', bookingId).single();
+            if (booking && booking.user_id) {
+                 let lawyerName = 'Your Lawyer';
+                 let date = 'Pending';
+                 let time = 'Pending';
+                 let duration = '30 mins';
+
+                 // Fetch Slot
+                 const { data: slot } = await supabase.schema('lawyer').from('consultation_slots').select('*').eq('id', booking.slot_id).single();
+                 if (slot) {
+                     const startDate = new Date(slot.start_time);
+                     date = startDate.toISOString().split('T')[0]; // YYYY-MM-DD
+                     time = startDate.toISOString().split('T')[1].substring(0, 5) + ' UTC'; // HH:MM UTC
+                 }
+                 if (booking.duration_minutes) duration = `${booking.duration_minutes} minutes`;
+
+                 // Fetch Lawyer Profile
+                 const { data: lawyerProfile } = await supabase.schema('lawyer').from('profiles').select('profile_id').eq('id', booking.lawyer_id).single();
+                 if (lawyerProfile) {
+                     const { data: publicProfile } = await supabase.from('profiles').select('full_name').eq('id', lawyerProfile.profile_id).single();
+                     if (publicProfile?.full_name) lawyerName = publicProfile.full_name;
+                 }
+
+                 await sendNotification(booking.user_id, 'booking_confirmation', {
+                     lawyerName,
+                     date,
+                     time,
+                     duration,
+                     amount: (amount_total ? amount_total / 100 : 0).toFixed(2),
+                     dashboardUrl: `${Deno.env.get('VITE_APP_URL') || 'https://visabuild.com'}/user/consultations`,
+                 });
+            }
+        } catch (fetchError) {
+            console.error('Error fetching booking details for email:', fetchError);
         }
       }
     } else {
