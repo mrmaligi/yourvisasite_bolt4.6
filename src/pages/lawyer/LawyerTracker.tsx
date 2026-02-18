@@ -15,8 +15,8 @@ interface TrackerEntry {
   visa_id: string;
   visa_name: string | null;
   outcome: 'approved' | 'denied' | 'pending';
-  processing_days: number;
-  submission_date: string;
+  processing_days: number | null;
+  application_date: string;
   decision_date: string | null;
   created_at: string;
 }
@@ -32,7 +32,7 @@ export function LawyerTracker() {
     visa_id: '',
     outcome: 'approved' as 'approved' | 'denied' | 'pending',
     processing_days: '',
-    submission_date: '',
+    application_date: '',
     decision_date: '',
   });
 
@@ -43,23 +43,12 @@ export function LawyerTracker() {
   const fetchData = async () => {
     if (!profile) return;
 
-    const { data: lawyerProfile } = await supabase
-      .schema('lawyer')
-      .from('profiles')
-      .select('id')
-      .eq('profile_id', profile.id)
-      .maybeSingle();
-
-    if (!lawyerProfile) {
-      setLoading(false);
-      return;
-    }
-
+    // Use profile.id directly as submitted_by references public.profiles
     const [trackerRes, visasRes] = await Promise.all([
       supabase
         .from('tracker_entries')
-        .select('id, visa_id, outcome, processing_days, submission_date, decision_date, created_at')
-        .eq('submitter_id', lawyerProfile.id)
+        .select('id, visa_id, outcome, processing_days, application_date, decision_date, created_at')
+        .eq('submitted_by', profile.id)
         .order('created_at', { ascending: false }),
       supabase.from('visas').select('id, name').order('name'),
     ]);
@@ -78,7 +67,7 @@ export function LawyerTracker() {
         visa_name: visaMap.get(e.visa_id) || null,
       }));
 
-      setEntries(enriched);
+      setEntries(enriched as TrackerEntry[]);
     }
 
     setVisas(visasRes.data || []);
@@ -86,31 +75,30 @@ export function LawyerTracker() {
   };
 
   const handleSubmit = async () => {
-    if (!profile || !formData.visa_id || !formData.processing_days || !formData.submission_date) {
+    if (!profile || !formData.visa_id || !formData.application_date) {
       toast('error', 'Please fill all required fields');
       return;
     }
 
-    const { data: lawyerProfile } = await supabase
-      .schema('lawyer')
-      .from('profiles')
-      .select('id')
-      .eq('profile_id', profile.id)
-      .maybeSingle();
-
-    if (!lawyerProfile) return;
+    if (formData.outcome !== 'pending' && !formData.decision_date) {
+       toast('error', 'Decision date is required for completed applications');
+       return;
+    }
 
     const { error } = await supabase.from('tracker_entries').insert({
       visa_id: formData.visa_id,
-      submitter_id: lawyerProfile.id,
-      submitter_type: 'lawyer',
+      submitted_by: profile.id,
+      submitter_role: 'lawyer',
       outcome: formData.outcome,
-      processing_days: parseInt(formData.processing_days),
-      submission_date: formData.submission_date,
+      // processing_days is calculated by trigger, but we can pass null or omit it
+      // actually the form has processing_days input, but it's redundant if we have dates.
+      // let's omit it and let the trigger handle it.
+      application_date: formData.application_date,
       decision_date: formData.decision_date || null,
     });
 
     if (error) {
+      console.error(error);
       toast('error', 'Failed to submit entry');
       return;
     }
@@ -121,7 +109,7 @@ export function LawyerTracker() {
       visa_id: '',
       outcome: 'approved',
       processing_days: '',
-      submission_date: '',
+      application_date: '',
       decision_date: '',
     });
     fetchData();
@@ -187,8 +175,10 @@ export function LawyerTracker() {
                     <div>
                       <p className="font-medium text-neutral-900">{entry.visa_name}</p>
                       <div className="flex items-center gap-3 mt-1 text-sm text-neutral-500">
-                        <span>{entry.processing_days} days</span>
-                        <span>Submitted: {new Date(entry.submission_date).toLocaleDateString()}</span>
+                        {entry.processing_days !== null && (
+                          <span>{entry.processing_days} days</span>
+                        )}
+                        <span>Applied: {new Date(entry.application_date).toLocaleDateString()}</span>
                       </div>
                     </div>
                   </div>
@@ -249,26 +239,21 @@ export function LawyerTracker() {
             </select>
           </div>
 
-          <Input
-            label="Processing Days *"
-            type="number"
-            value={formData.processing_days}
-            onChange={(e) => setFormData({ ...formData, processing_days: e.target.value })}
-            placeholder="e.g., 90"
-          />
+          {/* Processing Days is calculated automatically, so we remove the input */}
 
           <Input
-            label="Submission Date *"
+            label="Application Date *"
             type="date"
-            value={formData.submission_date}
-            onChange={(e) => setFormData({ ...formData, submission_date: e.target.value })}
+            value={formData.application_date}
+            onChange={(e) => setFormData({ ...formData, application_date: e.target.value })}
           />
 
           <Input
-            label="Decision Date (optional)"
+            label="Decision Date"
             type="date"
             value={formData.decision_date}
             onChange={(e) => setFormData({ ...formData, decision_date: e.target.value })}
+            description={formData.outcome === 'pending' ? 'Optional for pending applications' : 'Required for completed applications'}
           />
         </div>
       </Modal>
