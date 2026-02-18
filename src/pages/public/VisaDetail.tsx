@@ -18,7 +18,7 @@ import { Button } from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
 import { StripeCheckout } from '../../components/StripeCheckout';
-import type { Visa, TrackerStats, VisaPremiumContent, Product, UserVisaPurchase } from '../../types/database';
+import type { Visa, TrackerStats, VisaPremiumContent, Product, UserVisaPurchase, NewsArticle } from '../../types/database';
 
 export function VisaDetail() {
   const { id } = useParams<{ id: string }>();
@@ -31,6 +31,7 @@ export function VisaDetail() {
   const [premiumContent, setPremiumContent] = useState<VisaPremiumContent[]>([]);
   const [product, setProduct] = useState<Product | null>(null);
   const [purchase, setPurchase] = useState<UserVisaPurchase | null>(null);
+  const [news, setNews] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -81,7 +82,17 @@ export function VisaDetail() {
         .maybeSingle();
       setProduct(productData);
 
-      // 5. Fetch Purchase & Premium Content (if user logged in)
+      // 5. Fetch News
+      const { data: newsData } = await supabase
+        .from('news_articles')
+        .select('*')
+        .contains('visa_ids', [id])
+        .eq('is_published', true)
+        .order('published_at', { ascending: false })
+        .limit(5);
+      setNews(newsData || []);
+
+      // 6. Fetch Purchase & Premium Content (if user logged in)
       if (user) {
          const { data: purchaseData } = await supabase
             .from('user_visa_purchases')
@@ -241,6 +252,39 @@ export function VisaDetail() {
                             </div>
                         </CardBody>
                     </Card>
+                </section>
+            )}
+
+            {/* Latest News */}
+            {news.length > 0 && (
+                <section>
+                    <h2 className="text-xl font-bold text-neutral-900 mb-4">Latest News</h2>
+                    <div className="space-y-4">
+                        {news.map(article => (
+                            <Card key={article.id} hover>
+                                <CardBody className="p-4">
+                                    <div className="flex justify-between items-start gap-4">
+                                        <div>
+                                            <h3 className="font-medium text-neutral-900 mb-1 line-clamp-2">
+                                                <a href={`/news/${article.slug}`} className="hover:text-primary-600 transition-colors">
+                                                    {article.title}
+                                                </a>
+                                            </h3>
+                                            <p className="text-sm text-neutral-500 mb-2 line-clamp-2">{article.excerpt}</p>
+                                            <div className="flex items-center gap-2 text-xs text-neutral-400">
+                                                <span>{new Date(article.published_at || article.created_at).toLocaleDateString()}</span>
+                                                <span>•</span>
+                                                <Badge variant="secondary" className="text-xs px-2 py-0.5">{article.category}</Badge>
+                                            </div>
+                                        </div>
+                                        {article.image_url && (
+                                            <img src={article.image_url} alt="" className="w-20 h-20 object-cover rounded-lg flex-shrink-0 bg-neutral-100" />
+                                        )}
+                                    </div>
+                                </CardBody>
+                            </Card>
+                        ))}
+                    </div>
                 </section>
             )}
 

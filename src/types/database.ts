@@ -107,6 +107,7 @@ export interface NewsArticle {
   category: string;
   is_published: boolean;
   published_at: string | null;
+  visa_ids: string[] | null;
   created_at: string;
   updated_at: string;
 }
