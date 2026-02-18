@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { DataTable, type Column } from '../../components/ui/DataTable';
 import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { useToast } from '../../components/ui/Toast';
 import type { Profile } from '../../types/database';
 
 const roleVariant = {
@@ -11,6 +13,7 @@ const roleVariant = {
 };
 
 export function UserManagement() {
+  const { toast } = useToast();
   const [users, setUsers] = useState<Profile[]>([]);
   const [filtered, setFiltered] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,11 +41,46 @@ export function UserManagement() {
     ));
   };
 
+  const handleToggleStatus = async (user: Profile) => {
+    const newStatus = !user.is_active;
+    const { error } = await supabase
+      .from('profiles')
+      .update({ is_active: newStatus })
+      .eq('id', user.id);
+
+    if (error) {
+      toast('error', 'Failed to update user status');
+      return;
+    }
+
+    toast('success', `User ${newStatus ? 'activated' : 'deactivated'}`);
+
+    const updatedUsers = users.map(u => u.id === user.id ? { ...u, is_active: newStatus } : u);
+    setUsers(updatedUsers);
+
+    // Also update filtered list if necessary, preserving the filter logic is complex,
+    // but re-applying filter on full list is safer or just map over filtered too
+    setFiltered(filtered.map(u => u.id === user.id ? { ...u, is_active: newStatus } : u));
+  };
+
   const columns: Column<Profile>[] = [
     { key: 'name', header: 'Name', render: (r) => r.full_name || 'Unnamed', sortable: true },
     { key: 'role', header: 'Role', render: (r) => <Badge variant={roleVariant[r.role]}>{r.role}</Badge>, sortable: true },
     { key: 'status', header: 'Status', render: (r) => <Badge variant={r.is_active ? 'success' : 'default'}>{r.is_active ? 'Active' : 'Inactive'}</Badge> },
     { key: 'joined', header: 'Joined', render: (r) => new Date(r.created_at).toLocaleDateString(), sortable: true },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (r) => (
+        <Button
+          size="sm"
+          variant={r.is_active ? 'danger' : 'secondary'}
+          onClick={() => handleToggleStatus(r)}
+        >
+          {r.is_active ? 'Deactivate' : 'Activate'}
+        </Button>
+      )
+    },
   ];
 
   return (

@@ -93,7 +93,20 @@ export function LawyerManagement() {
     { key: 'bar', header: 'Bar Number', render: (r) => r.bar_number },
     { key: 'jurisdiction', header: 'Jurisdiction', render: (r) => r.jurisdiction },
     { key: 'experience', header: 'Experience', render: (r) => `${r.years_experience} years` },
-    { key: 'status', header: 'Status', render: (r) => <Badge variant={statusVariant[r.verification_status]}>{r.verification_status}</Badge> },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (r) => (
+        <div className="flex flex-col gap-1">
+            <Badge variant={statusVariant[r.verification_status]}>{r.verification_status}</Badge>
+            {r.verification_status === 'rejected' && r.rejection_reason && (
+                <span className="text-xs text-red-600 max-w-[200px] truncate" title={r.rejection_reason}>
+                    {r.rejection_reason}
+                </span>
+            )}
+        </div>
+      )
+    },
     { key: 'rate', header: 'Rate', render: (r) => r.hourly_rate_cents ? `$${r.hourly_rate_cents / 100}/hr` : 'Not set' },
     {
       key: 'actions', header: 'Actions', render: (r) => (
