@@ -17,6 +17,16 @@ export interface Profile {
   updated_at: string;
 }
 
+export interface YouTubeFeed {
+  id: string;
+  title: string;
+  youtube_url: string;
+  thumbnail_url: string | null;
+  channel_name: string;
+  visa_id: string | null;
+  created_at: string;
+}
+
 export interface Visa {
   id: string;
   subclass: string;
@@ -241,21 +251,12 @@ export interface NotificationPreferences {
   updated_at: string;
 }
 
-export interface LawyerReview {
+export interface Message {
   id: string;
-  lawyer_id: string;
-  user_id: string;
   booking_id: string;
-  rating: number;
-  review_text: string;
-  reply_text: string | null;
-  replied_at: string | null;
+  sender_id: string;
+  sender_role: UserRole;
+  message_text: string;
+  is_read: boolean;
   created_at: string;
-  updated_at: string;
-}
-
-export interface LawyerRating {
-  lawyer_id: string;
-  review_count: number;
-  average_rating: number;
 }

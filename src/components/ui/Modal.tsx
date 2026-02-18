@@ -39,12 +39,12 @@ export function Modal({ isOpen, onClose, title, children, footer, size = 'md' }:
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-fade-in"
       onClick={(e) => e.target === overlayRef.current && onClose()}
     >
-      <div className={`bg-white dark:bg-neutral-800 rounded-2xl shadow-elevated w-full ${sizeClasses[size]} max-h-[85vh] flex flex-col animate-scale-in border border-neutral-200/50 dark:border-neutral-700`}>
+      <div className={`bg-white dark:bg-neutral-800 w-full h-full sm:h-auto rounded-none sm:rounded-2xl shadow-elevated ${sizeClasses[size]} max-h-screen sm:max-h-[85vh] flex flex-col animate-scale-in border-0 sm:border border-neutral-200/50 dark:border-neutral-700`}>
         {title && (
-          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100 dark:border-neutral-700">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 border-b border-neutral-100 dark:border-neutral-700 shrink-0">
             <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">{title}</h2>
             <button
               onClick={onClose}
@@ -54,9 +54,9 @@ export function Modal({ isOpen, onClose, title, children, footer, size = 'md' }:
             </button>
           </div>
         )}
-        <div className="px-6 py-5 overflow-y-auto flex-1 dark:text-neutral-200">{children}</div>
+        <div className="px-4 sm:px-6 py-4 sm:py-5 overflow-y-auto flex-1 dark:text-neutral-200">{children}</div>
         {footer && (
-          <div className="px-6 py-4 border-t border-neutral-100 dark:border-neutral-700 flex items-center justify-end gap-3 bg-neutral-50/50 dark:bg-neutral-900/50 rounded-b-2xl">
+          <div className="px-4 sm:px-6 py-4 border-t border-neutral-100 dark:border-neutral-700 flex items-center justify-end gap-3 bg-neutral-50/50 dark:bg-neutral-900/50 shrink-0 rounded-none sm:rounded-b-2xl">
             {footer}
           </div>
         )}

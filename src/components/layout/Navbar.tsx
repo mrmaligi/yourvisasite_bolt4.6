@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
 import { Logo } from '../ui/Logo';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { UserMenu } from './UserMenu';
 
 export function Navbar() {
-  const { user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
 
@@ -62,7 +60,7 @@ export function Navbar() {
       </div>
 
       {mobileOpen && (
-        <div className="lg:hidden border-t border-neutral-200/60 dark:border-neutral-700/60 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl px-4 py-4 space-y-1 animate-fade-in">
+        <div className="lg:hidden fixed inset-x-0 top-16 bottom-0 z-30 border-t border-neutral-200/60 dark:border-neutral-700/60 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl px-4 py-4 space-y-1 animate-fade-in overflow-y-auto">
           {publicLinks.map((link) => (
             <Link
               key={link.to}
