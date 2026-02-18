@@ -96,7 +96,7 @@ export function VisaDetail() {
               .from('visa_premium_content')
               .select('*')
               .eq('visa_id', id)
-              .order('section_number');
+              .order('step_number');
             setPremiumContent(contentData || []);
          }
       }
@@ -128,7 +128,7 @@ export function VisaDetail() {
               .from('visa_premium_content')
               .select('*')
               .eq('visa_id', id)
-              .order('section_number');
+              .order('step_number');
             setPremiumContent(content || []);
             toast('success', 'Payment successful! Guide unlocked.');
             window.history.replaceState({}, '', window.location.pathname);
@@ -258,31 +258,23 @@ export function VisaDetail() {
                                 <CardHeader className="bg-primary-50/50 border-b border-primary-100">
                                     <h3 className="font-semibold text-primary-900 flex items-center">
                                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary-100 text-primary-700 text-xs font-bold mr-3">
-                                            {step.section_number}
+                                            {step.step_number}
                                         </span>
-                                        {step.section_title}
+                                        {step.title}
                                     </h3>
                                 </CardHeader>
                                 <CardBody>
                                     <div className="prose prose-sm max-w-none text-neutral-600 whitespace-pre-wrap">
-                                        {step.content}
+                                        {step.body}
                                     </div>
 
-                                    {step.required_documents && step.required_documents.length > 0 && (
+                                    {step.document_category && (
                                         <div className="mt-4 p-3 bg-neutral-50 rounded-lg border border-neutral-100 text-sm">
-                                            <span className="font-medium text-neutral-700">Required Documents: </span>
-                                            <div className="flex flex-wrap gap-2 mt-2">
-                                                {step.required_documents.map(doc => (
-                                                    <Badge key={doc} variant="info">{doc}</Badge>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {step.tips && (
-                                        <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-100 text-sm">
-                                            <span className="font-medium text-yellow-800">Tip: </span>
-                                            <span className="text-yellow-700">{step.tips}</span>
+                                            <span className="font-medium text-neutral-700">Required Document: </span>
+                                            <Badge variant="info" className="ml-2">{step.document_category}</Badge>
+                                            {step.document_explanation && (
+                                                <p className="mt-2 text-neutral-600">{step.document_explanation}</p>
+                                            )}
                                         </div>
                                     )}
                                 </CardBody>
