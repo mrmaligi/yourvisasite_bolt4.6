@@ -22,20 +22,21 @@ export function PremiumContent() {
   useEffect(() => {
     if (!selectedVisaId) { setSteps([]); return; }
     setLoading(true);
-    supabase.from('visa_premium_content').select('*').eq('visa_id', selectedVisaId).order('step_number')
+    supabase.from('visa_premium_content').select('*').eq('visa_id', selectedVisaId).order('section_number')
       .then(({ data }) => { setSteps(data || []); setLoading(false); });
   }, [selectedVisaId]);
 
   const addStep = () => {
-    const next = steps.length > 0 ? Math.max(...steps.map((s) => s.step_number)) + 1 : 1;
+    const next = steps.length > 0 ? Math.max(...steps.map((s) => s.section_number)) + 1 : 1;
     setSteps([...steps, {
-      id: `new-${Date.now()}`, visa_id: selectedVisaId, step_number: next,
-      title: '', body: '', document_category: null, document_explanation: null,
-      document_example_url: null, created_at: '', updated_at: '',
+      id: `new-${Date.now()}`, visa_id: selectedVisaId, section_number: next,
+      section_title: '', content: '', tips: null, common_mistakes: null,
+      examples: null, estimated_minutes: null, required_documents: null,
+      created_at: '', updated_at: '',
     }]);
   };
 
-  const updateStep = (idx: number, field: string, value: string) => {
+  const updateStep = (idx: number, field: keyof VisaPremiumContent, value: string | number | string[]) => {
     setSteps(steps.map((s, i) => i === idx ? { ...s, [field]: value || null } : s));
   };
 
@@ -45,16 +46,19 @@ export function PremiumContent() {
     if (!selectedVisaId) return;
     setLoading(true);
 
-    await supabase.from('visa_premium_content').delete().eq('visa_id', selectedVisaId);
+    const { error: deleteError } = await supabase.from('visa_premium_content').delete().eq('visa_id', selectedVisaId);
+    if (deleteError) { toast('error', deleteError.message); setLoading(false); return; }
 
     const rows = steps.map((s, i) => ({
       visa_id: selectedVisaId,
-      step_number: i + 1,
-      title: s.title,
-      body: s.body,
-      document_category: s.document_category,
-      document_explanation: s.document_explanation,
-      document_example_url: s.document_example_url,
+      section_number: i + 1,
+      section_title: s.section_title,
+      content: s.content,
+      tips: s.tips,
+      common_mistakes: s.common_mistakes,
+      examples: s.examples,
+      estimated_minutes: s.estimated_minutes,
+      required_documents: s.required_documents,
     }));
 
     if (rows.length > 0) {
@@ -92,11 +96,45 @@ export function PremiumContent() {
                   </button>
                 </CardHeader>
                 <CardBody className="space-y-3">
-                  <Input label="Title" value={step.title} onChange={(e) => updateStep(idx, 'title', e.target.value)} />
-                  <Textarea label="Body (Markdown)" value={step.body} onChange={(e) => updateStep(idx, 'body', e.target.value)} />
-                  <Input label="Document Category" value={step.document_category || ''} onChange={(e) => updateStep(idx, 'document_category', e.target.value)} helperText="Leave empty if no document required" />
-                  <Input label="Document Explanation" value={step.document_explanation || ''} onChange={(e) => updateStep(idx, 'document_explanation', e.target.value)} />
-                  <Input label="Example Document URL" value={step.document_example_url || ''} onChange={(e) => updateStep(idx, 'document_example_url', e.target.value)} />
+                  <Input
+                    label="Section Title"
+                    value={step.section_title}
+                    onChange={(e) => updateStep(idx, 'section_title', e.target.value)}
+                  />
+                  <Textarea
+                    label="Content (Markdown)"
+                    value={step.content}
+                    onChange={(e) => updateStep(idx, 'content', e.target.value)}
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      label="Tips"
+                      value={step.tips || ''}
+                      onChange={(e) => updateStep(idx, 'tips', e.target.value)}
+                    />
+                    <Input
+                      label="Estimated Minutes"
+                      type="number"
+                      value={step.estimated_minutes || ''}
+                      onChange={(e) => updateStep(idx, 'estimated_minutes', parseInt(e.target.value) || 0)}
+                    />
+                  </div>
+                  <Textarea
+                    label="Common Mistakes"
+                    value={step.common_mistakes || ''}
+                    onChange={(e) => updateStep(idx, 'common_mistakes', e.target.value)}
+                  />
+                  <Textarea
+                    label="Examples (JSON or Text)"
+                    value={typeof step.examples === 'string' ? step.examples : JSON.stringify(step.examples || '')}
+                    onChange={(e) => updateStep(idx, 'examples', e.target.value)}
+                  />
+                  <Input
+                    label="Required Documents (comma separated keys)"
+                    value={step.required_documents ? step.required_documents.join(', ') : ''}
+                    onChange={(e) => updateStep(idx, 'required_documents', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+                    helperText="e.g. passport, birth_certificate"
+                  />
                 </CardBody>
               </Card>
             ))}
