@@ -362,7 +362,9 @@ export function VisaDetail() {
             </ul>
             {user ? (
               <StripeCheckout 
-                product={STRIPE_PRODUCTS.visasite}
+                type="premium"
+                visaId={id}
+                amount={4900}
                 className="bg-accent-500 hover:bg-accent-600 text-white px-8 py-3 rounded-lg font-semibold"
               >
                 Unlock Guide — {STRIPE_PRODUCTS.visasite.currencySymbol}{STRIPE_PRODUCTS.visasite.price}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../lib/auth';
-import { stripeProducts } from '../stripe-config';
+import { STRIPE_PRODUCTS } from '../stripe-config';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Alert, AlertDescription } from '../components/ui/alert';
@@ -56,7 +56,7 @@ export function Products() {
         )}
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {stripeProducts.map((product) => (
+          {Object.values(STRIPE_PRODUCTS).map((product) => (
             <Card key={product.priceId} className="relative">
               <CardHeader>
                 <CardTitle>{product.name}</CardTitle>

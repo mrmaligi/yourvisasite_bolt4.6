@@ -1,4 +1,3 @@
-import React from 'react';
 import { Check } from 'lucide-react';
 import { StripeCheckout } from './StripeCheckout';
 import type { StripeProduct } from '../stripe-config';
@@ -39,7 +38,8 @@ export function PricingCard({ product, featured = false }: PricingCardProps) {
         </div>
         
         <StripeCheckout 
-          product={product}
+          type="premium"
+          amount={Math.round(product.price * 100)}
           className={`w-full ${
             featured 
               ? 'bg-indigo-600 hover:bg-indigo-700 text-white' 

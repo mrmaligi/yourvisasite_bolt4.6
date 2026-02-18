@@ -13,13 +13,6 @@ Deno.serve(async (req: Request) => {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
 
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
-
   try {
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2025-02-24.acacia',
@@ -112,6 +105,7 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (bookingError || !booking) {
+      console.error('Booking error:', bookingError);
       return new Response(JSON.stringify({ error: 'Failed to create booking' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -139,6 +133,8 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    const origin = req.headers.get('origin') || 'http://localhost:5173';
+
     // Create checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -146,7 +142,7 @@ Deno.serve(async (req: Request) => {
       line_items: [
         {
           price_data: {
-            currency: 'usd',
+            currency: 'aud',
             product_data: {
               name: `Consultation with Immigration Lawyer`,
               description: `${durationMinutes} minute consultation - ${start.toLocaleDateString()}`,
@@ -157,9 +153,10 @@ Deno.serve(async (req: Request) => {
         },
       ],
       mode: 'payment',
-      success_url: successUrl || `${req.headers.get('origin')}/success?booking=${booking.id}`,
-      cancel_url: cancelUrl || `${req.headers.get('origin')}/lawyers`,
+      success_url: successUrl || `${origin}/success?session_id={CHECKOUT_SESSION_ID}&type=consultation`,
+      cancel_url: cancelUrl || `${origin}/lawyers/${lawyerId}`,
       metadata: {
+        type: 'consultation',
         booking_id: booking.id,
         slot_id: slotId,
         user_id: user.id,
