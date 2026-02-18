@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Search, MapPin, Briefcase, Clock, Scale, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
@@ -21,10 +21,12 @@ interface LawyerListItem {
 }
 
 export function LawyerDirectory() {
+  const [searchParams] = useSearchParams();
   const [lawyers, setLawyers] = useState<LawyerListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [jurisdictionFilter, setJurisdictionFilter] = useState('');
+  const filter = searchParams.get('filter');
 
   useEffect(() => {
     async function fetchLawyers() {
@@ -109,7 +111,8 @@ export function LawyerDirectory() {
       (l.practice_areas || []).some((a) => a.toLowerCase().includes(search.toLowerCase())) ||
       l.jurisdiction.toLowerCase().includes(search.toLowerCase());
     const matchJurisdiction = !jurisdictionFilter || l.jurisdiction === jurisdictionFilter;
-    return matchSearch && matchJurisdiction;
+    const matchAvailability = filter === 'available' ? l.slot_count > 0 : true;
+    return matchSearch && matchJurisdiction && matchAvailability;
   });
 
   return (
@@ -123,6 +126,13 @@ export function LawyerDirectory() {
         <p className="text-neutral-500 max-w-2xl">
           Find top-rated immigration lawyers to help with your visa application. Browse by specialization, reviews, and availability.
         </p>
+        {filter === 'available' && (
+          <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-md text-sm border border-emerald-100">
+            <Clock className="w-4 h-4" />
+            Showing lawyers available for immediate consultation
+            <Link to="/lawyers" className="ml-2 hover:text-emerald-900 font-medium">Clear filter</Link>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-8">

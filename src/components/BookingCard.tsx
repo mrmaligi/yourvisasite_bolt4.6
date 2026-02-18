@@ -1,8 +1,11 @@
-import { Calendar, Clock, Scale, User, Video, CheckCircle } from 'lucide-react';
+import { useState } from 'react';
+import { Calendar, Clock, Scale, User, Video, CheckCircle, MessageSquare } from 'lucide-react';
 import { Card, CardBody } from './ui/Card';
 import { Badge } from './ui/Badge';
 import { Button } from './ui/Button';
 import { BookingWithDetails } from '../hooks/useBookings';
+import { ChatInterface } from './chat/ChatInterface';
+import { useUnreadCount } from '../hooks/useChat';
 
 interface BookingCardProps {
   booking: BookingWithDetails;
@@ -33,6 +36,9 @@ export function BookingCard({
   const isPast = booking.start_time ? new Date(booking.start_time) < new Date() : false;
   const showJoin = booking.status === 'confirmed' && !isPast; // Simplified logic for join button
 
+  const [showChat, setShowChat] = useState(false);
+  const unreadCount = useUnreadCount(booking.id);
+
   // Format date and time
   const startTime = booking.start_time ? new Date(booking.start_time) : new Date(booking.created_at); // Fallback
   const endTime = new Date(startTime.getTime() + booking.duration_minutes * 60000);
@@ -47,7 +53,7 @@ export function BookingCard({
   const timeStr = `${startTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} - ${endTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
 
   return (
-    <Card className="hover:border-primary-200 transition-colors duration-200">
+    <Card className={`transition-all duration-200 ${showChat ? 'ring-2 ring-primary-100' : 'hover:border-primary-200'}`}>
       <CardBody className="p-0">
         <div className="p-4 border-b border-neutral-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -89,6 +95,21 @@ export function BookingCard({
           </div>
 
           <div className="flex flex-wrap gap-2 justify-end">
+            <Button
+                variant={showChat ? "primary" : "secondary"}
+                size="sm"
+                onClick={() => setShowChat(!showChat)}
+                className="relative"
+            >
+                <MessageSquare className="w-4 h-4 mr-1.5" />
+                {showChat ? 'Close Chat' : 'Messages'}
+                {unreadCount > 0 && !showChat && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white font-bold ring-2 ring-white">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                )}
+            </Button>
+
             {/* User Actions */}
             {userType === 'user' && (
               <>
@@ -134,6 +155,13 @@ export function BookingCard({
             )}
           </div>
         </div>
+
+        {/* Chat Section */}
+        {showChat && (
+            <div className="border-t border-neutral-100 p-4 animate-in slide-in-from-top-2 fade-in duration-200">
+                <ChatInterface bookingId={booking.id} />
+            </div>
+        )}
       </CardBody>
     </Card>
   );

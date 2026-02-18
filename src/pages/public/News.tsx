@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Newspaper, ArrowRight, Calendar } from 'lucide-react';
+import { Newspaper, ArrowRight, Calendar, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
@@ -14,6 +14,7 @@ interface NewsItem {
   body: string | null;
   category: string;
   published_at: string;
+  news_comments: { count: number }[];
 }
 
 export function News() {
@@ -30,7 +31,7 @@ export function News() {
   const fetchNews = async () => {
     let query = supabase
       .from('news_articles')
-      .select('id, title, slug, excerpt, body, category, published_at')
+      .select('id, title, slug, excerpt, body, category, published_at, news_comments(count)')
       .eq('is_published', true)
       .order('published_at', { ascending: false });
 
@@ -143,6 +144,10 @@ export function News() {
                         day: 'numeric',
                       })}
                     </span>
+                    <span className="flex items-center gap-1.5">
+                      <MessageSquare className="w-4 h-4" />
+                      {featuredNews.news_comments?.[0]?.count || 0}
+                    </span>
                   </div>
                   <Button variant="secondary" size="sm">
                     Read More
@@ -170,10 +175,16 @@ export function News() {
                 <h3 className="text-xl font-semibold text-neutral-900 mb-3 line-clamp-2">{item.title}</h3>
                 <p className="text-sm text-neutral-600 line-clamp-3 mb-4">{getExcerpt(item)}</p>
                 <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
-                  <span className="text-xs text-neutral-400 flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5" />
-                    {new Date(item.published_at).toLocaleDateString()}
-                  </span>
+                  <div className="flex items-center gap-4 text-xs text-neutral-400">
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {new Date(item.published_at).toLocaleDateString()}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      {item.news_comments?.[0]?.count || 0}
+                    </span>
+                  </div>
                   <span className="text-sm font-medium text-primary-600 flex items-center gap-1">
                     Read More
                     <ArrowRight className="w-4 h-4" />

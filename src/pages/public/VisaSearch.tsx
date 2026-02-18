@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, FileText, ArrowUpRight } from 'lucide-react';
+import { Search, FileText, ArrowUpRight, Filter } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
 import { Input, Select } from '../../components/ui/Input';
 import { CardSkeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
@@ -32,6 +33,7 @@ export function VisaSearch() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [sortBy, setSortBy] = useState('name_asc');
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     const fetchVisas = async () => {
@@ -85,28 +87,43 @@ export function VisaSearch() {
         </p>
       </div>
 
-      <div className="grid md:grid-cols-[1fr_200px_200px] gap-4 mb-8">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 dark:text-neutral-500" />
-          <Input
-            placeholder="Search by name or subclass..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-12"
-          />
+      <div className="flex flex-col md:flex-row gap-4 mb-8">
+        <div className="flex gap-2 flex-1">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 dark:text-neutral-500" />
+            <Input
+              placeholder="Search by name or subclass..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-12"
+            />
+          </div>
+          <Button
+            variant="secondary"
+            className="md:hidden px-3"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <Filter className="w-5 h-5" />
+          </Button>
         </div>
 
-        <Select
-          options={CATEGORIES}
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        />
+        <div className={`flex flex-col md:flex-row gap-4 ${showFilters ? 'flex' : 'hidden md:flex'}`}>
+          <div className="w-full md:w-[200px]">
+            <Select
+              options={CATEGORIES}
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            />
+          </div>
 
-        <Select
-          options={SORTS}
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-        />
+          <div className="w-full md:w-[200px]">
+            <Select
+              options={SORTS}
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            />
+          </div>
+        </div>
       </div>
 
       {loading ? (

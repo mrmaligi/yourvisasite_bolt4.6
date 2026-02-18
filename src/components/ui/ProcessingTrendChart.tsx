@@ -11,12 +11,16 @@ interface ProcessingTrendChartProps {
 export function ProcessingTrendChart({ entries, visaName }: ProcessingTrendChartProps) {
   // Filter for approved visas and sort by decision date
   const data = entries
-    .filter(e => e.outcome === 'approved' && e.processing_days > 0)
-    .sort((a, b) => new Date(a.decision_date).getTime() - new Date(b.decision_date).getTime())
+    .filter(e => e.outcome === 'approved' && e.processing_days !== null && e.processing_days > 0 && e.decision_date)
+    .sort((a, b) => {
+        const dateA = a.decision_date ? new Date(a.decision_date).getTime() : 0;
+        const dateB = b.decision_date ? new Date(b.decision_date).getTime() : 0;
+        return dateA - dateB;
+    })
     .map(e => ({
-      date: new Date(e.decision_date).getTime(),
-      days: e.processing_days,
-      formattedDate: new Date(e.decision_date).toLocaleDateString(),
+      date: e.decision_date ? new Date(e.decision_date).getTime() : 0,
+      days: e.processing_days || 0,
+      formattedDate: e.decision_date ? new Date(e.decision_date).toLocaleDateString() : '',
     }));
 
   if (data.length === 0) {

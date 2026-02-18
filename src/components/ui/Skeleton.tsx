@@ -20,11 +20,11 @@ export function CardSkeleton() {
   );
 }
 
-export function TableRowSkeleton({ cols = 5 }: { cols?: number }) {
+export function TableRowSkeleton({ cols = 5, className = '' }: { cols?: number; className?: string }) {
   return (
-    <tr>
+    <tr className={className}>
       {Array.from({ length: cols }).map((_, i) => (
-        <td key={i} className="px-4 py-3">
+        <td key={i} className="px-4 py-3 block md:table-cell border-b md:border-b-0 last:border-0 border-neutral-50">
           <Skeleton className="h-4 w-full" />
         </td>
       ))}
