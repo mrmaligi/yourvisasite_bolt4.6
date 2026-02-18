@@ -391,7 +391,7 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                 </Button>
                 <h1 className="text-xl font-bold text-neutral-900">{visa.name} Guide</h1>
             </div>
-            <Button variant="outline" size="sm" onClick={() => window.print()}>
+            <Button variant="secondary" size="sm" onClick={() => window.print()}>
                 <Printer className="w-4 h-4 mr-2" />
                 Print Guide
             </Button>
@@ -508,7 +508,7 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                         {/* Footer Navigation */}
                         <div className="flex items-center justify-between pt-8 border-t border-neutral-100">
                             <Button
-                                variant="outline"
+                                variant="secondary"
                                 disabled={currentStepIndex === 0}
                                 onClick={() => {
                                     setCurrentStepIndex(i => i - 1);

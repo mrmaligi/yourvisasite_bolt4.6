@@ -1,7 +1,9 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { PublicLayout } from './components/layout/PublicLayout';
 import { UserDashboardLayout } from './components/layout/UserDashboardLayout';
 import { LawyerDashboardLayout } from './components/layout/LawyerDashboardLayout';
@@ -66,9 +68,11 @@ function LoadingFallback() {
 export default function App() {
   return (
     <AuthProvider>
-      <ToastProvider>
-        <BrowserRouter>
-          <Suspense fallback={<LoadingFallback />}>
+      <ThemeProvider>
+        <ToastProvider>
+          <ErrorBoundary>
+            <BrowserRouter>
+              <Suspense fallback={<LoadingFallback />}>
             <Routes>
               <Route element={<PublicLayout />}>
                 <Route index element={<Landing />} />
@@ -126,10 +130,12 @@ export default function App() {
                 <Route path="promos" element={<PromoCodeManagement />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Route>
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-      </ToastProvider>
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+          </ErrorBoundary>
+        </ToastProvider>
+      </ThemeProvider>
     </AuthProvider>
   );
 }

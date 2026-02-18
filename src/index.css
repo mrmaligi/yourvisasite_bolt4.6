@@ -10,7 +10,7 @@
   }
 
   body {
-    @apply bg-neutral-50 text-neutral-900;
+    @apply bg-neutral-50 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-50 transition-colors duration-300;
     line-height: 1.5;
   }
 
@@ -46,7 +46,8 @@
       shadow-sm
       transform active:scale-[0.98]
       transition-all duration-200 ease-out
-      disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
+      disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+      dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700 dark:hover:border-neutral-600;
   }
 
   .btn-danger {
@@ -63,7 +64,8 @@
       hover:bg-neutral-100 active:bg-neutral-200
       transform active:scale-[0.98]
       transition-all duration-200 ease-out
-      disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
+      disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+      dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200;
   }
 
   .input-field {
@@ -71,15 +73,17 @@
       placeholder:text-neutral-400
       focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500
       hover:border-neutral-300
-      transition-all duration-200;
+      transition-all duration-200
+      dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:hover:border-neutral-600;
   }
 
   .card {
-    @apply bg-white border border-neutral-200/80 rounded-2xl shadow-soft;
+    @apply bg-white border border-neutral-200/80 rounded-2xl shadow-soft dark:bg-neutral-800 dark:border-neutral-700/60;
   }
 
   .card-hover {
-    @apply card hover:shadow-elevated hover:border-neutral-300 hover:-translate-y-0.5 transition-all duration-300 ease-out;
+    @apply card hover:shadow-elevated hover:border-neutral-300 hover:-translate-y-0.5 transition-all duration-300 ease-out
+    dark:hover:border-neutral-600;
   }
 }
 
@@ -92,7 +96,7 @@
   .stagger-6 { animation-delay: 0.6s; }
 
   .glass {
-    @apply bg-white/70 backdrop-blur-xl border-neutral-200/60;
+    @apply bg-white/70 backdrop-blur-xl border-neutral-200/60 dark:bg-neutral-900/70 dark:border-neutral-800/60;
   }
 
   .text-gradient {
