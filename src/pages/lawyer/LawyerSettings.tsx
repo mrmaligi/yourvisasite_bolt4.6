@@ -8,7 +8,7 @@ import { Input } from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
 
 export function LawyerSettings() {
-  const { profile, refreshProfile } = useAuth();
+  const { profile, user, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -21,9 +21,9 @@ export function LawyerSettings() {
 
   const [lawyerData, setLawyerData] = useState({
     jurisdiction: '',
-    license_number: '',
+    bar_number: '',
     years_experience: '',
-    specializations: '',
+    practice_areas: '',
     bio: '',
     hourly_rate_cents: '',
   });
@@ -34,7 +34,7 @@ export function LawyerSettings() {
     setProfileData({
       full_name: profile.full_name || '',
       phone: profile.phone || '',
-      email: profile.email || '',
+      email: user?.email || '',
     });
 
     fetchLawyerProfile();
@@ -53,9 +53,9 @@ export function LawyerSettings() {
     if (data) {
       setLawyerData({
         jurisdiction: data.jurisdiction || '',
-        license_number: data.license_number || '',
+        bar_number: data.bar_number || '',
         years_experience: data.years_experience?.toString() || '',
-        specializations: Array.isArray(data.specializations) ? data.specializations.join(', ') : '',
+        practice_areas: Array.isArray(data.practice_areas) ? data.practice_areas.join(', ') : '',
         bio: data.bio || '',
         hourly_rate_cents: data.hourly_rate_cents ? (data.hourly_rate_cents / 100).toString() : '',
       });
@@ -91,7 +91,7 @@ export function LawyerSettings() {
     if (!profile) return;
     setSaving(true);
 
-    const specializations = lawyerData.specializations
+    const practice_areas = lawyerData.practice_areas
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
@@ -101,9 +101,9 @@ export function LawyerSettings() {
       .from('profiles')
       .update({
         jurisdiction: lawyerData.jurisdiction,
-        license_number: lawyerData.license_number,
+        bar_number: lawyerData.bar_number,
         years_experience: lawyerData.years_experience ? parseInt(lawyerData.years_experience) : null,
-        specializations,
+        practice_areas,
         bio: lawyerData.bio,
         hourly_rate_cents: lawyerData.hourly_rate_cents
           ? Math.round(parseFloat(lawyerData.hourly_rate_cents) * 100)
@@ -197,8 +197,8 @@ export function LawyerSettings() {
 
           <Input
             label="License Number"
-            value={lawyerData.license_number}
-            onChange={(e) => setLawyerData({ ...lawyerData, license_number: e.target.value })}
+            value={lawyerData.bar_number}
+            onChange={(e) => setLawyerData({ ...lawyerData, bar_number: e.target.value })}
             placeholder="Your professional license number"
           />
 
@@ -224,8 +224,8 @@ export function LawyerSettings() {
             </label>
             <input
               type="text"
-              value={lawyerData.specializations}
-              onChange={(e) => setLawyerData({ ...lawyerData, specializations: e.target.value })}
+              value={lawyerData.practice_areas}
+              onChange={(e) => setLawyerData({ ...lawyerData, practice_areas: e.target.value })}
               placeholder="e.g., Family Immigration, Business Visas, Student Visas"
               className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
