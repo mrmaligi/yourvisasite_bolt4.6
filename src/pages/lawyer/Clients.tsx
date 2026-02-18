@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Users, Calendar, Phone, Briefcase, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { Users, Calendar, Phone, Briefcase, FileText, ChevronDown, ChevronUp, Lock, Unlock } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { Button } from '../../components/ui/Button';
+import { useToast } from '../../components/ui/Toast';
 
 interface ClientInfo {
   user_id: string;
@@ -14,6 +16,7 @@ interface ClientInfo {
   last_booking_date: string;
   total_spent_cents: number;
   visa_types: string[];
+  file_takeover_status: 'requested' | 'accepted' | 'rejected' | null;
   shared_documents: {
     id: string;
     file_name: string;
@@ -37,6 +40,7 @@ const statusVariant = {
 
 export function Clients() {
   const { profile } = useAuth();
+  const { toast } = useToast();
   const [clients, setClients] = useState<ClientInfo[]>([]);
   const [recentBookings, setRecentBookings] = useState<{
     id: string;
@@ -76,7 +80,7 @@ export function Clients() {
     const fetchClients = async () => {
       const { data: bookings } = await supabase
         .from('bookings')
-        .select('user_id, total_price_cents, status, created_at')
+        .select('user_id, total_price_cents, status, created_at, file_takeover_status')
         .eq('lawyer_id', lawyerProfileId);
 
       if (!bookings || bookings.length === 0) {
@@ -149,9 +153,21 @@ export function Clients() {
       bookings.forEach(b => {
         const existing = clientMap.get(b.user_id);
         const prof = profileMap.get(b.user_id);
+
+        // Takeover Status Priority: Accepted > Requested > Rejected > Null
+        const currentStatus = b.file_takeover_status as ClientInfo['file_takeover_status'];
+        let nextStatus = existing?.file_takeover_status || currentStatus;
+
+        if (existing) {
+             if (currentStatus === 'accepted') nextStatus = 'accepted';
+             else if (currentStatus === 'requested' && nextStatus !== 'accepted') nextStatus = 'requested';
+             else if (currentStatus === 'rejected' && !nextStatus) nextStatus = 'rejected';
+        }
+
         if (existing) {
           existing.total_bookings += 1;
           existing.total_spent_cents += b.total_price_cents;
+          existing.file_takeover_status = nextStatus;
           if (b.created_at > existing.last_booking_date) {
             existing.last_booking_date = b.created_at;
           }
@@ -165,6 +181,7 @@ export function Clients() {
             total_spent_cents: b.total_price_cents,
             visa_types: Array.from(visaMap.get(b.user_id) || []),
             shared_documents: docMap.get(b.user_id) || [],
+            file_takeover_status: currentStatus,
           });
         }
       });
@@ -193,6 +210,38 @@ export function Clients() {
 
     fetchClients();
   }, [lawyerProfileId]);
+
+  const requestAccess = async (userId: string) => {
+      if (!lawyerProfileId) return;
+
+      // Find latest booking
+      const { data } = await supabase
+          .from('bookings')
+          .select('id')
+          .eq('lawyer_id', lawyerProfileId)
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+      if (data) {
+          const { error } = await supabase
+              .from('bookings')
+              .update({ file_takeover_status: 'requested' })
+              .eq('id', data.id);
+
+          if (!error) {
+              setClients(prev => prev.map(c =>
+                   c.user_id === userId ? { ...c, file_takeover_status: 'requested' } : c
+               ));
+              toast('success', 'Access requested sent to client');
+          } else {
+              toast('error', 'Failed to send request');
+          }
+      } else {
+          toast('error', 'No booking found for this client');
+      }
+  };
 
   if (loading) {
     return (
@@ -260,10 +309,22 @@ export function Clients() {
                           </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-neutral-900">
-                          ${(client.total_spent_cents / 100).toFixed(0)}
-                        </p>
+                      <div className="text-right flex flex-col items-end gap-2">
+                         {client.file_takeover_status === 'accepted' ? (
+                             <Badge variant="success" className="flex items-center gap-1">
+                                 <Unlock className="w-3 h-3" />
+                                 Access Granted
+                             </Badge>
+                         ) : client.file_takeover_status === 'requested' ? (
+                             <Badge variant="warning" className="flex items-center gap-1">
+                                 <Lock className="w-3 h-3" />
+                                 Request Pending
+                             </Badge>
+                         ) : (
+                             <Button size="sm" variant="secondary" onClick={() => requestAccess(client.user_id)}>
+                                 Request File Access
+                             </Button>
+                         )}
                         <p className="text-xs text-neutral-400">
                           Last: {new Date(client.last_booking_date).toLocaleDateString()}
                         </p>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, MapPin, Briefcase, Clock, Scale, Users } from 'lucide-react';
+import { Search, MapPin, Briefcase, Clock, Scale, Users, Star } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
@@ -17,6 +17,7 @@ interface LawyerListItem {
   hourly_rate_cents: number | null;
   full_name: string | null;
   avatar_url: string | null;
+  is_featured: boolean;
   slot_count: number;
 }
 
@@ -51,7 +52,7 @@ export function LawyerDirectory() {
         const profileIds = lawyerRows.map((l) => l.profile_id);
         const { data: profileRows, error: profileError } = await supabase
           .from('profiles')
-          .select('id, full_name, avatar_url')
+          .select('id, full_name, avatar_url, is_featured')
           .in('id', profileIds);
 
         if (profileError) {
@@ -85,8 +86,16 @@ export function LawyerDirectory() {
             ...l,
             full_name: p?.full_name || null,
             avatar_url: p?.avatar_url || null,
+            is_featured: p?.is_featured || false,
             slot_count: slotCounts[l.id] || 0,
           };
+        });
+
+        // Sort: Featured first, then by slot count, then random/id
+        merged.sort((a, b) => {
+            if (a.is_featured && !b.is_featured) return -1;
+            if (!a.is_featured && b.is_featured) return 1;
+            return b.slot_count - a.slot_count;
         });
 
         setLawyers(merged);
@@ -190,7 +199,7 @@ export function LawyerDirectory() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((lawyer) => (
             <Link key={lawyer.id} to={`/lawyers/${lawyer.id}`}>
-              <Card hover className="h-full group">
+              <Card hover className="h-full group border-l-4 border-l-transparent hover:border-l-primary-500">
                 <CardBody className="space-y-4">
                   <div className="flex items-center gap-4">
                     {lawyer.avatar_url ? (
@@ -204,10 +213,18 @@ export function LawyerDirectory() {
                         <Scale className="w-6 h-6 text-white" />
                       </div>
                     )}
-                    <div className="min-w-0">
-                      <h3 className="font-semibold text-neutral-900 truncate group-hover:text-primary-700 transition-colors">
-                        {lawyer.full_name || 'Immigration Lawyer'}
-                      </h3>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                          <h3 className="font-semibold text-neutral-900 truncate group-hover:text-primary-700 transition-colors">
+                            {lawyer.full_name || 'Immigration Lawyer'}
+                          </h3>
+                          {lawyer.is_featured && (
+                              <Badge variant="warning" className="text-[10px] px-1.5 py-0 h-5 flex items-center gap-1 shrink-0">
+                                <Star className="w-3 h-3 fill-current" />
+                                Featured
+                              </Badge>
+                          )}
+                      </div>
                       <div className="flex items-center gap-1.5 text-sm text-neutral-500 mt-0.5">
                         <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
                         <span className="truncate">{lawyer.jurisdiction}</span>
