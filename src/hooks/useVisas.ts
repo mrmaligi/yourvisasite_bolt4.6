@@ -55,7 +55,7 @@ export function useVisas(search?: string, country?: string, category?: string) {
         query = query.eq('category', category);
       }
       if (search) {
-        query = query.or(`name.ilike.%${search}%,subclass_number.ilike.%${search}%`);
+        query = query.or(`name.ilike.%${search}%,subclass.ilike.%${search}%`);
       }
 
       const { data, error } = await query;

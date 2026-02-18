@@ -56,7 +56,7 @@ export function MyVisas() {
               <Card hover>
                 <CardBody className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <Badge>{p.visas.subclass_number}</Badge>
+                    <Badge>{p.visas.subclass}</Badge>
                     <Badge variant="premium">Premium</Badge>
                   </div>
                   <h3 className="font-semibold text-neutral-900">{p.visas.name}</h3>

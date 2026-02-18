@@ -21,8 +21,8 @@ const CATEGORY_OPTIONS = [
 ];
 
 const EMPTY_VISA = {
-  subclass_number: '', name: '', country: 'Australia', category: 'work' as VisaCategory,
-  official_url: '', summary: '', processing_fee_description: '',
+  subclass: '', name: '', country: 'Australia', category: 'work' as string,
+  official_link: '', summary: '', processing_fee_description: '',
 };
 
 const REQUIREMENTS_TEMPLATE = JSON.stringify({
@@ -102,8 +102,8 @@ export function VisaManagement() {
   const openEdit = (v: Visa) => {
     setEditing(v);
     setForm({
-      subclass_number: v.subclass_number, name: v.name, country: v.country,
-      category: v.category, official_url: v.official_url || '',
+      subclass: v.subclass, name: v.name, country: v.country,
+      category: v.category, official_link: v.official_link || '',
       summary: v.summary || '', processing_fee_description: v.processing_fee_description || '',
     });
     setActiveTab('details');
@@ -197,18 +197,18 @@ export function VisaManagement() {
     const lower = q.toLowerCase();
     setFiltered(visas.filter((v) =>
       v.name.toLowerCase().includes(lower) ||
-      v.subclass_number.toLowerCase().includes(lower) ||
+      v.subclass.toLowerCase().includes(lower) ||
       v.country.toLowerCase().includes(lower)
     ));
   };
 
   const columns: Column<Visa>[] = [
-    { key: 'subclass', header: 'Subclass', render: (r) => <Badge>{r.subclass_number}</Badge>, sortable: true },
+    { key: 'subclass', header: 'Subclass', render: (r) => <Badge>{r.subclass}</Badge>, sortable: true },
     { key: 'name', header: 'Name', render: (r) => (
       <div>
         <span className="font-medium text-neutral-900">{r.name}</span>
-        {r.official_url && (
-          <a href={r.official_url} target="_blank" rel="noopener noreferrer" className="ml-2 text-primary-500 hover:text-primary-700">
+        {r.official_link && (
+          <a href={r.official_link} target="_blank" rel="noopener noreferrer" className="ml-2 text-primary-500 hover:text-primary-700">
             <ExternalLink className="w-3 h-3 inline" />
           </a>
         )}
@@ -247,7 +247,7 @@ export function VisaManagement() {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={editing ? `Edit: ${editing.subclass_number} ${editing.name}` : 'Create Visa'}
+        title={editing ? `Edit: ${editing.subclass} ${editing.name}` : 'Create Visa'}
         size="lg"
         footer={
           <>
@@ -286,14 +286,14 @@ export function VisaManagement() {
         {activeTab === 'details' ? (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <Input label="Subclass Number" value={form.subclass_number} onChange={(e) => setForm({ ...form, subclass_number: e.target.value })} placeholder="e.g. 189" />
+              <Input label="Subclass Number" value={form.subclass} onChange={(e) => setForm({ ...form, subclass: e.target.value })} placeholder="e.g. 189" />
               <Input label="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Skilled Independent" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <Input label="Country" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} placeholder="Australia" />
               <Select label="Category" value={form.category} options={CATEGORY_OPTIONS} onChange={(e) => setForm({ ...form, category: (e.target as HTMLSelectElement).value as VisaCategory })} />
             </div>
-            <Input label="Official URL" value={form.official_url} onChange={(e) => setForm({ ...form, official_url: e.target.value })} placeholder="https://immi.homeaffairs.gov.au/..." />
+            <Input label="Official URL" value={form.official_link} onChange={(e) => setForm({ ...form, official_link: e.target.value })} placeholder="https://immi.homeaffairs.gov.au/..." />
             <Textarea label="Summary (shown on free tier)" value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} rows={4} />
             <Input label="Processing Fee Description" value={form.processing_fee_description} onChange={(e) => setForm({ ...form, processing_fee_description: e.target.value })} placeholder="e.g. AUD $4,640 (principal applicant)" />
           </div>
