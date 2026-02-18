@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown, LogOut, LayoutDashboard, User } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { Button } from '../ui/Button';
 import { Logo } from '../ui/Logo';
 import { ThemeToggle } from '../ui/ThemeToggle';
+<<<<<<< HEAD
+=======
+import { UserMenu } from './UserMenu';
+>>>>>>> origin/main
 
 export function Navbar() {
-  const { user, profile, role, signOut, isLoading } = useAuth();
+  const { user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const location = useLocation();
 
   const publicLinks = [
@@ -21,14 +23,8 @@ export function Navbar() {
     { to: '/news', label: 'News' },
   ];
 
-  const getDashboardPath = () => {
-    if (role === 'admin') return '/admin';
-    if (role === 'lawyer') return '/lawyer';
-    return '/dashboard';
-  };
-
   return (
-    <nav className="sticky top-0 z-40 glass border-b">
+    <nav className="sticky top-0 z-40 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link to="/">
@@ -42,8 +38,13 @@ export function Navbar() {
                 to={link.to}
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                   location.pathname === link.to
+<<<<<<< HEAD
                     ? 'text-primary-700 bg-primary-50 dark:bg-primary-900/20 dark:text-primary-400'
                     : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100/80 dark:text-neutral-400 dark:hover:text-neutral-200 dark:hover:bg-neutral-800'
+=======
+                    ? 'text-primary-700 bg-primary-50 dark:bg-primary-900/20 dark:text-primary-300'
+                    : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 hover:bg-neutral-100/80 dark:hover:bg-neutral-800'
+>>>>>>> origin/main
                 }`}
               >
                 {link.label}
@@ -51,6 +52,7 @@ export function Navbar() {
             ))}
           </div>
 
+<<<<<<< HEAD
           <div className="hidden lg:flex items-center gap-3">
             <ThemeToggle />
 
@@ -123,6 +125,17 @@ export function Navbar() {
              <ThemeToggle />
              <button
               className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-neutral-700 dark:text-neutral-200"
+=======
+          <div className="hidden md:flex items-center gap-3">
+            <ThemeToggle />
+            <UserMenu />
+          </div>
+
+          <div className="flex items-center gap-3 md:hidden">
+            <ThemeToggle />
+            <button
+              className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-neutral-600 dark:text-neutral-400"
+>>>>>>> origin/main
               onClick={() => setMobileOpen(!mobileOpen)}
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -132,17 +145,26 @@ export function Navbar() {
       </div>
 
       {mobileOpen && (
+<<<<<<< HEAD
         <div className="lg:hidden border-t border-neutral-200/60 dark:border-neutral-700/60 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl px-4 py-4 space-y-1 animate-fade-in">
+=======
+        <div className="md:hidden border-t border-neutral-200/60 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl px-4 py-4 space-y-1 animate-fade-in h-[calc(100vh-64px)] overflow-y-auto">
+>>>>>>> origin/main
           {publicLinks.map((link) => (
             <Link
               key={link.to}
               to={link.to}
               onClick={() => setMobileOpen(false)}
+<<<<<<< HEAD
               className="block px-4 py-3 rounded-xl text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+=======
+              className="block px-4 py-3 rounded-xl text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+>>>>>>> origin/main
             >
               {link.label}
             </Link>
           ))}
+<<<<<<< HEAD
           <hr className="border-neutral-100 dark:border-neutral-700 my-2" />
           {user ? (
             <>
@@ -165,6 +187,13 @@ export function Navbar() {
               <Button size="sm" className="w-full">Sign in</Button>
             </Link>
           )}
+=======
+          <hr className="border-neutral-100 dark:border-neutral-800 my-2" />
+
+          <div className="px-4 py-2 flex justify-start">
+             <UserMenu />
+          </div>
+>>>>>>> origin/main
         </div>
       )}
     </nav>

@@ -1,6 +1,5 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { Check, X, HelpCircle } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
 export function Pricing() {
@@ -47,7 +46,7 @@ export function Pricing() {
               </li>
             </ul>
             <Link to="/visas">
-              <Button variant="outline" className="w-full">Start for Free</Button>
+              <Button variant="secondary" className="w-full">Start for Free</Button>
             </Link>
           </div>
 
@@ -120,7 +119,7 @@ export function Pricing() {
               </li>
             </ul>
             <Link to="/lawyers">
-              <Button variant="outline" className="w-full">Find a Lawyer</Button>
+              <Button variant="secondary" className="w-full">Find a Lawyer</Button>
             </Link>
           </div>
         </div>

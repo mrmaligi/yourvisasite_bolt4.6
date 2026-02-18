@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { TrendingUp, Plus, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
+import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
@@ -129,7 +129,7 @@ export function LawyerTracker() {
 
   const outcomeVariant = {
     approved: 'success' as const,
-    denied: 'error' as const,
+    denied: 'danger' as const,
     pending: 'warning' as const,
   };
 

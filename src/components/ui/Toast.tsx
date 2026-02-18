@@ -55,17 +55,29 @@ const icons: Record<ToastType, typeof CheckCircle> = {
 };
 
 const colors: Record<ToastType, string> = {
+<<<<<<< HEAD
   success: 'border-emerald-500 bg-emerald-50 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300',
   error: 'border-red-500 bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-300',
   info: 'border-sky-500 bg-sky-50 text-sky-800 dark:bg-sky-900/20 dark:text-sky-300',
+=======
+  success: 'border-emerald-500 bg-emerald-50 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200',
+  error: 'border-red-500 bg-red-50 text-red-800 dark:bg-red-900/30 dark:text-red-200',
+  info: 'border-sky-500 bg-sky-50 text-sky-800 dark:bg-sky-900/30 dark:text-sky-200',
+>>>>>>> origin/main
 };
 
 function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
   const Icon = icons[toast.type];
   return (
+<<<<<<< HEAD
     <div className={`flex items-start gap-3 px-4 py-3 rounded-lg border-l-4 shadow-lg animate-slide-in-right ${colors[toast.type]} dark:border-opacity-80`}>
       <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" />
       <p className="text-sm flex-1 font-medium">{toast.message}</p>
+=======
+    <div className={`flex items-start gap-3 px-4 py-3 rounded-lg border-l-4 shadow-lg animate-slide-in-right ${colors[toast.type]}`}>
+      <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" />
+      <p className="text-sm flex-1">{toast.message}</p>
+>>>>>>> origin/main
       <button onClick={onDismiss} className="flex-shrink-0 p-0.5 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
         <X className="w-4 h-4" />
       </button>
