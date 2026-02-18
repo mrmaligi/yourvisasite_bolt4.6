@@ -131,21 +131,26 @@ export function MyDocuments() {
   };
 
   const handleDelete = async (doc: UserDocument) => {
-    await supabase.storage.from('user-documents').remove([doc.storage_path]);
+    const path = doc.file_path || doc.storage_path;
+    if (path) {
+      await supabase.storage.from('user-documents').remove([path]);
+    }
     await supabase.from('user_documents').delete().eq('id', doc.id);
     toast('success', 'Document deleted');
     fetchDocs();
   };
 
   const handleDownload = async (doc: UserDocument) => {
+    const path = doc.file_path || doc.storage_path;
+    if (!path) return;
     const { data } = await supabase.storage
       .from('user-documents')
-      .createSignedUrl(doc.storage_path, 300);
+      .createSignedUrl(path, 300);
     if (data?.signedUrl) window.open(data.signedUrl, '_blank');
   };
 
   const getDocsByCategory = (category: string) =>
-    docs.filter((d) => d.document_category === category);
+    docs.filter((d) => d.document_category === category || (d as any).category_id === category); // Handle both for now
 
   return (
     <div className="space-y-6">

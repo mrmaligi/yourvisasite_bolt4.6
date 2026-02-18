@@ -3,16 +3,13 @@ import { useParams, Link } from 'react-router-dom';
 import {
   ExternalLink,
   Clock,
-  TrendingUp,
-  BarChart3,
-  Lock,
   CheckCircle,
   BookOpen,
-  FileText,
-  ListChecks,
+  ArrowUpRight,
+  ChevronRight,
+  ArrowLeft,
   AlertCircle
 } from 'lucide-react';
-import { useVisa, useVisaTrackerEntries } from '../../hooks/useVisas';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
@@ -20,61 +17,105 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
-import { ProcessingTrendChart } from '../../components/ui/ProcessingTrendChart';
 import { StripeCheckout } from '../../components/StripeCheckout';
 import { STRIPE_PRODUCTS } from '../../stripe-config';
-import { TRACKER_THRESHOLDS } from '../../lib/constants';
-import type { VisaPremiumContent, Product, UserVisaPurchase } from '../../types/database';
+import type { Visa, TrackerStats, VisaPremiumContent, Product, UserVisaPurchase } from '../../types/database';
 
 export function VisaDetail() {
   const { id } = useParams<{ id: string }>();
-  const { visa, loading } = useVisa(id);
-  const { entries: trackerEntries, loading: entriesLoading } = useVisaTrackerEntries(id);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  const [visa, setVisa] = useState<Visa | null>(null);
+  const [stats, setStats] = useState<TrackerStats | null>(null);
+  const [relatedVisas, setRelatedVisas] = useState<Visa[]>([]);
   const [premiumContent, setPremiumContent] = useState<VisaPremiumContent[]>([]);
   const [product, setProduct] = useState<Product | null>(null);
   const [purchase, setPurchase] = useState<UserVisaPurchase | null>(null);
-  const [purchaseLoading, setPurchaseLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
 
-    supabase
-      .from('products')
-      .select('*')
-      .eq('visa_id', id)
-      .maybeSingle()
-      .then(({ data }) => setProduct(data));
+    const fetchData = async () => {
+      setLoading(true);
 
-    if (user) {
-      supabase
-        .from('user_visa_purchases')
+      // 1. Fetch Visa
+      const { data: visaData, error: visaError } = await supabase
+        .from('visas')
         .select('*')
-        .eq('user_id', user.id)
-        .eq('visa_id', id)
-        .maybeSingle()
-        .then(({ data }) => setPurchase(data));
+        .eq('id', id)
+        .single();
 
-      supabase
-        .from('visa_premium_content')
+      if (visaError) {
+        console.error('Error fetching visa:', visaError);
+        setLoading(false);
+        return;
+      }
+
+      setVisa(visaData);
+
+      // 2. Fetch Stats
+      const { data: statsData } = await supabase
+        .from('tracker_stats')
         .select('*')
         .eq('visa_id', id)
-        .order('step_number')
-        .then(({ data }) => setPremiumContent(data || []));
-    }
+        .maybeSingle();
+      setStats(statsData);
+
+      // 3. Fetch Related Visas
+      if (visaData) {
+        const { data: relatedData } = await supabase
+          .from('visas')
+          .select('*')
+          .eq('category', visaData.category)
+          .neq('id', id)
+          .limit(3);
+        setRelatedVisas(relatedData || []);
+      }
+
+      // 4. Fetch Product info
+      const { data: productData } = await supabase
+        .from('products')
+        .select('*')
+        .eq('visa_id', id)
+        .maybeSingle();
+      setProduct(productData);
+
+      // 5. Fetch Purchase & Premium Content (if user logged in)
+      if (user) {
+         const { data: purchaseData } = await supabase
+            .from('user_visa_purchases')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('visa_id', id)
+            .maybeSingle();
+         setPurchase(purchaseData);
+
+         if (purchaseData) {
+            const { data: contentData } = await supabase
+              .from('visa_premium_content')
+              .select('*')
+              .eq('visa_id', id)
+              .order('step_number');
+            setPremiumContent(contentData || []);
+         }
+      }
+
+      setLoading(false);
+    };
+
+    fetchData();
   }, [id, user]);
 
-  // Stripe checkout success handler - checks for completed session
+  // Stripe success handler
   useEffect(() => {
     const checkSession = async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session_id');
       
       if (sessionId && user && id) {
-        setPurchaseLoading(true);
         try {
-          // Verify the purchase was recorded
           const { data: p } = await supabase
             .from('user_visa_purchases')
             .select('*')
@@ -91,26 +132,27 @@ export function VisaDetail() {
               .order('step_number');
             setPremiumContent(content || []);
             toast('success', 'Payment successful! Guide unlocked.');
-            // Clear the session_id from URL
             window.history.replaceState({}, '', window.location.pathname);
           }
         } catch (err) {
           console.error('Session check error:', err);
-        } finally {
-          setPurchaseLoading(false);
         }
       }
     };
-    
     checkSession();
   }, [user, id, toast]);
+
 
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-        <Skeleton className="h-10 w-2/3" />
-        <Skeleton className="h-6 w-1/3" />
-        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-12 w-3/4" />
+        <div className="grid md:grid-cols-3 gap-6">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+        </div>
       </div>
     );
   }
@@ -119,268 +161,268 @@ export function VisaDetail() {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
         <h2 className="text-2xl font-bold text-neutral-900 mb-2">Visa not found</h2>
-        <Link to="/visas" className="text-primary-600 hover:underline">Back to search</Link>
+        <Link to="/visas">
+            <Button variant="secondary">Back to search</Button>
+        </Link>
       </div>
     );
   }
 
-  const stats = visa.tracker_stats;
-  const reqs = visa.visa_requirements?.requirements_json as any;
-  const price = product?.price_cents || 4900;
   const hasPurchased = !!purchase;
+  const price = product?.price_cents ? product.price_cents / 100 : 49;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <Link to="/visas" className="text-sm text-primary-600 hover:underline mb-6 inline-block">
-        Back to Visa Search
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {/* Breadcrumbs & Back */}
+      <div className="flex items-center gap-2 text-sm text-neutral-500 mb-6">
+        <Link to="/" className="hover:text-primary-600">Home</Link>
+        <ChevronRight className="w-4 h-4" />
+        <Link to="/visas" className="hover:text-primary-600">Visas</Link>
+        <ChevronRight className="w-4 h-4" />
+        <span className="text-neutral-900 font-medium truncate">{visa.name}</span>
+      </div>
+
+      <Link to="/visas" className="inline-flex items-center text-sm font-medium text-neutral-500 hover:text-neutral-900 mb-8 transition-colors">
+        <ArrowLeft className="w-4 h-4 mr-1" />
+        Back to Search
       </Link>
 
-      <div className="mb-8">
-        <div className="flex flex-wrap items-center gap-2 mb-3">
-          <Badge>{visa.subclass}</Badge>
-          <Badge variant="primary">{visa.category}</Badge>
-          <Badge variant="info">{visa.country}</Badge>
+      {/* Header */}
+      <div className="mb-10">
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+            <Badge className="text-sm px-3 py-1">{visa.subclass}</Badge>
+            <Badge variant="primary" className="text-sm px-3 py-1">{visa.category}</Badge>
+            {visa.country && <Badge variant="info" className="text-sm px-3 py-1">{visa.country}</Badge>}
         </div>
-        <h1 className="text-3xl font-bold text-neutral-900 mb-3">{visa.name}</h1>
-        {visa.official_link && (
-          <a
-            href={visa.official_link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-sm text-primary-600 hover:underline"
-          >
-            Official government page <ExternalLink className="w-3.5 h-3.5" />
-          </a>
-        )}
-      </div>
+        <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-6">{visa.name}</h1>
 
-      {visa.summary && (
-        <Card className="mb-6">
-          <CardBody>
-            <p className="text-neutral-700 leading-relaxed">{visa.summary}</p>
-            {visa.processing_fee_description && (
-              <p className="text-sm text-neutral-500 mt-3">Fees: {visa.processing_fee_description}</p>
-            )}
-          </CardBody>
-        </Card>
-      )}
-
-      {/* Structured Requirements from JSON */}
-      {reqs && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          {reqs.eligibility && (
-            <Card className="h-full">
-              <CardHeader className="flex items-center gap-2 pb-2">
-                <ListChecks className="w-5 h-5 text-primary-600" />
-                <h2 className="text-lg font-semibold text-neutral-900">Eligibility Criteria</h2>
-              </CardHeader>
-              <CardBody className="pt-0">
-                <ul className="space-y-2 mt-2">
-                  {reqs.eligibility.map((item: string, i: number) => (
-                    <li key={i} className="flex gap-2 text-sm text-neutral-700">
-                      <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary-400 flex-shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardBody>
-            </Card>
-          )}
-
-          {reqs.documents && (
-            <Card className="h-full">
-              <CardBody>
-                <div className="flex items-center gap-2 mb-4">
-                  <FileText className="w-5 h-5 text-primary-600" />
-                  <h2 className="text-lg font-semibold text-neutral-900">Required Documents</h2>
-                </div>
-                <div className="space-y-6">
-                  {Object.entries(reqs.documents).map(([category, docs]: [string, any]) => (
-                    <div key={category}>
-                      <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 pb-1 border-b border-neutral-100">
-                        {category.replace(/_/g, ' ')}
-                      </h3>
-                      <ul className="space-y-2">
-                        {Array.isArray(docs) ? docs.map((doc: string, i: number) => (
-                          <li key={i} className="text-sm text-neutral-700 flex items-start gap-2">
-                            <span className="text-primary-400 mt-1.5">•</span>
-                            <span className="leading-relaxed">{doc}</span>
-                          </li>
-                        )) : (
-                          <li className="text-sm text-neutral-700 flex items-start gap-2">
-                            <span className="text-primary-400 mt-1.5">•</span>
-                            <span className="leading-relaxed">{String(docs)}</span>
-                          </li>
-                        )}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              </CardBody>
-            </Card>
-          )}
-        </div>
-      )}
-
-      {/* Processing Times Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {stats && (
-          <div className="h-full flex flex-col gap-6">
-            <Card className="flex-1">
-              <CardHeader>
-                <h2 className="text-lg font-semibold text-neutral-900 flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-primary-600" />
-                  Community Tracker
-                </h2>
-              </CardHeader>
-              <CardBody>
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <p className="text-xs text-neutral-400 mb-1">Avg Wait</p>
-                    <p className="text-2xl font-bold text-neutral-900">
-                      {stats.weighted_avg_days ? `${Math.round(stats.weighted_avg_days)}d` : '-'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-neutral-400 mb-1">Reports</p>
-                    <p className="text-2xl font-bold text-neutral-900">{stats.total_entries}</p>
-                  </div>
-                </div>
-                
-                {stats.weighted_avg_days && (
-                  <div className="mt-2">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm text-neutral-500">Speed rating:</span>
-                      <Badge
-                        variant={
-                          stats.weighted_avg_days <= TRACKER_THRESHOLDS.FAST_MAX_DAYS
-                            ? 'success'
-                            : stats.weighted_avg_days <= TRACKER_THRESHOLDS.MODERATE_MAX_DAYS
-                            ? 'warning'
-                            : 'danger'
-                        }
-                      >
-                        {stats.weighted_avg_days <= TRACKER_THRESHOLDS.FAST_MAX_DAYS
-                          ? 'Fast'
-                          : stats.weighted_avg_days <= TRACKER_THRESHOLDS.MODERATE_MAX_DAYS
-                          ? 'Moderate'
-                          : 'Slow'}
-                      </Badge>
-                    </div>
-                  </div>
-                )}
-              </CardBody>
-            </Card>
-            
-            {!entriesLoading && trackerEntries.length > 0 && (
-              <ProcessingTrendChart entries={trackerEntries} visaName={visa.subclass} />
-            )}
-          </div>
-        )}
-
-        {reqs?.processing_times && (
-          <Card className="h-full bg-neutral-50 border-neutral-200">
-            <CardHeader>
-              <h2 className="text-lg font-semibold text-neutral-900 flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-neutral-600" />
-                Official Estimates
-              </h2>
-            </CardHeader>
-            <CardBody>
-              <p className="text-sm text-neutral-700 leading-relaxed mb-4">
-                {reqs.processing_times.summary}
-              </p>
-              <div className="flex flex-col gap-1 text-xs text-neutral-500">
-                 {reqs.processing_times.source && (
-                  <a 
-                    href={reqs.processing_times.source}
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="hover:underline text-primary-600 flex items-center gap-1"
-                  >
-                    Source: Home Affairs <ExternalLink className="w-3 h-3" />
-                  </a>
-                 )}
-                 {reqs.processing_times.last_checked && (
-                   <span>Last checked: {reqs.processing_times.last_checked}</span>
-                 )}
-              </div>
-            </CardBody>
-          </Card>
-        )}
-      </div>
-
-      {hasPurchased && premiumContent.length > 0 ? (
-        <Card className="mb-6">
-          <CardHeader className="flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-accent-600" />
-            <h2 className="text-lg font-semibold text-neutral-900">Step-by-Step Guide</h2>
-            <Badge variant="premium">Premium</Badge>
-          </CardHeader>
-          <CardBody className="space-y-6">
-            {premiumContent.map((step) => (
-              <div key={step.id} className="relative pl-8 pb-8 border-l-2 border-primary-100 last:border-0 last:pb-0">
-                <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-primary-600 border-4 border-white shadow-sm" />
-                <div className="space-y-3">
-                  <h3 className="text-lg font-bold text-neutral-900">
-                    <span className="text-primary-600 mr-2">Step {step.step_number}</span>
-                    {step.title}
-                  </h3>
-                  <div className="text-neutral-600 leading-relaxed whitespace-pre-wrap text-sm">{step.body}</div>
-                  
-                  {step.document_category && (
-                    <div className="mt-4 p-4 bg-primary-50 rounded-xl border border-primary-100">
-                      <div className="flex items-center gap-2 mb-2">
-                        <FileText className="w-4 h-4 text-primary-600" />
-                        <span className="text-xs font-bold text-primary-700 uppercase tracking-wide">Required Evidence</span>
-                      </div>
-                      <p className="text-sm font-semibold text-neutral-900 mb-1">{step.document_category}</p>
-                      {step.document_explanation && (
-                        <p className="text-sm text-neutral-600 italic">"{step.document_explanation}"</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </CardBody>
-        </Card>
-      ) : (
-        <Card className="mb-6 overflow-hidden">
-          <div className="bg-gradient-to-br from-neutral-900 to-neutral-800 p-8 text-center">
-            <div className="w-14 h-14 bg-accent-500/20 rounded-2xl flex items-center justify-center mx-auto mb-5">
-              <Lock className="w-7 h-7 text-accent-400" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 bg-neutral-50 rounded-2xl border border-neutral-100">
+            <div>
+                <p className="text-sm text-neutral-500 mb-1">Cost</p>
+                <p className="font-semibold text-neutral-900">{visa.cost_aud || 'Varies'}</p>
             </div>
-            <h2 className="text-2xl font-bold text-white mb-3">Unlock the Full Guide</h2>
-            <p className="text-neutral-300 mb-6 max-w-md mx-auto">
-              Get step-by-step instructions, document checklists, and expert tips for this visa application.
-            </p>
-            <ul className="text-sm text-neutral-300 space-y-2 mb-8 max-w-xs mx-auto text-left">
-              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-primary-400" /> Complete step-by-step guide</li>
-              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-primary-400" /> Document upload helper</li>
-              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-primary-400" /> Example documents and tips</li>
-            </ul>
-            {user ? (
-              <StripeCheckout 
-                type="premium"
-                visaId={id}
-                amount={4900}
-                className="bg-accent-500 hover:bg-accent-600 text-white px-8 py-3 rounded-lg font-semibold"
-              >
-                Unlock Guide — {STRIPE_PRODUCTS.visasite.currencySymbol}{STRIPE_PRODUCTS.visasite.price}
-              </StripeCheckout>
-            ) : (
-              <Button
-                size="lg"
-                onClick={() => toast('info', 'Please sign in first')}
-                className="bg-accent-500 hover:bg-accent-600 text-white"
-              >
-                Unlock Guide — {STRIPE_PRODUCTS.visasite.currencySymbol}{STRIPE_PRODUCTS.visasite.price}
-              </Button>
+            <div>
+                <p className="text-sm text-neutral-500 mb-1">Processing Time</p>
+                <p className="font-semibold text-neutral-900">{visa.processing_time_range || 'Unknown'}</p>
+            </div>
+            <div>
+                <p className="text-sm text-neutral-500 mb-1">Duration</p>
+                <p className="font-semibold text-neutral-900">{visa.duration || 'Permanent'}</p>
+            </div>
+            <div>
+                 <a
+                    href={visa.official_link || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`inline-flex items-center justify-center w-full h-full text-sm font-medium rounded-lg transition-colors ${visa.official_link ? 'text-primary-600 bg-white border border-primary-200 hover:bg-primary-50' : 'text-neutral-400 bg-neutral-100 cursor-not-allowed'}`}
+                 >
+                    Official Site <ExternalLink className="w-4 h-4 ml-2" />
+                 </a>
+            </div>
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
+            {/* Summary */}
+            <section>
+                <h2 className="text-xl font-bold text-neutral-900 mb-4">Overview</h2>
+                <div className="prose prose-neutral max-w-none text-neutral-600">
+                    <p>{visa.summary || visa.description || "No summary available."}</p>
+                </div>
+            </section>
+
+            {/* Requirements */}
+            {visa.key_requirements && (
+                <section>
+                    <h2 className="text-xl font-bold text-neutral-900 mb-4">Key Requirements</h2>
+                    <Card>
+                        <CardBody className="pt-6">
+                            <div className="prose prose-sm max-w-none text-neutral-600 whitespace-pre-line">
+                                {visa.key_requirements}
+                            </div>
+                        </CardBody>
+                    </Card>
+                </section>
             )}
-          </div>
-        </Card>
-      )}
+
+            {/* Premium Content */}
+            <section id="premium-guide">
+                 <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold text-neutral-900">Application Guide</h2>
+                    {hasPurchased && <Badge variant="success">Unlocked</Badge>}
+                 </div>
+
+                 {hasPurchased && premiumContent.length > 0 ? (
+                    <div className="space-y-6">
+                        {premiumContent.map((step) => (
+                            <Card key={step.id} className="overflow-hidden">
+                                <CardHeader className="bg-primary-50/50 border-b border-primary-100">
+                                    <h3 className="font-semibold text-primary-900 flex items-center">
+                                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary-100 text-primary-700 text-xs font-bold mr-3">
+                                            {step.step_number}
+                                        </span>
+                                        {step.title}
+                                    </h3>
+                                </CardHeader>
+                                <CardBody>
+                                    <div className="prose prose-sm max-w-none text-neutral-600 whitespace-pre-wrap">
+                                        {step.body}
+                                    </div>
+                                    {step.document_category && (
+                                        <div className="mt-4 p-3 bg-neutral-50 rounded-lg border border-neutral-100 text-sm">
+                                            <span className="font-medium text-neutral-700">Required Document: </span>
+                                            <span className="text-neutral-600">{step.document_category}</span>
+                                            {step.document_explanation && (
+                                                <p className="mt-1 text-xs text-neutral-500">{step.document_explanation}</p>
+                                            )}
+                                        </div>
+                                    )}
+                                </CardBody>
+                            </Card>
+                        ))}
+                    </div>
+                 ) : (
+                    <Card className="overflow-hidden border-primary-200 shadow-sm">
+                        <div className="bg-gradient-to-br from-neutral-900 to-neutral-800 p-8 text-center text-white">
+                            <BookOpen className="w-12 h-12 text-primary-400 mx-auto mb-4" />
+                            <h3 className="text-2xl font-bold mb-2">Unlock the Premium Guide</h3>
+                            <p className="text-neutral-300 mb-8 max-w-md mx-auto">
+                                Get step-by-step instructions, document checklists, and expert tips for a successful {visa.subclass} application.
+                            </p>
+
+                            <div className="grid sm:grid-cols-2 gap-4 max-w-lg mx-auto mb-8 text-left">
+                                <div className="flex gap-3">
+                                    <CheckCircle className="w-5 h-5 text-primary-400 flex-shrink-0" />
+                                    <span className="text-sm text-neutral-200">Step-by-step instructions</span>
+                                </div>
+                                <div className="flex gap-3">
+                                    <CheckCircle className="w-5 h-5 text-primary-400 flex-shrink-0" />
+                                    <span className="text-sm text-neutral-200">Document checklists</span>
+                                </div>
+                                <div className="flex gap-3">
+                                    <CheckCircle className="w-5 h-5 text-primary-400 flex-shrink-0" />
+                                    <span className="text-sm text-neutral-200">Example declarations</span>
+                                </div>
+                                <div className="flex gap-3">
+                                    <CheckCircle className="w-5 h-5 text-primary-400 flex-shrink-0" />
+                                    <span className="text-sm text-neutral-200">Expert tips & warnings</span>
+                                </div>
+                            </div>
+
+                            {user ? (
+                                <StripeCheckout
+                                    product={STRIPE_PRODUCTS.visasite} // Using default product for now as per code
+                                    className="w-full sm:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-primary-900/20"
+                                >
+                                    Unlock Now — ${price}
+                                </StripeCheckout>
+                            ) : (
+                                <Button
+                                    onClick={() => toast('info', 'Please log in to purchase')}
+                                    className="w-full sm:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-primary-900/20"
+                                >
+                                    Unlock Now — ${price}
+                                </Button>
+                            )}
+                        </div>
+                    </Card>
+                 )}
+            </section>
+        </div>
+
+        <div className="space-y-8">
+            {/* Processing Stats */}
+            <Card>
+                <CardHeader>
+                    <h3 className="font-bold text-neutral-900 flex items-center gap-2">
+                        <Clock className="w-5 h-5 text-primary-600" />
+                        Real Processing Times
+                    </h3>
+                </CardHeader>
+                <CardBody>
+                    {stats ? (
+                        <div className="space-y-6">
+                            <div className="text-center">
+                                <p className="text-3xl font-bold text-neutral-900">
+                                    {Math.round(stats.median_days || 0)} days
+                                </p>
+                                <p className="text-sm text-neutral-500">Median waiting time</p>
+                            </div>
+
+                            <div className="space-y-3 pt-4 border-t border-neutral-100">
+                                <div className="relative pt-6 pb-2">
+                                    {/* Visual Distribution Bar */}
+                                    <div className="h-2 bg-neutral-100 rounded-full overflow-hidden flex">
+                                        <div className="w-1/4 bg-primary-200" />
+                                        <div className="w-2/4 bg-primary-400" />
+                                        <div className="w-1/4 bg-primary-600" />
+                                    </div>
+
+                                    {/* Markers */}
+                                    <div className="absolute top-0 left-[25%] -translate-x-1/2 flex flex-col items-center">
+                                        <span className="text-xs font-medium text-neutral-700">{Math.round(stats.p25_days || 0)}d</span>
+                                        <div className="h-2 w-px bg-neutral-300 mt-1" />
+                                    </div>
+                                    <div className="absolute top-0 left-[50%] -translate-x-1/2 flex flex-col items-center">
+                                        <span className="text-xs font-bold text-primary-700">{Math.round(stats.median_days || 0)}d</span>
+                                        <div className="h-2 w-px bg-primary-500 mt-1" />
+                                    </div>
+                                    <div className="absolute top-0 left-[75%] -translate-x-1/2 flex flex-col items-center">
+                                        <span className="text-xs font-medium text-neutral-700">{Math.round(stats.p75_days || 0)}d</span>
+                                        <div className="h-2 w-px bg-neutral-300 mt-1" />
+                                    </div>
+
+                                    <div className="flex justify-between text-xs text-neutral-400 mt-2">
+                                        <span>Fast (25%)</span>
+                                        <span>Slow (75%)</span>
+                                    </div>
+                                </div>
+                                <div className="text-center">
+                                     <p className="text-xs text-neutral-400 mt-2">Based on {stats.total_entries} user reports</p>
+                                     <Link to="/tracker" className="text-xs text-primary-600 hover:underline">View full tracker stats</Link>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="text-center py-6">
+                            <AlertCircle className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
+                            <p className="text-neutral-500 text-sm">No sufficient data yet.</p>
+                            <Link to="/tracker" className="text-xs text-primary-600 hover:underline mt-2 block">
+                                Check global stats
+                            </Link>
+                        </div>
+                    )}
+                </CardBody>
+            </Card>
+
+            {/* Related Visas */}
+            {relatedVisas.length > 0 && (
+                <div>
+                    <h3 className="font-bold text-neutral-900 mb-4">Related Visas</h3>
+                    <div className="space-y-3">
+                        {relatedVisas.map((v) => (
+                            <Link key={v.id} to={`/visas/${v.id}`}>
+                                <Card hover className="group">
+                                    <CardBody className="p-4">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <Badge className="mb-2">{v.subclass}</Badge>
+                                                <h4 className="font-medium text-neutral-900 group-hover:text-primary-700 transition-colors">
+                                                    {v.name}
+                                                </h4>
+                                            </div>
+                                            <ArrowUpRight className="w-4 h-4 text-neutral-300 group-hover:text-primary-600" />
+                                        </div>
+                                    </CardBody>
+                                </Card>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+      </div>
     </div>
   );
 }

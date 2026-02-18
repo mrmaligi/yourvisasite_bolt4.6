@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   MapPin, Briefcase, Clock, Scale, Calendar,
-  CheckCircle, ArrowLeft, CreditCard,
+  CheckCircle, ArrowLeft, CreditCard, Star, Shield
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -21,6 +21,7 @@ interface LawyerData {
   years_experience: number;
   bio: string | null;
   hourly_rate_cents: number | null;
+  bar_number: string;
   full_name: string | null;
   avatar_url: string | null;
 }
@@ -52,7 +53,7 @@ export function LawyerProfile() {
       const { data: lawyerRow } = await supabase
         .schema('lawyer')
         .from('profiles')
-        .select('id, profile_id, jurisdiction, practice_areas, years_experience, bio, hourly_rate_cents')
+        .select('id, profile_id, jurisdiction, practice_areas, years_experience, bio, hourly_rate_cents, bar_number')
         .eq('id', id)
         .eq('is_verified', true)
         .maybeSingle();
@@ -93,11 +94,17 @@ export function LawyerProfile() {
   }, [id]);
 
   const handleBook = async () => {
-    if (!user || !selectedSlot || !lawyer) return;
+    if (!user) {
+      // Redirect to login if not logged in
+      toast('info', 'Please sign in to book a consultation');
+      navigate('/login', { state: { from: `/lawyers/${id}` } });
+      return;
+    }
+
+    if (!selectedSlot || !lawyer) return;
     setSubmitting(true);
 
     try {
-      // Get current session for auth token
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         toast('error', 'Please sign in to book a consultation');
@@ -105,7 +112,6 @@ export function LawyerProfile() {
         return;
       }
 
-      // Call consultation checkout function
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/consultation-checkout`, {
         method: 'POST',
         headers: {
@@ -127,7 +133,6 @@ export function LawyerProfile() {
         throw new Error(data.error || 'Failed to initiate checkout');
       }
 
-      // Redirect to Stripe Checkout
       if (data.url) {
         window.location.href = data.url;
       } else {
@@ -216,6 +221,10 @@ export function LawyerProfile() {
               <Briefcase className="w-4 h-4" />
               {lawyer.years_experience} years experience
             </span>
+            <span className="flex items-center gap-1.5">
+              <Shield className="w-4 h-4" />
+              Bar #{lawyer.bar_number}
+            </span>
             {lawyer.hourly_rate_cents && (
               <span className="flex items-center gap-1.5 font-semibold text-neutral-900">
                 ${(lawyer.hourly_rate_cents / 100).toFixed(0)}/hr
@@ -245,53 +254,74 @@ export function LawyerProfile() {
         </CardBody>
       </Card>
 
-      <Card className="mb-6">
-        <CardHeader>
-          <h2 className="text-lg font-semibold text-neutral-900 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-primary-600" />
-            Available Time Slots
-          </h2>
-        </CardHeader>
-        <CardBody>
-          {slots.length === 0 ? (
-            <div className="text-center py-8">
-              <Clock className="w-8 h-8 text-neutral-300 mx-auto mb-3" />
-              <p className="text-neutral-500">No availability at the moment. Check back later.</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {Object.entries(slotGroups).map(([dateLabel, dateSlots]) => (
-                <div key={dateLabel}>
-                  <p className="text-sm font-semibold text-neutral-700 mb-3">{dateLabel}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {dateSlots.map((slot) => {
-                      const start = new Date(slot.start_time);
-                      const end = new Date(slot.end_time);
-                      const time = start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-                      const endTime = end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-                      return (
-                        <button
-                          key={slot.id}
-                          onClick={() => {
-                            if (!user) {
-                              toast('info', 'Please sign in to book a consultation');
-                              return;
-                            }
-                            setSelectedSlot(slot);
-                          }}
-                          className="px-4 py-2.5 rounded-xl border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200"
-                        >
-                          {time} - {endTime}
-                        </button>
-                      );
-                    })}
-                  </div>
+      <div className="grid md:grid-cols-3 gap-6">
+        <div className="md:col-span-2">
+           <Card>
+            <CardHeader>
+              <h2 className="text-lg font-semibold text-neutral-900 flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-primary-600" />
+                Available Time Slots
+              </h2>
+            </CardHeader>
+            <CardBody>
+              {slots.length === 0 ? (
+                <div className="text-center py-8">
+                  <Clock className="w-8 h-8 text-neutral-300 mx-auto mb-3" />
+                  <p className="text-neutral-500">No availability at the moment. Check back later.</p>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardBody>
-      </Card>
+              ) : (
+                <div className="space-y-6">
+                  {Object.entries(slotGroups).map(([dateLabel, dateSlots]) => (
+                    <div key={dateLabel}>
+                      <p className="text-sm font-semibold text-neutral-700 mb-3">{dateLabel}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {dateSlots.map((slot) => {
+                          const start = new Date(slot.start_time);
+                          const end = new Date(slot.end_time);
+                          const time = start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                          const endTime = end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                          return (
+                            <button
+                              key={slot.id}
+                              onClick={() => {
+                                if (!user) {
+                                  toast('info', 'Please sign in to book a consultation');
+                                  navigate('/login', { state: { from: `/lawyers/${id}` } });
+                                  return;
+                                }
+                                setSelectedSlot(slot);
+                              }}
+                              className="px-4 py-2.5 rounded-xl border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200"
+                            >
+                              {time} - {endTime}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardBody>
+          </Card>
+        </div>
+
+        <div className="md:col-span-1">
+          <Card>
+            <CardHeader>
+              <h2 className="text-lg font-semibold text-neutral-900 flex items-center gap-2">
+                <Star className="w-5 h-5 text-yellow-500" />
+                Reviews
+              </h2>
+            </CardHeader>
+            <CardBody>
+               <div className="text-center py-8">
+                  <p className="text-sm text-neutral-500">No reviews yet.</p>
+               </div>
+            </CardBody>
+          </Card>
+        </div>
+      </div>
 
       <Modal
         isOpen={!!selectedSlot}
