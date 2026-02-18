@@ -19,12 +19,14 @@ interface ArticleWithAuthor extends NewsArticle {
   author_name: string | null;
 }
 
+type RelatedArticle = Pick<NewsArticle, 'id' | 'title' | 'slug' | 'published_at' | 'category'>;
+
 export function NewsDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { user, role } = useAuth();
   const { toast } = useToast();
   const [article, setArticle] = useState<ArticleWithAuthor | null>(null);
-  const [relatedArticles, setRelatedArticles] = useState<NewsArticle[]>([]);
+  const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
   const [comments, setComments] = useState<CommentWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
   const [commentBody, setCommentBody] = useState('');

@@ -129,7 +129,7 @@ export function LawyerTracker() {
 
   const outcomeVariant = {
     approved: 'success' as const,
-    denied: 'error' as const,
+    denied: 'danger' as const,
     pending: 'warning' as const,
   };
 

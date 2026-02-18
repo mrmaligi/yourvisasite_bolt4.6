@@ -151,7 +151,6 @@ function PremiumContentList() {
                     Comprehensive step-by-step guide with all requirements, forms, and timeline information.
                   </p>
 
-                  {/* Changed to View Guide (Internal) instead of Download if it's our premium content */}
                   <Button
                     variant="primary"
                     size="sm"
@@ -391,7 +390,7 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                 </Button>
                 <h1 className="text-xl font-bold text-neutral-900">{visa.name} Guide</h1>
             </div>
-            <Button variant="outline" size="sm" onClick={() => window.print()}>
+            <Button variant="secondary" size="sm" onClick={() => window.print()}>
                 <Printer className="w-4 h-4 mr-2" />
                 Print Guide
             </Button>
@@ -435,11 +434,11 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                                         ? 'bg-primary-100 text-primary-700'
                                         : 'bg-neutral-100 text-neutral-500'
                                 }`}>
-                                    {isCompleted ? <CheckCircle className="w-4 h-4" /> : step.step_number}
+                                    {isCompleted ? <CheckCircle className="w-4 h-4" /> : step.section_number}
                                 </div>
                                 <div>
                                     <p className={`text-sm font-medium ${isActive ? 'text-primary-900' : 'text-neutral-700'}`}>
-                                        {step.title}
+                                        {step.section_title}
                                     </p>
                                 </div>
                             </button>
@@ -458,9 +457,9 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                         <div className="flex items-center justify-between mb-6 pb-6 border-b border-neutral-100">
                              <div>
                                 <span className="text-xs font-bold tracking-wider text-primary-600 uppercase mb-1 block">
-                                    Step {currentStep.step_number}
+                                    Step {currentStep.section_number}
                                 </span>
-                                <h2 className="text-2xl font-bold text-neutral-900">{currentStep.title}</h2>
+                                <h2 className="text-2xl font-bold text-neutral-900">{currentStep.section_title}</h2>
                              </div>
                              <button
                                 onClick={() => toggleStep(currentStep.id)}
@@ -485,15 +484,20 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                         </div>
 
                         {/* Document Requirement */}
-                        {currentStep.document_category && (
+                        {currentStep.required_documents && currentStep.required_documents.length > 0 && (
                             <div className="mb-8 p-4 bg-amber-50 rounded-lg border border-amber-100 flex gap-4">
                                 <FileText className="w-6 h-6 text-amber-600 flex-shrink-0 mt-1" />
                                 <div>
                                     <h3 className="font-semibold text-amber-900 mb-1">
-                                        Required: {currentStep.document_category}
+                                        Required Documents
                                     </h3>
-                                    {currentStep.document_explanation && (
-                                        <p className="text-sm text-amber-800">{currentStep.document_explanation}</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {currentStep.required_documents.map(doc => (
+                                            <Badge key={doc} variant="warning">{doc}</Badge>
+                                        ))}
+                                    </div>
+                                    {currentStep.tips && (
+                                        <p className="text-sm text-amber-800 mt-2">{currentStep.tips}</p>
                                     )}
                                 </div>
                             </div>
@@ -502,13 +506,13 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                         {/* Content Body */}
                         <div
                             className="prose prose-neutral max-w-none mb-12"
-                            dangerouslySetInnerHTML={{ __html: currentStep.body }}
+                            dangerouslySetInnerHTML={{ __html: currentStep.content }}
                         />
 
                         {/* Footer Navigation */}
                         <div className="flex items-center justify-between pt-8 border-t border-neutral-100">
                             <Button
-                                variant="outline"
+                                variant="secondary"
                                 disabled={currentStepIndex === 0}
                                 onClick={() => {
                                     setCurrentStepIndex(i => i - 1);
