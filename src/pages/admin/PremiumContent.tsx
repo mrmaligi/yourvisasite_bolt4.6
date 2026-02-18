@@ -22,20 +22,20 @@ export function PremiumContent() {
   useEffect(() => {
     if (!selectedVisaId) { setSteps([]); return; }
     setLoading(true);
-    supabase.from('visa_premium_content').select('*').eq('visa_id', selectedVisaId).order('step_number')
+    supabase.from('visa_premium_content').select('*').eq('visa_id', selectedVisaId).order('section_number')
       .then(({ data }) => { setSteps(data || []); setLoading(false); });
   }, [selectedVisaId]);
 
   const addStep = () => {
-    const next = steps.length > 0 ? Math.max(...steps.map((s) => s.step_number)) + 1 : 1;
+    const next = steps.length > 0 ? Math.max(...steps.map((s) => s.section_number)) + 1 : 1;
     setSteps([...steps, {
-      id: `new-${Date.now()}`, visa_id: selectedVisaId, step_number: next,
-      title: '', body: '', document_category: null, document_explanation: null,
-      document_example_url: null, created_at: '', updated_at: '',
+      id: `new-${Date.now()}`, visa_id: selectedVisaId, section_number: next,
+      section_title: '', content: '', tips: '', common_mistakes: '',
+      examples: '', estimated_minutes: 30, required_documents: [], created_at: '', updated_at: '',
     }]);
   };
 
-  const updateStep = (idx: number, field: string, value: string) => {
+  const updateStep = (idx: number, field: keyof VisaPremiumContent, value: any) => {
     setSteps(steps.map((s, i) => i === idx ? { ...s, [field]: value || null } : s));
   };
 
@@ -45,25 +45,68 @@ export function PremiumContent() {
     if (!selectedVisaId) return;
     setLoading(true);
 
-    await supabase.from('visa_premium_content').delete().eq('visa_id', selectedVisaId);
+    try {
+      // 1. Fetch existing steps from DB to identify what needs to be deleted
+      const { data: existingSteps, error: fetchError } = await supabase
+        .from('visa_premium_content')
+        .select('id')
+        .eq('visa_id', selectedVisaId);
 
-    const rows = steps.map((s, i) => ({
-      visa_id: selectedVisaId,
-      step_number: i + 1,
-      title: s.title,
-      body: s.body,
-      document_category: s.document_category,
-      document_explanation: s.document_explanation,
-      document_example_url: s.document_example_url,
-    }));
+      if (fetchError) throw fetchError;
 
-    if (rows.length > 0) {
-      const { error } = await supabase.from('visa_premium_content').insert(rows);
-      if (error) { toast('error', error.message); setLoading(false); return; }
+      const existingIds = new Set((existingSteps || []).map(s => s.id));
+      const currentIds = new Set(steps.map(s => s.id).filter(id => !id.startsWith('new-')));
+      const idsToDelete = Array.from(existingIds).filter(id => !currentIds.has(id));
+
+      // 2. Delete removed items
+      if (idsToDelete.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('visa_premium_content')
+          .delete()
+          .in('id', idsToDelete);
+
+        if (deleteError) throw deleteError;
+      }
+
+      // 3. Upsert current items (update existing, insert new)
+      const rows = steps.map((s, i) => ({
+        id: s.id.startsWith('new-') ? undefined : s.id, // Undefined ID lets DB generate one for inserts
+        visa_id: selectedVisaId,
+        section_number: i + 1,
+        section_title: s.section_title,
+        content: s.content,
+        tips: s.tips,
+        common_mistakes: s.common_mistakes,
+        examples: s.examples,
+        estimated_minutes: s.estimated_minutes,
+        required_documents: s.required_documents,
+        updated_at: new Date().toISOString(),
+      }));
+
+      if (rows.length > 0) {
+        const { error: upsertError } = await supabase
+          .from('visa_premium_content')
+          .upsert(rows);
+
+        if (upsertError) throw upsertError;
+      }
+
+      toast('success', 'Premium content saved');
+
+      // 4. Refresh data to get new IDs
+      const { data: refreshedData } = await supabase
+        .from('visa_premium_content')
+        .select('*')
+        .eq('visa_id', selectedVisaId)
+        .order('section_number');
+
+      setSteps(refreshedData || []);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Save failed';
+      toast('error', msg);
+    } finally {
+      setLoading(false);
     }
-
-    toast('success', 'Premium content saved');
-    setLoading(false);
   };
 
   return (
@@ -85,26 +128,50 @@ export function PremiumContent() {
                 <CardHeader className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <GripVertical className="w-4 h-4 text-neutral-400" />
-                    <span className="text-sm font-medium text-neutral-600">Step {idx + 1}</span>
+                    <span className="text-sm font-medium text-neutral-600">Section {idx + 1}</span>
                   </div>
                   <button onClick={() => removeStep(idx)} className="p-1 rounded hover:bg-red-50 text-red-500">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </CardHeader>
                 <CardBody className="space-y-3">
-                  <Input label="Title" value={step.title} onChange={(e) => updateStep(idx, 'title', e.target.value)} />
-                  <Textarea label="Body (Markdown)" value={step.body} onChange={(e) => updateStep(idx, 'body', e.target.value)} />
-                  <Input label="Document Category" value={step.document_category || ''} onChange={(e) => updateStep(idx, 'document_category', e.target.value)} helperText="Leave empty if no document required" />
-                  <Input label="Document Explanation" value={step.document_explanation || ''} onChange={(e) => updateStep(idx, 'document_explanation', e.target.value)} />
-                  <Input label="Example Document URL" value={step.document_example_url || ''} onChange={(e) => updateStep(idx, 'document_example_url', e.target.value)} />
+                  <Input label="Section Title" value={step.section_title} onChange={(e) => updateStep(idx, 'section_title', e.target.value)} />
+                  <Textarea label="Content (Markdown)" value={step.content} onChange={(e) => updateStep(idx, 'content', e.target.value)} rows={6} />
+
+                  <div className="grid sm:grid-cols-2 gap-4">
+                     <Textarea label="Tips" value={step.tips || ''} onChange={(e) => updateStep(idx, 'tips', e.target.value)} placeholder="Helpful tips for this section..." />
+                     <Textarea label="Common Mistakes" value={step.common_mistakes || ''} onChange={(e) => updateStep(idx, 'common_mistakes', e.target.value)} placeholder="Avoid these common errors..." />
+                  </div>
+
+                  <Textarea
+                    label="Examples (JSON or Text)"
+                    value={typeof step.examples === 'object' ? JSON.stringify(step.examples, null, 2) : (step.examples || '')}
+                    onChange={(e) => updateStep(idx, 'examples', e.target.value)}
+                    helperText="Can be plain text or valid JSON"
+                  />
+
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <Input
+                      label="Estimated Minutes"
+                      type="number"
+                      value={step.estimated_minutes || ''}
+                      onChange={(e) => updateStep(idx, 'estimated_minutes', parseInt(e.target.value) || null)}
+                    />
+                    <Input
+                      label="Required Documents (comma separated keys)"
+                      value={Array.isArray(step.required_documents) ? step.required_documents.join(', ') : ''}
+                      onChange={(e) => updateStep(idx, 'required_documents', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+                      helperText="e.g. passport, birth_certificate"
+                    />
+                  </div>
                 </CardBody>
               </Card>
             ))}
           </div>
 
           <div className="flex items-center justify-between">
-            <Button variant="secondary" onClick={addStep}><Plus className="w-4 h-4" /> Add Step</Button>
-            <Button loading={loading} onClick={saveAll}>Save All Steps</Button>
+            <Button variant="secondary" onClick={addStep}><Plus className="w-4 h-4" /> Add Section</Button>
+            <Button loading={loading} onClick={saveAll}>Save All Sections</Button>
           </div>
         </>
       )}
