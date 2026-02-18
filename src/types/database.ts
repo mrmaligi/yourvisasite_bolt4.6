@@ -2,6 +2,7 @@ export type UserRole = 'user' | 'lawyer' | 'admin';
 export type VisaCategory = 'work' | 'family' | 'student' | 'visitor' | 'humanitarian' | 'business' | 'other';
 export type TrackerOutcome = 'approved' | 'refused' | 'withdrawn';
 export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
+export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
 export type DocumentStatus = 'pending' | 'verified' | 'rejected';
 export type VerificationStatus = 'pending' | 'approved' | 'rejected';
 
@@ -140,6 +141,8 @@ export interface ConsultationSlot {
   start_time: string;
   end_time: string;
   is_booked: boolean;
+  is_reserved: boolean;
+  reserved_until: string | null;
   created_at: string;
 }
 
@@ -151,6 +154,10 @@ export interface Booking {
   duration_minutes: number;
   total_price_cents: number;
   status: BookingStatus;
+  payment_status: PaymentStatus;
+  payment_intent_id: string | null;
+  stripe_checkout_session_id: string | null;
+  confirmed_at: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;

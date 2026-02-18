@@ -18,7 +18,6 @@ import { Button } from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
 import { StripeCheckout } from '../../components/StripeCheckout';
-import { STRIPE_PRODUCTS } from '../../stripe-config';
 import type { Visa, TrackerStats, VisaPremiumContent, Product, UserVisaPurchase } from '../../types/database';
 
 export function VisaDetail() {
@@ -312,7 +311,9 @@ export function VisaDetail() {
 
                             {user ? (
                                 <StripeCheckout
-                                    product={STRIPE_PRODUCTS.visasite} // Using default product for now as per code
+                                    type="premium"
+                                    visaId={visa.id}
+                                    amount={product?.price_cents || 4900}
                                     className="w-full sm:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-primary-900/20"
                                 >
                                     Unlock Now — ${price}
