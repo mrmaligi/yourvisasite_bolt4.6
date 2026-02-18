@@ -1,71 +1,177 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, Bookmark, FolderOpen, Calendar, TrendingUp, ArrowRight, Scale } from 'lucide-react';
+import {
+  FileText,
+  Bookmark,
+  FolderOpen,
+  Calendar,
+  Search,
+  Upload,
+  UserCheck
+} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
-import type { NewsArticle } from '../../types/database';
+import { Button } from '../../components/ui/Button';
+import { CardSkeleton } from '../../components/ui/Skeleton';
+
+type ActivityType = 'purchase' | 'document' | 'booking';
+
+interface ActivityItem {
+  id: string;
+  type: ActivityType;
+  date: string;
+  title: string;
+  description: string;
+  link: string;
+}
 
 export function UserDashboard() {
   const { profile } = useAuth();
-  const [counts, setCounts] = useState({ purchases: 0, saved: 0, documents: 0, bookings: 0, submissions: 0 });
-  const [news, setNews] = useState<NewsArticle[]>([]);
+  const [counts, setCounts] = useState({
+    purchases: 0,
+    saved: 0,
+    documents: 0,
+    upcomingBookings: 0
+  });
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!profile) return;
-    Promise.all([
-      supabase.from('user_visa_purchases').select('id', { count: 'exact', head: true }).eq('user_id', profile.id),
-      supabase.from('saved_visas').select('id', { count: 'exact', head: true }).eq('user_id', profile.id),
-      supabase.from('user_documents').select('id', { count: 'exact', head: true }).eq('user_id', profile.id),
-      supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('user_id', profile.id),
-      supabase.from('tracker_entries').select('id', { count: 'exact', head: true }).eq('submitted_by', profile.id),
-    ]).then(([purchases, saved, docs, bookings, submissions]) => {
-      setCounts({
-        purchases: purchases.count ?? 0,
-        saved: saved.count ?? 0,
-        documents: docs.count ?? 0,
-        bookings: bookings.count ?? 0,
-        submissions: submissions.count ?? 0,
-      });
-    }).catch(() => {});
 
-    supabase
-      .from('news_articles')
-      .select('*')
-      .eq('is_published', true)
-      .order('published_at', { ascending: false })
-      .limit(5)
-      .then(({ data }) => setNews(data || []));
+    const fetchData = async () => {
+      try {
+        const now = new Date().toISOString();
+
+        // Fetch counts
+        const [purchasesCount, savedCount, docsCount] = await Promise.all([
+          supabase.from('user_visa_purchases').select('id', { count: 'exact', head: true }).eq('user_id', profile.id),
+          supabase.from('saved_visas').select('id', { count: 'exact', head: true }).eq('user_id', profile.id),
+          supabase.from('user_documents').select('id', { count: 'exact', head: true }).eq('user_id', profile.id),
+        ]);
+
+        // To get upcoming bookings count properly:
+        const { count: upcomingCount } = await supabase
+          .from('bookings')
+          .select('id, consultation_slots!inner(start_time)', { count: 'exact', head: true })
+          .eq('user_id', profile.id)
+          .gt('consultation_slots.start_time', now);
+
+        setCounts({
+          purchases: purchasesCount.count ?? 0,
+          saved: savedCount.count ?? 0,
+          documents: docsCount.count ?? 0,
+          upcomingBookings: upcomingCount ?? 0,
+        });
+
+        // Fetch recent activity items
+        const [recentPurchases, recentDocs, recentBookings] = await Promise.all([
+          supabase
+            .from('user_visa_purchases')
+            .select('id, purchased_at, visas(id, name, subclass)')
+            .eq('user_id', profile.id)
+            .order('purchased_at', { ascending: false })
+            .limit(5),
+          supabase
+            .from('user_documents')
+            .select('id, file_name, uploaded_at')
+            .eq('user_id', profile.id)
+            .order('uploaded_at', { ascending: false })
+            .limit(5),
+          supabase
+            .from('bookings')
+            .select('id, created_at, consultation_slots(start_time), lawyer_profiles(profile_id)')
+            .eq('user_id', profile.id)
+            .order('created_at', { ascending: false }) // Or filter by start_time? usually "recent activity" is when you booked it.
+            .limit(5)
+        ]);
+
+        const purchaseItems: ActivityItem[] = (recentPurchases.data || []).map((p: any) => ({
+          id: p.id,
+          type: 'purchase',
+          date: p.purchased_at,
+          title: 'Premium Guide Unlocked',
+          description: `${p.visas?.subclass} - ${p.visas?.name}`,
+          link: `/visas/${p.visas?.id}` // Or /dashboard/visas
+        }));
+
+        const docItems: ActivityItem[] = (recentDocs.data || []).map((d: any) => ({
+          id: d.id,
+          type: 'document',
+          date: d.uploaded_at,
+          title: 'Document Uploaded',
+          description: d.file_name,
+          link: '/dashboard/documents'
+        }));
+
+        const bookingItems: ActivityItem[] = (recentBookings.data || []).map((b: any) => ({
+          id: b.id,
+          type: 'booking',
+          date: b.created_at,
+          title: 'Consultation Booked',
+          description: b.consultation_slots?.start_time ? new Date(b.consultation_slots.start_time).toLocaleDateString() : 'Scheduled',
+          link: '/dashboard/consultations'
+        }));
+
+        const allActivities = [...purchaseItems, ...docItems, ...bookingItems]
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+          .slice(0, 5);
+
+        setActivities(allActivities);
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [profile]);
 
   const statCards = [
-    { label: 'Visas Unlocked', value: counts.purchases, icon: FileText, to: '/dashboard/visas' },
-    { label: 'Saved Visas', value: counts.saved, icon: Bookmark, to: '/dashboard/saved' },
-    { label: 'Documents', value: counts.documents, icon: FolderOpen, to: '/dashboard/documents' },
-    { label: 'Consultations', value: counts.bookings, icon: Calendar, to: '/dashboard/consultations' },
-    { label: 'Tracker Submissions', value: counts.submissions, icon: TrendingUp, to: '/tracker' },
+    { label: 'Purchased Visas', value: counts.purchases, icon: FileText, to: '/dashboard/visas', color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Documents', value: counts.documents, icon: FolderOpen, to: '/dashboard/documents', color: 'text-purple-600', bg: 'bg-purple-50' },
+    { label: 'Upcoming Consultations', value: counts.upcomingBookings, icon: Calendar, to: '/dashboard/consultations', color: 'text-teal-600', bg: 'bg-teal-50' },
+    { label: 'Saved Visas', value: counts.saved, icon: Bookmark, to: '/dashboard/saved', color: 'text-amber-600', bg: 'bg-amber-50' },
   ];
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <div className="h-8 w-64 bg-neutral-200 rounded animate-pulse mb-2"></div>
+          <div className="h-4 w-96 bg-neutral-100 rounded animate-pulse"></div>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map(i => <CardSkeleton key={i} />)}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
+      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-neutral-900">
-          Welcome back{profile?.full_name ? `, ${profile.full_name}` : ''}
+          Welcome back{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}
         </h1>
         <p className="text-neutral-500 mt-1">Here is an overview of your immigration journey.</p>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      {/* Stats Grid */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((stat) => (
           <Link key={stat.label} to={stat.to}>
             <Card hover>
               <CardBody className="flex items-center gap-4">
-                <div className="w-11 h-11 rounded-xl bg-primary-50 flex items-center justify-center flex-shrink-0">
-                  <stat.icon className="w-5 h-5 text-primary-600" />
+                <div className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center flex-shrink-0`}>
+                  <stat.icon className={`w-6 h-6 ${stat.color}`} />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-neutral-900">{stat.value}</p>
-                  <p className="text-xs text-neutral-500">{stat.label}</p>
+                  <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide">{stat.label}</p>
                 </div>
               </CardBody>
             </Card>
@@ -73,45 +179,87 @@ export function UserDashboard() {
         ))}
       </div>
 
-      <Link to="/lawyers">
-        <Card hover className="border-teal-100 bg-gradient-to-r from-teal-50/50 to-white">
-          <CardBody className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-11 h-11 rounded-xl bg-teal-100 flex items-center justify-center flex-shrink-0">
-                <Scale className="w-5 h-5 text-teal-700" />
-              </div>
-              <div>
-                <p className="font-semibold text-neutral-900">Book a Consultation</p>
-                <p className="text-sm text-neutral-500">Connect with a verified immigration lawyer</p>
-              </div>
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* Recent Activity */}
+        <div className="lg:col-span-2 space-y-4">
+          <h2 className="text-lg font-semibold text-neutral-900">Recent Activity</h2>
+          {activities.length > 0 ? (
+            <div className="space-y-3">
+              {activities.map((item) => (
+                <Link key={`${item.type}-${item.id}`} to={item.link}>
+                  <Card hover className="group">
+                    <CardBody className="flex items-center gap-4 py-3">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0
+                        ${item.type === 'purchase' ? 'bg-blue-100 text-blue-600' :
+                          item.type === 'document' ? 'bg-purple-100 text-purple-600' :
+                          'bg-teal-100 text-teal-600'}`}>
+                        {item.type === 'purchase' && <FileText className="w-5 h-5" />}
+                        {item.type === 'document' && <FolderOpen className="w-5 h-5" />}
+                        {item.type === 'booking' && <Calendar className="w-5 h-5" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-neutral-900 group-hover:text-primary-600 transition-colors">
+                          {item.title}
+                        </p>
+                        <p className="text-xs text-neutral-500 truncate">{item.description}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-xs text-neutral-400">
+                          {new Date(item.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                        </p>
+                      </div>
+                    </CardBody>
+                  </Card>
+                </Link>
+              ))}
             </div>
-            <ArrowRight className="w-5 h-5 text-teal-600" />
-          </CardBody>
-        </Card>
-      </Link>
-
-      {news.length > 0 && (
-        <div>
-          <h2 className="text-lg font-semibold text-neutral-900 mb-4">Latest Immigration News</h2>
-          <div className="space-y-3">
-            {news.map((article) => (
-              <Link key={article.id} to={`/news/${article.slug}`}>
-                <Card hover className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium text-neutral-900">{article.title}</h3>
-                      <p className="text-xs text-neutral-400 mt-1">
-                        {article.published_at && new Date(article.published_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-neutral-400" />
-                  </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
+          ) : (
+            <Card className="bg-neutral-50 border-dashed">
+              <CardBody className="text-center py-8">
+                <p className="text-neutral-500">No recent activity</p>
+              </CardBody>
+            </Card>
+          )}
         </div>
-      )}
+
+        {/* Quick Actions */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold text-neutral-900">Quick Actions</h2>
+          <Card>
+            <CardBody className="space-y-3">
+              <Link to="/visas" className="block">
+                <Button variant="secondary" className="w-full justify-start gap-3 h-auto py-3">
+                  <Search className="w-5 h-5 text-neutral-400" />
+                  <div className="text-left">
+                    <div className="font-medium text-neutral-900">Search Visas</div>
+                    <div className="text-xs text-neutral-500 font-normal">Find the right visa for you</div>
+                  </div>
+                </Button>
+              </Link>
+
+              <Link to="/dashboard/documents" className="block">
+                <Button variant="secondary" className="w-full justify-start gap-3 h-auto py-3">
+                  <Upload className="w-5 h-5 text-neutral-400" />
+                  <div className="text-left">
+                    <div className="font-medium text-neutral-900">Upload Document</div>
+                    <div className="text-xs text-neutral-500 font-normal">Securely store your files</div>
+                  </div>
+                </Button>
+              </Link>
+
+              <Link to="/lawyers" className="block">
+                <Button variant="secondary" className="w-full justify-start gap-3 h-auto py-3">
+                  <UserCheck className="w-5 h-5 text-neutral-400" />
+                  <div className="text-left">
+                    <div className="font-medium text-neutral-900">Book Consultation</div>
+                    <div className="text-xs text-neutral-500 font-normal">Talk to an expert</div>
+                  </div>
+                </Button>
+              </Link>
+            </CardBody>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

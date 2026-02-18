@@ -203,3 +203,19 @@ export interface PlatformSetting {
 export interface TrackerSummary extends Visa {
   tracker_stats: TrackerStats | null;
 }
+
+export interface NotificationPreferences {
+  id: string;
+  user_id: string;
+  email_booking_confirmation: boolean;
+  email_booking_reminder: boolean;
+  email_consultation_cancelled: boolean;
+  email_processing_time_alert: boolean;
+  email_welcome: boolean;
+  email_premium_purchase: boolean;
+  email_marketing: boolean;
+  push_booking_reminder: boolean;
+  push_processing_time_alert: boolean;
+  created_at: string;
+  updated_at: string;
+}
