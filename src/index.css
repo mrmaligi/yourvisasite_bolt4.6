@@ -10,7 +10,7 @@
   }
 
   body {
-    @apply bg-neutral-50 text-neutral-900;
+    @apply bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-50;
     line-height: 1.5;
   }
 
@@ -26,7 +26,7 @@
   }
 
   ::selection {
-    @apply bg-primary-200 text-primary-900;
+    @apply bg-primary-200 text-primary-900 dark:bg-primary-900 dark:text-primary-100;
   }
 }
 
@@ -37,7 +37,8 @@
       shadow-sm hover:shadow-md
       transform active:scale-[0.98]
       transition-all duration-200 ease-out
-      disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
+      disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+      dark:bg-primary-600 dark:hover:bg-primary-500;
   }
 
   .btn-secondary {
@@ -46,7 +47,8 @@
       shadow-sm
       transform active:scale-[0.98]
       transition-all duration-200 ease-out
-      disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
+      disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+      dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700 dark:hover:border-neutral-600;
   }
 
   .btn-danger {
@@ -63,7 +65,8 @@
       hover:bg-neutral-100 active:bg-neutral-200
       transform active:scale-[0.98]
       transition-all duration-200 ease-out
-      disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
+      disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+      dark:text-neutral-400 dark:hover:bg-neutral-800 dark:active:bg-neutral-700;
   }
 
   .input-field {
@@ -71,15 +74,19 @@
       placeholder:text-neutral-400
       focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500
       hover:border-neutral-300
-      transition-all duration-200;
+      transition-all duration-200
+      dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-100 dark:placeholder:text-neutral-500
+      dark:focus:border-primary-500 dark:focus:ring-primary-500/20 dark:hover:border-neutral-600;
   }
 
   .card {
-    @apply bg-white border border-neutral-200/80 rounded-2xl shadow-soft;
+    @apply bg-white border border-neutral-200/80 rounded-2xl shadow-soft
+      dark:bg-neutral-900 dark:border-neutral-800 dark:shadow-none;
   }
 
   .card-hover {
-    @apply card hover:shadow-elevated hover:border-neutral-300 hover:-translate-y-0.5 transition-all duration-300 ease-out;
+    @apply card hover:shadow-elevated hover:border-neutral-300 hover:-translate-y-0.5 transition-all duration-300 ease-out
+      dark:hover:border-neutral-700 dark:hover:shadow-none;
   }
 }
 
@@ -92,10 +99,10 @@
   .stagger-6 { animation-delay: 0.6s; }
 
   .glass {
-    @apply bg-white/70 backdrop-blur-xl border-neutral-200/60;
+    @apply bg-white/70 backdrop-blur-xl border-neutral-200/60 dark:bg-neutral-900/70 dark:border-neutral-800/60;
   }
 
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-400;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-400 dark:from-primary-400 dark:to-primary-200;
   }
 }
