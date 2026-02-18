@@ -66,7 +66,8 @@ export function LawyerManagement() {
     }).eq('id', lawyer.id);
 
     try {
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-lawyer`;
+      const baseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '');
+      const apiUrl = `${baseUrl}/functions/v1/verify-lawyer`;
       await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -105,7 +106,7 @@ export function LawyerManagement() {
       .createSignedUrl(lawyer.verification_document_url, 300);
 
     if (data?.signedUrl) {
-      window.open(data.signedUrl, '_blank');
+      window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
     } else {
       toast('error', 'Failed to load document');
     }

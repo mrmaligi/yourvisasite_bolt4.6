@@ -1,12 +1,16 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { PublicLayout } from './components/layout/PublicLayout';
 import { UserDashboardLayout } from './components/layout/UserDashboardLayout';
 import { LawyerDashboardLayout } from './components/layout/LawyerDashboardLayout';
 import { AdminDashboardLayout } from './components/layout/AdminDashboardLayout';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
+import { Loading } from './components/ui/Loading';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
 
 const Landing = lazy(() => import('./pages/public/Landing').then(m => ({ default: m.Landing })));
 const Login = lazy(() => import('./pages/public/Login').then(m => ({ default: m.Login })));
@@ -55,10 +59,40 @@ const AdminPricing = lazy(() => import('./pages/admin/Pricing').then(m => ({ def
 const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagement').then(m => ({ default: m.PromoCodeManagement })));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings').then(m => ({ default: m.AdminSettings })));
 
+<<<<<<< HEAD
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <ErrorBoundary>
+            <BrowserRouter>
+              <Suspense fallback={<Loading fullScreen />}>
+                <Routes>
+                  <Route element={<PublicLayout />}>
+                    <Route index element={<Landing />} />
+                    <Route path="login" element={<Login />} />
+                    <Route path="register" element={<Register />} />
+                    <Route path="register/lawyer" element={<LawyerRegister />} />
+                    <Route path="visas" element={<VisaSearch />} />
+                    <Route path="visas/:id" element={<VisaDetail />} />
+                    <Route path="tracker" element={<Tracker />} />
+                    <Route path="lawyers" element={<LawyerDirectory />} />
+                    <Route path="lawyers/:id" element={<LawyerProfile />} />
+                    <Route path="news" element={<News />} />
+                    <Route path="news/:slug" element={<NewsDetail />} />
+                    <Route path="marketplace" element={<PublicMarketplace />} />
+                    <Route path="pricing" element={<Pricing />} />
+                    <Route path="success" element={<Success />} />
+                  </Route>
+=======
 function LoadingFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+    <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 transition-colors">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-10 h-10 border-4 border-primary-200 dark:border-primary-900/30 border-t-primary-600 dark:border-t-primary-500 rounded-full animate-spin" />
+        <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400 animate-pulse">Loading...</p>
+      </div>
     </div>
   );
 }
@@ -66,10 +100,12 @@ function LoadingFallback() {
 export default function App() {
   return (
     <AuthProvider>
-      <ToastProvider>
-        <BrowserRouter>
-          <Suspense fallback={<LoadingFallback />}>
-            <Routes>
+      <ThemeProvider>
+        <ToastProvider>
+          <BrowserRouter>
+            <ErrorBoundary>
+              <Suspense fallback={<LoadingFallback />}>
+                <Routes>
               <Route element={<PublicLayout />}>
                 <Route index element={<Landing />} />
                 <Route path="login" element={<Login />} />
@@ -86,33 +122,56 @@ export default function App() {
                 <Route path="pricing" element={<Pricing />} />
                 <Route path="success" element={<Success />} />
               </Route>
+>>>>>>> origin/main
 
-              <Route path="dashboard" element={<ProtectedRoute><UserDashboardLayout /></ProtectedRoute>}>
-                <Route index element={<UserDashboard />} />
-                <Route path="visas" element={<MyVisas />} />
-                <Route path="saved" element={<SavedVisas />} />
-                <Route path="documents" element={<MyDocuments />} />
-                <Route path="consultations" element={<Consultations />} />
-                <Route path="premium" element={<UserPremiumContent />} />
-                <Route path="marketplace" element={<UserMarketplacePurchases />} />
-                <Route path="settings" element={<UserSettings />} />
-              </Route>
+                  <Route path="dashboard" element={<ProtectedRoute><UserDashboardLayout /></ProtectedRoute>}>
+                    <Route index element={<UserDashboard />} />
+                    <Route path="visas" element={<MyVisas />} />
+                    <Route path="saved" element={<SavedVisas />} />
+                    <Route path="documents" element={<MyDocuments />} />
+                    <Route path="consultations" element={<Consultations />} />
+                    <Route path="premium" element={<UserPremiumContent />} />
+                    <Route path="marketplace" element={<UserMarketplacePurchases />} />
+                    <Route path="settings" element={<UserSettings />} />
+                  </Route>
 
-              <Route path="lawyer">
-                <Route index element={<PortalLanding />} />
-                <Route path="pending" element={<ProtectedRoute><LawyerPending /></ProtectedRoute>} />
-                <Route element={<ProtectedRoute requiredRole="lawyer"><LawyerDashboardLayout /></ProtectedRoute>}>
-                  <Route path="dashboard" element={<LawyerDashboard />} />
-                  <Route path="clients" element={<LawyerClients />} />
-                  <Route path="availability" element={<Availability />} />
-                  <Route path="marketing" element={<Marketing />} />
-                  <Route path="tracker" element={<LawyerTracker />} />
-                  <Route path="news" element={<LawyerNews />} />
-                  <Route path="marketplace" element={<LawyerMarketplace />} />
-                  <Route path="settings" element={<LawyerSettings />} />
-                </Route>
-              </Route>
+                  <Route path="lawyer">
+                    <Route index element={<PortalLanding />} />
+                    <Route path="pending" element={<ProtectedRoute><LawyerPending /></ProtectedRoute>} />
+                    <Route element={<ProtectedRoute requiredRole="lawyer"><LawyerDashboardLayout /></ProtectedRoute>}>
+                      <Route path="dashboard" element={<LawyerDashboard />} />
+                      <Route path="clients" element={<LawyerClients />} />
+                      <Route path="availability" element={<Availability />} />
+                      <Route path="marketing" element={<Marketing />} />
+                      <Route path="tracker" element={<LawyerTracker />} />
+                      <Route path="news" element={<LawyerNews />} />
+                      <Route path="marketplace" element={<LawyerMarketplace />} />
+                      <Route path="settings" element={<LawyerSettings />} />
+                    </Route>
+                  </Route>
 
+<<<<<<< HEAD
+                  <Route path="admin" element={<ProtectedRoute requiredRole="admin"><AdminDashboardLayout /></ProtectedRoute>}>
+                    <Route index element={<AdminDashboard />} />
+                    <Route path="activity" element={<AdminActivityLog />} />
+                    <Route path="users" element={<UserManagement />} />
+                    <Route path="lawyers" element={<LawyerManagement />} />
+                    <Route path="visas" element={<VisaManagement />} />
+                    <Route path="premium" element={<PremiumContent />} />
+                    <Route path="news" element={<NewsManagement />} />
+                    <Route path="tracker" element={<TrackerManagement />} />
+                    <Route path="pricing" element={<AdminPricing />} />
+                    <Route path="promos" element={<PromoCodeManagement />} />
+                    <Route path="settings" element={<AdminSettings />} />
+                  </Route>
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
+          </ErrorBoundary>
+        </ToastProvider>
+      </AuthProvider>
+    </ThemeProvider>
+=======
               <Route path="admin" element={<ProtectedRoute requiredRole="admin"><AdminDashboardLayout /></ProtectedRoute>}>
                 <Route index element={<AdminDashboard />} />
                 <Route path="activity" element={<AdminActivityLog />} />
@@ -126,10 +185,13 @@ export default function App() {
                 <Route path="promos" element={<PromoCodeManagement />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Route>
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-      </ToastProvider>
+                </Routes>
+              </Suspense>
+            </ErrorBoundary>
+          </BrowserRouter>
+        </ToastProvider>
+      </ThemeProvider>
     </AuthProvider>
+>>>>>>> origin/main
   );
 }

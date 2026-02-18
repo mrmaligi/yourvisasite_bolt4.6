@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Store, ShoppingCart, Clock, Calendar, Check, Filter, Star } from 'lucide-react';
+import { Store, ShoppingCart, Clock, Calendar, Check, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';

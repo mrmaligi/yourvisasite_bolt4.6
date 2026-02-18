@@ -1,44 +1,37 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { DataTable, type Column } from '../../components/ui/DataTable';
-import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
-import { Modal } from '../../components/ui/Modal';
-import { Select } from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
 import type { Profile, UserRole } from '../../types/database';
 
-const roleVariant = {
-  user: 'primary' as const,
-  lawyer: 'info' as const,
-  admin: 'danger' as const,
-};
-
 export function UserManagement() {
-  const { toast } = useToast();
   const [users, setUsers] = useState<Profile[]>([]);
   const [filtered, setFiltered] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<Profile | null>(null);
-  const [form, setForm] = useState<{ role: UserRole; is_active: string }>({ role: 'user', is_active: 'true' });
-  const [saving, setSaving] = useState(false);
-
-  const fetchUsers = () => {
-    setLoading(true);
-    supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        setUsers(data || []);
-        setFiltered(data || []);
-        setLoading(false);
-      });
-  };
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setUsers(data || []);
+      setFiltered(data || []);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast('error', 'Failed to fetch users');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearch = (q: string) => {
     if (!q) {
@@ -51,36 +44,102 @@ export function UserManagement() {
     ));
   };
 
-  const openEdit = (user: Profile) => {
-    setEditing(user);
-    setForm({ role: user.role, is_active: user.is_active ? 'true' : 'false' });
+  const updateRole = async (userId: string, newRole: UserRole) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: newRole })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      toast('success', 'User role updated successfully');
+
+      const updateState = (prev: Profile[]) =>
+        prev.map(u => u.id === userId ? { ...u, role: newRole } : u);
+
+      setUsers(updateState);
+      setFiltered(updateState);
+
+    } catch (error) {
+      console.error('Error updating role:', error);
+      toast('error', 'Failed to update user role');
+    }
   };
 
-  const handleSave = async () => {
-    if (!editing) return;
-    setSaving(true);
+  const toggleStatus = async (user: Profile) => {
+    const newStatus = !user.is_active;
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_active: newStatus })
+        .eq('id', user.id);
 
-    const { error } = await supabase.from('profiles').update({
-      role: form.role,
-      is_active: form.is_active === 'true',
-    }).eq('id', editing.id);
+      if (error) throw error;
 
-    if (error) {
-      toast('error', error.message);
-    } else {
-      toast('success', 'User updated');
-      fetchUsers();
-      setEditing(null);
+      toast('success', `User ${newStatus ? 'activated' : 'deactivated'} successfully`);
+
+      const updateState = (prev: Profile[]) =>
+        prev.map(u => u.id === user.id ? { ...u, is_active: newStatus } : u);
+
+      setUsers(updateState);
+      setFiltered(updateState);
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast('error', 'Failed to update user status');
     }
-    setSaving(false);
   };
 
   const columns: Column<Profile>[] = [
-    { key: 'name', header: 'Name', render: (r) => r.full_name || 'Unnamed', sortable: true },
-    { key: 'role', header: 'Role', render: (r) => <Badge variant={roleVariant[r.role]}>{r.role}</Badge>, sortable: true },
-    { key: 'status', header: 'Status', render: (r) => <Badge variant={r.is_active ? 'success' : 'default'}>{r.is_active ? 'Active' : 'Inactive'}</Badge> },
-    { key: 'joined', header: 'Joined', render: (r) => new Date(r.created_at).toLocaleDateString(), sortable: true },
-    { key: 'actions', header: '', render: (r) => <Button size="sm" variant="ghost" onClick={() => openEdit(r)}>Edit</Button> },
+    {
+      key: 'name',
+      header: 'Name',
+      render: (r) => (
+        <div>
+          <div className="font-medium text-neutral-900">{r.full_name || 'Unnamed'}</div>
+          <div className="text-xs text-neutral-500">{r.id.slice(0, 8)}...</div>
+        </div>
+      ),
+      sortable: true
+    },
+    {
+      key: 'role',
+      header: 'Role',
+      render: (r) => (
+        <select
+          value={r.role}
+          onChange={(e) => updateRole(r.id, e.target.value as UserRole)}
+          className="text-sm border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 py-1 pl-2 pr-8 bg-white"
+        >
+          <option value="user">User</option>
+          <option value="lawyer">Lawyer</option>
+          <option value="admin">Admin</option>
+        </select>
+      ),
+      sortable: true
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (r) => (
+        <button
+          onClick={() => toggleStatus(r)}
+          className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+            r.is_active
+              ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+              : 'bg-red-100 text-red-800 hover:bg-red-200'
+          }`}
+        >
+          {r.is_active ? 'Active' : 'Inactive'}
+        </button>
+      )
+    },
+    {
+      key: 'joined',
+      header: 'Joined',
+      render: (r) => new Date(r.created_at).toLocaleDateString(),
+      sortable: true
+    },
   ];
 
   return (
@@ -95,40 +154,6 @@ export function UserManagement() {
         searchPlaceholder="Search users..."
         onSearch={handleSearch}
       />
-
-      <Modal
-        isOpen={!!editing}
-        onClose={() => setEditing(null)}
-        title={`Edit User: ${editing?.full_name || 'Unnamed'}`}
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setEditing(null)}>Cancel</Button>
-            <Button loading={saving} onClick={handleSave}>Save Changes</Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          <Select
-            label="Role"
-            value={form.role}
-            onChange={(e) => setForm({ ...form, role: (e.target as HTMLSelectElement).value as UserRole })}
-            options={[
-              { value: 'user', label: 'User' },
-              { value: 'lawyer', label: 'Lawyer' },
-              { value: 'admin', label: 'Admin' },
-            ]}
-          />
-          <Select
-            label="Status"
-            value={form.is_active}
-            onChange={(e) => setForm({ ...form, is_active: (e.target as HTMLSelectElement).value })}
-            options={[
-              { value: 'true', label: 'Active' },
-              { value: 'false', label: 'Inactive' },
-            ]}
-          />
-        </div>
-      </Modal>
     </div>
   );
 }

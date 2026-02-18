@@ -42,21 +42,21 @@ export function Modal({ isOpen, onClose, title, children, footer, size = 'md' }:
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in"
       onClick={(e) => e.target === overlayRef.current && onClose()}
     >
-      <div className={`bg-white rounded-2xl shadow-elevated w-full ${sizeClasses[size]} max-h-[85vh] flex flex-col animate-scale-in border border-neutral-200/50`}>
+      <div className={`bg-white dark:bg-neutral-800 rounded-2xl shadow-elevated w-full ${sizeClasses[size]} max-h-[85vh] flex flex-col animate-scale-in border border-neutral-200/50 dark:border-neutral-700`}>
         {title && (
-          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100">
-            <h2 className="text-lg font-bold text-neutral-900">{title}</h2>
+          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100 dark:border-neutral-700">
+            <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">{title}</h2>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-xl text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-all duration-200"
+              className="p-1.5 rounded-xl text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-all duration-200"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
         )}
-        <div className="px-6 py-5 overflow-y-auto flex-1">{children}</div>
+        <div className="px-6 py-5 overflow-y-auto flex-1 dark:text-neutral-200">{children}</div>
         {footer && (
-          <div className="px-6 py-4 border-t border-neutral-100 flex items-center justify-end gap-3 bg-neutral-50/50 rounded-b-2xl">
+          <div className="px-6 py-4 border-t border-neutral-100 dark:border-neutral-700 flex items-center justify-end gap-3 bg-neutral-50/50 dark:bg-neutral-900/50 rounded-b-2xl">
             {footer}
           </div>
         )}
