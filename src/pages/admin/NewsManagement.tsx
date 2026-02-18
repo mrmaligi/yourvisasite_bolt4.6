@@ -17,7 +17,7 @@ export function NewsManagement() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<NewsArticle | null>(null);
-  const [form, setForm] = useState({ title: '', body: '', image_url: '', is_published: false });
+  const [form, setForm] = useState({ title: '', body: '', excerpt: '', category: 'general', image_url: '', is_published: false });
   const [saving, setSaving] = useState(false);
 
   const fetchArticles = async () => {
@@ -32,13 +32,20 @@ export function NewsManagement() {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ title: '', body: '', image_url: '', is_published: false });
+    setForm({ title: '', body: '', excerpt: '', category: 'general', image_url: '', is_published: false });
     setShowModal(true);
   };
 
   const openEdit = (a: NewsArticle) => {
     setEditing(a);
-    setForm({ title: a.title, body: a.body, image_url: a.image_url || '', is_published: a.is_published });
+    setForm({
+      title: a.title,
+      body: a.body,
+      excerpt: a.excerpt || '',
+      category: a.category || 'general',
+      image_url: a.image_url || '',
+      is_published: a.is_published
+    });
     setShowModal(true);
   };
 
@@ -50,7 +57,7 @@ export function NewsManagement() {
       ...form,
       slug: editing?.slug || slug,
       image_url: form.image_url || null,
-      published_at: form.is_published ? new Date().toISOString() : null,
+      published_at: form.is_published ? (editing?.published_at || new Date().toISOString()) : null,
       author_id: editing?.author_id || user.id,
     };
     if (editing) {
@@ -68,6 +75,7 @@ export function NewsManagement() {
 
   const columns: Column<NewsArticle>[] = [
     { key: 'title', header: 'Title', render: (r) => <span className="font-medium">{r.title}</span>, sortable: true },
+    { key: 'category', header: 'Category', render: (r) => <Badge variant="secondary">{r.category}</Badge>, sortable: true },
     { key: 'status', header: 'Status', render: (r) => <Badge variant={r.is_published ? 'success' : 'default'}>{r.is_published ? 'Published' : 'Draft'}</Badge> },
     { key: 'date', header: 'Date', render: (r) => new Date(r.created_at).toLocaleDateString(), sortable: true },
     { key: 'actions', header: '', render: (r) => (
@@ -95,6 +103,8 @@ export function NewsManagement() {
       >
         <div className="space-y-4">
           <Input label="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+          <Input label="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+          <Textarea label="Excerpt" value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} />
           <Textarea label="Body" value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} />
           <Input label="Image URL" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
           <label className="flex items-center gap-2 text-sm">
