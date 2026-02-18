@@ -14,6 +14,7 @@ interface NewsItem {
   category: string;
   published_at: string;
   is_premium: boolean;
+  slug: string;
 }
 
 export function LawyerNews() {
@@ -38,7 +39,7 @@ export function LawyerNews() {
     }
 
     const { data } = await query;
-    setNews(data || []);
+    setNews((data as unknown as NewsItem[]) || []);
     setLoading(false);
   };
 
@@ -91,8 +92,12 @@ export function LawyerNews() {
       ) : (
         <div className="space-y-4">
           {news.map((item) => (
-            <Card key={item.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardBody onClick={() => navigate(`/news/${item.id}`)}>
+            <Card
+              key={item.id}
+              className="hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => navigate(`/news/${item.slug}`)}
+            >
+              <CardBody>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
