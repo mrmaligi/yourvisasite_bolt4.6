@@ -21,19 +21,9 @@ export function Sidebar({ items, title, mobileOpen = false, onMobileClose }: Sid
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
 
-<<<<<<< HEAD
-  return (
-    <aside
-      className={`hidden lg:flex flex-col bg-white dark:bg-neutral-900 border-r border-neutral-200/80 dark:border-neutral-700/80 transition-all duration-300 ease-out ${
-        collapsed ? 'w-[72px]' : 'w-64'
-      }`}
-    >
-      <div className="flex items-center justify-between h-16 px-4 border-b border-neutral-100 dark:border-neutral-800">
-=======
   const sidebarContent = (
     <div className="flex flex-col h-full bg-white dark:bg-neutral-900 border-r border-neutral-200/80 dark:border-neutral-800 transition-all duration-300 ease-out">
       <div className="flex items-center justify-between h-16 px-4 border-b border-neutral-100 dark:border-neutral-800 flex-shrink-0">
->>>>>>> origin/main
         {!collapsed && (
           <Link to="/" onClick={onMobileClose}>
             <Logo size="sm" />
@@ -44,12 +34,6 @@ export function Sidebar({ items, title, mobileOpen = false, onMobileClose }: Sid
             <Logo size="sm" showText={false} />
           </Link>
         )}
-<<<<<<< HEAD
-        {!collapsed && (
-          <button
-            onClick={() => setCollapsed(true)}
-            className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-=======
 
         {/* Desktop Collapse Button */}
         <div className="hidden lg:block">
@@ -68,7 +52,6 @@ export function Sidebar({ items, title, mobileOpen = false, onMobileClose }: Sid
            <button
             onClick={onMobileClose}
             className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
->>>>>>> origin/main
           >
             <X className="w-5 h-5" />
           </button>
@@ -78,11 +61,7 @@ export function Sidebar({ items, title, mobileOpen = false, onMobileClose }: Sid
       {collapsed && (
         <button
           onClick={() => setCollapsed(false)}
-<<<<<<< HEAD
-          className="mx-auto mt-3 p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-=======
           className="mx-auto mt-3 p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors hidden lg:block"
->>>>>>> origin/main
         >
           <ChevronRight className="w-4 h-4" />
         </button>
@@ -108,13 +87,8 @@ export function Sidebar({ items, title, mobileOpen = false, onMobileClose }: Sid
               onClick={onMobileClose}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                 isActive
-<<<<<<< HEAD
-                  ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 shadow-sm'
-                  : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200'
-=======
                   ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 shadow-sm'
                   : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-neutral-200'
->>>>>>> origin/main
               }`}
             >
               <Icon className={`w-[18px] h-[18px] flex-shrink-0 ${isActive ? 'text-primary-600 dark:text-primary-400' : ''}`} />
@@ -123,13 +97,10 @@ export function Sidebar({ items, title, mobileOpen = false, onMobileClose }: Sid
           );
         })}
       </nav>
-<<<<<<< HEAD
 
       <div className={`p-4 border-t border-neutral-100 dark:border-neutral-800 ${collapsed ? 'flex justify-center' : ''}`}>
         <ThemeToggle className={collapsed ? 'flex-col' : ''} />
       </div>
-    </aside>
-=======
     </div>
   );
 
@@ -156,6 +127,5 @@ export function Sidebar({ items, title, mobileOpen = false, onMobileClose }: Sid
         </div>
       )}
     </>
->>>>>>> origin/main
   );
 }

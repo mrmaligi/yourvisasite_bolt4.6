@@ -10,11 +10,7 @@
   }
 
   body {
-<<<<<<< HEAD
     @apply bg-neutral-50 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-50 transition-colors duration-300;
-=======
-    @apply bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-50;
->>>>>>> origin/main
     line-height: 1.5;
   }
 
@@ -80,33 +76,18 @@
       dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-50 dark:placeholder:text-neutral-500
       placeholder:text-neutral-400
       focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500
-<<<<<<< HEAD
       hover:border-neutral-300 dark:hover:border-neutral-600
       transition-all duration-200;
-=======
-      hover:border-neutral-300
-      transition-all duration-200
-      dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-100 dark:placeholder:text-neutral-500
-      dark:focus:border-primary-500 dark:focus:ring-primary-500/20 dark:hover:border-neutral-600;
->>>>>>> origin/main
   }
 
   .card {
     @apply bg-white border border-neutral-200/80 rounded-2xl shadow-soft
-<<<<<<< HEAD
       dark:bg-neutral-800 dark:border-neutral-700/80;
-=======
-      dark:bg-neutral-900 dark:border-neutral-800 dark:shadow-none;
->>>>>>> origin/main
   }
 
   .card-hover {
     @apply card hover:shadow-elevated hover:border-neutral-300 hover:-translate-y-0.5 transition-all duration-300 ease-out
-<<<<<<< HEAD
       dark:hover:border-neutral-600;
-=======
-      dark:hover:border-neutral-700 dark:hover:shadow-none;
->>>>>>> origin/main
   }
 }
 
@@ -119,12 +100,8 @@
   .stagger-6 { animation-delay: 0.6s; }
 
   .glass {
-<<<<<<< HEAD
     @apply bg-white/70 backdrop-blur-xl border-neutral-200/60
       dark:bg-neutral-900/70 dark:border-neutral-700/60;
-=======
-    @apply bg-white/70 backdrop-blur-xl border-neutral-200/60 dark:bg-neutral-900/70 dark:border-neutral-800/60;
->>>>>>> origin/main
   }
 
   .text-gradient {
