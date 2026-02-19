@@ -9,7 +9,8 @@ import {
   ChevronRight,
   ArrowLeft,
   AlertCircle,
-  TrendingUp
+  TrendingUp,
+  Printer
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -195,7 +196,7 @@ export function VisaDetail() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Breadcrumbs & Back */}
-      <div className="flex items-center gap-2 text-sm text-neutral-500 mb-6">
+      <div className="flex items-center gap-2 text-sm text-neutral-500 mb-6 no-print">
         <Link to="/" className="hover:text-primary-600">Home</Link>
         <ChevronRight className="w-4 h-4" />
         <Link to="/visas" className="hover:text-primary-600">Visas</Link>
@@ -203,10 +204,16 @@ export function VisaDetail() {
         <span className="text-neutral-900 font-medium truncate">{visa.name}</span>
       </div>
 
-      <Link to="/visas" className="inline-flex items-center text-sm font-medium text-neutral-500 hover:text-neutral-900 mb-8 transition-colors">
-        <ArrowLeft className="w-4 h-4 mr-1" />
-        Back to Search
-      </Link>
+      <div className="flex items-center justify-between mb-8 no-print">
+        <Link to="/visas" className="inline-flex items-center text-sm font-medium text-neutral-500 hover:text-neutral-900 transition-colors">
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Back to Search
+        </Link>
+        <Button variant="secondary" size="sm" onClick={() => window.print()}>
+          <Printer className="w-4 h-4 mr-2" />
+          Print Guide
+        </Button>
+      </div>
 
       {/* Header */}
       <div className="mb-10">
@@ -229,7 +236,7 @@ export function VisaDetail() {
                 <p className="text-sm text-neutral-500 mb-1">Duration</p>
                 <p className="font-semibold text-neutral-900">{visa.duration || 'Permanent'}</p>
             </div>
-            <div>
+            <div className="no-print">
                  <a
                     href={visa.official_link || '#'}
                     target="_blank"
@@ -331,23 +338,25 @@ export function VisaDetail() {
                                 </div>
                             </div>
 
-                            {user ? (
-                                <StripeCheckout
-                                    type="premium"
-                                    visaId={visa.id}
-                                    amount={product?.price_cents || 4900}
-                                    className="w-full sm:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-primary-900/20"
-                                >
-                                    Unlock Now — ${price}
-                                </StripeCheckout>
-                            ) : (
-                                <Button
-                                    onClick={() => toast('info', 'Please log in to purchase')}
-                                    className="w-full sm:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-primary-900/20"
-                                >
-                                    Unlock Now — ${price}
-                                </Button>
-                            )}
+                            <div className="no-print">
+                                {user ? (
+                                    <StripeCheckout
+                                        type="premium"
+                                        visaId={visa.id}
+                                        amount={product?.price_cents || 4900}
+                                        className="w-full sm:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-primary-900/20"
+                                    >
+                                        Unlock Now — ${price}
+                                    </StripeCheckout>
+                                ) : (
+                                    <Button
+                                        onClick={() => toast('info', 'Please log in to purchase')}
+                                        className="w-full sm:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-primary-900/20"
+                                    >
+                                        Unlock Now — ${price}
+                                    </Button>
+                                )}
+                            </div>
                         </div>
                     </Card>
                  )}
@@ -421,7 +430,7 @@ export function VisaDetail() {
 
             {/* Recent Reports */}
             {recentEntries.length > 0 && (
-              <Card>
+              <Card className="no-print">
                 <CardHeader>
                   <h3 className="font-bold text-neutral-900 flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-primary-600" />
@@ -458,7 +467,7 @@ export function VisaDetail() {
 
             {/* Visa-Specific News */}
             {visaNews.length > 0 && (
-              <Card>
+              <Card className="no-print">
                 <CardHeader>
                   <h3 className="font-bold text-neutral-900 flex items-center gap-2">
                     <BookOpen className="w-5 h-5 text-primary-600" />
@@ -499,7 +508,7 @@ export function VisaDetail() {
 
             {/* Related Visas */}
             {relatedVisas.length > 0 && (
-                <div>
+                <div className="no-print">
                     <h3 className="font-bold text-neutral-900 mb-4">Related Visas</h3>
                     <div className="space-y-3">
                         {relatedVisas.map((v) => (
