@@ -3,15 +3,18 @@ import { Outlet } from 'react-router-dom';
 import { type LucideIcon, Menu } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { UserMenu } from './UserMenu';
+import { MobileNav } from './MobileNav';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { Logo } from '../ui/Logo';
+import { SearchTrigger } from '../ui/SearchTrigger';
 
 interface DashboardLayoutProps {
   sidebarItems: { to: string; label: string; icon: LucideIcon }[];
+  mobileNavItems?: { to: string; label: string; icon: LucideIcon }[];
   title?: string;
 }
 
-export function DashboardLayout({ sidebarItems, title }: DashboardLayoutProps) {
+export function DashboardLayout({ sidebarItems, mobileNavItems, title }: DashboardLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -28,6 +31,7 @@ export function DashboardLayout({ sidebarItems, title }: DashboardLayoutProps) {
           <Logo size="sm" />
         </div>
         <div className="flex items-center gap-2">
+          <SearchTrigger variant="icon" />
           <ThemeToggle />
           <UserMenu />
         </div>
@@ -41,9 +45,10 @@ export function DashboardLayout({ sidebarItems, title }: DashboardLayoutProps) {
           onMobileClose={() => setMobileOpen(false)}
         />
 
-        <main className="flex-1 w-full overflow-y-auto overflow-x-hidden">
+        <main className={`flex-1 w-full overflow-y-auto overflow-x-hidden ${mobileNavItems ? 'pb-16 lg:pb-0' : ''}`}>
           {/* Desktop Header Actions */}
           <header className="hidden lg:flex items-center justify-end px-8 py-4 bg-transparent gap-3">
+             <SearchTrigger className="mr-2" />
              <ThemeToggle />
              <UserMenu />
           </header>
@@ -53,6 +58,8 @@ export function DashboardLayout({ sidebarItems, title }: DashboardLayoutProps) {
           </div>
         </main>
       </div>
+
+      {mobileNavItems && <MobileNav items={mobileNavItems} />}
     </div>
   );
 }

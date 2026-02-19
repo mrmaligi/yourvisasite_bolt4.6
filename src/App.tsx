@@ -4,17 +4,21 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
+import { GlobalSearchProvider } from './contexts/GlobalSearchContext';
+import { GlobalSearch } from './components/GlobalSearch';
 import { PublicLayout } from './components/layout/PublicLayout';
 import { UserDashboardLayout } from './components/layout/UserDashboardLayout';
 import { LawyerDashboardLayout } from './components/layout/LawyerDashboardLayout';
 import { AdminDashboardLayout } from './components/layout/AdminDashboardLayout';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { Loading } from './components/ui/Loading';
+import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 
 const Landing = lazy(() => import('./pages/public/Landing').then(m => ({ default: m.Landing })));
 const Login = lazy(() => import('./pages/public/Login').then(m => ({ default: m.Login })));
 const Register = lazy(() => import('./pages/public/Register').then(m => ({ default: m.Register })));
 const VisaSearch = lazy(() => import('./pages/public/VisaSearch').then(m => ({ default: m.VisaSearch })));
+const VisaCompare = lazy(() => import('./pages/public/VisaCompare').then(m => ({ default: m.VisaCompare })));
 const VisaDetail = lazy(() => import('./pages/public/VisaDetail').then(m => ({ default: m.VisaDetail })));
 const Tracker = lazy(() => import('./pages/public/Tracker').then(m => ({ default: m.Tracker })));
 const LawyerDirectory = lazy(() => import('./pages/public/LawyerDirectory').then(m => ({ default: m.LawyerDirectory })));
@@ -24,6 +28,14 @@ const NewsDetail = lazy(() => import('./pages/public/NewsDetail').then(m => ({ d
 const PublicMarketplace = lazy(() => import('./pages/public/Marketplace').then(m => ({ default: m.Marketplace })));
 const Success = lazy(() => import('./pages/Success').then(m => ({ default: m.Success })));
 const Pricing = lazy(() => import('./pages/Pricing').then(m => ({ default: m.Pricing })));
+const EligibilityQuizPage = lazy(() => import('./pages/public/EligibilityQuizPage').then(m => ({ default: m.EligibilityQuizPage })));
+const SuccessStoriesPage = lazy(() => import('./pages/public/SuccessStoriesPage').then(m => ({ default: m.SuccessStoriesPage })));
+const AboutPage = lazy(() => import('./pages/public/AboutPage').then(m => ({ default: m.AboutPage })));
+const ContactPage = lazy(() => import('./pages/public/ContactPage').then(m => ({ default: m.ContactPage })));
+const FAQPage = lazy(() => import('./pages/public/FAQPage').then(m => ({ default: m.FAQPage })));
+const TermsPage = lazy(() => import('./pages/public/TermsPage').then(m => ({ default: m.TermsPage })));
+const PrivacyPage = lazy(() => import('./pages/public/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
+const CareersPage = lazy(() => import('./pages/public/CareersPage').then(m => ({ default: m.CareersPage })));
 const LawyerRegister = lazy(() => import('./pages/lawyer/LawyerRegister').then(m => ({ default: m.LawyerRegister })));
 const LawyerPending = lazy(() => import('./pages/lawyer/LawyerPending').then(m => ({ default: m.LawyerPending })));
 
@@ -36,6 +48,7 @@ const UserPremiumContent = lazy(() => import('./pages/user/PremiumContent').then
 const UserMarketplacePurchases = lazy(() => import('./pages/user/MarketplacePurchases').then(m => ({ default: m.MarketplacePurchases })));
 const UserSettings = lazy(() => import('./pages/user/UserSettings').then(m => ({ default: m.UserSettings })));
 const SavedVisas = lazy(() => import('./pages/user/SavedVisas').then(m => ({ default: m.SavedVisas })));
+const Referrals = lazy(() => import('./pages/user/Referrals').then(m => ({ default: m.Referrals })));
 
 const PortalLanding = lazy(() => import('./pages/lawyer/PortalLanding').then(m => ({ default: m.PortalLanding })));
 const LawyerDashboard = lazy(() => import('./pages/lawyer/Dashboard').then(m => ({ default: m.LawyerDashboard })));
@@ -67,15 +80,19 @@ export default function App() {
       <AuthProvider>
         <ToastProvider>
           <ErrorBoundary>
+            <PWAInstallPrompt />
             <BrowserRouter>
-              <Suspense fallback={<Loading fullScreen />}>
-                <Routes>
-                  <Route element={<PublicLayout />}>
+              <GlobalSearchProvider>
+                <GlobalSearch />
+                <Suspense fallback={<Loading fullScreen />}>
+                  <Routes>
+                    <Route element={<PublicLayout />}>
                     <Route index element={<Landing />} />
                     <Route path="login" element={<Login />} />
                     <Route path="register" element={<Register />} />
                     <Route path="register/lawyer" element={<LawyerRegister />} />
                     <Route path="visas" element={<VisaSearch />} />
+                    <Route path="visas/compare" element={<VisaCompare />} />
                     <Route path="visas/:id" element={<VisaDetail />} />
                     <Route path="tracker" element={<Tracker />} />
                     <Route path="lawyers" element={<LawyerDirectory />} />
@@ -85,6 +102,14 @@ export default function App() {
                     <Route path="marketplace" element={<PublicMarketplace />} />
                     <Route path="pricing" element={<Pricing />} />
                     <Route path="success" element={<Success />} />
+                    <Route path="quiz" element={<EligibilityQuizPage />} />
+                    <Route path="stories" element={<SuccessStoriesPage />} />
+                    <Route path="about" element={<AboutPage />} />
+                    <Route path="contact" element={<ContactPage />} />
+                    <Route path="faq" element={<FAQPage />} />
+                    <Route path="terms" element={<TermsPage />} />
+                    <Route path="privacy" element={<PrivacyPage />} />
+                    <Route path="careers" element={<CareersPage />} />
                   </Route>
 
                   <Route path="dashboard" element={<ProtectedRoute><UserDashboardLayout /></ProtectedRoute>}>
@@ -97,6 +122,7 @@ export default function App() {
                     <Route path="premium" element={<UserPremiumContent />} />
                     <Route path="marketplace" element={<UserMarketplacePurchases />} />
                     <Route path="settings" element={<UserSettings />} />
+                    <Route path="referrals" element={<Referrals />} />
                   </Route>
 
                   <Route path="lawyer">
@@ -128,9 +154,10 @@ export default function App() {
                     <Route path="pricing" element={<AdminPricing />} />
                     <Route path="promos" element={<PromoCodeManagement />} />
                     <Route path="settings" element={<AdminSettings />} />
-                  </Route>
-                </Routes>
-              </Suspense>
+                    </Route>
+                  </Routes>
+                </Suspense>
+              </GlobalSearchProvider>
             </BrowserRouter>
           </ErrorBoundary>
         </ToastProvider>

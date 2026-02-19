@@ -5,7 +5,7 @@ import { Search, TrendingUp, Filter, BarChart3, AlertCircle, Pencil } from 'luci
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { CardSkeleton } from '../../components/ui/Skeleton';
+import { TrackerCardSkeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { Modal } from '../../components/ui/Modal';
 import { TrackerSubmitForm } from './TrackerSubmitForm';
@@ -245,7 +245,7 @@ export function Tracker() {
 
       {loading ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)}
+          {Array.from({ length: 6 }).map((_, i) => <TrackerCardSkeleton key={i} />)}
         </div>
       ) : filteredStats.length === 0 ? (
         <EmptyState

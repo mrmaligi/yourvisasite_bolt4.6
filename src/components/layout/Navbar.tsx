@@ -4,6 +4,7 @@ import { Menu, X } from 'lucide-react';
 import { Logo } from '../ui/Logo';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { UserMenu } from './UserMenu';
+import { SearchTrigger } from '../ui/SearchTrigger';
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -43,11 +44,13 @@ export function Navbar() {
           </div>
 
           <div className="hidden lg:flex items-center gap-3">
+            <SearchTrigger className="mr-2 w-48 xl:w-64" />
             <ThemeToggle />
             <UserMenu />
           </div>
 
           <div className="flex items-center gap-2 lg:hidden">
+             <SearchTrigger variant="icon" />
              <ThemeToggle />
              <button
               className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-neutral-700 dark:text-neutral-200"
