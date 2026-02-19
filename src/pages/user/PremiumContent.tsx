@@ -388,7 +388,8 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
 
   // Unlocked View
   return (
-    <div className="flex flex-col h-[calc(100vh-100px)]">
+    <>
+      <div className="flex flex-col h-[calc(100vh-100px)] no-print">
         <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
                 <Button onClick={() => navigate('/dashboard/premium')} variant="ghost" size="sm">
@@ -595,7 +596,52 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                  )}
              </div>
         </div>
-    </div>
+      </div>
+
+      <div className="print-only p-8">
+        <h1 className="text-3xl font-bold mb-2">{visa.name}</h1>
+        <p className="text-xl text-neutral-600 mb-8">Premium Application Guide</p>
+
+        <div className="space-y-12">
+            {content.map((step) => (
+                <div key={step.id} className="break-inside-avoid">
+                    <h2 className="text-2xl font-bold text-neutral-900 mb-4 flex items-center">
+                        <span className="w-8 h-8 rounded-full bg-neutral-900 text-white flex items-center justify-center text-sm mr-3">
+                            {step.step_number}
+                        </span>
+                        {step.title}
+                    </h2>
+
+                    {step.document_category && (
+                        <div className="mb-6 p-4 border border-neutral-300 rounded-lg">
+                             <p className="font-bold mb-1">Required Document: {step.document_category}</p>
+                             {step.document_explanation && <p className="text-sm">{step.document_explanation}</p>}
+                        </div>
+                    )}
+
+                    <div
+                        className="prose prose-neutral max-w-none"
+                        dangerouslySetInnerHTML={{ __html: step.body || '' }}
+                    />
+
+                    {step.application_example_json && step.application_example_json.length > 0 && (
+                        <div className="mt-6 border border-neutral-200 rounded-lg p-4 bg-neutral-50">
+                            <h3 className="font-bold mb-3">Example Application Data</h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                {step.application_example_json.map((field, i) => (
+                                    <div key={i} className="text-sm">
+                                        <p className="font-semibold">{field.field_name}</p>
+                                        <p className="font-mono bg-white border px-2 py-1 mt-1">{field.example_value}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            ))}
+        </div>
+      </div>
+    </>
   );
 }
 
