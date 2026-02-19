@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom';
+import { AnimatedOutlet } from '../animations/AnimatedOutlet';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 
@@ -7,7 +7,7 @@ export function PublicLayout() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
-        <Outlet />
+        <AnimatedOutlet />
       </main>
       <Footer />
     </div>
