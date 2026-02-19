@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, Bookmark, FolderOpen, Calendar, BookOpen, ShoppingBag, Settings } from 'lucide-react';
+import { LayoutDashboard, FileText, Bookmark, FolderOpen, Calendar, BookOpen, ShoppingBag, Settings, BarChart3, User } from 'lucide-react';
 import { DashboardLayout } from './DashboardLayout';
 
 const sidebarItems = [
@@ -12,6 +12,13 @@ const sidebarItems = [
   { to: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
+const mobileNavItems = [
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/dashboard/visas', label: 'Visas', icon: FileText },
+  { to: '/tracker', label: 'Tracker', icon: BarChart3 },
+  { to: '/dashboard/settings', label: 'Profile', icon: User },
+];
+
 export function UserDashboardLayout() {
-  return <DashboardLayout sidebarItems={sidebarItems} title="My Dashboard" />;
+  return <DashboardLayout sidebarItems={sidebarItems} mobileNavItems={mobileNavItems} title="My Dashboard" />;
 }
