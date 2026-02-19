@@ -59,8 +59,8 @@ export function TrackerSubmitForm({ onSuccess, preselectedVisaId, initialEntry }
       submitter_role: role || null,
       application_date: applicationDate,
       decision_date: isPending ? null : decisionDate,
-      outcome,
-      // weight and processing_days are handled by DB trigger
+      outcome: isPending ? 'pending' as TrackerOutcome : outcome,
+      status: isPending ? 'pending' : 'completed',
     };
 
     let error;

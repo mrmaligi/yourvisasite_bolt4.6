@@ -51,12 +51,11 @@ export function UserDashboard() {
           supabase.from('user_documents').select('id', { count: 'exact', head: true }).eq('user_id', profile.id),
         ]);
 
-        // To get upcoming bookings count properly:
         const { count: upcomingCount } = await supabase
           .from('bookings')
-          .select('id, consultation_slots!inner(start_time)', { count: 'exact', head: true })
+          .select('id', { count: 'exact', head: true })
           .eq('user_id', profile.id)
-          .gt('consultation_slots.start_time', now);
+          .in('status', ['pending', 'confirmed']);
 
         setCounts({
           purchases: purchasesCount.count ?? 0,
@@ -81,9 +80,9 @@ export function UserDashboard() {
             .limit(5),
           supabase
             .from('bookings')
-            .select('id, created_at, consultation_slots(start_time), lawyer_profiles(profile_id)')
+            .select('id, created_at, status')
             .eq('user_id', profile.id)
-            .order('created_at', { ascending: false }) // Or filter by start_time? usually "recent activity" is when you booked it.
+            .order('created_at', { ascending: false })
             .limit(5)
         ]);
 
@@ -110,7 +109,7 @@ export function UserDashboard() {
           type: 'booking',
           date: b.created_at,
           title: 'Consultation Booked',
-          description: b.consultation_slots?.start_time ? new Date(b.consultation_slots.start_time).toLocaleDateString() : 'Scheduled',
+          description: `Status: ${b.status || 'pending'}`,
           link: '/dashboard/consultations'
         }));
 

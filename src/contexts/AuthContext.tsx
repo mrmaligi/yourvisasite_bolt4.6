@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('user_id', currentUser.id)
+        .eq('id', currentUser.id)
         .maybeSingle();
 
       if (error) {
@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data: createdProfile, error: createError } = await supabase
           .from('profiles')
           .insert([{
-            user_id: currentUser.id,
+            id: currentUser.id,
             role: 'user' as UserRole,
             full_name: currentUser.user_metadata?.full_name || '',
           }])
