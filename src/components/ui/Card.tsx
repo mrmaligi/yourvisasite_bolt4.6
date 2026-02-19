@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import { useRipple, Ripple } from './Ripple';
 
 interface CardProps {
   children: ReactNode;
@@ -8,15 +9,28 @@ interface CardProps {
 }
 
 export function Card({ children, className = '', hover = false, onClick }: CardProps) {
+  const { ripples, addRipple } = useRipple();
+  const isInteractive = !!onClick;
+
   return (
     <div
-      className={`${hover ? 'card-hover cursor-pointer' : 'card'} ${className}`}
-      onClick={onClick}
+      className={`${hover ? 'card-hover cursor-pointer' : 'card'} ${
+        isInteractive
+          ? 'active:scale-[0.98] transition-transform duration-200 min-h-[44px] relative overflow-hidden'
+          : ''
+      } ${className}`}
+      onClick={(e) => {
+        if (onClick) {
+          addRipple(e);
+          onClick();
+        }
+      }}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
       onKeyDown={onClick ? (e) => e.key === 'Enter' && onClick() : undefined}
     >
       {children}
+      {isInteractive && <Ripple ripples={ripples} />}
     </div>
   );
 }

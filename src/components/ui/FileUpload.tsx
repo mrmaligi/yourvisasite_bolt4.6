@@ -67,9 +67,9 @@ export function FileUpload({
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
         className={`
-          relative border-2 border-dashed rounded-xl text-center cursor-pointer transition-all duration-200
+          relative border-2 border-dashed rounded-xl text-center cursor-pointer transition-all duration-200 min-h-[44px]
           ${dragOver ? 'border-primary-500 bg-primary-50' : 'border-neutral-300 hover:border-neutral-400 hover:bg-neutral-50'}
-          ${uploading ? 'pointer-events-none opacity-60' : ''}
+          ${uploading ? 'pointer-events-none opacity-60' : 'active:scale-[0.99]'}
           ${compact ? 'p-3 flex items-center justify-center gap-2' : 'p-8'}
         `}
       >
