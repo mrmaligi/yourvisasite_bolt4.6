@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { MessageSquare, Eye, ChevronUp, Pin, Lock, User, Clock } from 'lucide-react';
+import { MessageSquare, Eye, Pin, Lock, User, Clock } from 'lucide-react';
 import { Card, CardBody } from '../ui/Card';
 import { Badge } from '../ui/Badge';
-import { Button } from '../ui/Button';
 import { supabase } from '../../lib/supabase';
-import type { ForumTopic, ForumCategory } from '../../types/database';
+import type { ForumTopic } from '../../types/database';
 
-interface TopicWithAuthor extends ForumTopic {
+interface TopicWithAuthor extends Omit<ForumTopic, 'author'> {
   author?: {
     full_name: string;
     avatar_url?: string;
@@ -19,7 +18,6 @@ interface TopicWithAuthor extends ForumTopic {
 
 export function ForumTopicList() {
   const { categorySlug } = useParams();
-  const [category, setCategory] = useState<ForumCategory | null>(null);
   const [topics, setTopics] = useState<TopicWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,7 +37,6 @@ export function ForumTopicList() {
         .single();
 
       if (!cat) return;
-      setCategory(cat);
 
       // Get topics with authors
       const { data: topicsData } = await supabase
@@ -66,7 +63,9 @@ export function ForumTopicList() {
       <div className="space-y-4">
         {[1, 2, 3, 4, 5].map((i) => (
           <Card key={i} className="animate-pulse">
-            <CardBody className="h-20" />
+            <CardBody className="h-20">
+              <div className="h-full bg-neutral-200 dark:bg-neutral-700 rounded" />
+            </CardBody>
           </Card>
         ))}
       </div>

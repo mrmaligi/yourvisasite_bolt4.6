@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Target, Users, Shield, Heart, Globe, Award } from 'lucide-react';
+import { Users, Shield, Globe } from 'lucide-react';
 import { Card, CardBody } from '../../components/ui/Card';
 
 export function AboutPage() {

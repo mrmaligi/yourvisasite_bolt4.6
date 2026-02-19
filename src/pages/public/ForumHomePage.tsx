@@ -5,13 +5,10 @@ import { ForumCategoryList } from '../../components/forum/ForumCategoryList';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { supabase } from '../../lib/supabase';
-import type { ForumTopic } from '../../types/database';
+import type { ForumTopic, ForumCategory } from '../../types/database';
 
-interface RecentTopic extends ForumTopic {
-  category?: {
-    name: string;
-    slug: string;
-  };
+interface RecentTopic extends Omit<ForumTopic, 'author'> {
+  category?: ForumCategory;
   author?: {
     full_name: string;
   };

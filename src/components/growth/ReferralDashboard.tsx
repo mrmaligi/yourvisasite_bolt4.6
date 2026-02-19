@@ -77,7 +77,7 @@ export function ReferralDashboard() {
   const copyToClipboard = () => {
     navigator.clipboard.writeText(referralLink);
     setCopied(true);
-    toast.success('Referral link copied!');
+    toast('success', 'Referral link copied!');
     setTimeout(() => setCopied(false), 2000);
   };
 

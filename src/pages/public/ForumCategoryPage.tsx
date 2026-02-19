@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Plus, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { ForumTopicList } from '../../components/forum/ForumTopicList';
 import { ForumNewTopic } from '../../components/forum/ForumNewTopic';
 import { Card, CardBody } from '../../components/ui/Card';
@@ -32,7 +32,11 @@ export function ForumCategoryPage() {
     return (
       <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 py-8 px-4">
         <div className="max-w-4xl mx-auto">
-          <Card className="animate-pulse h-32" />
+          <Card>
+            <CardBody className="h-32">
+              <div className="h-full bg-neutral-200 dark:bg-neutral-700 rounded animate-pulse" />
+            </CardBody>
+          </Card>
         </div>
       </div>
     );
@@ -61,7 +65,7 @@ export function ForumCategoryPage() {
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs defaultValue="topics" value={activeTab} onValueChange={setActiveTab}>
           <div className="flex items-center justify-between mb-6">
             <TabsList>
               <TabsTrigger value="topics">Topics</TabsTrigger>

@@ -192,7 +192,7 @@ function SuccessStoryCard({ story }: { story: SuccessStory }) {
 }
 
 // Submit Success Story Form
-import { Input, Textarea } from '../ui/Input';
+import { Input, Textarea, Select } from '../ui/Input';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../ui/Toast';
 
@@ -243,7 +243,7 @@ export function SubmitSuccessStory() {
 
       if (error) throw error;
 
-      toast.success('Story submitted! It will be reviewed and published soon.');
+      toast('success', 'Story submitted! It will be reviewed and published soon.');
       setFormData({
         visa_id: '',
         title: '',
@@ -255,7 +255,7 @@ export function SubmitSuccessStory() {
       });
     } catch (error) {
       console.error('Error submitting story:', error);
-      toast.error('Failed to submit story. Please try again.');
+      toast('error', 'Failed to submit story. Please try again.');
     } finally {
       setLoading(false);
     }

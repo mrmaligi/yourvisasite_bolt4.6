@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronRight, ChevronLeft, CheckCircle, FileText, Briefcase, GraduationCap, Users, Globe } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Card, CardBody } from '../ui/Card';
-import { Input, Select } from '../ui/Input';
+import { Input } from '../ui/Input';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../ui/Toast';
 
@@ -195,10 +195,10 @@ export function EligibilityQuiz() {
 
       setResults(recommendations);
       
-      toast.success('Quiz completed! Check your email for detailed results.');
+      toast('success', 'Quiz completed! Check your email for detailed results.');
     } catch (error) {
       console.error('Error submitting quiz:', error);
-      toast.error('Failed to submit quiz. Please try again.');
+      toast('error', 'Failed to submit quiz. Please try again.');
     } finally {
       setLoading(false);
     }

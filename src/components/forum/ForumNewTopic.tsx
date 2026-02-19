@@ -22,7 +22,7 @@ export function ForumNewTopic() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      toast.error('Please sign in to create a topic');
+      toast('error', 'Please sign in to create a topic');
       return;
     }
 
@@ -47,7 +47,7 @@ export function ForumNewTopic() {
       // Add random suffix to ensure uniqueness
       const uniqueSlug = `${slug}-${Date.now().toString(36).substring(0, 6)}`;
 
-      const { data: topic, error } = await supabase
+      const { error } = await supabase
         .from('forum_topics')
         .insert({
           category_id: category.id,
@@ -61,11 +61,11 @@ export function ForumNewTopic() {
 
       if (error) throw error;
 
-      toast.success('Topic created successfully!');
+      toast('success', 'Topic created successfully!');
       navigate(`/forum/${categorySlug}/${uniqueSlug}`);
     } catch (error) {
       console.error('Error creating topic:', error);
-      toast.error('Failed to create topic. Please try again.');
+      toast('error', 'Failed to create topic. Please try again.');
     } finally {
       setLoading(false);
     }

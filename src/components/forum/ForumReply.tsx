@@ -1,15 +1,13 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState } from 'react';
 import { Heart, MessageCircle, CheckCircle, User } from 'lucide-react';
 import { Card, CardBody } from '../ui/Card';
-import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { useToast } from '../ui/Toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import type { ForumReply } from '../../types/database';
 
-interface ReplyWithAuthor extends ForumReply {
+interface ReplyWithAuthor extends Omit<ForumReply, 'author'> {
   author?: {
     full_name: string;
     avatar_url?: string;
@@ -39,7 +37,7 @@ export function ForumReplyComponent({
 
   const handleUpvote = async () => {
     if (!user) {
-      toast.error('Please sign in to vote');
+      toast('error', 'Please sign in to vote');
       return;
     }
 
@@ -63,7 +61,7 @@ export function ForumReplyComponent({
       }
     } catch (error) {
       console.error('Error voting:', error);
-      toast.error('Failed to vote');
+      toast('error', 'Failed to vote');
     }
   };
 

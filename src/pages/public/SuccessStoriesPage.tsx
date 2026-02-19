@@ -19,9 +19,9 @@ export function SuccessStoriesPage() {
             </p>
           </div>
           {user && (
-            <Button as={Link} to="/dashboard/referrals">
-              Share Your Story
-            </Button>
+            <Link to="/dashboard/referrals">
+              <Button>Share Your Story</Button>
+            </Link>
           )}
         </div>
         <SuccessStoriesList />

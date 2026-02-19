@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Eye, MessageSquare, Heart, Share2, Bell } from 'lucide-react';
+import { Eye, MessageSquare, Share2, Bell } from 'lucide-react';
 import { ForumReplyComponent } from '../../components/forum/ForumReply';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Textarea } from '../../components/ui/Input';
-import { Badge } from '../../components/ui/Badge';
 import { useToast } from '../../components/ui/Toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import type { ForumTopic, ForumReply, ForumCategory } from '../../types/database';
 
-interface ReplyWithAuthor extends ForumReply {
+interface ReplyWithAuthor extends Omit<ForumReply, 'author'> {
   author?: {
     full_name: string;
     avatar_url?: string;
@@ -101,7 +100,7 @@ export function ForumTopicPage() {
 
   const handleReply = async () => {
     if (!user) {
-      toast.error('Please sign in to reply');
+      toast('error', 'Please sign in to reply');
       return;
     }
     if (!replyContent.trim()) return;
@@ -118,13 +117,13 @@ export function ForumTopicPage() {
 
       if (error) throw error;
 
-      toast.success('Reply posted!');
+      toast('success', 'Reply posted!');
       setReplyContent('');
       setReplyingTo(null);
       fetchTopicData();
     } catch (error) {
       console.error('Error posting reply:', error);
-      toast.error('Failed to post reply');
+      toast('error', 'Failed to post reply');
     }
   };
 
@@ -142,11 +141,11 @@ export function ForumTopicPage() {
         .update({ is_solution: true })
         .eq('id', replyId);
 
-      toast.success('Marked as solution!');
+      toast('success', 'Marked as solution!');
       fetchTopicData();
     } catch (error) {
       console.error('Error marking solution:', error);
-      toast.error('Failed to mark solution');
+      toast('error', 'Failed to mark solution');
     }
   };
 
@@ -161,16 +160,16 @@ export function ForumTopicPage() {
           .eq('topic_id', topic.id)
           .eq('user_id', user.id);
         setIsSubscribed(false);
-        toast.success('Unsubscribed');
+        toast('success', 'Unsubscribed');
       } else {
         await supabase
           .from('forum_subscriptions')
           .insert({ topic_id: topic.id, user_id: user.id });
         setIsSubscribed(true);
-        toast.success('Subscribed to notifications');
+        toast('success', 'Subscribed to notifications');
       }
     } catch (error) {
-      toast.error('Failed to update subscription');
+      toast('error', 'Failed to update subscription');
     }
   };
 
@@ -178,9 +177,9 @@ export function ForumTopicPage() {
     return (
       <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 py-8 px-4">
         <div className="max-w-4xl mx-auto space-y-4">
-          <Card className="animate-pulse h-40" />
-          <Card className="animate-pulse h-32" />
-          <Card className="animate-pulse h-32" />
+          <Card><CardBody className="h-40"><div className="h-full bg-neutral-200 dark:bg-neutral-700 rounded animate-pulse"/></CardBody></Card>
+          <Card><CardBody className="h-32"><div className="h-full bg-neutral-200 dark:bg-neutral-700 rounded animate-pulse"/></CardBody></Card>
+          <Card><CardBody className="h-32"><div className="h-full bg-neutral-200 dark:bg-neutral-700 rounded animate-pulse"/></CardBody></Card>
         </div>
       </div>
     );

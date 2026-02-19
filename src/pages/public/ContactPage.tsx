@@ -34,11 +34,11 @@ export function ContactPage() {
 
       if (error) throw error;
 
-      toast.success('Message sent! We\'ll get back to you within 24 hours.');
+      toast('success', 'Message sent! We\'ll get back to you within 24 hours.');
       setFormData({ name: '', email: '', subject: '', message: '' });
     } catch (error) {
       console.error('Error sending message:', error);
-      toast.error('Failed to send message. Please try again.');
+      toast('error', 'Failed to send message. Please try again.');
     } finally {
       setLoading(false);
     }

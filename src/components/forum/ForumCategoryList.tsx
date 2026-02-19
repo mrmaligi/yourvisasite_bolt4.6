@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageSquare, Users, ChevronRight, TrendingUp, Clock } from 'lucide-react';
+import { MessageSquare, Users, ChevronRight, Clock, TrendingUp } from 'lucide-react';
 import { Card, CardBody } from '../ui/Card';
-import { Button } from '../ui/Button';
 import { supabase } from '../../lib/supabase';
 import type { ForumCategory, ForumTopic } from '../../types/database';
 
@@ -82,7 +81,9 @@ export function ForumCategoryList() {
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <Card key={i} className="animate-pulse">
-            <CardBody className="h-32" />
+            <CardBody className="h-32">
+              <div className="h-full bg-neutral-200 dark:bg-neutral-700 rounded" />
+            </CardBody>
           </Card>
         ))}
       </div>
