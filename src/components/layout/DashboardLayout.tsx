@@ -1,10 +1,11 @@
 import { useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import { type LucideIcon, Menu } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { UserMenu } from './UserMenu';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { Logo } from '../ui/Logo';
-import { AnimatedOutlet } from '../animations/AnimatedOutlet';
+import { SearchTrigger } from '../ui/SearchTrigger';
 
 interface DashboardLayoutProps {
   sidebarItems: { to: string; label: string; icon: LucideIcon }[];
@@ -28,6 +29,7 @@ export function DashboardLayout({ sidebarItems, title }: DashboardLayoutProps) {
           <Logo size="sm" />
         </div>
         <div className="flex items-center gap-2">
+          <SearchTrigger variant="icon" />
           <ThemeToggle />
           <UserMenu />
         </div>
@@ -44,12 +46,13 @@ export function DashboardLayout({ sidebarItems, title }: DashboardLayoutProps) {
         <main className="flex-1 w-full overflow-y-auto overflow-x-hidden">
           {/* Desktop Header Actions */}
           <header className="hidden lg:flex items-center justify-end px-8 py-4 bg-transparent gap-3">
+             <SearchTrigger className="mr-2" />
              <ThemeToggle />
              <UserMenu />
           </header>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <AnimatedOutlet />
+            <Outlet />
           </div>
         </main>
       </div>
