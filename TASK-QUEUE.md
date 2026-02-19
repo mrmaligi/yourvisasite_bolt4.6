@@ -14,6 +14,13 @@
 | T7: Lawyers + News + Pricing | 13245073353872056035 | 2026-02-18 16:04 | MERGED |
 | T11: Consultation Booking Flow | 7794485243225256080 | 2026-02-18 20:03 | MERGED |
 | T21: Form Accessibility (Palette) | 15092563641274535117 | 2026-02-18 17:42 | MERGED |
+| T22: Virtualized Infinite Scroll | 6981195571708935372 | 2026-02-19 07:19 | MERGED |
+| T23: Visa Comparison Tool | 6491417889582352809 | 2026-02-19 07:20 | MERGED |
+| T24: PWA Support | 11908944192301546975 | 2026-02-19 07:21 | MERGED |
+| T25: Breadcrumb Navigation | 2747688450321353975 | 2026-02-19 07:22 | MERGED |
+| T26: Mobile Bottom Nav | 13333652296048624704 | 2026-02-19 07:22 | MERGED |
+| T27: Touch UI (44px + Ripple) | 15745391727880445291 | 2026-02-19 07:23 | MERGED |
+| T28: Visa Favorites | 5127850182011259884 | 2026-02-19 07:33 | MERGED |
 
 ## TASK QUEUE (fire these next, in order)
 Each cron job picks the FIRST task with status=QUEUED, fires it to Jules, and marks it FIRED.
