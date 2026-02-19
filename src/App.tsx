@@ -4,6 +4,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
+import { GlobalSearchProvider } from './contexts/GlobalSearchContext';
+import { GlobalSearch } from './components/GlobalSearch';
 import { PublicLayout } from './components/layout/PublicLayout';
 import { UserDashboardLayout } from './components/layout/UserDashboardLayout';
 import { LawyerDashboardLayout } from './components/layout/LawyerDashboardLayout';
@@ -68,9 +70,11 @@ export default function App() {
         <ToastProvider>
           <ErrorBoundary>
             <BrowserRouter>
-              <Suspense fallback={<Loading fullScreen />}>
-                <Routes>
-                  <Route element={<PublicLayout />}>
+              <GlobalSearchProvider>
+                <GlobalSearch />
+                <Suspense fallback={<Loading fullScreen />}>
+                  <Routes>
+                    <Route element={<PublicLayout />}>
                     <Route index element={<Landing />} />
                     <Route path="login" element={<Login />} />
                     <Route path="register" element={<Register />} />
@@ -128,9 +132,10 @@ export default function App() {
                     <Route path="pricing" element={<AdminPricing />} />
                     <Route path="promos" element={<PromoCodeManagement />} />
                     <Route path="settings" element={<AdminSettings />} />
-                  </Route>
-                </Routes>
-              </Suspense>
+                    </Route>
+                  </Routes>
+                </Suspense>
+              </GlobalSearchProvider>
             </BrowserRouter>
           </ErrorBoundary>
         </ToastProvider>
