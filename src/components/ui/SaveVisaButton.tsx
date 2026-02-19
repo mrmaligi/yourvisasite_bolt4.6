@@ -24,7 +24,7 @@ export function SaveVisaButton({ visaId, isSaved, onToggle, size = 'sm', classNa
         e.stopPropagation();
         onToggle(visaId);
       }}
-      className={`${padding} rounded-lg transition-colors ${
+      className={`${padding} min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors ${
         isSaved
           ? 'text-primary-600 bg-primary-50 hover:bg-primary-100'
           : 'text-neutral-400 hover:text-primary-600 hover:bg-neutral-50'
