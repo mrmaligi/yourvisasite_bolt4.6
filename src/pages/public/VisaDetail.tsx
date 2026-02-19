@@ -19,6 +19,7 @@ import { Button } from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
 import { StripeCheckout } from '../../components/StripeCheckout';
+import { ShareButton } from '../../components/ShareButton';
 import type { Visa, TrackerStats, VisaPremiumContent, Product, UserVisaPurchase, TrackerEntry, NewsArticle } from '../../types/database';
 
 export function VisaDetail() {
@@ -214,7 +215,10 @@ export function VisaDetail() {
             <Badge className="text-sm px-3 py-1">{visa.subclass}</Badge>
             <Badge variant="primary" className="text-sm px-3 py-1">{visa.category}</Badge>
         </div>
-        <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-6">{visa.name}</h1>
+        <div className="flex justify-between items-start gap-4 mb-6">
+            <h1 className="text-3xl md:text-4xl font-bold text-neutral-900">{visa.name}</h1>
+            <ShareButton title={`Check out this visa guide: ${visa.name}`} />
+        </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 bg-neutral-50 rounded-2xl border border-neutral-100">
             <div>
