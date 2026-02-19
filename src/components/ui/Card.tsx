@@ -1,4 +1,5 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, type KeyboardEvent } from 'react';
+import { motion } from 'framer-motion';
 
 interface CardProps {
   children: ReactNode;
@@ -9,15 +10,17 @@ interface CardProps {
 
 export function Card({ children, className = '', hover = false, onClick }: CardProps) {
   return (
-    <div
-      className={`${hover ? 'card-hover cursor-pointer' : 'card'} ${className}`}
+    <motion.div
+      className={`${hover ? 'cursor-pointer' : ''} card ${className}`}
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      onKeyDown={onClick ? (e) => e.key === 'Enter' && onClick() : undefined}
+      onKeyDown={onClick ? (e: KeyboardEvent) => e.key === 'Enter' && onClick() : undefined}
+      whileHover={hover ? { y: -5, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.1)" } : undefined}
+      transition={{ duration: 0.3 }}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }
 
