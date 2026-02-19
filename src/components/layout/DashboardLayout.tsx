@@ -6,6 +6,7 @@ import { UserMenu } from './UserMenu';
 import { MobileNav } from './MobileNav';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { Logo } from '../ui/Logo';
+import { SearchTrigger } from '../ui/SearchTrigger';
 
 interface DashboardLayoutProps {
   sidebarItems: { to: string; label: string; icon: LucideIcon }[];
@@ -30,6 +31,7 @@ export function DashboardLayout({ sidebarItems, mobileNavItems, title }: Dashboa
           <Logo size="sm" />
         </div>
         <div className="flex items-center gap-2">
+          <SearchTrigger variant="icon" />
           <ThemeToggle />
           <UserMenu />
         </div>
@@ -46,6 +48,7 @@ export function DashboardLayout({ sidebarItems, mobileNavItems, title }: Dashboa
         <main className={`flex-1 w-full overflow-y-auto overflow-x-hidden ${mobileNavItems ? 'pb-16 lg:pb-0' : ''}`}>
           {/* Desktop Header Actions */}
           <header className="hidden lg:flex items-center justify-end px-8 py-4 bg-transparent gap-3">
+             <SearchTrigger className="mr-2" />
              <ThemeToggle />
              <UserMenu />
           </header>

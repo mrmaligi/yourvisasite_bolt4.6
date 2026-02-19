@@ -13,7 +13,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { CardSkeleton } from '../../components/ui/Skeleton';
+import { DashboardSkeleton } from '../../components/ui/Skeleton';
 
 type ActivityType = 'purchase' | 'document' | 'booking';
 
@@ -136,17 +136,7 @@ export function UserDashboard() {
   ];
 
   if (loading) {
-    return (
-      <div className="space-y-8">
-        <div>
-          <div className="h-8 w-64 bg-neutral-200 rounded animate-pulse mb-2"></div>
-          <div className="h-4 w-96 bg-neutral-100 rounded animate-pulse"></div>
-        </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map(i => <CardSkeleton key={i} />)}
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   return (
