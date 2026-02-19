@@ -8,7 +8,8 @@ import {
   CheckCircle,
   BarChart3,
   BookOpen,
-  Phone
+  Phone,
+  Sparkles
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/Button';
@@ -103,6 +104,39 @@ export function Landing() {
               <p className="text-sm font-medium text-primary-600 dark:text-primary-300">Lawyers</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Eligibility Quiz CTA */}
+      <section className="bg-gradient-to-r from-primary-600 to-primary-700 py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-white/90 text-sm font-medium mb-6">
+            <Sparkles className="w-4 h-4" />
+            <span>Free 2-Minute Assessment</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            Not sure which visa is right for you?
+          </h2>
+          <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
+            Answer 9 simple questions about your situation and get personalized visa recommendations 
+            with eligibility scores sent straight to your inbox.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/quiz">
+              <Button size="lg" className="w-full sm:w-auto text-lg px-8 bg-white text-primary-600 hover:bg-white/90">
+                <Sparkles className="mr-2 w-5 h-5" />
+                Start Free Assessment
+              </Button>
+            </Link>
+            <Link to="/stories">
+              <Button variant="secondary" size="lg" className="w-full sm:w-auto text-lg px-8 bg-white/10 text-white border-white/20 hover:bg-white/20">
+                Read Success Stories
+              </Button>
+            </Link>
+          </div>
+          <p className="mt-6 text-sm text-white/60">
+            Join 10,000+ applicants who found their perfect visa match
+          </p>
         </div>
       </section>
 
