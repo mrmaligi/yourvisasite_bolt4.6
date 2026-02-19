@@ -6,7 +6,6 @@ import {
   CheckCircle,
   BookOpen,
   ArrowUpRight,
-  ChevronRight,
   ArrowLeft,
   AlertCircle,
   TrendingUp
@@ -19,6 +18,7 @@ import { Button } from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
 import { StripeCheckout } from '../../components/StripeCheckout';
+import { Breadcrumbs } from '../../components/ui/Breadcrumbs';
 import type { Visa, TrackerStats, VisaPremiumContent, Product, UserVisaPurchase, TrackerEntry, NewsArticle } from '../../types/database';
 
 export function VisaDetail() {
@@ -195,13 +195,14 @@ export function VisaDetail() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Breadcrumbs & Back */}
-      <div className="flex items-center gap-2 text-sm text-neutral-500 mb-6">
-        <Link to="/" className="hover:text-primary-600">Home</Link>
-        <ChevronRight className="w-4 h-4" />
-        <Link to="/visas" className="hover:text-primary-600">Visas</Link>
-        <ChevronRight className="w-4 h-4" />
-        <span className="text-neutral-900 font-medium truncate">{visa.name}</span>
-      </div>
+      <Breadcrumbs
+        items={[
+          { label: 'Home', to: '/' },
+          { label: 'Visas', to: '/visas' },
+          { label: visa.name }
+        ]}
+        className="mb-6"
+      />
 
       <Link to="/visas" className="inline-flex items-center text-sm font-medium text-neutral-500 hover:text-neutral-900 mb-8 transition-colors">
         <ArrowLeft className="w-4 h-4 mr-1" />

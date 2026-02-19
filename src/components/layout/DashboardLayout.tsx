@@ -5,6 +5,7 @@ import { Sidebar } from './Sidebar';
 import { UserMenu } from './UserMenu';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { Logo } from '../ui/Logo';
+import { Breadcrumbs } from '../ui/Breadcrumbs';
 
 interface DashboardLayoutProps {
   sidebarItems: { to: string; label: string; icon: LucideIcon }[];
@@ -49,6 +50,7 @@ export function DashboardLayout({ sidebarItems, title }: DashboardLayoutProps) {
           </header>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <Breadcrumbs className="mb-6" />
             <Outlet />
           </div>
         </main>

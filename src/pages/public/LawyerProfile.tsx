@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   MapPin, Briefcase, Clock, Scale, Calendar,
-  CheckCircle, ArrowLeft, Star, Shield, MessageSquare
+  CheckCircle, Star, Shield, MessageSquare
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -10,6 +10,7 @@ import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
+import { Breadcrumbs } from '../../components/ui/Breadcrumbs';
 
 interface LawyerData {
   id: string;
@@ -169,10 +170,14 @@ export function LawyerProfile() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <Link to="/lawyers" className="inline-flex items-center gap-1.5 text-sm text-primary-600 hover:underline mb-8">
-        <ArrowLeft className="w-3.5 h-3.5" />
-        All Lawyers
-      </Link>
+      <Breadcrumbs
+        items={[
+          { label: 'Home', to: '/' },
+          { label: 'Lawyers', to: '/lawyers' },
+          { label: lawyer.full_name || 'Lawyer Profile' }
+        ]}
+        className="mb-8"
+      />
 
       <div className="flex flex-col sm:flex-row items-start gap-6 mb-8">
         {lawyer.avatar_url ? (
