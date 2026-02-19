@@ -6,6 +6,7 @@ import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Input, Select } from '../../components/ui/Input';
+import { Checkbox } from '../../components/ui/Checkbox';
 import { CardSkeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
 import type { Visa } from '../../types/database';
@@ -34,6 +35,19 @@ export function VisaSearch() {
   const [category, setCategory] = useState('all');
   const [sortBy, setSortBy] = useState('name_asc');
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedVisas, setSelectedVisas] = useState<string[]>([]);
+
+  const handleToggleSelect = (visaId: string) => {
+    setSelectedVisas((prev) => {
+      if (prev.includes(visaId)) {
+        return prev.filter((id) => id !== visaId);
+      }
+      if (prev.length >= 3) {
+        return prev;
+      }
+      return [...prev, visaId];
+    });
+  };
 
   useEffect(() => {
     const fetchVisas = async () => {
@@ -143,42 +157,74 @@ export function VisaSearch() {
             </p>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredVisas.map((visa) => (
-                <Link key={visa.id} to={`/visas/${visa.id}`}>
-                <Card hover className="h-full group">
-                    <CardBody className="space-y-4">
-                    <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-2">
-                        <Badge>{visa.subclass}</Badge>
-                        <Badge variant="primary">{visa.category}</Badge>
-                        </div>
-                        <ArrowUpRight className="w-4 h-4 text-neutral-400 group-hover:text-primary-600 transition-colors" />
-                    </div>
+                <div key={visa.id} className="relative group h-full">
+                  <div className="absolute top-5 right-5 z-10" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={selectedVisas.includes(visa.id)}
+                      onChange={() => handleToggleSelect(visa.id)}
+                      disabled={!selectedVisas.includes(visa.id) && selectedVisas.length >= 3}
+                      className="w-5 h-5 border-2"
+                      aria-label={`Select ${visa.name} for comparison`}
+                    />
+                  </div>
+                  <Link to={`/visas/${visa.id}`} className="block h-full">
+                  <Card hover className="h-full group">
+                      <CardBody className="space-y-4">
+                      <div className="flex items-start justify-between pr-8">
+                          <div className="flex items-center gap-2">
+                          <Badge>{visa.subclass}</Badge>
+                          <Badge variant="primary">{visa.category}</Badge>
+                          </div>
+                          <ArrowUpRight className="w-4 h-4 text-neutral-400 group-hover:text-primary-600 transition-colors" />
+                      </div>
 
-                    <div>
-                        <h3 className="font-semibold text-neutral-900 dark:text-white mb-1 group-hover:text-primary-700 dark:group-hover:text-primary-400 transition-colors">
-                            {visa.name}
-                        </h3>
-                        <p className="text-sm text-neutral-500 dark:text-neutral-400 line-clamp-2">
-                            {visa.summary}
-                        </p>
-                    </div>
+                      <div>
+                          <h3 className="font-semibold text-neutral-900 dark:text-white mb-1 group-hover:text-primary-700 dark:group-hover:text-primary-400 transition-colors">
+                              {visa.name}
+                          </h3>
+                          <p className="text-sm text-neutral-500 dark:text-neutral-400 line-clamp-2">
+                              {visa.summary}
+                          </p>
+                      </div>
 
-                    <div className="pt-4 border-t border-neutral-100 dark:border-neutral-700 flex items-center justify-between text-sm">
-                        <span className="text-neutral-600 dark:text-neutral-300 font-medium">
-                            {visa.cost_aud ? visa.cost_aud : 'Free / Varies'}
-                        </span>
-                        {visa.processing_time_range && (
-                             <span className="text-neutral-500 dark:text-neutral-400">
-                                {visa.processing_time_range}
-                             </span>
-                        )}
-                    </div>
-                    </CardBody>
-                </Card>
-                </Link>
+                      <div className="pt-4 border-t border-neutral-100 dark:border-neutral-700 flex items-center justify-between text-sm">
+                          <span className="text-neutral-600 dark:text-neutral-300 font-medium">
+                              {visa.cost_aud ? visa.cost_aud : 'Free / Varies'}
+                          </span>
+                          {visa.processing_time_range && (
+                              <span className="text-neutral-500 dark:text-neutral-400">
+                                  {visa.processing_time_range}
+                              </span>
+                          )}
+                      </div>
+                      </CardBody>
+                  </Card>
+                  </Link>
+                </div>
             ))}
             </div>
         </>
+      )}
+
+      {selectedVisas.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 animate-fade-in-up">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="text-neutral-900 dark:text-white font-medium">
+              {selectedVisas.length} visa{selectedVisas.length !== 1 ? 's' : ''} selected
+              <span className="text-neutral-500 dark:text-neutral-400 text-sm ml-2 font-normal hidden sm:inline">
+                (Select up to 3 to compare)
+              </span>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="secondary" onClick={() => setSelectedVisas([])}>
+                Clear
+              </Button>
+              <Link to={`/visas/compare?ids=${selectedVisas.join(',')}`}>
+                <Button>Compare Visas</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
