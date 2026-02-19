@@ -26,6 +26,8 @@ const NewsDetail = lazy(() => import('./pages/public/NewsDetail').then(m => ({ d
 const PublicMarketplace = lazy(() => import('./pages/public/Marketplace').then(m => ({ default: m.Marketplace })));
 const Success = lazy(() => import('./pages/Success').then(m => ({ default: m.Success })));
 const Pricing = lazy(() => import('./pages/Pricing').then(m => ({ default: m.Pricing })));
+const EligibilityQuizPage = lazy(() => import('./pages/public/EligibilityQuizPage').then(m => ({ default: m.EligibilityQuizPage })));
+const SuccessStoriesPage = lazy(() => import('./pages/public/SuccessStoriesPage').then(m => ({ default: m.SuccessStoriesPage })));
 const LawyerRegister = lazy(() => import('./pages/lawyer/LawyerRegister').then(m => ({ default: m.LawyerRegister })));
 const LawyerPending = lazy(() => import('./pages/lawyer/LawyerPending').then(m => ({ default: m.LawyerPending })));
 
@@ -38,6 +40,7 @@ const UserPremiumContent = lazy(() => import('./pages/user/PremiumContent').then
 const UserMarketplacePurchases = lazy(() => import('./pages/user/MarketplacePurchases').then(m => ({ default: m.MarketplacePurchases })));
 const UserSettings = lazy(() => import('./pages/user/UserSettings').then(m => ({ default: m.UserSettings })));
 const SavedVisas = lazy(() => import('./pages/user/SavedVisas').then(m => ({ default: m.SavedVisas })));
+const Referrals = lazy(() => import('./pages/user/Referrals').then(m => ({ default: m.Referrals })));
 
 const PortalLanding = lazy(() => import('./pages/lawyer/PortalLanding').then(m => ({ default: m.PortalLanding })));
 const LawyerDashboard = lazy(() => import('./pages/lawyer/Dashboard').then(m => ({ default: m.LawyerDashboard })));
@@ -89,6 +92,8 @@ export default function App() {
                     <Route path="marketplace" element={<PublicMarketplace />} />
                     <Route path="pricing" element={<Pricing />} />
                     <Route path="success" element={<Success />} />
+                    <Route path="quiz" element={<EligibilityQuizPage />} />
+                    <Route path="stories" element={<SuccessStoriesPage />} />
                   </Route>
 
                   <Route path="dashboard" element={<ProtectedRoute><UserDashboardLayout /></ProtectedRoute>}>
@@ -101,6 +106,7 @@ export default function App() {
                     <Route path="premium" element={<UserPremiumContent />} />
                     <Route path="marketplace" element={<UserMarketplacePurchases />} />
                     <Route path="settings" element={<UserSettings />} />
+                    <Route path="referrals" element={<Referrals />} />
                   </Route>
 
                   <Route path="lawyer">
