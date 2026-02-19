@@ -361,3 +361,70 @@ export interface MarketplaceReview {
   review_text: string | null;
   created_at: string;
 }
+
+// Forum System Types
+export interface ForumCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  icon: string | null;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface ForumTopic {
+  id: string;
+  category_id: string;
+  author_id: string;
+  title: string;
+  slug: string;
+  content: string;
+  is_pinned: boolean;
+  is_locked: boolean;
+  view_count: number;
+  replies_count: number;
+  last_reply_at: string | null;
+  last_reply_by: string | null;
+  created_at: string;
+  updated_at: string;
+  // Join fields
+  author?: Profile;
+  category?: ForumCategory;
+}
+
+export interface ForumReply {
+  id: string;
+  topic_id: string;
+  author_id: string;
+  content: string;
+  is_solution: boolean;
+  upvotes: number;
+  parent_id: string | null;
+  created_at: string;
+  updated_at: string;
+  // Join fields
+  author?: Profile;
+}
+
+// Document Templates
+export interface DocumentTemplate {
+  id: string;
+  title: string;
+  description: string | null;
+  category: string;
+  visa_types: string[] | null;
+  file_url: string;
+  file_name: string;
+  file_size: number | null;
+  file_type: string | null;
+  download_count: number;
+  is_premium: boolean;
+  price_cents: number;
+  content_guide: string | null;
+  sample_content: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
