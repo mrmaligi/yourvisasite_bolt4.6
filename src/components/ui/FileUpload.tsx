@@ -1,4 +1,4 @@
-import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
+import { useState, type DragEvent, type ChangeEvent, useId } from 'react';
 import { Upload, File, X, AlertCircle } from 'lucide-react';
 
 interface FileUploadProps {
@@ -23,7 +23,8 @@ export function FileUpload({
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputId = useId();
+  const errorId = `${inputId}-error`;
 
   const validate = (file: File): boolean => {
     setError(null);
@@ -61,24 +62,27 @@ export function FileUpload({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <div
+      <label
+        htmlFor={inputId}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
-        onClick={() => inputRef.current?.click()}
         className={`
-          relative border-2 border-dashed rounded-xl text-center cursor-pointer transition-all duration-200 min-h-[44px]
+          relative block border-2 border-dashed rounded-xl text-center cursor-pointer transition-all duration-200 min-h-[44px]
           ${dragOver ? 'border-primary-500 bg-primary-50' : 'border-neutral-300 hover:border-neutral-400 hover:bg-neutral-50'}
           ${uploading ? 'pointer-events-none opacity-60' : 'active:scale-[0.99]'}
           ${compact ? 'p-3 flex items-center justify-center gap-2' : 'p-8'}
+          focus-within:ring-2 focus-within:ring-primary-500 focus-within:ring-offset-2
         `}
       >
         <input
-          ref={inputRef}
+          id={inputId}
           type="file"
           accept={accept}
           onChange={handleChange}
-          className="hidden"
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
+          className="sr-only"
         />
         {compact ? (
             <>
@@ -96,7 +100,7 @@ export function FileUpload({
                 </p>
             </>
         )}
-      </div>
+      </label>
 
       {selectedFile && !error && (
         <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-lg">
@@ -114,6 +118,8 @@ export function FileUpload({
             </div>
           ) : (
             <button
+              type="button"
+              aria-label="Remove file"
               onClick={(e) => { e.stopPropagation(); setSelectedFile(null); }}
               className="p-1 rounded hover:bg-neutral-200"
             >
@@ -124,7 +130,7 @@ export function FileUpload({
       )}
 
       {error && (
-        <div className="flex items-center gap-2 p-3 bg-red-50 rounded-lg text-red-700">
+        <div id={errorId} className="flex items-center gap-2 p-3 bg-red-50 rounded-lg text-red-700" role="alert">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <p className="text-sm">{error}</p>
         </div>
