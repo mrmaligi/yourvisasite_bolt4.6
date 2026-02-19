@@ -19,6 +19,7 @@ import { Button } from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
 import { StripeCheckout } from '../../components/StripeCheckout';
+import { FavoriteButton } from '../../components/FavoriteButton';
 import type { Visa, TrackerStats, VisaPremiumContent, Product, UserVisaPurchase, TrackerEntry, NewsArticle } from '../../types/database';
 
 export function VisaDetail() {
@@ -34,6 +35,7 @@ export function VisaDetail() {
   const [purchase, setPurchase] = useState<UserVisaPurchase | null>(null);
   const [recentEntries, setRecentEntries] = useState<TrackerEntry[]>([]);
   const [visaNews, setVisaNews] = useState<NewsArticle[]>([]);
+  const [isSaved, setIsSaved] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -84,7 +86,7 @@ export function VisaDetail() {
         .maybeSingle();
       setProduct(productData);
 
-      // 5. Fetch Purchase & Premium Content (if user logged in)
+      // 5. Fetch Purchase & Premium Content & Saved Status (if user logged in)
       if (user) {
          const { data: purchaseData } = await supabase
             .from('user_visa_purchases')
@@ -102,6 +104,15 @@ export function VisaDetail() {
               .order('step_number');
             setPremiumContent(contentData || []);
          }
+
+         // Check saved status
+         const { data: savedData } = await supabase
+            .from('saved_visas')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('visa_id', id)
+            .maybeSingle();
+         setIsSaved(!!savedData);
       }
 
       // 6. Fetch Recent Entries
@@ -163,6 +174,25 @@ export function VisaDetail() {
     checkSession();
   }, [user, id, toast]);
 
+  const handleToggleSaved = async () => {
+    if (!user || !visa) return;
+
+    if (isSaved) {
+      const { error } = await supabase
+        .from('saved_visas')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('visa_id', visa.id);
+
+      if (!error) setIsSaved(false);
+    } else {
+      const { error } = await supabase
+        .from('saved_visas')
+        .insert({ user_id: user.id, visa_id: visa.id });
+
+      if (!error) setIsSaved(true);
+    }
+  };
 
   if (loading) {
     return (
@@ -210,9 +240,16 @@ export function VisaDetail() {
 
       {/* Header */}
       <div className="mb-10">
-        <div className="flex flex-wrap items-center gap-3 mb-4">
-            <Badge className="text-sm px-3 py-1">{visa.subclass}</Badge>
-            <Badge variant="primary" className="text-sm px-3 py-1">{visa.category}</Badge>
+        <div className="flex items-start justify-between mb-4">
+            <div className="flex flex-wrap items-center gap-3">
+                <Badge className="text-sm px-3 py-1">{visa.subclass}</Badge>
+                <Badge variant="primary" className="text-sm px-3 py-1">{visa.category}</Badge>
+            </div>
+            <FavoriteButton
+                isSaved={isSaved}
+                onToggle={handleToggleSaved}
+                size="lg"
+            />
         </div>
         <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-6">{visa.name}</h1>
 

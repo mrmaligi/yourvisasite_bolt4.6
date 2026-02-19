@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, FileText, ArrowUpRight, Filter } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
@@ -8,6 +9,7 @@ import { Button } from '../../components/ui/Button';
 import { Input, Select } from '../../components/ui/Input';
 import { CardSkeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { FavoriteButton } from '../../components/FavoriteButton';
 import type { Visa } from '../../types/database';
 
 const CATEGORIES = [
@@ -28,7 +30,9 @@ const SORTS = [
 ];
 
 export function VisaSearch() {
+  const { user } = useAuth();
   const [visas, setVisas] = useState<Visa[]>([]);
+  const [savedVisaIds, setSavedVisaIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
@@ -36,24 +40,77 @@ export function VisaSearch() {
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    const fetchVisas = async () => {
+    const fetchData = async () => {
       setLoading(true);
-      const { data, error } = await supabase
+
+      // Fetch visas
+      const { data: visaData, error: visaError } = await supabase
         .from('visas')
         .select('*')
         .eq('is_active', true)
         .eq('country', 'Australia');
 
-      if (error) {
-        console.error('Error fetching visas:', error);
+      if (visaError) {
+        console.error('Error fetching visas:', visaError);
       } else {
-        setVisas(data || []);
+        setVisas(visaData || []);
       }
+
+      // Fetch saved visas if user is logged in
+      if (user) {
+        const { data: savedData, error: savedError } = await supabase
+          .from('saved_visas')
+          .select('visa_id')
+          .eq('user_id', user.id);
+
+        if (savedError) {
+          console.error('Error fetching saved visas:', savedError);
+        } else if (savedData) {
+          setSavedVisaIds(new Set(savedData.map((v) => v.visa_id)));
+        }
+      }
+
       setLoading(false);
     };
 
-    fetchVisas();
-  }, []);
+    fetchData();
+  }, [user]);
+
+  const handleToggleSaved = async (visaId: string) => {
+    if (!user) return;
+
+    const isSaved = savedVisaIds.has(visaId);
+
+    if (isSaved) {
+      // Unsave
+      const { error } = await supabase
+        .from('saved_visas')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('visa_id', visaId);
+
+      if (!error) {
+        setSavedVisaIds((prev) => {
+          const next = new Set(prev);
+          next.delete(visaId);
+          return next;
+        });
+      }
+    } else {
+      // Save
+      const { error } = await supabase
+        .from('saved_visas')
+        .insert({ user_id: user.id, visa_id: visaId });
+
+      if (!error) {
+        setSavedVisaIds((prev) => {
+          const next = new Set(prev);
+          next.add(visaId);
+          return next;
+        });
+      }
+    }
+  };
 
   const filteredVisas = visas
     .filter((visa) => {
@@ -151,7 +208,14 @@ export function VisaSearch() {
                         <Badge>{visa.subclass}</Badge>
                         <Badge variant="primary">{visa.category}</Badge>
                         </div>
-                        <ArrowUpRight className="w-4 h-4 text-neutral-400 group-hover:text-primary-600 transition-colors" />
+                        <div className="flex items-center gap-2">
+                          <FavoriteButton
+                            isSaved={savedVisaIds.has(visa.id)}
+                            onToggle={() => handleToggleSaved(visa.id)}
+                            size="sm"
+                          />
+                          <ArrowUpRight className="w-4 h-4 text-neutral-400 group-hover:text-primary-600 transition-colors" />
+                        </div>
                     </div>
 
                     <div>

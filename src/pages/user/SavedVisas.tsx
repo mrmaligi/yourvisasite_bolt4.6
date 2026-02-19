@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bookmark, ArrowUpRight, Heart } from 'lucide-react';
+import { Bookmark, ArrowUpRight } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { CardSkeleton } from '../../components/ui/Skeleton';
+import { FavoriteButton } from '../../components/FavoriteButton';
 import type { Visa } from '../../types/database';
 
 interface SavedVisaWithDetails {
@@ -20,7 +21,6 @@ export function SavedVisas() {
   const { user } = useAuth();
   const [savedVisas, setSavedVisas] = useState<SavedVisaWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
-  const [removing, setRemoving] = useState<string | null>(null);
 
   const fetchSaved = async () => {
     if (!user) return;
@@ -65,14 +65,12 @@ export function SavedVisas() {
   }, [user]);
 
   const handleRemove = async (savedVisaId: string, visaId: string) => {
-    setRemoving(savedVisaId);
     await supabase
       .from('saved_visas')
       .delete()
       .eq('user_id', user!.id)
       .eq('visa_id', visaId);
     setSavedVisas((prev) => prev.filter((sv) => sv.id !== savedVisaId));
-    setRemoving(null);
   };
 
   return (
@@ -108,18 +106,11 @@ export function SavedVisas() {
           {savedVisas.map((sv) => (
             <Card key={sv.id} hover className="group flex flex-col h-full relative">
                <div className="absolute top-4 right-4 z-10">
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleRemove(sv.id, sv.visa_id);
-                    }}
-                    disabled={removing === sv.id}
-                    className="p-2 rounded-full bg-white/80 backdrop-blur-sm text-red-500 hover:bg-red-50 transition-colors shadow-sm border border-neutral-100"
-                    title="Remove from saved"
-                  >
-                    <Heart className="w-4 h-4 fill-current" />
-                  </button>
+                  <FavoriteButton
+                    isSaved={true}
+                    onToggle={() => handleRemove(sv.id, sv.visa_id)}
+                    className="bg-white/80 backdrop-blur-sm shadow-sm border border-neutral-100 hover:bg-red-50"
+                  />
                 </div>
               <Link to={`/visas/${sv.visa.id}`} className="flex-1 flex flex-col">
                 <CardBody className="flex-1 space-y-4">
