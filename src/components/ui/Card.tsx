@@ -1,5 +1,5 @@
-import { type ReactNode } from 'react';
-import { useRipple, Ripple } from './Ripple';
+import { type ReactNode, type KeyboardEvent } from 'react';
+import { motion } from 'framer-motion';
 
 interface CardProps {
   children: ReactNode;
@@ -9,29 +9,18 @@ interface CardProps {
 }
 
 export function Card({ children, className = '', hover = false, onClick }: CardProps) {
-  const { ripples, addRipple } = useRipple();
-  const isInteractive = !!onClick;
-
   return (
-    <div
-      className={`${hover ? 'card-hover cursor-pointer' : 'card'} ${
-        isInteractive
-          ? 'active:scale-[0.98] transition-transform duration-200 min-h-[44px] relative overflow-hidden'
-          : ''
-      } ${className}`}
-      onClick={(e) => {
-        if (onClick) {
-          addRipple(e);
-          onClick();
-        }
-      }}
+    <motion.div
+      className={`${hover ? 'cursor-pointer' : ''} card ${className}`}
+      onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      onKeyDown={onClick ? (e) => e.key === 'Enter' && onClick() : undefined}
+      onKeyDown={onClick ? (e: KeyboardEvent) => e.key === 'Enter' && onClick() : undefined}
+      whileHover={hover ? { y: -5, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.1)" } : undefined}
+      transition={{ duration: 0.3 }}
     >
       {children}
-      {isInteractive && <Ripple ripples={ripples} />}
-    </div>
+    </motion.div>
   );
 }
 

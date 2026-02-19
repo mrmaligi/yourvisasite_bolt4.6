@@ -1,0 +1,89 @@
+@media print {
+  @page {
+    margin: 2cm;
+  }
+
+  /* Hide navigation, sidebar, footer, etc. */
+  nav, footer, aside, header {
+    display: none !important;
+  }
+
+  /* Utility classes */
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  /* Reset layout constraints */
+  body, #root, main, .max-w-7xl, .max-w-5xl, .container {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* Typography tweaks */
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #000;
+    background: #fff;
+  }
+
+  h1 {
+    font-size: 24pt;
+    margin-bottom: 0.5em;
+  }
+
+  h2 {
+    font-size: 18pt;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    page-break-after: avoid;
+  }
+
+  h3 {
+    font-size: 14pt;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    page-break-after: avoid;
+  }
+
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+
+  a {
+    text-decoration: none;
+    color: #000;
+  }
+
+  /* Ensure background colors are printed */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Ensure card backgrounds are visible or replaced with borders */
+  .bg-neutral-50, .bg-primary-50 {
+    background-color: #f9f9f9 !important;
+    border: 1px solid #ddd;
+  }
+
+  /* Table borders */
+  table, th, td {
+    border: 1px solid #000;
+    border-collapse: collapse;
+  }
+}
+
+/* Default state for print-only elements */
+.print-only {
+  display: none;
+}
