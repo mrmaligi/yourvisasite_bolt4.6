@@ -13,6 +13,7 @@ import { AdminDashboardLayout } from './components/layout/AdminDashboardLayout';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { Loading } from './components/ui/Loading';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 const Landing = lazy(() => import('./pages/public/Landing').then(m => ({ default: m.Landing })));
 const Login = lazy(() => import('./pages/public/Login').then(m => ({ default: m.Login })));
@@ -165,6 +166,7 @@ export default function App() {
                 </Suspense>
               </GlobalSearchProvider>
             </BrowserRouter>
+            <SpeedInsights />
           </ErrorBoundary>
         </ToastProvider>
       </AuthProvider>
