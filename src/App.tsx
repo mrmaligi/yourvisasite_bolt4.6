@@ -10,6 +10,7 @@ import { LawyerDashboardLayout } from './components/layout/LawyerDashboardLayout
 import { AdminDashboardLayout } from './components/layout/AdminDashboardLayout';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { Loading } from './components/ui/Loading';
+import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 
 const Landing = lazy(() => import('./pages/public/Landing').then(m => ({ default: m.Landing })));
 const Login = lazy(() => import('./pages/public/Login').then(m => ({ default: m.Login })));
@@ -67,6 +68,7 @@ export default function App() {
       <AuthProvider>
         <ToastProvider>
           <ErrorBoundary>
+            <PWAInstallPrompt />
             <BrowserRouter>
               <Suspense fallback={<Loading fullScreen />}>
                 <Routes>
