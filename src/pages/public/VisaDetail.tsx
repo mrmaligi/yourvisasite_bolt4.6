@@ -16,7 +16,7 @@ import { supabase } from '../../lib/supabase';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { Skeleton } from '../../components/ui/Skeleton';
+import { VisaDetailSkeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
 import { StripeCheckout } from '../../components/StripeCheckout';
 import type { Visa, TrackerStats, VisaPremiumContent, Product, UserVisaPurchase, TrackerEntry, NewsArticle } from '../../types/database';
@@ -165,17 +165,7 @@ export function VisaDetail() {
 
 
   if (loading) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-12 w-3/4" />
-        <div className="grid md:grid-cols-3 gap-6">
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-32 w-full" />
-        </div>
-      </div>
-    );
+    return <VisaDetailSkeleton />;
   }
 
   if (!visa) {

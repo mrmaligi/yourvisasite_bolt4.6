@@ -6,7 +6,7 @@ import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Input, Select } from '../../components/ui/Input';
-import { CardSkeleton } from '../../components/ui/Skeleton';
+import { VisaCardSkeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
 import type { Visa } from '../../types/database';
 
@@ -128,7 +128,7 @@ export function VisaSearch() {
 
       {loading ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)}
+          {Array.from({ length: 6 }).map((_, i) => <VisaCardSkeleton key={i} />)}
         </div>
       ) : filteredVisas.length === 0 ? (
         <EmptyState
