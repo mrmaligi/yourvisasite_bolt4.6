@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
 import { type LucideIcon, Menu } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { UserMenu } from './UserMenu';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { Logo } from '../ui/Logo';
+import { AnimatedOutlet } from '../animations/AnimatedOutlet';
 
 interface DashboardLayoutProps {
   sidebarItems: { to: string; label: string; icon: LucideIcon }[];
@@ -49,7 +49,7 @@ export function DashboardLayout({ sidebarItems, title }: DashboardLayoutProps) {
           </header>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <Outlet />
+            <AnimatedOutlet />
           </div>
         </main>
       </div>
