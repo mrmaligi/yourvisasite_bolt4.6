@@ -50,6 +50,12 @@ const UserSettings = lazy(() => import('./pages/user/UserSettings').then(m => ({
 const SavedVisas = lazy(() => import('./pages/user/SavedVisas').then(m => ({ default: m.SavedVisas })));
 const Referrals = lazy(() => import('./pages/user/Referrals').then(m => ({ default: m.Referrals })));
 
+const UserSecurity = lazy(() => import('./pages/user/Security').then(m => ({ default: m.Security })));
+const UserHelpCenter = lazy(() => import('./pages/user/HelpCenter').then(m => ({ default: m.HelpCenter })));
+const UserLiveChat = lazy(() => import('./pages/user/LiveChat').then(m => ({ default: m.LiveChat })));
+const UserFeedback = lazy(() => import('./pages/user/Feedback').then(m => ({ default: m.Feedback })));
+const UserReportIssue = lazy(() => import('./pages/user/ReportIssue').then(m => ({ default: m.ReportIssue })));
+
 const PortalLanding = lazy(() => import('./pages/lawyer/PortalLanding').then(m => ({ default: m.PortalLanding })));
 const LawyerDashboard = lazy(() => import('./pages/lawyer/LawyerDashboard').then(m => ({ default: m.LawyerDashboard })));
 const LawyerClients = lazy(() => import('./pages/lawyer/Clients').then(m => ({ default: m.Clients })));
@@ -60,6 +66,11 @@ const LawyerTracker = lazy(() => import('./pages/lawyer/LawyerTracker').then(m =
 const LawyerNews = lazy(() => import('./pages/lawyer/LawyerNews').then(m => ({ default: m.LawyerNews })));
 const LawyerMarketplace = lazy(() => import('./pages/lawyer/Marketplace').then(m => ({ default: m.Marketplace })));
 const LawyerSettings = lazy(() => import('./pages/lawyer/LawyerSettings').then(m => ({ default: m.LawyerSettings })));
+const LawyerProfileEditor = lazy(() => import('./pages/lawyer/Profile').then(m => ({ default: m.LawyerProfile })));
+const LawyerReviews = lazy(() => import('./pages/lawyer/Reviews').then(m => ({ default: m.Reviews })));
+const LawyerAnalytics = lazy(() => import('./pages/lawyer/Analytics').then(m => ({ default: m.Analytics })));
+const LawyerBilling = lazy(() => import('./pages/lawyer/Billing').then(m => ({ default: m.Billing })));
+const LawyerContracts = lazy(() => import('./pages/lawyer/Contracts').then(m => ({ default: m.Contracts })));
 
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
 const AdminActivityLog = lazy(() => import('./pages/admin/ActivityLog').then(m => ({ default: m.ActivityLog })));
@@ -128,6 +139,12 @@ export default function App() {
                   <Route path="dashboard/settings" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserSettings /></ProtectedRoute>} />
                   <Route path="dashboard/referrals" element={<ProtectedRoute allowedRoles={['user', 'admin']}><Referrals /></ProtectedRoute>} />
 
+                  <Route path="dashboard/security" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserSecurity /></ProtectedRoute>} />
+                  <Route path="dashboard/help" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserHelpCenter /></ProtectedRoute>} />
+                  <Route path="dashboard/chat" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserLiveChat /></ProtectedRoute>} />
+                  <Route path="dashboard/feedback" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserFeedback /></ProtectedRoute>} />
+                  <Route path="dashboard/report-issue" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserReportIssue /></ProtectedRoute>} />
+
                   {/* Lawyer Routes - Each has its own layout */}
                   <Route path="lawyer" element={<PortalLanding />} />
                   <Route path="lawyer/pending" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerPending /></ProtectedRoute>} />
@@ -140,6 +157,12 @@ export default function App() {
                   <Route path="lawyer/news" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerNews /></ProtectedRoute>} />
                   <Route path="lawyer/marketplace" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerMarketplace /></ProtectedRoute>} />
                   <Route path="lawyer/settings" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerSettings /></ProtectedRoute>} />
+
+                  <Route path="lawyer/profile" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerProfileEditor /></ProtectedRoute>} />
+                  <Route path="lawyer/reviews" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerReviews /></ProtectedRoute>} />
+                  <Route path="lawyer/analytics" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerAnalytics /></ProtectedRoute>} />
+                  <Route path="lawyer/billing" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerBilling /></ProtectedRoute>} />
+                  <Route path="lawyer/contracts" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerContracts /></ProtectedRoute>} />
 
                   {/* Admin Routes - Each has its own layout */}
                   <Route path="admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />

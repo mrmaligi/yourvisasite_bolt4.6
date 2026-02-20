@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Outlet } from 'react-router-dom';
 import { type LucideIcon, Menu } from 'lucide-react';
 import { Sidebar } from './Sidebar';
@@ -12,9 +12,10 @@ interface DashboardLayoutProps {
   sidebarItems: { to: string; label: string; icon: LucideIcon }[];
   mobileNavItems?: { to: string; label: string; icon: LucideIcon }[];
   title?: string;
+  children?: ReactNode;
 }
 
-export function DashboardLayout({ sidebarItems, mobileNavItems, title }: DashboardLayoutProps) {
+export function DashboardLayout({ sidebarItems, mobileNavItems, title, children }: DashboardLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -54,7 +55,7 @@ export function DashboardLayout({ sidebarItems, mobileNavItems, title }: Dashboa
           </header>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <Outlet />
+            {children || <Outlet />}
           </div>
         </main>
       </div>

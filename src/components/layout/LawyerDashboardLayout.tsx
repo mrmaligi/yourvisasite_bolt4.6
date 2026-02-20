@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import {
   LayoutDashboard,
   Users,
@@ -21,6 +22,6 @@ const sidebarItems = [
   { to: '/lawyer/settings', label: 'Settings', icon: Settings },
 ];
 
-export function LawyerDashboardLayout() {
-  return <DashboardLayout sidebarItems={sidebarItems} title="Lawyer Portal" />;
+export function LawyerDashboardLayout({ children }: { children?: ReactNode }) {
+  return <DashboardLayout sidebarItems={sidebarItems} title="Lawyer Portal" children={children} />;
 }

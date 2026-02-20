@@ -1,8 +1,11 @@
+import path from "path"
+import { fileURLToPath } from "url"
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-// https://vitejs.dev/config/
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
 export default defineConfig({
   plugins: [
     react(),
@@ -14,6 +17,11 @@ export default defineConfig({
       manifest: false,
     }),
   ],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
   optimizeDeps: {
     exclude: ['lucide-react'],
   },

@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import { LayoutDashboard, FileText, Bookmark, FolderOpen, Calendar, BookOpen, ShoppingBag, Settings, BarChart3, User } from 'lucide-react';
 import { DashboardLayout } from './DashboardLayout';
 
@@ -19,6 +20,6 @@ const mobileNavItems = [
   { to: '/dashboard/settings', label: 'Profile', icon: User },
 ];
 
-export function UserDashboardLayout() {
-  return <DashboardLayout sidebarItems={sidebarItems} mobileNavItems={mobileNavItems} title="My Dashboard" />;
+export function UserDashboardLayout({ children }: { children?: ReactNode }) {
+  return <DashboardLayout sidebarItems={sidebarItems} mobileNavItems={mobileNavItems} title="My Dashboard" children={children} />;
 }
