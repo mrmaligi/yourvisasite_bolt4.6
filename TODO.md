@@ -3,6 +3,7 @@
 ## Phase 1: Documentation & Structure
 - [x] Update README.md with the exact project spec.
 - [x] Create a TODO.md breaking down the features into coding tasks.
+- [x] Verify session attachment.
 
 ## Phase 2: Database Schema (Supabase)
 - [ ] Design the SQL tables.
