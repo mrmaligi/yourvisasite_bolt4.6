@@ -108,6 +108,66 @@ const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagement
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings').then(m => ({ default: m.AdminSettings })));
 const YouTubeManagement = lazy(() => import('./pages/admin/YouTubeManagement').then(m => ({ default: m.YouTubeManagement })));
 
+// Gamification
+const Achievements = lazy(() => import('./pages/user/gamification/Achievements').then(m => ({ default: m.Achievements })));
+const AchievementDetail = lazy(() => import('./pages/user/gamification/AchievementDetail').then(m => ({ default: m.AchievementDetail })));
+const Leaderboard = lazy(() => import('./pages/user/gamification/Leaderboard').then(m => ({ default: m.Leaderboard })));
+const Streaks = lazy(() => import('./pages/user/gamification/Streaks').then(m => ({ default: m.Streaks })));
+const Rewards = lazy(() => import('./pages/user/gamification/Rewards').then(m => ({ default: m.Rewards })));
+const Challenges = lazy(() => import('./pages/user/gamification/Challenges').then(m => ({ default: m.Challenges })));
+const Badges = lazy(() => import('./pages/user/gamification/Badges').then(m => ({ default: m.Badges })));
+const Points = lazy(() => import('./pages/user/gamification/Points').then(m => ({ default: m.Points })));
+const Levels = lazy(() => import('./pages/user/gamification/Levels').then(m => ({ default: m.Levels })));
+const Certificates = lazy(() => import('./pages/user/gamification/Certificates').then(m => ({ default: m.Certificates })));
+
+// Planning
+const Planner = lazy(() => import('./pages/user/planning/Planner').then(m => ({ default: m.Planner })));
+const PlannerTimeline = lazy(() => import('./pages/user/planning/PlannerTimeline').then(m => ({ default: m.PlannerTimeline })));
+const Budget = lazy(() => import('./pages/user/planning/Budget').then(m => ({ default: m.Budget })));
+const BudgetPlanner = lazy(() => import('./pages/user/planning/BudgetPlanner').then(m => ({ default: m.BudgetPlanner })));
+const ChecklistBuilder = lazy(() => import('./pages/user/planning/ChecklistBuilder').then(m => ({ default: m.ChecklistBuilder })));
+const FormFiller = lazy(() => import('./pages/user/planning/FormFiller').then(m => ({ default: m.FormFiller })));
+const DocumentScanner = lazy(() => import('./pages/user/planning/DocumentScanner').then(m => ({ default: m.DocumentScanner })));
+const Translator = lazy(() => import('./pages/user/planning/Translator').then(m => ({ default: m.Translator })));
+const Comparator = lazy(() => import('./pages/user/planning/Comparator').then(m => ({ default: m.Comparator })));
+const Recommendations = lazy(() => import('./pages/user/planning/Recommendations').then(m => ({ default: m.Recommendations })));
+
+// Social
+const CommunityFeed = lazy(() => import('./pages/user/social/CommunityFeed').then(m => ({ default: m.CommunityFeed })));
+const CommunityGroups = lazy(() => import('./pages/user/social/CommunityGroups').then(m => ({ default: m.CommunityGroups })));
+const CommunityEvents = lazy(() => import('./pages/user/social/CommunityEvents').then(m => ({ default: m.CommunityEvents })));
+const CommunityStories = lazy(() => import('./pages/user/social/CommunityStories').then(m => ({ default: m.CommunityStories })));
+const CommunityMentors = lazy(() => import('./pages/user/social/CommunityMentors').then(m => ({ default: m.CommunityMentors })));
+const CommunityBuddies = lazy(() => import('./pages/user/social/CommunityBuddies').then(m => ({ default: m.CommunityBuddies })));
+const CommunityDiscussions = lazy(() => import('./pages/user/social/CommunityDiscussions').then(m => ({ default: m.CommunityDiscussions })));
+const CommunityQuestions = lazy(() => import('./pages/user/social/CommunityQuestions').then(m => ({ default: m.CommunityQuestions })));
+const CommunityResources = lazy(() => import('./pages/user/social/CommunityResources').then(m => ({ default: m.CommunityResources })));
+const Network = lazy(() => import('./pages/user/social/Network').then(m => ({ default: m.Network })));
+
+// Advanced
+const AiAssistant = lazy(() => import('./pages/user/advanced/AiAssistant').then(m => ({ default: m.AiAssistant })));
+const AiDocumentReview = lazy(() => import('./pages/user/advanced/AiDocumentReview').then(m => ({ default: m.AiDocumentReview })));
+const EligibilityCalculator = lazy(() => import('./pages/user/advanced/EligibilityCalculator').then(m => ({ default: m.EligibilityCalculator })));
+const ProcessingEstimator = lazy(() => import('./pages/user/advanced/ProcessingEstimator').then(m => ({ default: m.ProcessingEstimator })));
+const CostCalculator = lazy(() => import('./pages/user/advanced/CostCalculator').then(m => ({ default: m.CostCalculator })));
+const RiskAssessment = lazy(() => import('./pages/user/advanced/RiskAssessment').then(m => ({ default: m.RiskAssessment })));
+const DocumentVerifier = lazy(() => import('./pages/user/advanced/DocumentVerifier').then(m => ({ default: m.DocumentVerifier })));
+const SpellChecker = lazy(() => import('./pages/user/advanced/SpellChecker').then(m => ({ default: m.SpellChecker })));
+const FormValidator = lazy(() => import('./pages/user/advanced/FormValidator').then(m => ({ default: m.FormValidator })));
+const RequirementsChecker = lazy(() => import('./pages/user/advanced/RequirementsChecker').then(m => ({ default: m.RequirementsChecker })));
+
+// Integrations
+const Integrations = lazy(() => import('./pages/user/integrations/Integrations').then(m => ({ default: m.Integrations })));
+const CalendarIntegration = lazy(() => import('./pages/user/integrations/CalendarIntegration').then(m => ({ default: m.CalendarIntegration })));
+const CloudIntegration = lazy(() => import('./pages/user/integrations/CloudIntegration').then(m => ({ default: m.CloudIntegration })));
+const EmailIntegration = lazy(() => import('./pages/user/integrations/EmailIntegration').then(m => ({ default: m.EmailIntegration })));
+const SlackIntegration = lazy(() => import('./pages/user/integrations/SlackIntegration').then(m => ({ default: m.SlackIntegration })));
+const DiscordIntegration = lazy(() => import('./pages/user/integrations/DiscordIntegration').then(m => ({ default: m.DiscordIntegration })));
+const WhatsAppIntegration = lazy(() => import('./pages/user/integrations/WhatsAppIntegration').then(m => ({ default: m.WhatsAppIntegration })));
+const Backup = lazy(() => import('./pages/user/integrations/Backup').then(m => ({ default: m.Backup })));
+const Import = lazy(() => import('./pages/user/integrations/Import').then(m => ({ default: m.Import })));
+const AdvancedSettings = lazy(() => import('./pages/user/integrations/AdvancedSettings').then(m => ({ default: m.AdvancedSettings })));
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -186,6 +246,66 @@ export default function App() {
                     <Route path="dashboard/profile" element={<UserProfile />} />
                     <Route path="dashboard/notifications" element={<Notifications />} />
                     <Route path="dashboard/billing" element={<Billing />} />
+
+                    {/* Gamification */}
+                    <Route path="achievements" element={<Achievements />} />
+                    <Route path="achievements/:id" element={<AchievementDetail />} />
+                    <Route path="leaderboard" element={<Leaderboard />} />
+                    <Route path="streaks" element={<Streaks />} />
+                    <Route path="rewards" element={<Rewards />} />
+                    <Route path="challenges" element={<Challenges />} />
+                    <Route path="badges" element={<Badges />} />
+                    <Route path="points" element={<Points />} />
+                    <Route path="levels" element={<Levels />} />
+                    <Route path="certificates" element={<Certificates />} />
+
+                    {/* Planning */}
+                    <Route path="planner" element={<Planner />} />
+                    <Route path="planner/timeline" element={<PlannerTimeline />} />
+                    <Route path="budget" element={<Budget />} />
+                    <Route path="budget/planner" element={<BudgetPlanner />} />
+                    <Route path="checklist-builder" element={<ChecklistBuilder />} />
+                    <Route path="form-filler" element={<FormFiller />} />
+                    <Route path="document-scanner" element={<DocumentScanner />} />
+                    <Route path="translator" element={<Translator />} />
+                    <Route path="comparator" element={<Comparator />} />
+                    <Route path="recommendations" element={<Recommendations />} />
+
+                    {/* Social */}
+                    <Route path="community/feed" element={<CommunityFeed />} />
+                    <Route path="community/groups" element={<CommunityGroups />} />
+                    <Route path="community/events" element={<CommunityEvents />} />
+                    <Route path="community/stories" element={<CommunityStories />} />
+                    <Route path="community/mentors" element={<CommunityMentors />} />
+                    <Route path="community/buddies" element={<CommunityBuddies />} />
+                    <Route path="community/discussions" element={<CommunityDiscussions />} />
+                    <Route path="community/questions" element={<CommunityQuestions />} />
+                    <Route path="community/resources" element={<CommunityResources />} />
+                    <Route path="network" element={<Network />} />
+
+                    {/* Advanced */}
+                    <Route path="ai-assistant" element={<AiAssistant />} />
+                    <Route path="ai-document-review" element={<AiDocumentReview />} />
+                    <Route path="eligibility-calculator" element={<EligibilityCalculator />} />
+                    <Route path="processing-estimator" element={<ProcessingEstimator />} />
+                    <Route path="cost-calculator" element={<CostCalculator />} />
+                    <Route path="risk-assessment" element={<RiskAssessment />} />
+                    <Route path="document-verifier" element={<DocumentVerifier />} />
+                    <Route path="spell-checker" element={<SpellChecker />} />
+                    <Route path="form-validator" element={<FormValidator />} />
+                    <Route path="requirements-checker" element={<RequirementsChecker />} />
+
+                    {/* Integrations */}
+                    <Route path="integrations" element={<Integrations />} />
+                    <Route path="integrations/calendar" element={<CalendarIntegration />} />
+                    <Route path="integrations/cloud" element={<CloudIntegration />} />
+                    <Route path="integrations/email" element={<EmailIntegration />} />
+                    <Route path="integrations/slack" element={<SlackIntegration />} />
+                    <Route path="integrations/discord" element={<DiscordIntegration />} />
+                    <Route path="integrations/whatsapp" element={<WhatsAppIntegration />} />
+                    <Route path="backup" element={<Backup />} />
+                    <Route path="import" element={<Import />} />
+                    <Route path="settings/advanced" element={<AdvancedSettings />} />
                   </Route>
 
                   {/* Lawyer Routes - Each has its own layout */}
