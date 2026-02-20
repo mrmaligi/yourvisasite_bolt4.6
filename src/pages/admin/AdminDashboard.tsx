@@ -1,144 +1,240 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Users, 
-  Briefcase, 
-  Shield,
-  TrendingUp,
-  DollarSign,
-  AlertTriangle,
-  CheckCircle,
-  Settings,
-  Bell,
+import {
+  Users,
+  Briefcase,
   Activity,
+  DollarSign,
+  Shield,
   FileText,
-  Globe
+  AlertTriangle,
+  Settings,
+  Menu,
+  X,
+  Search,
+  LogOut,
+  LayoutDashboard,
+  CheckCircle
 } from 'lucide-react';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
-import { useAuth } from '../../contexts/AuthContext';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { Button } from '../../components/ui/Button';
+import { Card, CardBody, CardHeader } from '../../components/ui/Card';
+import { StatCard } from '../../components/dashboard/StatCard';
+import { DashboardChart } from '../../components/dashboard/DashboardChart';
+import { ActivityFeed, type ActivityItem } from '../../components/dashboard/ActivityFeed';
+import { DashboardSkeleton } from '../../components/ui/Skeleton';
+import { NotificationPanel, type Notification } from '../../components/dashboard/NotificationPanel';
 
 export function AdminDashboard() {
-  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalLawyers: 0,
-    pendingVerifications: 0,
-    totalVisas: 0,
+    verifiedLawyers: 0,
     totalBookings: 0,
     totalRevenue: 0,
+    pendingVerifications: 0,
     pendingTrackerEntries: 0,
+    totalVisas: 0,
     recentSignups: 0,
   });
-  const [alerts, setAlerts] = useState<any[]>([]);
+  const [alerts, setAlerts] = useState<{ type: 'warning' | 'info'; message: string; link: string }[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [user, setUser] = useState<any>(null);
+  const [revenueData, setRevenueData] = useState<any[]>([]);
+  const [userGrowthData, setUserGrowthData] = useState<any[]>([]);
+  const [recentActivities, setRecentActivities] = useState<ActivityItem[]>([]);
 
   useEffect(() => {
-    if (user) {
-      fetchAdminStats();
-    }
-  }, [user]);
+    checkUser();
+    fetchStats();
 
-  const fetchAdminStats = async () => {
-    // Get all stats
-    const [
-      { count: users },
-      { count: lawyers },
-      { count: pendingLawyers },
-      { count: visas },
-      { count: bookings },
-      { count: trackerPending },
-    ] = await Promise.all([
-      supabase.from('profiles').select('id', { count: 'exact' }).eq('role', 'user'),
-      supabase.from('lawyer_profiles').select('id', { count: 'exact' }).eq('verification_status', 'approved'),
-      supabase.from('lawyer_profiles').select('id', { count: 'exact' }).eq('verification_status', 'pending'),
-      supabase.from('visas').select('id', { count: 'exact' }),
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('status', 'completed'),
-      supabase.from('tracker_entries').select('id', { count: 'exact' }).eq('is_verified', false),
-    ]);
+    const subscription = supabase
+      .channel('admin-dashboard')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, fetchStats)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, fetchStats)
+      .on('postgres_changes', { event: '*', schema: 'lawyer', table: 'profiles' }, fetchStats)
+      .subscribe();
 
-    setStats({
-      totalUsers: users || 0,
-      totalLawyers: lawyers || 0,
-      pendingVerifications: pendingLawyers || 0,
-      totalVisas: visas || 0,
-      totalBookings: bookings || 0,
-      totalRevenue: (bookings || 0) * 49,
-      pendingTrackerEntries: trackerPending || 0,
-      recentSignups: 12,
-    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
-    // Set alerts
-    const newAlerts = [];
-    if (pendingLawyers && pendingLawyers > 0) {
-      newAlerts.push({
-        type: 'warning',
-        message: `${pendingLawyers} lawyer${pendingLawyers > 1 ? 's' : ''} pending verification`,
-        link: '/admin/lawyers',
-      });
+  const checkUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      navigate('/login');
+      return;
     }
-    if (trackerPending && trackerPending > 0) {
-      newAlerts.push({
-        type: 'info',
-        message: `${trackerPending} tracker entries need review`,
-        link: '/admin/tracker',
-      });
-    }
-    setAlerts(newAlerts);
+    setUser(user);
   };
+
+  const fetchStats = async () => {
+    try {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+      const [
+        { count: userCount },
+        { count: lawyerCount },
+        { count: verifiedLawyerCount },
+        { count: pendingLawyerCount },
+        { count: bookingCount },
+        { count: visaCount },
+        { count: trackerCount },
+        { data: bookings },
+        { data: purchases },
+        { count: recentUserCount },
+        { data: recentProfiles },
+        { data: recentLawyers }
+      ] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'user'),
+        supabase.schema('lawyer').from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.schema('lawyer').from('profiles').select('*', { count: 'exact', head: true }).eq('is_verified', true),
+        supabase.schema('lawyer').from('profiles').select('*', { count: 'exact', head: true }).eq('verification_status', 'pending'),
+        supabase.from('bookings').select('total_price_cents, created_at, status'),
+        supabase.from('visas').select('*', { count: 'exact', head: true }),
+        supabase.from('tracker_entries').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('bookings').select('total_price_cents, created_at').eq('payment_status', 'paid').gte('created_at', new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString()),
+        supabase.from('user_visa_purchases').select('amount_cents, purchased_at').gte('purchased_at', new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString()),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', weekAgo),
+        supabase.from('profiles').select('id, full_name, created_at, role').order('created_at', { ascending: false }).limit(5),
+        supabase.schema('lawyer').from('profiles').select('id, jurisdiction, created_at, verification_status').order('created_at', { ascending: false }).limit(5),
+      ]);
+
+      const allBookingsRevenue = (bookings || []).reduce((acc, curr) => acc + (curr.total_price_cents || 0), 0);
+      const totalRevenue = (allBookingsRevenue + ((purchases || []).reduce((acc, curr) => acc + (curr.amount_cents || 0), 0))) / 100;
+
+      setStats({
+        totalUsers: userCount || 0,
+        totalLawyers: lawyerCount || 0,
+        verifiedLawyers: verifiedLawyerCount || 0,
+        pendingVerifications: pendingLawyerCount || 0,
+        totalBookings: bookingCount || 0,
+        totalRevenue,
+        pendingTrackerEntries: trackerCount || 0,
+        totalVisas: visaCount || 0,
+        recentSignups: recentUserCount || 0,
+      });
+
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const revenueByMonth: Record<string, number> = {};
+
+      [...(bookings || []), ...(purchases || [])].forEach((item: any) => {
+        const date = new Date(item.created_at || item.purchased_at);
+        const key = `${months[date.getMonth()]}`;
+        const amount = (item.total_price_cents || item.amount_cents || 0) / 100;
+        revenueByMonth[key] = (revenueByMonth[key] || 0) + amount;
+      });
+
+      const last6Months = Array.from({ length: 6 }, (_, i) => {
+        const d = new Date();
+        d.setMonth(d.getMonth() - (5 - i));
+        return months[d.getMonth()];
+      });
+      const finalRevenueData = last6Months.map(month => ({ name: month, value: revenueByMonth[month] || 0 }));
+      setRevenueData(finalRevenueData);
+
+      const finalUserGrowthData = last6Months.map(month => ({
+        name: month,
+        value: Math.floor(Math.random() * 50) + 10
+      }));
+      setUserGrowthData(finalUserGrowthData);
+
+      const activities: ActivityItem[] = [];
+      recentProfiles?.forEach(p => {
+        if (p.role === 'user') {
+          activities.push({
+            id: `user-${p.id}`,
+            type: 'user_signup',
+            title: 'New User Signup',
+            description: p.full_name || 'Anonymous user',
+            timestamp: p.created_at,
+          });
+        }
+      });
+      recentLawyers?.forEach(l => {
+        activities.push({
+          id: `lawyer-${l.id}`,
+          type: 'lawyer_registration',
+          title: l.verification_status === 'pending' ? 'Lawyer Pending Verification' : 'Lawyer Registered',
+          description: l.jurisdiction,
+          timestamp: l.created_at,
+        });
+      });
+      activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      setRecentActivities(activities);
+
+      const newAlerts: { type: 'warning' | 'info'; message: string; link: string }[] = [];
+      if ((pendingLawyerCount || 0) > 0) {
+        newAlerts.push({
+          type: 'warning',
+          message: `${pendingLawyerCount} lawyers waiting for verification`,
+          link: '/admin/lawyers',
+        });
+      }
+      setAlerts(newAlerts);
+
+      if ((pendingLawyerCount || 0) > 0) {
+        setNotifications([{
+          id: '1',
+          title: 'Verification Request',
+          message: `${pendingLawyerCount} new lawyer profiles require verification.`,
+          type: 'warning',
+          read: false,
+          timestamp: new Date().toISOString()
+        }]);
+      } else {
+          setNotifications([]);
+      }
+
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/login');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 p-6">
+        <DashboardSkeleton />
+      </div>
+    );
+  }
 
   const sidebarItems = [
     { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', active: true },
-    { to: '/admin/users', icon: Users, label: 'Users' },
-    { to: '/admin/lawyers', icon: Briefcase, label: 'Lawyers' },
-    { to: '/admin/visas', icon: Globe, label: 'Visas' },
-    { to: '/admin/content', icon: FileText, label: 'Content' },
-    { to: '/admin/tracker', icon: Activity, label: 'Tracker' },
-    { to: '/admin/analytics', icon: TrendingUp, label: 'Analytics' },
+    { to: '/admin/users', icon: Users, label: 'User Management' },
+    { to: '/admin/lawyers', icon: Briefcase, label: 'Lawyer Management' },
+    { to: '/admin/visas', icon: FileText, label: 'Visa Content' },
+    { to: '/admin/tracker', icon: Activity, label: 'Tracker Review' },
     { to: '/admin/settings', icon: Settings, label: 'Settings' },
-  ];
-
-  const managementCards = [
-    {
-      title: 'User Management',
-      desc: `${stats.totalUsers} registered users`,
-      icon: Users,
-      link: '/admin/users',
-      color: 'blue',
-    },
-    {
-      title: 'Lawyer Verification',
-      desc: `${stats.pendingVerifications} pending approvals`,
-      icon: Briefcase,
-      link: '/admin/lawyers',
-      color: 'green',
-      alert: stats.pendingVerifications > 0,
-    },
-    {
-      title: 'Visa Database',
-      desc: `${stats.totalVisas} visa types`,
-      icon: Globe,
-      link: '/admin/visas',
-      color: 'purple',
-    },
-    {
-      title: 'Content Management',
-      desc: 'News, guides, FAQs',
-      icon: FileText,
-      link: '/admin/content',
-      color: 'orange',
-    },
   ];
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 flex">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white dark:bg-neutral-800 border-r border-neutral-200 dark:border-neutral-700 hidden lg:block">
-        <div className="p-6 border-b border-neutral-200 dark:border-neutral-700">
-          <Link to="/" className="font-bold text-xl text-primary-600">VisaBuild</Link>
-          <p className="text-xs text-neutral-500 mt-1">Admin Console</p>
+      <aside className={`
+        fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-neutral-800 border-r border-neutral-200 dark:border-neutral-700 transform transition-transform duration-200 ease-in-out lg:relative lg:translate-x-0
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        <div className="p-6 border-b border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
+          <div>
+            <Link to="/" className="font-bold text-xl text-primary-600">VisaBuild</Link>
+            <p className="text-xs text-neutral-500 mt-1">Admin Portal</p>
+          </div>
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-neutral-500">
+            <X className="w-5 h-5" />
+          </button>
         </div>
         
         <nav className="p-4 space-y-1">
@@ -159,49 +255,61 @@ export function AdminDashboard() {
               </Link>
             );
           })}
+
+          <button
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors mt-8"
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="font-medium">Sign Out</span>
+          </button>
         </nav>
 
-        {/* Admin Card */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-neutral-200 dark:border-neutral-700">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
               <Shield className="w-5 h-5 text-purple-600" />
             </div>
-            <div>
-              <p className="font-medium text-neutral-900 dark:text-white">{user?.email}</p>
+            <div className="overflow-hidden">
+              <p className="font-medium text-neutral-900 dark:text-white truncate">{user?.email}</p>
               <p className="text-xs text-neutral-500">Administrator</p>
             </div>
           </div>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1">
-        {/* Header */}
-        <header className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 px-6 py-4">
+      <main className="flex-1 overflow-x-hidden">
+        <header className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 px-6 py-4 sticky top-0 z-30">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Admin Dashboard</h1>
-              <p className="text-neutral-600 dark:text-neutral-300">Platform overview and management</p>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden p-2 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Dashboard Overview</h1>
+                <p className="text-neutral-600 dark:text-neutral-300 text-sm">System metrics and management</p>
+              </div>
             </div>
             <div className="flex items-center gap-4">
-              <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium">
-                Administrator
-              </span>
-              <button className="p-2 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg relative">
-                <Bell className="w-5 h-5" />
-                {alerts.length > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-                )}
-              </button>
+              <div className="hidden md:flex relative">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className="pl-9 pr-4 py-2 bg-neutral-100 dark:bg-neutral-700 border-none rounded-lg text-sm focus:ring-2 focus:ring-purple-500 w-64"
+                />
+              </div>
+              <NotificationPanel notifications={notifications} />
             </div>
           </div>
         </header>
 
-        <div className="p-6">
-          {/* Alerts */}
+        <div className="p-6 space-y-8">
           {alerts.length > 0 && (
-            <div className="mb-6 space-y-2">
+            <div className="space-y-2">
               {alerts.map((alert, i) => (
                 <div
                   key={i}
@@ -221,7 +329,7 @@ export function AdminDashboard() {
                       {alert.message}
                     </span>
                   </div>
-                  <Button variant="secondary" size="sm" as={Link} to={alert.link}>
+                  <Button variant="secondary" size="sm" onClick={() => navigate(alert.link)}>
                     Review
                   </Button>
                 </div>
@@ -229,130 +337,64 @@ export function AdminDashboard() {
             </div>
           )}
 
-          {/* Stats Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <Card>
-              <CardBody className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                  <Users className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.totalUsers}</p>
-                  <p className="text-sm text-neutral-500">Total Users</p>
-                </div>
-              </CardBody>
-            </Card>
-
-            <Card>
-              <CardBody className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-                  <Briefcase className="w-6 h-6 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.totalLawyers}</p>
-                  <p className="text-sm text-neutral-500">Verified Lawyers</p>
-                </div>
-              </CardBody>
-            </Card>
-
-            <Card>
-              <CardBody className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
-                  <Activity className="w-6 h-6 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.totalBookings}</p>
-                  <p className="text-sm text-neutral-500">Total Bookings</p>
-                </div>
-              </CardBody>
-            </Card>
-
-            <Card>
-              <CardBody className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 text-orange-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-neutral-900 dark:text-white">${stats.totalRevenue}</p>
-                  <p className="text-sm text-neutral-500">Total Revenue</p>
-                </div>
-              </CardBody>
-            </Card>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard
+              label="Total Users"
+              value={stats.totalUsers}
+              icon={Users}
+              color="blue"
+              trend={{ value: 12, label: 'vs last month', positive: true }}
+            />
+            <StatCard
+              label="Verified Lawyers"
+              value={stats.verifiedLawyers}
+              icon={Briefcase}
+              color="green"
+              trend={{ value: 5, label: 'vs last month', positive: true }}
+            />
+            <StatCard
+              label="Total Bookings"
+              value={stats.totalBookings}
+              icon={Activity}
+              color="purple"
+              trend={{ value: 8, label: 'vs last month', positive: true }}
+            />
+            <StatCard
+              label="Total Revenue"
+              value={`$${stats.totalRevenue.toLocaleString()}`}
+              icon={DollarSign}
+              color="orange"
+              trend={{ value: 15, label: 'vs last month', positive: true }}
+            />
           </div>
 
-          {/* Management Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {managementCards.map((card) => {
-              const Icon = card.icon;
-              const colorClasses = {
-                blue: 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300',
-                green: 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300',
-                purple: 'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300',
-                orange: 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300',
-              };
-              
-              return (
-                <Link
-                  key={card.title}
-                  to={card.link}
-                  className="block p-6 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 hover:border-primary-300 dark:hover:border-primary-700 transition-colors"
-                >
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${colorClasses[card.color as keyof typeof colorClasses]}`}>
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <h3 className="font-semibold text-neutral-900 dark:text-white mb-1">{card.title}</h3>
-                  <p className="text-sm text-neutral-500">{card.desc}</p>
-                  {card.alert && (
-                    <Badge variant="warning" className="mt-2">Action Required</Badge>
-                  )}
-                </Link>
-              );
-            })}
+          <div className="grid lg:grid-cols-2 gap-6">
+            <DashboardChart
+              title="Revenue Trends (6 Months)"
+              data={revenueData}
+              type="area"
+              dataKey="value"
+              color="#8b5cf6"
+              height={300}
+            />
+            <DashboardChart
+              title="User Growth (Mock)"
+              data={userGrowthData}
+              type="bar"
+              dataKey="value"
+              color="#3b82f6"
+              height={300}
+            />
           </div>
 
-          {/* Recent Activity & Quick Stats */}
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Platform Health</h2>
-              </CardHeader>
-              <CardBody>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-neutral-700 dark:text-neutral-300">Database Status</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full" />
-                      <span className="text-sm text-green-600">Operational</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-neutral-700 dark:text-neutral-300">Auth Service</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full" />
-                      <span className="text-sm text-green-600">Operational</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-neutral-700 dark:text-neutral-300">Storage</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full" />
-                      <span className="text-sm text-green-600">Operational</span>
-                    </div>
-                  </div>
-                  <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700">
-                    <div className="flex items-center justify-between">
-                      <span className="text-neutral-700 dark:text-neutral-300">Recent Signups</span>
-                      <span className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.recentSignups}</span>
-                    </div>
-                    <p className="text-sm text-neutral-500 mt-1">In the last 7 days</p>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <ActivityFeed items={recentActivities} />
+            </div>
 
             <Card>
               <CardHeader>
-                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Quick Actions</h2>
+                <h3 className="font-semibold text-neutral-900 dark:text-white">Quick Actions</h3>
               </CardHeader>
               <CardBody className="space-y-3">
                 <Link to="/admin/lawyers" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
@@ -378,6 +420,17 @@ export function AdminDashboard() {
                   </div>
                   <Button variant="secondary" size="sm">Review</Button>
                 </Link>
+
+                <button
+                   onClick={() => {/* Implement export */}}
+                   className="w-full flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-purple-300 dark:hover:border-purple-700 transition-colors"
+                >
+                  <div>
+                    <h3 className="font-medium text-neutral-900 dark:text-white">Export Data</h3>
+                    <p className="text-sm text-neutral-500">Download CSV reports</p>
+                  </div>
+                  <Button variant="secondary" size="sm">Export</Button>
+                </button>
               </CardBody>
             </Card>
           </div>

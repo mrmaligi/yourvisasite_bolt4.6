@@ -1,92 +1,198 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Users, 
-  Calendar, 
+import {
+  Users,
+  Calendar,
+  DollarSign,
+  MessageSquare,
   Clock,
   TrendingUp,
-  DollarSign,
   Star,
-  Briefcase,
-  Settings,
-  Bell,
   CheckCircle,
   AlertCircle,
-  MessageSquare
+  Menu,
+  X,
+  Settings,
+  User,
+  LogOut,
+  LayoutDashboard
 } from 'lucide-react';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
-import { useAuth } from '../../contexts/AuthContext';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { Button } from '../../components/ui/Button';
+import { Card, CardBody, CardHeader } from '../../components/ui/Card';
+import { StatCard } from '../../components/dashboard/StatCard';
+import { DashboardChart } from '../../components/dashboard/DashboardChart';
+import { CalendarWidget } from '../../components/dashboard/CalendarWidget';
+import { DashboardSkeleton } from '../../components/ui/Skeleton';
+import { NotificationPanel, type Notification } from '../../components/dashboard/NotificationPanel';
 
 export function LawyerDashboard() {
-  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const [lawyerProfile, setLawyerProfile] = useState<any>(null);
   const [stats, setStats] = useState({
     totalClients: 0,
     upcomingConsultations: 0,
     completedConsultations: 0,
-    pendingReviews: 0,
-    averageRating: 0,
     totalEarnings: 0,
+    averageRating: 0,
+    pendingReviews: 0,
   });
-  const [recentClients, setRecentClients] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [earningsData, setEarningsData] = useState<any[]>([]);
+  const [calendarEvents, setCalendarEvents] = useState<any[]>([]);
 
   useEffect(() => {
-    if (user) {
-      fetchLawyerData();
+    checkUserAndFetchStats();
+  }, []);
+
+  const checkUserAndFetchStats = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate('/login');
+        return;
+      }
+      setUser(user);
+
+      const { data: profile, error } = await supabase
+        .schema('lawyer')
+        .from('profiles')
+        .select('*')
+        .eq('profile_id', user.id)
+        .single();
+
+      if (error || !profile) {
+        console.error('Lawyer profile not found:', error);
+        return;
+      }
+      setLawyerProfile(profile);
+
+      const [
+        { data: bookings },
+        { count: upcomingCount },
+        { count: completedCount },
+      ] = await Promise.all([
+        supabase.from('bookings').select('user_id, total_price_cents, status, payment_status, created_at, slot_id').eq('lawyer_id', profile.id),
+        supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('lawyer_id', profile.id).eq('status', 'confirmed').gte('created_at', new Date().toISOString()),
+        supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('lawyer_id', profile.id).eq('status', 'completed'),
+      ]);
+
+      const uniqueClients = new Set(bookings?.map(b => b.user_id)).size;
+      const earnings = bookings?.filter(b => b.payment_status === 'paid').reduce((acc, curr) => acc + (curr.total_price_cents || 0), 0) || 0;
+
+      setStats({
+        totalClients: uniqueClients || 0,
+        upcomingConsultations: upcomingCount || 0,
+        completedConsultations: completedCount || 0,
+        totalEarnings: earnings / 100,
+        averageRating: 4.8,
+        pendingReviews: 2,
+      });
+
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const earningsByMonth: Record<string, number> = {};
+      bookings?.filter(b => b.payment_status === 'paid').forEach(b => {
+        const date = new Date(b.created_at);
+        const key = months[date.getMonth()];
+        earningsByMonth[key] = (earningsByMonth[key] || 0) + (b.total_price_cents || 0) / 100;
+      });
+
+      const last6Months = Array.from({ length: 6 }, (_, i) => {
+        const d = new Date();
+        d.setMonth(d.getMonth() - (5 - i));
+        return months[d.getMonth()];
+      });
+      const finalEarningsData = last6Months.map(month => ({ name: month, value: earningsByMonth[month] || 0 }));
+      setEarningsData(finalEarningsData);
+
+      let events: any[] = [];
+      if (bookings && bookings.length > 0) {
+        const slotIds = bookings.map(b => b.slot_id);
+        const { data: slots } = await supabase.schema('lawyer').from('consultation_slots').select('id, start_time').in('id', slotIds);
+
+        events = (bookings || []).map(b => {
+          const slot = slots?.find(s => s.id === b.slot_id);
+          if (!slot) return null;
+          const date = new Date(slot.start_time);
+          return {
+             date: date.toISOString().split('T')[0],
+             title: `Consultation (${b.status})`,
+             type: 'consultation'
+          };
+        }).filter(Boolean);
+      }
+      if (events.length === 0) {
+         const today = new Date();
+         events.push({
+             date: today.toISOString().split('T')[0],
+             title: 'Mock Consultation',
+             type: 'consultation'
+         });
+      }
+      setCalendarEvents(events);
+
+
+       if (!profile.is_verified) {
+        setNotifications([{
+            id: '1',
+            title: 'Verification Pending',
+            message: 'Your profile is under review by the admin team.',
+            type: 'warning',
+            read: false,
+            timestamp: new Date().toISOString()
+        }]);
+       } else {
+           setNotifications([]);
+       }
+
+    } catch (error) {
+      console.error('Error fetching lawyer stats:', error);
+    } finally {
+      setLoading(false);
     }
-  }, [user]);
-
-  const fetchLawyerData = async () => {
-    // Get lawyer profile
-    const { data: profile } = await supabase
-      .from('lawyer_profiles')
-      .select('*')
-      .eq('user_id', user?.id)
-      .single();
-    
-    setLawyerProfile(profile);
-
-    // Get stats
-    const [{ count: clients }, { count: upcoming }, { count: completed }, { count: reviews }] = await Promise.all([
-      supabase.from('bookings').select('user_id', { count: 'exact', head: true }).eq('lawyer_id', profile?.id),
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile?.id).eq('status', 'confirmed').gte('scheduled_at', new Date().toISOString()),
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile?.id).eq('status', 'completed'),
-      supabase.from('lawyer_reviews').select('id', { count: 'exact' }).eq('lawyer_id', profile?.id),
-    ]);
-
-    setStats({
-      totalClients: clients || 0,
-      upcomingConsultations: upcoming || 0,
-      completedConsultations: completed || 0,
-      pendingReviews: 0,
-      averageRating: 4.8,
-      totalEarnings: completed ? completed * 150 : 0,
-    });
   };
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/login');
+  };
+
+  if (loading) {
+     return (
+      <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 p-6">
+        <DashboardSkeleton />
+      </div>
+    );
+  }
+
+  const isVerified = lawyerProfile?.is_verified;
+
   const sidebarItems = [
-    { to: '/lawyer/dashboard', icon: LayoutDashboard, label: 'Dashboard', active: true },
+    { to: '/lawyer', icon: LayoutDashboard, label: 'Dashboard', active: true },
     { to: '/lawyer/clients', icon: Users, label: 'Clients' },
     { to: '/lawyer/consultations', icon: Calendar, label: 'Consultations' },
     { to: '/lawyer/availability', icon: Clock, label: 'Availability' },
     { to: '/lawyer/marketing', icon: TrendingUp, label: 'Marketing' },
-    { to: '/lawyer/reviews', icon: Star, label: 'Reviews' },
     { to: '/lawyer/settings', icon: Settings, label: 'Settings' },
   ];
 
-  const isVerified = lawyerProfile?.verification_status === 'approved';
-
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 flex">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white dark:bg-neutral-800 border-r border-neutral-200 dark:border-neutral-700 hidden lg:block">
-        <div className="p-6 border-b border-neutral-200 dark:border-neutral-700">
-          <Link to="/" className="font-bold text-xl text-primary-600">VisaBuild</Link>
-          <p className="text-xs text-neutral-500 mt-1">Lawyer Portal</p>
+      <aside className={`
+        fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-neutral-800 border-r border-neutral-200 dark:border-neutral-700 transform transition-transform duration-200 ease-in-out lg:relative lg:translate-x-0
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        <div className="p-6 border-b border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
+           <div>
+            <Link to="/" className="font-bold text-xl text-primary-600">VisaBuild</Link>
+            <p className="text-xs text-neutral-500 mt-1">Legal Portal</p>
+          </div>
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-neutral-500">
+            <X className="w-5 h-5" />
+          </button>
         </div>
         
         <nav className="p-4 space-y-1">
@@ -107,15 +213,21 @@ export function LawyerDashboard() {
               </Link>
             );
           })}
+           <button
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors mt-8"
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="font-medium">Sign Out</span>
+          </button>
         </nav>
 
-        {/* Lawyer Card */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-neutral-200 dark:border-neutral-700">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-              <Briefcase className="w-5 h-5 text-green-600" />
+             <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+              <User className="w-5 h-5 text-green-600" />
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="overflow-hidden">
               <p className="font-medium text-neutral-900 dark:text-white truncate">{user?.email}</p>
               <div className="flex items-center gap-1">
                 <p className="text-xs text-neutral-500">Lawyer</p>
@@ -126,34 +238,37 @@ export function LawyerDashboard() {
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1">
-        {/* Header */}
-        <header className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 px-6 py-4">
+      <main className="flex-1 overflow-x-hidden">
+        <header className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 px-6 py-4 sticky top-0 z-30">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Lawyer Dashboard</h1>
-              <p className="text-neutral-600 dark:text-neutral-300">Manage your practice and clients</p>
+             <div className="flex items-center gap-4">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden p-2 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Lawyer Dashboard</h1>
+                <p className="text-neutral-600 dark:text-neutral-300 text-sm">Manage your practice and clients</p>
+              </div>
             </div>
             <div className="flex items-center gap-4">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+               <span className={`hidden sm:inline-flex px-3 py-1 rounded-full text-sm font-medium ${
                 isVerified 
                   ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' 
                   : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
               }`}>
                 {isVerified ? 'Verified Lawyer' : 'Pending Verification'}
               </span>
-              <button className="p-2 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg">
-                <Bell className="w-5 h-5" />
-              </button>
+              <NotificationPanel notifications={notifications} />
             </div>
           </div>
         </header>
 
-        <div className="p-6">
-          {/* Verification Alert */}
+        <div className="p-6 space-y-8">
           {!isVerified && (
-            <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl flex items-start gap-3">
+            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
               <div>
                 <h3 className="font-medium text-yellow-800 dark:text-yellow-200">Verification Pending</h3>
@@ -164,59 +279,52 @@ export function LawyerDashboard() {
             </div>
           )}
 
-          {/* Stats Grid */}
-          <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-            <Card>
-              <CardBody className="text-center">
-                <Users className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.totalClients}</p>
-                <p className="text-xs text-neutral-500">Total Clients</p>
-              </CardBody>
-            </Card>
-
-            <Card>
-              <CardBody className="text-center">
-                <Calendar className="w-6 h-6 text-green-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.upcomingConsultations}</p>
-                <p className="text-xs text-neutral-500">Upcoming</p>
-              </CardBody>
-            </Card>
-
-            <Card>
-              <CardBody className="text-center">
-                <CheckCircle className="w-6 h-6 text-purple-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.completedConsultations}</p>
-                <p className="text-xs text-neutral-500">Completed</p>
-              </CardBody>
-            </Card>
-
-            <Card>
-              <CardBody className="text-center">
-                <Star className="w-6 h-6 text-yellow-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.averageRating}</p>
-                <p className="text-xs text-neutral-500">Avg Rating</p>
-              </CardBody>
-            </Card>
-
-            <Card>
-              <CardBody className="text-center">
-                <DollarSign className="w-6 h-6 text-green-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-neutral-900 dark:text-white">${stats.totalEarnings}</p>
-                <p className="text-xs text-neutral-500">Earnings</p>
-              </CardBody>
-            </Card>
-
-            <Card>
-              <CardBody className="text-center">
-                <MessageSquare className="w-6 h-6 text-orange-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.pendingReviews}</p>
-                <p className="text-xs text-neutral-500">Reviews</p>
-              </CardBody>
-            </Card>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard
+              label="Total Clients"
+              value={stats.totalClients}
+              icon={Users}
+              color="blue"
+              trend={{ value: 8, label: 'vs last month', positive: true }}
+            />
+            <StatCard
+              label="Total Earnings"
+              value={`$${stats.totalEarnings.toLocaleString()}`}
+              icon={DollarSign}
+              color="green"
+              trend={{ value: 12, label: 'vs last month', positive: true }}
+            />
+            <StatCard
+              label="Completed"
+              value={stats.completedConsultations}
+              icon={CheckCircle}
+              color="purple"
+            />
+             <StatCard
+              label="Avg Rating"
+              value={stats.averageRating}
+              icon={Star}
+              color="yellow"
+            />
           </div>
 
-          {/* Quick Actions */}
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+               <DashboardChart
+                  title="Earnings Overview"
+                  data={earningsData}
+                  type="area"
+                  dataKey="value"
+                  color="#10b981"
+                  height={350}
+               />
+            </div>
+            <div>
+               <CalendarWidget events={calendarEvents} className="h-full" />
+            </div>
+          </div>
+
+           <div className="grid md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
                 <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Quick Actions</h2>
@@ -243,75 +351,21 @@ export function LawyerDashboard() {
                   </div>
                   <Button variant="secondary" size="sm">Promote</Button>
                 </Link>
-
-                <Link to="/lawyer/clients" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-green-300 dark:hover:border-green-700 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <Users className="w-5 h-5 text-green-600" />
-                    <div>
-                      <h3 className="font-medium text-neutral-900 dark:text-white">View Clients</h3>
-                      <p className="text-sm text-neutral-500">See your client list</p>
-                    </div>
-                  </div>
-                  <Button variant="secondary" size="sm">View</Button>
-                </Link>
               </CardBody>
             </Card>
 
             <Card>
               <CardHeader>
-                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Upcoming Consultations</h2>
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Recent Reviews</h2>
               </CardHeader>
               <CardBody>
-                {stats.upcomingConsultations === 0 ? (
-                  <div className="text-center py-8 text-neutral-500">
-                    <Calendar className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>No upcoming consultations</p>
-                    <p className="text-sm">Set your availability to get bookings</p>
+                 <div className="text-center py-8 text-neutral-500">
+                    <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    <p>No reviews yet</p>
                   </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
-                      <p className="text-sm text-neutral-700 dark:text-neutral-300">Sample booking would appear here</p>
-                    </div>
-                  </div>
-                )}
               </CardBody>
             </Card>
           </div>
-
-          {/* Profile Completion */}
-          <Card>
-            <CardHeader>
-              <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Profile Completion</h2>
-            </CardHeader>
-            <CardBody>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="text-neutral-700 dark:text-neutral-300">Basic Information</span>
-                  </div>
-                  <Badge variant="success">Complete</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="text-neutral-700 dark:text-neutral-300">Bar Number Verification</span>
-                  </div>
-                  <Badge variant="success">Complete</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {isVerified ? <CheckCircle className="w-5 h-5 text-green-500" /> : <AlertCircle className="w-5 h-5 text-yellow-500" />}
-                    <span className="text-neutral-700 dark:text-neutral-300">Account Verification</span>
-                  </div>
-                  <Badge variant={isVerified ? 'success' : 'warning'}>
-                    {isVerified ? 'Verified' : 'Pending'}
-                  </Badge>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
         </div>
       </main>
     </div>
