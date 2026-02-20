@@ -13,13 +13,48 @@ import {
   Bell,
   Activity,
   FileText,
-  Globe
+  Globe,
+  Download,
+  MoreVertical,
+  UserCheck
 } from 'lucide-react';
+import {
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
+import type { Profile, LawyerProfile } from '../../types/database';
+
+interface UserGrowthData {
+  date: string;
+  count: number;
+}
+
+interface RevenueSourceData {
+  name: string;
+  value: number;
+  color: string;
+}
+
+interface PendingLawyer extends LawyerProfile {
+  profiles: {
+    full_name: string | null;
+    email: string;
+  } | null;
+}
 
 export function AdminDashboard() {
   const { user } = useAuth();
@@ -34,59 +69,162 @@ export function AdminDashboard() {
     recentSignups: 0,
   });
   const [alerts, setAlerts] = useState<any[]>([]);
+  const [userGrowthData, setUserGrowthData] = useState<UserGrowthData[]>([]);
+  const [revenueData, setRevenueData] = useState<RevenueSourceData[]>([]);
+  const [pendingLawyers, setPendingLawyers] = useState<PendingLawyer[]>([]);
+  const [recentUsers, setRecentUsers] = useState<Profile[]>([]);
 
   useEffect(() => {
     if (user) {
-      fetchAdminStats();
+      fetchDashboardData();
     }
   }, [user]);
 
-  const fetchAdminStats = async () => {
-    // Get all stats
+  const fetchDashboardData = async () => {
+    // Parallel Fetch
     const [
-      { count: users },
-      { count: lawyers },
-      { count: pendingLawyers },
-      { count: visas },
-      { count: bookings },
-      { count: trackerPending },
+      usersRes,
+      lawyersRes,
+      pendingLawyersRes,
+      visasRes,
+      trackerPendingRes,
+      userGrowthRes,
+      recentUsersRes,
+      bookingsRes,
+      purchasesRes
     ] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact' }).eq('role', 'user'),
       supabase.from('lawyer_profiles').select('id', { count: 'exact' }).eq('verification_status', 'approved'),
-      supabase.from('lawyer_profiles').select('id', { count: 'exact' }).eq('verification_status', 'pending'),
+      supabase.from('lawyer_profiles').select('*, profiles:profile_id(full_name, email)').eq('verification_status', 'pending'),
       supabase.from('visas').select('id', { count: 'exact' }),
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('status', 'completed'),
       supabase.from('tracker_entries').select('id', { count: 'exact' }).eq('is_verified', false),
+      supabase.from('profiles').select('created_at').eq('role', 'user').order('created_at', { ascending: true }),
+      supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(5),
+      supabase.from('bookings').select('total_price_cents').eq('status', 'completed'),
+      supabase.from('user_visa_purchases').select('amount_cents')
     ]);
 
+    // Process Stats
+    const bookingRevenue = bookingsRes.data?.reduce((acc, curr) => acc + (curr.total_price_cents || 0), 0) || 0;
+    const purchaseRevenue = purchasesRes.data?.reduce((acc, curr) => acc + (curr.amount_cents || 0), 0) || 0;
+    const totalRevenue = (bookingRevenue + purchaseRevenue) / 100;
+
+    // Calculate Recent Signups (last 7 days)
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const recentCount = userGrowthRes.data?.filter(p => new Date(p.created_at) > sevenDaysAgo).length || 0;
+
     setStats({
-      totalUsers: users || 0,
-      totalLawyers: lawyers || 0,
-      pendingVerifications: pendingLawyers || 0,
-      totalVisas: visas || 0,
-      totalBookings: bookings || 0,
-      totalRevenue: (bookings || 0) * 49,
-      pendingTrackerEntries: trackerPending || 0,
-      recentSignups: 12,
+      totalUsers: usersRes.count || 0,
+      totalLawyers: lawyersRes.count || 0,
+      pendingVerifications: pendingLawyersRes.data?.length || 0,
+      totalVisas: visasRes.count || 0,
+      totalBookings: bookingsRes.data?.length || 0,
+      totalRevenue: totalRevenue,
+      pendingTrackerEntries: trackerPendingRes.count || 0,
+      recentSignups: recentCount,
     });
 
-    // Set alerts
+    // Process User Growth Chart
+    if (userGrowthRes.data) {
+      const growthMap = new Map<string, number>();
+      userGrowthRes.data.forEach(profile => {
+        const date = new Date(profile.created_at);
+        const key = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+        growthMap.set(key, (growthMap.get(key) || 0) + 1);
+      });
+      const chartData = Array.from(growthMap.entries()).map(([date, count]) => ({ date, count }));
+      setUserGrowthData(chartData);
+    }
+
+    // Process Revenue Chart
+    setRevenueData([
+      { name: 'Consultations', value: bookingRevenue / 100, color: '#8b5cf6' },
+      { name: 'Visa Guides', value: purchaseRevenue / 100, color: '#ec4899' },
+    ]);
+
+    // Process Tables
+    if (pendingLawyersRes.data) {
+      setPendingLawyers(pendingLawyersRes.data as unknown as PendingLawyer[]);
+    }
+    if (recentUsersRes.data) {
+      setRecentUsers(recentUsersRes.data);
+    }
+
+    // Alerts
     const newAlerts = [];
-    if (pendingLawyers && pendingLawyers > 0) {
+    if (pendingLawyersRes.data && pendingLawyersRes.data.length > 0) {
       newAlerts.push({
         type: 'warning',
-        message: `${pendingLawyers} lawyer${pendingLawyers > 1 ? 's' : ''} pending verification`,
+        message: `${pendingLawyersRes.data.length} lawyer${pendingLawyersRes.data.length > 1 ? 's' : ''} pending verification`,
         link: '/admin/lawyers',
       });
     }
-    if (trackerPending && trackerPending > 0) {
+    if (trackerPendingRes.count && trackerPendingRes.count > 0) {
       newAlerts.push({
         type: 'info',
-        message: `${trackerPending} tracker entries need review`,
+        message: `${trackerPendingRes.count} tracker entries need review`,
         link: '/admin/tracker',
       });
     }
     setAlerts(newAlerts);
+  };
+
+  const handleApproveLawyer = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('lawyer_profiles')
+        .update({
+          verification_status: 'approved',
+          is_verified: true,
+          verified_at: new Date().toISOString()
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Refresh data
+      fetchDashboardData();
+    } catch (error) {
+      console.error('Error approving lawyer:', error);
+    }
+  };
+
+  const handleRejectLawyer = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('lawyer_profiles')
+        .update({
+          verification_status: 'rejected',
+          rejection_reason: 'Admin rejected via dashboard'
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Refresh data
+      fetchDashboardData();
+    } catch (error) {
+      console.error('Error rejecting lawyer:', error);
+    }
+  };
+
+  const handleExportData = () => {
+    const csvContent = "data:text/csv;charset=utf-8,"
+      + "Metric,Value\n"
+      + `Total Users,${stats.totalUsers}\n`
+      + `Total Lawyers,${stats.totalLawyers}\n`
+      + `Total Visas,${stats.totalVisas}\n`
+      + `Total Bookings,${stats.totalBookings}\n`
+      + `Total Revenue,${stats.totalRevenue}\n`;
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "admin_stats.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const sidebarItems = [
@@ -185,6 +323,10 @@ export function AdminDashboard() {
               <p className="text-neutral-600 dark:text-neutral-300">Platform overview and management</p>
             </div>
             <div className="flex items-center gap-4">
+              <Button variant="secondary" size="sm" onClick={handleExportData} className="hidden sm:flex items-center gap-2">
+                <Download className="w-4 h-4" />
+                Export Data
+              </Button>
               <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium">
                 Administrator
               </span>
@@ -221,9 +363,9 @@ export function AdminDashboard() {
                       {alert.message}
                     </span>
                   </div>
-                  <Button variant="secondary" size="sm" as={Link} to={alert.link}>
+                  <Link to={alert.link} className="btn-secondary text-xs px-3 py-2 min-h-[32px]">
                     Review
-                  </Button>
+                  </Link>
                 </div>
               ))}
             </div>
@@ -280,6 +422,69 @@ export function AdminDashboard() {
             </Card>
           </div>
 
+          {/* Charts Row */}
+          <div className="grid lg:grid-cols-3 gap-6 mb-8">
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-purple-600" />
+                  User Growth
+                </h2>
+              </CardHeader>
+              <CardBody>
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={userGrowthData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E5E5" />
+                      <XAxis dataKey="date" stroke="#A3A3A3" tick={{ fontSize: 12 }} />
+                      <YAxis stroke="#A3A3A3" tick={{ fontSize: 12 }} />
+                      <Tooltip
+                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                      />
+                      <Legend />
+                      <Line type="monotone" dataKey="count" name="New Users" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 8 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardBody>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-purple-600" />
+                  Revenue Source
+                </h2>
+              </CardHeader>
+              <CardBody>
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={revenueData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={80}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {revenueData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                         formatter={(value: any) => `$${Number(value).toFixed(2)}`}
+                         contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                      />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardBody>
+            </Card>
+          </div>
+
           {/* Management Cards */}
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {managementCards.map((card) => {
@@ -310,41 +515,165 @@ export function AdminDashboard() {
             })}
           </div>
 
-          {/* Recent Activity & Quick Stats */}
+          {/* Tables Row */}
+          <div className="grid lg:grid-cols-2 gap-6 mb-8">
+            <Card className="h-full">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
+                  <UserCheck className="w-5 h-5 text-purple-600" />
+                  Pending Verifications
+                </h2>
+                <Badge>{pendingLawyers.length}</Badge>
+              </CardHeader>
+              <CardBody className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-neutral-50 dark:bg-neutral-800 text-neutral-500 font-medium">
+                      <tr>
+                        <th className="px-4 py-3">Lawyer</th>
+                        <th className="px-4 py-3">Bar Number</th>
+                        <th className="px-4 py-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-100 dark:divide-neutral-700">
+                      {pendingLawyers.length === 0 ? (
+                         <tr>
+                           <td colSpan={3} className="px-4 py-8 text-center text-neutral-500">
+                             No pending verifications
+                           </td>
+                         </tr>
+                      ) : (
+                        pendingLawyers.map((lawyer) => (
+                          <tr key={lawyer.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50">
+                            <td className="px-4 py-3">
+                              <p className="font-medium text-neutral-900 dark:text-white">{lawyer.profiles?.full_name || 'Unknown'}</p>
+                              <p className="text-xs text-neutral-500">{lawyer.profiles?.email}</p>
+                            </td>
+                            <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                              {lawyer.bar_number}
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <Button
+                                  size="sm"
+                                  className="bg-green-600 hover:bg-green-700 text-white h-7 px-2 text-xs min-h-0"
+                                  onClick={() => handleApproveLawyer(lawyer.id)}
+                                >
+                                  Approve
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="danger"
+                                  className="h-7 px-2 text-xs min-h-0"
+                                  onClick={() => handleRejectLawyer(lawyer.id)}
+                                >
+                                  Reject
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardBody>
+            </Card>
+
+            <Card className="h-full">
+              <CardHeader>
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
+                  <Users className="w-5 h-5 text-purple-600" />
+                  Recent Registrations
+                </h2>
+              </CardHeader>
+              <CardBody className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-neutral-50 dark:bg-neutral-800 text-neutral-500 font-medium">
+                      <tr>
+                        <th className="px-4 py-3">User</th>
+                        <th className="px-4 py-3">Role</th>
+                        <th className="px-4 py-3 text-right">Joined</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-100 dark:divide-neutral-700">
+                      {recentUsers.length === 0 ? (
+                        <tr>
+                           <td colSpan={3} className="px-4 py-8 text-center text-neutral-500">
+                             No recent registrations
+                           </td>
+                        </tr>
+                      ) : (
+                        recentUsers.map((user) => (
+                          <tr key={user.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50">
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-700 dark:text-purple-300 font-medium text-xs">
+                                  {user.full_name ? user.full_name[0] : user.role[0].toUpperCase()}
+                                </div>
+                                <div>
+                                  <p className="font-medium text-neutral-900 dark:text-white">{user.full_name || 'Anonymous'}</p>
+                                  <p className="text-xs text-neutral-500">{user.role}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <Badge variant={user.role === 'lawyer' ? 'primary' : 'secondary'}>
+                                {user.role}
+                              </Badge>
+                            </td>
+                            <td className="px-4 py-3 text-right text-neutral-500">
+                              {new Date(user.created_at).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardBody>
+            </Card>
+          </div>
+
+          {/* Platform Health & Quick Actions */}
           <div className="grid md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Platform Health</h2>
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
+                   <Activity className="w-5 h-5 text-purple-600" />
+                   System Health
+                </h2>
               </CardHeader>
               <CardBody>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-neutral-700 dark:text-neutral-300">Database Status</span>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full" />
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                       <span className="text-sm text-green-600">Operational</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-neutral-700 dark:text-neutral-300">Auth Service</span>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full" />
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                       <span className="text-sm text-green-600">Operational</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-neutral-700 dark:text-neutral-300">Storage</span>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full" />
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                       <span className="text-sm text-green-600">Operational</span>
                     </div>
                   </div>
-                  <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700">
-                    <div className="flex items-center justify-between">
-                      <span className="text-neutral-700 dark:text-neutral-300">Recent Signups</span>
-                      <span className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.recentSignups}</span>
+                   <div className="flex items-center justify-between">
+                    <span className="text-neutral-700 dark:text-neutral-300">Edge Functions</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                      <span className="text-sm text-green-600">Operational</span>
                     </div>
-                    <p className="text-sm text-neutral-500 mt-1">In the last 7 days</p>
                   </div>
                 </div>
               </CardBody>
@@ -352,31 +681,34 @@ export function AdminDashboard() {
 
             <Card>
               <CardHeader>
-                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Quick Actions</h2>
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
+                  <MoreVertical className="w-5 h-5 text-purple-600" />
+                  Quick Actions
+                </h2>
               </CardHeader>
               <CardBody className="space-y-3">
-                <Link to="/admin/lawyers" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
+                <Link to="/admin/lawyers" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-purple-300 dark:hover:border-purple-700 transition-colors bg-white dark:bg-neutral-800 group">
                   <div>
                     <h3 className="font-medium text-neutral-900 dark:text-white">Verify Lawyers</h3>
                     <p className="text-sm text-neutral-500">{stats.pendingVerifications} pending</p>
                   </div>
-                  <Button variant="secondary" size="sm">Review</Button>
+                  <span className="btn-secondary text-sm px-3 py-2 min-h-[36px] group-hover:bg-neutral-50 dark:group-hover:bg-neutral-700">Review</span>
                 </Link>
                 
-                <Link to="/admin/visas" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
+                <Link to="/admin/visas" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-purple-300 dark:hover:border-purple-700 transition-colors bg-white dark:bg-neutral-800 group">
                   <div>
                     <h3 className="font-medium text-neutral-900 dark:text-white">Manage Visas</h3>
                     <p className="text-sm text-neutral-500">{stats.totalVisas} visa types</p>
                   </div>
-                  <Button variant="secondary" size="sm">Edit</Button>
+                  <span className="btn-secondary text-sm px-3 py-2 min-h-[36px] group-hover:bg-neutral-50 dark:group-hover:bg-neutral-700">Edit</span>
                 </Link>
 
-                <Link to="/admin/tracker" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
+                <Link to="/admin/tracker" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-purple-300 dark:hover:border-purple-700 transition-colors bg-white dark:bg-neutral-800 group">
                   <div>
                     <h3 className="font-medium text-neutral-900 dark:text-white">Review Tracker</h3>
                     <p className="text-sm text-neutral-500">{stats.pendingTrackerEntries} pending</p>
                   </div>
-                  <Button variant="secondary" size="sm">Review</Button>
+                  <span className="btn-secondary text-sm px-3 py-2 min-h-[36px] group-hover:bg-neutral-50 dark:group-hover:bg-neutral-700">Review</span>
                 </Link>
               </CardBody>
             </Card>
