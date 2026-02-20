@@ -13,11 +13,13 @@ import {
   UserPlus,
   Star,
   UserCog,
+  Sparkles,
 } from 'lucide-react';
 import { DashboardLayout } from './DashboardLayout';
 
 const sidebarItems = [
   { to: '/lawyer/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/ai', label: 'AI Tools', icon: Sparkles },
   { to: '/lawyer/clients', label: 'My Clients', icon: Users },
   { to: '/lawyer/team', label: 'Team', icon: UserCog },
   { to: '/lawyer/cases', label: 'Cases', icon: Briefcase },
