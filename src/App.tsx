@@ -108,6 +108,62 @@ const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagement
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings').then(m => ({ default: m.AdminSettings })));
 const YouTubeManagement = lazy(() => import('./pages/admin/YouTubeManagement').then(m => ({ default: m.YouTubeManagement })));
 
+// Integrations
+const IntegrationsDashboard = lazy(() => import('./pages/admin/integrations/IntegrationsDashboard').then(m => ({ default: m.IntegrationsDashboard })));
+const GoogleIntegration = lazy(() => import('./pages/admin/integrations/platforms/GoogleIntegration').then(m => ({ default: m.GoogleIntegration })));
+const MicrosoftIntegration = lazy(() => import('./pages/admin/integrations/platforms/MicrosoftIntegration').then(m => ({ default: m.MicrosoftIntegration })));
+const SlackIntegration = lazy(() => import('./pages/admin/integrations/platforms/SlackIntegration').then(m => ({ default: m.SlackIntegration })));
+const ZoomIntegration = lazy(() => import('./pages/admin/integrations/platforms/ZoomIntegration').then(m => ({ default: m.ZoomIntegration })));
+const SalesforceIntegration = lazy(() => import('./pages/admin/integrations/platforms/SalesforceIntegration').then(m => ({ default: m.SalesforceIntegration })));
+const HubSpotIntegration = lazy(() => import('./pages/admin/integrations/platforms/HubSpotIntegration').then(m => ({ default: m.HubSpotIntegration })));
+const StripeIntegration = lazy(() => import('./pages/admin/integrations/platforms/StripeIntegration').then(m => ({ default: m.StripeIntegration })));
+const PayPalIntegration = lazy(() => import('./pages/admin/integrations/platforms/PayPalIntegration').then(m => ({ default: m.PayPalIntegration })));
+const ZapierIntegration = lazy(() => import('./pages/admin/integrations/platforms/ZapierIntegration').then(m => ({ default: m.ZapierIntegration })));
+const MailchimpIntegration = lazy(() => import('./pages/admin/integrations/platforms/MailchimpIntegration').then(m => ({ default: m.MailchimpIntegration })));
+const DropboxIntegration = lazy(() => import('./pages/admin/integrations/platforms/DropboxIntegration').then(m => ({ default: m.DropboxIntegration })));
+const JiraIntegration = lazy(() => import('./pages/admin/integrations/platforms/JiraIntegration').then(m => ({ default: m.JiraIntegration })));
+const TrelloIntegration = lazy(() => import('./pages/admin/integrations/platforms/TrelloIntegration').then(m => ({ default: m.TrelloIntegration })));
+const AsanaIntegration = lazy(() => import('./pages/admin/integrations/platforms/AsanaIntegration').then(m => ({ default: m.AsanaIntegration })));
+const NotionIntegration = lazy(() => import('./pages/admin/integrations/platforms/NotionIntegration').then(m => ({ default: m.NotionIntegration })));
+const TwilioIntegration = lazy(() => import('./pages/admin/integrations/platforms/TwilioIntegration').then(m => ({ default: m.TwilioIntegration })));
+const SendGridIntegration = lazy(() => import('./pages/admin/integrations/platforms/SendGridIntegration').then(m => ({ default: m.SendGridIntegration })));
+const AWSIntegration = lazy(() => import('./pages/admin/integrations/platforms/AWSIntegration').then(m => ({ default: m.AWSIntegration })));
+const XeroIntegration = lazy(() => import('./pages/admin/integrations/platforms/XeroIntegration').then(m => ({ default: m.XeroIntegration })));
+const QuickBooksIntegration = lazy(() => import('./pages/admin/integrations/platforms/QuickBooksIntegration').then(m => ({ default: m.QuickBooksIntegration })));
+const ShopifyIntegration = lazy(() => import('./pages/admin/integrations/platforms/ShopifyIntegration').then(m => ({ default: m.ShopifyIntegration })));
+const IntercomIntegration = lazy(() => import('./pages/admin/integrations/platforms/IntercomIntegration').then(m => ({ default: m.IntercomIntegration })));
+
+const ApiDashboard = lazy(() => import('./pages/admin/integrations/api/ApiDashboard').then(m => ({ default: m.ApiDashboard })));
+const ApiKeys = lazy(() => import('./pages/admin/integrations/api/ApiKeys').then(m => ({ default: m.ApiKeys })));
+const ApiLogs = lazy(() => import('./pages/admin/integrations/api/ApiLogs').then(m => ({ default: m.ApiLogs })));
+const ApiRateLimits = lazy(() => import('./pages/admin/integrations/api/ApiRateLimits').then(m => ({ default: m.ApiRateLimits })));
+const AdminApiDocs = lazy(() => import('./pages/admin/integrations/api/ApiDocs').then(m => ({ default: m.ApiDocs })));
+const ApiSettings = lazy(() => import('./pages/admin/integrations/api/ApiSettings').then(m => ({ default: m.ApiSettings })));
+const ApiScopes = lazy(() => import('./pages/admin/integrations/api/ApiScopes').then(m => ({ default: m.ApiScopes })));
+const ApiTokens = lazy(() => import('./pages/admin/integrations/api/ApiTokens').then(m => ({ default: m.ApiTokens })));
+
+const WebhookDashboard = lazy(() => import('./pages/admin/integrations/webhooks/WebhookDashboard').then(m => ({ default: m.WebhookDashboard })));
+const WebhookList = lazy(() => import('./pages/admin/integrations/webhooks/WebhookList').then(m => ({ default: m.WebhookList })));
+const WebhookCreate = lazy(() => import('./pages/admin/integrations/webhooks/WebhookCreate').then(m => ({ default: m.WebhookCreate })));
+const WebhookEvents = lazy(() => import('./pages/admin/integrations/webhooks/WebhookEvents').then(m => ({ default: m.WebhookEvents })));
+const WebhookHistory = lazy(() => import('./pages/admin/integrations/webhooks/WebhookHistory').then(m => ({ default: m.WebhookHistory })));
+const WebhookSecurity = lazy(() => import('./pages/admin/integrations/webhooks/WebhookSecurity').then(m => ({ default: m.WebhookSecurity })));
+const WebhookRetryPolicy = lazy(() => import('./pages/admin/integrations/webhooks/WebhookRetryPolicy').then(m => ({ default: m.WebhookRetryPolicy })));
+
+const SsoDashboard = lazy(() => import('./pages/admin/integrations/sso/SsoDashboard').then(m => ({ default: m.SsoDashboard })));
+const SsoProviders = lazy(() => import('./pages/admin/integrations/sso/SsoProviders').then(m => ({ default: m.SsoProviders })));
+const SamlConfiguration = lazy(() => import('./pages/admin/integrations/sso/SamlConfiguration').then(m => ({ default: m.SamlConfiguration })));
+const OidcConfiguration = lazy(() => import('./pages/admin/integrations/sso/OidcConfiguration').then(m => ({ default: m.OidcConfiguration })));
+const SsoAuditLogs = lazy(() => import('./pages/admin/integrations/sso/SsoAuditLogs').then(m => ({ default: m.SsoAuditLogs })));
+const SsoSettings = lazy(() => import('./pages/admin/integrations/sso/SsoSettings').then(m => ({ default: m.SsoSettings })));
+
+const SyncDashboard = lazy(() => import('./pages/admin/integrations/sync/SyncDashboard').then(m => ({ default: m.SyncDashboard })));
+const SyncStatus = lazy(() => import('./pages/admin/integrations/sync/SyncStatus').then(m => ({ default: m.SyncStatus })));
+const SyncHistory = lazy(() => import('./pages/admin/integrations/sync/SyncHistory').then(m => ({ default: m.SyncHistory })));
+const SyncMapping = lazy(() => import('./pages/admin/integrations/sync/SyncMapping').then(m => ({ default: m.SyncMapping })));
+const SyncConflicts = lazy(() => import('./pages/admin/integrations/sync/SyncConflicts').then(m => ({ default: m.SyncConflicts })));
+const SyncSchedule = lazy(() => import('./pages/admin/integrations/sync/SyncSchedule').then(m => ({ default: m.SyncSchedule })));
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -224,6 +280,62 @@ export default function App() {
                   <Route path="admin/pricing" element={<ProtectedRoute allowedRoles={['admin']}><AdminPricing /></ProtectedRoute>} />
                   <Route path="admin/promos" element={<ProtectedRoute allowedRoles={['admin']}><PromoCodeManagement /></ProtectedRoute>} />
                   <Route path="admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
+
+                  {/* Admin Integrations */}
+                  <Route path="admin/integrations" element={<ProtectedRoute allowedRoles={['admin']}><IntegrationsDashboard /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/google" element={<ProtectedRoute allowedRoles={['admin']}><GoogleIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/microsoft" element={<ProtectedRoute allowedRoles={['admin']}><MicrosoftIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/slack" element={<ProtectedRoute allowedRoles={['admin']}><SlackIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/zoom" element={<ProtectedRoute allowedRoles={['admin']}><ZoomIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/salesforce" element={<ProtectedRoute allowedRoles={['admin']}><SalesforceIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/hubspot" element={<ProtectedRoute allowedRoles={['admin']}><HubSpotIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/stripe" element={<ProtectedRoute allowedRoles={['admin']}><StripeIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/paypal" element={<ProtectedRoute allowedRoles={['admin']}><PayPalIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/zapier" element={<ProtectedRoute allowedRoles={['admin']}><ZapierIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/mailchimp" element={<ProtectedRoute allowedRoles={['admin']}><MailchimpIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/dropbox" element={<ProtectedRoute allowedRoles={['admin']}><DropboxIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/jira" element={<ProtectedRoute allowedRoles={['admin']}><JiraIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/trello" element={<ProtectedRoute allowedRoles={['admin']}><TrelloIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/asana" element={<ProtectedRoute allowedRoles={['admin']}><AsanaIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/notion" element={<ProtectedRoute allowedRoles={['admin']}><NotionIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/twilio" element={<ProtectedRoute allowedRoles={['admin']}><TwilioIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/sendgrid" element={<ProtectedRoute allowedRoles={['admin']}><SendGridIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/aws" element={<ProtectedRoute allowedRoles={['admin']}><AWSIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/xero" element={<ProtectedRoute allowedRoles={['admin']}><XeroIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/quickbooks" element={<ProtectedRoute allowedRoles={['admin']}><QuickBooksIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/shopify" element={<ProtectedRoute allowedRoles={['admin']}><ShopifyIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/intercom" element={<ProtectedRoute allowedRoles={['admin']}><IntercomIntegration /></ProtectedRoute>} />
+
+                  <Route path="admin/integrations/api" element={<ProtectedRoute allowedRoles={['admin']}><ApiDashboard /></ProtectedRoute>} />
+                  <Route path="admin/integrations/api/keys" element={<ProtectedRoute allowedRoles={['admin']}><ApiKeys /></ProtectedRoute>} />
+                  <Route path="admin/integrations/api/logs" element={<ProtectedRoute allowedRoles={['admin']}><ApiLogs /></ProtectedRoute>} />
+                  <Route path="admin/integrations/api/limits" element={<ProtectedRoute allowedRoles={['admin']}><ApiRateLimits /></ProtectedRoute>} />
+                  <Route path="admin/integrations/api/docs" element={<ProtectedRoute allowedRoles={['admin']}><AdminApiDocs /></ProtectedRoute>} />
+                  <Route path="admin/integrations/api/settings" element={<ProtectedRoute allowedRoles={['admin']}><ApiSettings /></ProtectedRoute>} />
+                  <Route path="admin/integrations/api/scopes" element={<ProtectedRoute allowedRoles={['admin']}><ApiScopes /></ProtectedRoute>} />
+                  <Route path="admin/integrations/api/tokens" element={<ProtectedRoute allowedRoles={['admin']}><ApiTokens /></ProtectedRoute>} />
+
+                  <Route path="admin/integrations/webhooks" element={<ProtectedRoute allowedRoles={['admin']}><WebhookDashboard /></ProtectedRoute>} />
+                  <Route path="admin/integrations/webhooks/list" element={<ProtectedRoute allowedRoles={['admin']}><WebhookList /></ProtectedRoute>} />
+                  <Route path="admin/integrations/webhooks/create" element={<ProtectedRoute allowedRoles={['admin']}><WebhookCreate /></ProtectedRoute>} />
+                  <Route path="admin/integrations/webhooks/events" element={<ProtectedRoute allowedRoles={['admin']}><WebhookEvents /></ProtectedRoute>} />
+                  <Route path="admin/integrations/webhooks/history" element={<ProtectedRoute allowedRoles={['admin']}><WebhookHistory /></ProtectedRoute>} />
+                  <Route path="admin/integrations/webhooks/security" element={<ProtectedRoute allowedRoles={['admin']}><WebhookSecurity /></ProtectedRoute>} />
+                  <Route path="admin/integrations/webhooks/retry" element={<ProtectedRoute allowedRoles={['admin']}><WebhookRetryPolicy /></ProtectedRoute>} />
+
+                  <Route path="admin/integrations/sso" element={<ProtectedRoute allowedRoles={['admin']}><SsoDashboard /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sso/providers" element={<ProtectedRoute allowedRoles={['admin']}><SsoProviders /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sso/saml" element={<ProtectedRoute allowedRoles={['admin']}><SamlConfiguration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sso/oidc" element={<ProtectedRoute allowedRoles={['admin']}><OidcConfiguration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sso/audit" element={<ProtectedRoute allowedRoles={['admin']}><SsoAuditLogs /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sso/settings" element={<ProtectedRoute allowedRoles={['admin']}><SsoSettings /></ProtectedRoute>} />
+
+                  <Route path="admin/integrations/sync" element={<ProtectedRoute allowedRoles={['admin']}><SyncDashboard /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sync/status" element={<ProtectedRoute allowedRoles={['admin']}><SyncStatus /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sync/history" element={<ProtectedRoute allowedRoles={['admin']}><SyncHistory /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sync/mapping" element={<ProtectedRoute allowedRoles={['admin']}><SyncMapping /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sync/conflicts" element={<ProtectedRoute allowedRoles={['admin']}><SyncConflicts /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sync/schedule" element={<ProtectedRoute allowedRoles={['admin']}><SyncSchedule /></ProtectedRoute>} />
                   </Routes>
                 </Suspense>
               </GlobalSearchProvider>

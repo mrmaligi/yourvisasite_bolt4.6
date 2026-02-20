@@ -14,11 +14,13 @@ import {
   Library,
   Files,
   PenTool,
+  Blocks,
 } from 'lucide-react';
 import { DashboardLayout } from './DashboardLayout';
 
 const sidebarItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/admin/integrations', label: 'Integrations', icon: Blocks },
   { to: '/admin/activity', label: 'Activity Log', icon: Activity },
   { to: '/admin/users', label: 'Users', icon: Users },
   { to: '/admin/lawyers', label: 'Lawyers', icon: Scale },
