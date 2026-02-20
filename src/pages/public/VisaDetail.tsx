@@ -19,7 +19,6 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { VisaDetailSkeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
-import { StripeCheckout } from '../../components/StripeCheckout';
 import { ShareButton } from '../../components/ShareButton';
 import type { Visa, TrackerStats, VisaPremiumContent, Product, UserVisaPurchase, TrackerEntry, NewsArticle } from '../../types/database';
 
@@ -334,17 +333,37 @@ export function VisaDetail() {
 
                             <div className="no-print">
                                 {user ? (
-                                    <StripeCheckout
-                                        type="premium"
-                                        visaId={visa.id}
-                                        amount={product?.price_cents || 4900}
+                                    <Button
+                                        onClick={async () => {
+                                            // DUMMY UNLOCK - No real payment
+                                            try {
+                                                const { error } = await supabase
+                                                    .from('user_visas')
+                                                    .insert({
+                                                        user_id: user.id,
+                                                        visa_id: visa.id,
+                                                        status: 'active',
+                                                        purchased_at: new Date().toISOString()
+                                                    })
+                                                    .select()
+                                                    .single();
+
+                                                if (error) throw error;
+
+                                                toast('success', 'Content unlocked! (Demo mode)');
+                                                setHasAccess(true); // Refresh to show content
+                                            } catch (err) {
+                                                console.error('Unlock error:', err);
+                                                toast('error', 'Failed to unlock. Please try again.');
+                                            }
+                                        }}
                                         className="w-full sm:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-primary-900/20"
                                     >
-                                        Unlock Now — ${price}
-                                    </StripeCheckout>
+                                        Unlock Now — ${price} (Demo)
+                                    </Button>
                                 ) : (
                                     <Button
-                                        onClick={() => toast('info', 'Please log in to purchase')}
+                                        onClick={() => toast('info', 'Please log in to unlock')}
                                         className="w-full sm:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-primary-900/20"
                                     >
                                         Unlock Now — ${price}
