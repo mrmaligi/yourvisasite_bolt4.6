@@ -6,7 +6,6 @@ import { ThemeToggle } from '../ui/ThemeToggle';
 import { UserMenu } from './UserMenu';
 import { SearchTrigger } from '../ui/SearchTrigger';
 import { useAuth } from '../../contexts/AuthContext';
-import { Button } from '../ui/Button';
 
 function MobileAuthSection({ onClose }: { onClose: () => void }) {
   const { user, profile, role, signOut } = useAuth();
@@ -23,8 +22,12 @@ function MobileAuthSection({ onClose }: { onClose: () => void }) {
         <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-3">
           Sign in to access your dashboard, track applications, and more.
         </p>
-        <Link to="/login" onClick={onClose} className="block">
-          <Button className="w-full">Sign in</Button>
+        <Link
+          to="/login"
+          onClick={onClose}
+          className="flex items-center justify-center w-full px-5 py-3 rounded-xl text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 active:bg-primary-800 transition-colors min-h-[44px] shadow-sm active:scale-[0.98] transform"
+        >
+          Sign in
         </Link>
         <p className="text-xs text-center text-neutral-400 dark:text-neutral-500 mt-2">
           Don't have an account?{' '}
