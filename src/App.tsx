@@ -12,6 +12,7 @@ import { UserDashboardLayout } from './components/layout/UserDashboardLayout';
 import { ProtectedRoute, RoleRedirect } from './components/auth/RoleGuard';
 import { Loading } from './components/ui/Loading';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { MobileRoutes } from './routes/MobileRoutes';
 
 const Landing = lazy(() => import('./pages/public/Landing').then(m => ({ default: m.Landing })));
 const UnifiedLogin = lazy(() => import('./pages/public/UnifiedLogin').then(m => ({ default: m.UnifiedLogin })));
@@ -160,6 +161,11 @@ export default function App() {
                     <Route path="partners" element={<Partners />} />
                     <Route path="press" element={<Press />} />
                     <Route path="api-docs" element={<ApiDocs />} />
+                  </Route>
+
+                  {/* Mobile Routes */}
+                  <Route path="mobile">
+                    {MobileRoutes}
                   </Route>
 
                   {/* User Routes - Each has its own layout */}
