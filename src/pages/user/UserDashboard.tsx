@@ -18,6 +18,12 @@ import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
+import { TrackerEntryCard } from '../../components/tracker/TrackerEntryCard';
+import type { TrackerEntry, Visa } from '../../types/database';
+
+interface ExtendedEntry extends TrackerEntry {
+  visas: Pick<Visa, 'name' | 'subclass'> | null;
+}
 
 export function UserDashboard() {
   const { user } = useAuth();
@@ -27,11 +33,12 @@ export function UserDashboard() {
     documents: 0,
     upcomingConsultations: 0,
   });
-  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [trackerEntries, setTrackerEntries] = useState<ExtendedEntry[]>([]);
 
   useEffect(() => {
     if (user) {
       fetchUserStats();
+      fetchTrackerEntries();
     }
   }, [user]);
 
@@ -50,6 +57,17 @@ export function UserDashboard() {
       documents: docs || 0,
       upcomingConsultations: consultations || 0,
     });
+  };
+
+  const fetchTrackerEntries = async () => {
+    const { data } = await supabase
+      .from('tracker_entries')
+      .select('*, visas(name, subclass)')
+      .eq('submitted_by', user!.id)
+      .order('created_at', { ascending: false })
+      .limit(3); // Limit to 3 most recent
+
+    setTrackerEntries(data as unknown as ExtendedEntry[] || []);
   };
 
   const quickActions = [
@@ -184,9 +202,9 @@ export function UserDashboard() {
             </Card>
           </div>
 
-          {/* Quick Actions */}
+          {/* Quick Actions & Tracker */}
           <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <Card>
+            <Card className="h-full">
               <CardHeader>
                 <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Quick Actions</h2>
               </CardHeader>
@@ -208,29 +226,28 @@ export function UserDashboard() {
               </CardBody>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Recent Activity</h2>
-              </CardHeader>
-              <CardBody>
-                {recentActivity.length === 0 ? (
-                  <div className="text-center py-8 text-neutral-500">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">My Applications</h2>
+                <Link to="/tracker" className="text-sm text-primary-600 hover:underline">View All</Link>
+              </div>
+
+              {trackerEntries.length === 0 ? (
+                <Card>
+                   <CardBody className="text-center py-8 text-neutral-500">
                     <Clock className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>No recent activity</p>
-                    <p className="text-sm">Start by exploring visas or taking the quiz</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {recentActivity.map((activity, i) => (
-                      <div key={i} className="flex items-center gap-3 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
-                        <div className="w-2 h-2 bg-primary-500 rounded-full" />
-                        <p className="text-sm text-neutral-700 dark:text-neutral-300">{activity.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardBody>
-            </Card>
+                    <p>No active applications</p>
+                    <Link to="/tracker" className="text-sm text-primary-600 mt-2 block">Submit an application to track</Link>
+                  </CardBody>
+                </Card>
+              ) : (
+                <div className="space-y-4">
+                  {trackerEntries.map(entry => (
+                    <TrackerEntryCard key={entry.id} entry={entry} />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Recommended Visas */}

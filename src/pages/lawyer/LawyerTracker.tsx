@@ -1,37 +1,30 @@
 import { useEffect, useState } from 'react';
-import { TrendingUp, Plus, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { TrendingUp, Plus } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody } from '../../components/ui/Card';
-import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { TrackerEntryCard } from '../../components/tracker/TrackerEntryCard';
+import type { TrackerEntry, TrackerOutcome } from '../../types/database';
 
-interface TrackerEntry {
-  id: string;
-  visa_id: string;
-  visa_name: string | null;
-  outcome: 'approved' | 'denied' | 'pending';
-  processing_days: number | null;
-  application_date: string;
-  decision_date: string | null;
-  created_at: string;
+// Extend TrackerEntry to include visa_name which we enrich manually
+interface ExtendedEntry extends TrackerEntry {
+  visa_name?: string | null;
 }
 
 export function LawyerTracker() {
   const { profile } = useAuth();
   const { toast } = useToast();
-  const [entries, setEntries] = useState<TrackerEntry[]>([]);
+  const [entries, setEntries] = useState<ExtendedEntry[]>([]);
   const [visas, setVisas] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     visa_id: '',
-    outcome: 'approved' as 'approved' | 'denied' | 'pending',
-    processing_days: '',
+    outcome: 'approved' as TrackerOutcome,
     application_date: '',
     decision_date: '',
   });
@@ -43,11 +36,11 @@ export function LawyerTracker() {
   const fetchData = async () => {
     if (!profile) return;
 
-    // Use profile.id directly as submitted_by references public.profiles
+    // Fetch entries with status
     const [trackerRes, visasRes] = await Promise.all([
       supabase
         .from('tracker_entries')
-        .select('id, visa_id, outcome, processing_days, application_date, decision_date, created_at')
+        .select('*') // Select all including status
         .eq('submitted_by', profile.id)
         .order('created_at', { ascending: false }),
       supabase.from('visas').select('id, name').order('name'),
@@ -67,7 +60,7 @@ export function LawyerTracker() {
         visa_name: visaMap.get(e.visa_id) || null,
       }));
 
-      setEntries(enriched as TrackerEntry[]);
+      setEntries(enriched as ExtendedEntry[]);
     }
 
     setVisas(visasRes.data || []);
@@ -85,16 +78,16 @@ export function LawyerTracker() {
        return;
     }
 
+    const isPending = formData.outcome === 'pending';
+
     const { error } = await supabase.from('tracker_entries').insert({
       visa_id: formData.visa_id,
       submitted_by: profile.id,
       submitter_role: 'lawyer',
       outcome: formData.outcome,
-      // processing_days is calculated by trigger, but we can pass null or omit it
-      // actually the form has processing_days input, but it's redundant if we have dates.
-      // let's omit it and let the trigger handle it.
+      status: isPending ? 'pending' : 'completed',
       application_date: formData.application_date,
-      decision_date: formData.decision_date || null,
+      decision_date: isPending ? null : formData.decision_date,
     });
 
     if (error) {
@@ -103,28 +96,18 @@ export function LawyerTracker() {
       return;
     }
 
+    // Refresh stats
+    await supabase.rpc('refresh_tracker_stats');
+
     toast('success', 'Entry submitted successfully');
     setShowModal(false);
     setFormData({
       visa_id: '',
       outcome: 'approved',
-      processing_days: '',
       application_date: '',
       decision_date: '',
     });
     fetchData();
-  };
-
-  const outcomeVariant = {
-    approved: 'success' as const,
-    denied: 'danger' as const,
-    pending: 'warning' as const,
-  };
-
-  const outcomeIcon = {
-    approved: CheckCircle,
-    denied: XCircle,
-    pending: Clock,
   };
 
   if (loading) {
@@ -162,31 +145,10 @@ export function LawyerTracker() {
           description="Submit your first client outcome to contribute to processing time analytics."
         />
       ) : (
-        <div className="space-y-3">
-          {entries.map((entry) => {
-            const Icon = outcomeIcon[entry.outcome];
-            return (
-              <Card key={entry.id}>
-                <CardBody className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center">
-                      <Icon className="w-5 h-5 text-primary-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-neutral-900">{entry.visa_name}</p>
-                      <div className="flex items-center gap-3 mt-1 text-sm text-neutral-500">
-                        {entry.processing_days !== null && (
-                          <span>{entry.processing_days} days</span>
-                        )}
-                        <span>Applied: {new Date(entry.application_date).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <Badge variant={outcomeVariant[entry.outcome]}>{entry.outcome}</Badge>
-                </CardBody>
-              </Card>
-            );
-          })}
+        <div className="grid gap-4">
+          {entries.map((entry) => (
+             <TrackerEntryCard key={entry.id} entry={entry} />
+          ))}
         </div>
       )}
 
@@ -211,7 +173,7 @@ export function LawyerTracker() {
             <select
               value={formData.visa_id}
               onChange={(e) => setFormData({ ...formData, visa_id: e.target.value })}
-              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="input-field w-full"
             >
               <option value="">Select a visa</option>
               {visas.map((v) => (
@@ -229,23 +191,23 @@ export function LawyerTracker() {
             <select
               value={formData.outcome}
               onChange={(e) =>
-                setFormData({ ...formData, outcome: e.target.value as 'approved' | 'denied' | 'pending' })
+                setFormData({ ...formData, outcome: e.target.value as TrackerOutcome })
               }
-              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="input-field w-full"
             >
               <option value="approved">Approved</option>
-              <option value="denied">Denied</option>
+              <option value="refused">Refused</option>
+              <option value="withdrawn">Withdrawn</option>
               <option value="pending">Pending</option>
             </select>
           </div>
-
-          {/* Processing Days is calculated automatically, so we remove the input */}
 
           <Input
             label="Application Date *"
             type="date"
             value={formData.application_date}
             onChange={(e) => setFormData({ ...formData, application_date: e.target.value })}
+            max={new Date().toISOString().split('T')[0]}
           />
 
           <Input
@@ -254,6 +216,8 @@ export function LawyerTracker() {
             value={formData.decision_date}
             onChange={(e) => setFormData({ ...formData, decision_date: e.target.value })}
             helperText={formData.outcome === 'pending' ? 'Optional for pending applications' : 'Required for completed applications'}
+            disabled={formData.outcome === 'pending'}
+            max={new Date().toISOString().split('T')[0]}
           />
         </div>
       </Modal>
