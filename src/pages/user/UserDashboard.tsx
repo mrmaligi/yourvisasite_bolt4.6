@@ -115,7 +115,7 @@ export function UserDashboard() {
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-neutral-200 dark:border-neutral-700">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-              <User className="w-5 h-5 text-blue-600" />
+              <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
               <p className="font-medium text-neutral-900 dark:text-white">{user?.email}</p>
@@ -184,7 +184,7 @@ export function UserDashboard() {
             <Card>
               <CardBody className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                  <Heart className="w-6 h-6 text-blue-600" />
+                  <Heart className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.savedVisas}</p>
@@ -196,7 +196,7 @@ export function UserDashboard() {
             <Card>
               <CardBody className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-                  <Briefcase className="w-6 h-6 text-green-600" />
+                  <Briefcase className="w-6 h-6 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.myVisas}</p>
@@ -208,7 +208,7 @@ export function UserDashboard() {
             <Card>
               <CardBody className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-purple-600" />
+                  <FileText className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.documents}</p>
@@ -220,7 +220,7 @@ export function UserDashboard() {
             <Card>
               <CardBody className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-orange-600" />
+                  <Calendar className="w-6 h-6 text-orange-600 dark:text-orange-400" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.upcomingConsultations}</p>
@@ -245,7 +245,7 @@ export function UserDashboard() {
                       to={action.to}
                       className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-primary-300 dark:hover:border-primary-700 transition-colors"
                     >
-                      <Icon className="w-6 h-6 text-primary-600 mb-2" />
+                      <Icon className="w-6 h-6 text-primary-600 dark:text-primary-400 mb-2" />
                       <h3 className="font-medium text-neutral-900 dark:text-white">{action.label}</h3>
                       <p className="text-sm text-neutral-500">{action.desc}</p>
                     </Link>
@@ -269,7 +269,7 @@ export function UserDashboard() {
                   <div className="space-y-3">
                     {recentActivity.map((activity, i) => (
                       <div key={i} className="flex items-center gap-3 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
-                        <div className="w-2 h-2 bg-primary-500 rounded-full" />
+                        <div className="w-2 h-2 bg-primary-500 dark:bg-primary-400 rounded-full" />
                         <p className="text-sm text-neutral-700 dark:text-neutral-300">{activity.description}</p>
                       </div>
                     ))}
@@ -283,7 +283,7 @@ export function UserDashboard() {
           <Card>
             <CardHeader className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Recommended for You</h2>
-              <Link to="/visas" className="text-primary-600 hover:underline text-sm flex items-center gap-1">
+              <Link to="/visas" className="text-primary-600 dark:text-primary-400 hover:underline text-sm flex items-center gap-1">
                 View All <ChevronRight className="w-4 h-4" />
               </Link>
             </CardHeader>
