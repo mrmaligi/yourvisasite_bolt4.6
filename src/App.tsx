@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
@@ -61,6 +62,8 @@ const LawyerNews = lazy(() => import('./pages/lawyer/LawyerNews').then(m => ({ d
 const LawyerMarketplace = lazy(() => import('./pages/lawyer/Marketplace').then(m => ({ default: m.Marketplace })));
 const LawyerSettings = lazy(() => import('./pages/lawyer/LawyerSettings').then(m => ({ default: m.LawyerSettings })));
 
+const LawyerRoutes = lazy(() => import('./routes/LawyerRoutes').then(m => ({ default: m.LawyerRoutes })));
+
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
 const AdminActivityLog = lazy(() => import('./pages/admin/ActivityLog').then(m => ({ default: m.ActivityLog })));
 const UserManagement = lazy(() => import('./pages/admin/UserManagement').then(m => ({ default: m.UserManagement })));
@@ -76,12 +79,15 @@ const YouTubeManagement = lazy(() => import('./pages/admin/YouTubeManagement').t
 
 const UserRoutes = lazy(() => import('./routes/UserRoutes').then(m => ({ default: m.UserRoutes })));
 
+const queryClient = new QueryClient();
+
 export default function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <ToastProvider>
-          <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ToastProvider>
+            <ErrorBoundary>
             <PWAInstallPrompt />
             <BrowserRouter>
               <GlobalSearchProvider>
@@ -143,6 +149,9 @@ export default function App() {
                   <Route path="lawyer/marketplace" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerMarketplace /></ProtectedRoute>} />
                   <Route path="lawyer/settings" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerSettings /></ProtectedRoute>} />
 
+                  {/* Lawyer Expansion Routes */}
+                  <Route path="lawyer/*" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerRoutes /></ProtectedRoute>} />
+
                   {/* Admin Routes - Each has its own layout */}
                   <Route path="admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
                     <Route path="activity" element={<AdminActivityLog />} />
@@ -162,10 +171,11 @@ export default function App() {
                   </Routes>
                 </Suspense>
               </GlobalSearchProvider>
-            </BrowserRouter>
-          </ErrorBoundary>
-        </ToastProvider>
-      </AuthProvider>
+              </BrowserRouter>
+            </ErrorBoundary>
+          </ToastProvider>
+        </AuthProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }
