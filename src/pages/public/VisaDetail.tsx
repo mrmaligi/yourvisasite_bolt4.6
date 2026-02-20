@@ -19,7 +19,6 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { VisaDetailSkeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
-import { StripeCheckout } from '../../components/StripeCheckout';
 import { ShareButton } from '../../components/ShareButton';
 import type { Visa, TrackerStats, VisaPremiumContent, Product, UserVisaPurchase, TrackerEntry, NewsArticle } from '../../types/database';
 
@@ -37,6 +36,7 @@ export function VisaDetail() {
   const [recentEntries, setRecentEntries] = useState<TrackerEntry[]>([]);
   const [visaNews, setVisaNews] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [unlocking, setUnlocking] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -131,40 +131,65 @@ export function VisaDetail() {
     fetchData();
   }, [id, user]);
 
-  // Stripe success handler
-  useEffect(() => {
-    const checkSession = async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const sessionId = urlParams.get('session_id');
-      
-      if (sessionId && user && id) {
-        try {
-          const { data: p } = await supabase
-            .from('user_visa_purchases')
-            .select('*')
-            .eq('user_id', user.id)
-            .eq('visa_id', id)
-            .maybeSingle();
-          
-          if (p) {
-            setPurchase(p);
-            const { data: content } = await supabase
-              .from('visa_premium_content')
-              .select('*')
-              .eq('visa_id', id)
-              .order('step_number');
-            setPremiumContent(content || []);
-            toast('success', 'Payment successful! Guide unlocked.');
-            window.history.replaceState({}, '', window.location.pathname);
-          }
-        } catch (err) {
-          console.error('Session check error:', err);
-        }
-      }
-    };
-    checkSession();
-  }, [user, id, toast]);
+  const handleDummyUnlock = async () => {
+    if (!user || !visa) {
+      toast('info', 'Please log in to purchase');
+      return;
+    }
 
+    setUnlocking(true);
+
+    try {
+      // 1. Add to user_visas
+      const { error: visaError } = await supabase
+        .from('user_visas')
+        .upsert({
+          user_id: user.id,
+          visa_id: visa.id,
+          status: 'active'
+        }, { onConflict: 'user_id, visa_id' });
+      
+      if (visaError) {
+        console.error('Error adding to user_visas:', visaError);
+        // Continue anyway as purchase is more critical for this page
+      }
+
+      // 2. Add to user_visa_purchases
+      const purchaseData = {
+        user_id: user.id,
+        visa_id: visa.id,
+        amount_cents: product?.price_cents || 4900,
+        payment_provider: 'dummy_unlock',
+        purchased_at: new Date().toISOString(),
+      };
+
+      const { data: newPurchase, error: purchaseError } = await supabase
+        .from('user_visa_purchases')
+        .upsert(purchaseData, { onConflict: 'user_id, visa_id' })
+        .select()
+        .single();
+
+      if (purchaseError) throw purchaseError;
+
+      // 3. Fetch premium content
+      const { data: contentData } = await supabase
+        .from('visa_premium_content')
+        .select('*')
+        .eq('visa_id', visa.id)
+        .order('step_number');
+
+      setPurchase(newPurchase as any);
+      setPremiumContent(contentData || []);
+
+      toast('success', 'This is a demo. Content unlocked!');
+
+    } catch (error) {
+      console.error('Error unlocking:', error);
+      toast('error', 'Failed to unlock content');
+    } finally {
+      setUnlocking(false);
+    }
+  };
 
   if (loading) {
     return <VisaDetailSkeleton />;
@@ -334,14 +359,13 @@ export function VisaDetail() {
 
                             <div className="no-print">
                                 {user ? (
-                                    <StripeCheckout
-                                        type="premium"
-                                        visaId={visa.id}
-                                        amount={product?.price_cents || 4900}
+                                    <Button
+                                        onClick={handleDummyUnlock}
+                                        disabled={unlocking}
                                         className="w-full sm:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-primary-900/20"
                                     >
-                                        Unlock Now — ${price}
-                                    </StripeCheckout>
+                                        {unlocking ? 'Unlocking...' : `Unlock Now — $${price}`}
+                                    </Button>
                                 ) : (
                                     <Button
                                         onClick={() => toast('info', 'Please log in to purchase')}
