@@ -54,13 +54,7 @@ export function LawyerTracker() {
     ]);
 
     if (trackerRes.data) {
-      const visaIds = [...new Set(trackerRes.data.map(e => e.visa_id))];
-      const { data: visaDetails } = await supabase
-        .from('visas')
-        .select('id, name')
-        .in('id', visaIds);
-
-      const visaMap = new Map(visaDetails?.map(v => [v.id, v.name]) || []);
+      const visaMap = new Map(visasRes.data?.map(v => [v.id, v.name]) || []);
 
       const enriched = trackerRes.data.map(e => ({
         ...e,
