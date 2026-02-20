@@ -15,7 +15,6 @@ import {
   Gift
 } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 
@@ -246,23 +245,23 @@ export function UserDashboard() {
                 <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
                   <h3 className="font-semibold text-neutral-900 dark:text-white">Skilled Independent (189)</h3>
                   <p className="text-sm text-neutral-500 mt-1">Permanent visa for skilled workers</p>
-                  <Button variant="secondary" size="sm" className="mt-3" as={Link} to="/visas/189">
+                  <Link to="/visas/189" className="mt-3 btn-secondary text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]">
                     Learn More
-                  </Button>
+                  </Link>
                 </div>
                 <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
                   <h3 className="font-semibold text-neutral-900 dark:text-white">Student Visa (500)</h3>
                   <p className="text-sm text-neutral-500 mt-1">Study at Australian institutions</p>
-                  <Button variant="secondary" size="sm" className="mt-3" as={Link} to="/visas/500">
+                  <Link to="/visas/500" className="mt-3 btn-secondary text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]">
                     Learn More
-                  </Button>
+                  </Link>
                 </div>
                 <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
                   <h3 className="font-semibold text-neutral-900 dark:text-white">Working Holiday (417)</h3>
                   <p className="text-sm text-neutral-500 mt-1">Work and travel in Australia</p>
-                  <Button variant="secondary" size="sm" className="mt-3" as={Link} to="/visas/417">
+                  <Link to="/visas/417" className="mt-3 btn-secondary text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]">
                     Learn More
-                  </Button>
+                  </Link>
                 </div>
               </div>
             </CardBody>

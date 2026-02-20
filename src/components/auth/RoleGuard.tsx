@@ -15,7 +15,7 @@ export function ProtectedRoute({
   allowedRoles = ['user', 'lawyer', 'admin'],
   requireVerification = false 
 }: ProtectedRouteProps) {
-  const { user, loading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [profile, setProfile] = useState<{ role: string; is_active: boolean } | null>(null);
   const [loading, setLoading] = useState(true);
   const location = useLocation();

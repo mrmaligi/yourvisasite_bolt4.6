@@ -16,7 +16,6 @@ import {
   Globe
 } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -221,9 +220,9 @@ export function AdminDashboard() {
                       {alert.message}
                     </span>
                   </div>
-                  <Button variant="secondary" size="sm" as={Link} to={alert.link}>
+                  <Link to={alert.link} className="btn-secondary text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]">
                     Review
-                  </Button>
+                  </Link>
                 </div>
               ))}
             </div>
@@ -360,7 +359,7 @@ export function AdminDashboard() {
                     <h3 className="font-medium text-neutral-900 dark:text-white">Verify Lawyers</h3>
                     <p className="text-sm text-neutral-500">{stats.pendingVerifications} pending</p>
                   </div>
-                  <Button variant="secondary" size="sm">Review</Button>
+                  <span className="btn-secondary text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]">Review</span>
                 </Link>
                 
                 <Link to="/admin/visas" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
@@ -368,7 +367,7 @@ export function AdminDashboard() {
                     <h3 className="font-medium text-neutral-900 dark:text-white">Manage Visas</h3>
                     <p className="text-sm text-neutral-500">{stats.totalVisas} visa types</p>
                   </div>
-                  <Button variant="secondary" size="sm">Edit</Button>
+                  <span className="btn-secondary text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]">Edit</span>
                 </Link>
 
                 <Link to="/admin/tracker" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
@@ -376,7 +375,7 @@ export function AdminDashboard() {
                     <h3 className="font-medium text-neutral-900 dark:text-white">Review Tracker</h3>
                     <p className="text-sm text-neutral-500">{stats.pendingTrackerEntries} pending</p>
                   </div>
-                  <Button variant="secondary" size="sm">Review</Button>
+                  <span className="btn-secondary text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]">Review</span>
                 </Link>
               </CardBody>
             </Card>
