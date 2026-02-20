@@ -107,6 +107,7 @@ const AdminPricing = lazy(() => import('./pages/admin/Pricing').then(m => ({ def
 const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagement').then(m => ({ default: m.PromoCodeManagement })));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings').then(m => ({ default: m.AdminSettings })));
 const YouTubeManagement = lazy(() => import('./pages/admin/YouTubeManagement').then(m => ({ default: m.YouTubeManagement })));
+const AIRoutes = lazy(() => import('./pages/ai/AIRoutes').then(m => ({ default: m.AIRoutes })));
 
 export default function App() {
   return (
@@ -187,6 +188,9 @@ export default function App() {
                     <Route path="dashboard/notifications" element={<Notifications />} />
                     <Route path="dashboard/billing" element={<Billing />} />
                   </Route>
+
+                  {/* AI Routes */}
+                  <Route path="ai/*" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}><AIRoutes /></ProtectedRoute>} />
 
                   {/* Lawyer Routes - Each has its own layout */}
                   <Route path="lawyer" element={<PortalLanding />} />

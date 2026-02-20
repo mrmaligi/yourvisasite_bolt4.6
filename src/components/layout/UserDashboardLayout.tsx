@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, Bookmark, FolderOpen, Calendar, BookOpen, ShoppingBag, Settings, BarChart3, User } from 'lucide-react';
+import { LayoutDashboard, FileText, Bookmark, FolderOpen, Calendar, BookOpen, ShoppingBag, Settings, BarChart3, User, Sparkles } from 'lucide-react';
 import { DashboardLayout } from './DashboardLayout';
 
 const sidebarItems = [
@@ -6,6 +6,7 @@ const sidebarItems = [
   { to: '/dashboard/visas', label: 'My Visas', icon: FileText },
   { to: '/dashboard/saved', label: 'Saved Visas', icon: Bookmark },
   { to: '/dashboard/documents', label: 'My Documents', icon: FolderOpen },
+  { to: '/ai', label: 'AI Tools', icon: Sparkles },
   { to: '/dashboard/consultations', label: 'Consultations', icon: Calendar },
   { to: '/dashboard/premium', label: 'Premium Content', icon: BookOpen },
   { to: '/dashboard/marketplace', label: 'My Purchases', icon: ShoppingBag },
