@@ -61,42 +61,42 @@ export function BookingCard({
   const timeStr = `${startTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} - ${endTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
 
   return (
-    <Card className={`transition-all duration-200 ${showChat ? 'ring-2 ring-primary-100' : 'hover:border-primary-200'}`}>
+    <Card className={`transition-all duration-200 ${showChat ? 'ring-2 ring-primary-100 dark:ring-primary-900' : 'hover:border-primary-200 dark:hover:border-primary-800'}`}>
       <CardBody className="p-0">
-        <div className="p-4 border-b border-neutral-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="p-4 border-b border-neutral-100 dark:border-neutral-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${userType === 'user' ? 'bg-primary-100 text-primary-600' : 'bg-secondary-100 text-secondary-600'}`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${userType === 'user' ? 'bg-primary-100 text-primary-600 dark:bg-primary-900/50 dark:text-primary-400' : 'bg-secondary-100 text-secondary-600 dark:bg-neutral-700 dark:text-neutral-300'}`}>
               {userType === 'user' ? <Scale className="w-5 h-5" /> : <User className="w-5 h-5" />}
             </div>
             <div>
-              <p className="font-medium text-neutral-900">
+              <p className="font-medium text-neutral-900 dark:text-neutral-100">
                 {userType === 'user' ? booking.lawyer_name || 'Unknown Lawyer' : booking.user_name || 'Unknown Client'}
               </p>
-              <p className="text-xs text-neutral-500">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
                 {userType === 'user' ? booking.lawyer_jurisdiction : booking.user_phone || 'No phone'}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3 self-start sm:self-auto">
              <Badge variant={statusVariant[booking.status]}>{booking.status}</Badge>
-             <span className="text-sm font-semibold text-neutral-900">
+             <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
                ${(booking.total_price_cents / 100).toFixed(0)}
              </span>
           </div>
         </div>
 
-        <div className="p-4 bg-neutral-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex flex-wrap gap-4 text-sm text-neutral-600">
+        <div className="p-4 bg-neutral-50/50 dark:bg-neutral-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-wrap gap-4 text-sm text-neutral-600 dark:text-neutral-300">
             <div className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-neutral-400" />
+              <Calendar className="w-4 h-4 text-neutral-400 dark:text-neutral-500" />
               <span>{dateStr}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-neutral-400" />
+              <Clock className="w-4 h-4 text-neutral-400 dark:text-neutral-500" />
               <span>{timeStr}</span>
             </div>
             {booking.notes && (
-              <div className="w-full sm:w-auto mt-2 sm:mt-0 p-2 bg-white rounded border border-neutral-200 text-xs italic text-neutral-500 max-w-md">
+              <div className="w-full sm:w-auto mt-2 sm:mt-0 p-2 bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 text-xs italic text-neutral-500 dark:text-neutral-400 max-w-md">
                 "{booking.notes}"
               </div>
             )}
@@ -183,7 +183,7 @@ export function BookingCard({
 
         {/* Chat Section */}
         {showChat && (
-            <div className="border-t border-neutral-100 p-4 animate-in slide-in-from-top-2 fade-in duration-200">
+            <div className="border-t border-neutral-100 dark:border-neutral-700 p-4 animate-in slide-in-from-top-2 fade-in duration-200">
                 <ChatInterface bookingId={booking.id} />
             </div>
         )}

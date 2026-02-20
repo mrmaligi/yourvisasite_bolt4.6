@@ -9,14 +9,14 @@ interface BadgeProps {
 }
 
 const variantClasses: Record<BadgeVariant, string> = {
-  default: 'bg-neutral-100 text-neutral-700 ring-neutral-200/50',
-  primary: 'bg-primary-50 text-primary-800 ring-primary-200/50',
-  secondary: 'bg-neutral-200 text-neutral-800 ring-neutral-300/50',
-  success: 'bg-emerald-50 text-emerald-800 ring-emerald-200/50',
-  warning: 'bg-amber-50 text-amber-800 ring-amber-200/50',
-  danger: 'bg-red-50 text-red-800 ring-red-200/50',
-  info: 'bg-sky-50 text-sky-800 ring-sky-200/50',
-  premium: 'bg-accent-50 text-accent-800 ring-accent-200/50',
+  default: 'bg-neutral-100 text-neutral-700 ring-neutral-200/50 dark:bg-neutral-800 dark:text-neutral-300 dark:ring-neutral-700',
+  primary: 'bg-primary-50 text-primary-800 ring-primary-200/50 dark:bg-primary-900/30 dark:text-primary-300 dark:ring-primary-900/50',
+  secondary: 'bg-neutral-200 text-neutral-800 ring-neutral-300/50 dark:bg-neutral-700 dark:text-neutral-200 dark:ring-neutral-600/50',
+  success: 'bg-emerald-50 text-emerald-800 ring-emerald-200/50 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-900/50',
+  warning: 'bg-amber-50 text-amber-800 ring-amber-200/50 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-900/50',
+  danger: 'bg-red-50 text-red-800 ring-red-200/50 dark:bg-red-900/30 dark:text-red-300 dark:ring-red-900/50',
+  info: 'bg-sky-50 text-sky-800 ring-sky-200/50 dark:bg-sky-900/30 dark:text-sky-300 dark:ring-sky-900/50',
+  premium: 'bg-accent-50 text-accent-800 ring-accent-200/50 dark:bg-accent-900/30 dark:text-accent-300 dark:ring-accent-900/50',
 };
 
 export function Badge({ children, variant = 'default', className = '' }: BadgeProps) {
