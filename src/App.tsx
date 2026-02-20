@@ -10,12 +10,13 @@ import { PublicLayout } from './components/layout/PublicLayout';
 import { UserDashboardLayout } from './components/layout/UserDashboardLayout';
 import { LawyerDashboardLayout } from './components/layout/LawyerDashboardLayout';
 import { AdminDashboardLayout } from './components/layout/AdminDashboardLayout';
-import { ProtectedRoute } from './components/layout/ProtectedRoute';
+import { ProtectedRoute, UserOnly, LawyerOnly, AdminOnly, RoleRedirect } from './components/auth/RoleGuard';
+import { DashboardShell } from './components/layout/DashboardShell';
 import { Loading } from './components/ui/Loading';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 
 const Landing = lazy(() => import('./pages/public/Landing').then(m => ({ default: m.Landing })));
-const Login = lazy(() => import('./pages/public/Login').then(m => ({ default: m.Login })));
+const UnifiedLogin = lazy(() => import('./pages/public/UnifiedLogin').then(m => ({ default: m.UnifiedLogin })));
 const Register = lazy(() => import('./pages/public/Register').then(m => ({ default: m.Register })));
 const VisaSearch = lazy(() => import('./pages/public/VisaSearch').then(m => ({ default: m.VisaSearch })));
 const VisaCompare = lazy(() => import('./pages/public/VisaCompare').then(m => ({ default: m.VisaCompare })));
@@ -91,7 +92,8 @@ export default function App() {
                   <Routes>
                     <Route element={<PublicLayout />}>
                     <Route index element={<Landing />} />
-                    <Route path="login" element={<Login />} />
+                    <Route path="login" element={<UnifiedLogin />} />
+                    <Route path="role-select" element={<RoleRedirect />} />
                     <Route path="register" element={<Register />} />
                     <Route path="register/lawyer" element={<LawyerRegister />} />
                     <Route path="visas" element={<VisaSearch />} />
