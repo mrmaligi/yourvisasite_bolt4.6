@@ -108,6 +108,58 @@ const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagement
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings').then(m => ({ default: m.AdminSettings })));
 const YouTubeManagement = lazy(() => import('./pages/admin/YouTubeManagement').then(m => ({ default: m.YouTubeManagement })));
 
+// Security Imports
+const TwoFactorIntro = lazy(() => import('./pages/security/2fa/TwoFactorIntro'));
+const TwoFactorMethod = lazy(() => import('./pages/security/2fa/TwoFactorMethod'));
+const TwoFactorQR = lazy(() => import('./pages/security/2fa/TwoFactorQR'));
+const TwoFactorVerify = lazy(() => import('./pages/security/2fa/TwoFactorVerify'));
+const TwoFactorBackup = lazy(() => import('./pages/security/2fa/TwoFactorBackup'));
+const TwoFactorSuccess = lazy(() => import('./pages/security/2fa/TwoFactorSuccess'));
+const TwoFactorRecovery = lazy(() => import('./pages/security/2fa/TwoFactorRecovery'));
+const TwoFactorHistory = lazy(() => import('./pages/security/2fa/TwoFactorHistory'));
+const TwoFactorDisable = lazy(() => import('./pages/security/2fa/TwoFactorDisable'));
+const TwoFactorDevices = lazy(() => import('./pages/security/2fa/TwoFactorDevices'));
+const ActiveSessions = lazy(() => import('./pages/security/sessions/ActiveSessions'));
+const SessionDetail = lazy(() => import('./pages/security/sessions/SessionDetail'));
+const RevokeSession = lazy(() => import('./pages/security/sessions/RevokeSession'));
+const TimeoutSettings = lazy(() => import('./pages/security/sessions/TimeoutSettings'));
+const LoginHistory = lazy(() => import('./pages/security/sessions/LoginHistory'));
+const SuspiciousActivity = lazy(() => import('./pages/security/sessions/SuspiciousActivity'));
+const DeviceManagement = lazy(() => import('./pages/security/sessions/DeviceManagement'));
+const SessionSecurity = lazy(() => import('./pages/security/sessions/SessionSecurity'));
+const UserMonitor = lazy(() => import('./pages/security/sessions/UserMonitor'));
+const ForceLogout = lazy(() => import('./pages/security/sessions/ForceLogout'));
+const ComplianceDashboard = lazy(() => import('./pages/security/compliance/ComplianceDashboard'));
+const GDPRRequest = lazy(() => import('./pages/security/compliance/GDPRRequest'));
+const DataExport = lazy(() => import('./pages/security/compliance/DataExport'));
+const DataDeletion = lazy(() => import('./pages/security/compliance/DataDeletion'));
+const TermsOfService = lazy(() => import('./pages/security/compliance/TermsOfService'));
+const PrivacyPolicy = lazy(() => import('./pages/security/compliance/PrivacyPolicy'));
+const CookieSettings = lazy(() => import('./pages/security/compliance/CookieSettings'));
+const AuditLogs = lazy(() => import('./pages/security/compliance/AuditLogs'));
+const ComplianceReports = lazy(() => import('./pages/security/compliance/ComplianceReports'));
+const RegulatorySettings = lazy(() => import('./pages/security/compliance/RegulatorySettings'));
+const PrivacyDashboard = lazy(() => import('./pages/security/privacy/PrivacyDashboard'));
+const ProfileVisibility = lazy(() => import('./pages/security/privacy/ProfileVisibility'));
+const DataSharing = lazy(() => import('./pages/security/privacy/DataSharing'));
+const SearchVisibility = lazy(() => import('./pages/security/privacy/SearchVisibility'));
+const ContactPreferences = lazy(() => import('./pages/security/privacy/ContactPreferences'));
+const BlockedUsers = lazy(() => import('./pages/security/privacy/BlockedUsers'));
+const ActivityVisibility = lazy(() => import('./pages/security/privacy/ActivityVisibility'));
+const AdPreferences = lazy(() => import('./pages/security/privacy/AdPreferences'));
+const SocialAccounts = lazy(() => import('./pages/security/privacy/SocialAccounts'));
+const PrivacyAudit = lazy(() => import('./pages/security/privacy/PrivacyAudit'));
+const AccessDashboard = lazy(() => import('./pages/security/access/AccessDashboard'));
+const RoleManagement = lazy(() => import('./pages/security/access/RoleManagement'));
+const PermissionSets = lazy(() => import('./pages/security/access/PermissionSets'));
+const UserAccessReview = lazy(() => import('./pages/security/access/UserAccessReview'));
+const ApiKeys = lazy(() => import('./pages/security/access/ApiKeys'));
+const IpWhitelist = lazy(() => import('./pages/security/access/IpWhitelist'));
+const AccessLogs = lazy(() => import('./pages/security/access/AccessLogs'));
+const InviteUser = lazy(() => import('./pages/security/access/InviteUser'));
+const TeamAccess = lazy(() => import('./pages/security/access/TeamAccess'));
+const SecurityPolicy = lazy(() => import('./pages/security/access/SecurityPolicy'));
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -224,7 +276,63 @@ export default function App() {
                   <Route path="admin/pricing" element={<ProtectedRoute allowedRoles={['admin']}><AdminPricing /></ProtectedRoute>} />
                   <Route path="admin/promos" element={<ProtectedRoute allowedRoles={['admin']}><PromoCodeManagement /></ProtectedRoute>} />
                   <Route path="admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
-                  </Routes>
+                                    {/* Security Pages */}
+                  {/* 2FA */}
+                  <Route path="dashboard/security/2fa/two-factor-intro" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorIntro /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/2fa/two-factor-method" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorMethod /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/2fa/two-factor-q-r" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorQR /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/2fa/two-factor-verify" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorVerify /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/2fa/two-factor-backup" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorBackup /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/2fa/two-factor-success" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorSuccess /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/2fa/two-factor-recovery" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorRecovery /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/2fa/two-factor-history" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorHistory /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/2fa/two-factor-disable" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorDisable /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/2fa/two-factor-devices" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorDevices /> </ProtectedRoute>} />
+                  {/* SESSIONS */}
+                  <Route path="dashboard/security/sessions/active-sessions" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <ActiveSessions /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/sessions/session-detail" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <SessionDetail /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/sessions/revoke-session" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <RevokeSession /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/sessions/timeout-settings" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TimeoutSettings /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/sessions/login-history" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <LoginHistory /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/sessions/suspicious-activity" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <SuspiciousActivity /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/sessions/device-management" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <DeviceManagement /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/sessions/session-security" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <SessionSecurity /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/sessions/user-monitor" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <UserMonitor /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/sessions/force-logout" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <ForceLogout /> </ProtectedRoute>} />
+                  {/* COMPLIANCE */}
+                  <Route path="dashboard/security/compliance/compliance-dashboard" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <ComplianceDashboard /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/compliance/g-d-p-r-request" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <GDPRRequest /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/compliance/data-export" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <DataExport /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/compliance/data-deletion" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <DataDeletion /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/compliance/terms-of-service" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TermsOfService /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/compliance/privacy-policy" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <PrivacyPolicy /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/compliance/cookie-settings" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <CookieSettings /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/compliance/audit-logs" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <AuditLogs /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/compliance/compliance-reports" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <ComplianceReports /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/compliance/regulatory-settings" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <RegulatorySettings /> </ProtectedRoute>} />
+                  {/* PRIVACY */}
+                  <Route path="dashboard/security/privacy/privacy-dashboard" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <PrivacyDashboard /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/privacy/profile-visibility" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <ProfileVisibility /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/privacy/data-sharing" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <DataSharing /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/privacy/search-visibility" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <SearchVisibility /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/privacy/contact-preferences" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <ContactPreferences /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/privacy/blocked-users" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <BlockedUsers /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/privacy/activity-visibility" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <ActivityVisibility /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/privacy/ad-preferences" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <AdPreferences /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/privacy/social-accounts" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <SocialAccounts /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/privacy/privacy-audit" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <PrivacyAudit /> </ProtectedRoute>} />
+                  {/* ACCESS */}
+                  <Route path="dashboard/security/access/access-dashboard" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <AccessDashboard /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/access/role-management" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <RoleManagement /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/access/permission-sets" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <PermissionSets /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/access/user-access-review" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <UserAccessReview /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/access/api-keys" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <ApiKeys /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/access/ip-whitelist" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <IpWhitelist /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/access/access-logs" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <AccessLogs /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/access/invite-user" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <InviteUser /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/access/team-access" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TeamAccess /> </ProtectedRoute>} />
+                  <Route path="dashboard/security/access/security-policy" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <SecurityPolicy /> </ProtectedRoute>} />
+</Routes>
                 </Suspense>
               </GlobalSearchProvider>
             </BrowserRouter>
