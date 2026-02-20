@@ -1,10 +1,87 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User, LayoutDashboard, LogOut } from 'lucide-react';
 import { Logo } from '../ui/Logo';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { UserMenu } from './UserMenu';
 import { SearchTrigger } from '../ui/SearchTrigger';
+import { useAuth } from '../../contexts/AuthContext';
+import { Button } from '../ui/Button';
+
+function MobileAuthSection({ onClose }: { onClose: () => void }) {
+  const { user, profile, role, signOut } = useAuth();
+
+  const getDashboardPath = () => {
+    if (role === 'admin') return '/admin';
+    if (role === 'lawyer') return '/lawyer';
+    return '/dashboard';
+  };
+
+  if (!user) {
+    return (
+      <div className="px-4 py-3 space-y-2">
+        <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-3">
+          Sign in to access your dashboard, track applications, and more.
+        </p>
+        <Link to="/login" onClick={onClose} className="block">
+          <Button className="w-full">Sign in</Button>
+        </Link>
+        <p className="text-xs text-center text-neutral-400 dark:text-neutral-500 mt-2">
+          Don't have an account?{' '}
+          <Link to="/register" onClick={onClose} className="text-primary-600 dark:text-primary-400 hover:underline">
+            Register
+          </Link>
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-4 py-3 space-y-1">
+      <div className="flex items-center gap-3 px-3 py-2 mb-3 rounded-xl bg-neutral-50 dark:bg-neutral-800/50">
+        {profile?.avatar_url ? (
+          <img src={profile.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
+        ) : (
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
+            <User className="w-5 h-5 text-white" />
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-neutral-900 dark:text-white truncate">
+            {profile?.full_name || 'User'}
+          </p>
+          <p className="text-xs text-neutral-400 truncate">{user.email}</p>
+        </div>
+        {role && role !== 'user' && (
+          <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-lg ${
+            role === 'admin'
+              ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+              : 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300'
+          }`}>
+            {role}
+          </span>
+        )}
+      </div>
+
+      <Link
+        to={getDashboardPath()}
+        onClick={onClose}
+        className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+      >
+        <LayoutDashboard className="w-5 h-5 text-neutral-400" />
+        Dashboard
+      </Link>
+
+      <button
+        onClick={() => { signOut(); onClose(); }}
+        className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors w-full"
+      >
+        <LogOut className="w-5 h-5" />
+        Sign out
+      </button>
+    </div>
+  );
+}
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -76,9 +153,7 @@ export function Navbar() {
             </Link>
           ))}
           <hr className="border-neutral-100 dark:border-neutral-700 my-2" />
-          <div className="px-4 py-2 flex justify-start">
-             <UserMenu />
-          </div>
+          <MobileAuthSection onClose={() => setMobileOpen(false)} />
         </div>
       )}
     </nav>
