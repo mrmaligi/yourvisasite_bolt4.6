@@ -1,15 +1,16 @@
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { FileText, Download, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody } from '@/components/ui/Card';
 
 const TEMPLATES = [
-  { id: 1, title: 'Employer Reference Letter', category: 'Work', format: 'DOCX' },
-  { id: 2, title: 'Statutory Declaration for Partner Visa', category: 'Family', format: 'DOCX' },
-  { id: 3, title: 'Form 80 Character Assessment Draft', category: 'General', format: 'PDF' },
-  { id: 4, title: 'Resume Template for Skilled Migration', category: 'Skilled', format: 'DOCX' },
-  { id: 5, title: 'Invitation Letter for Visitor Visa', category: 'Visitor', format: 'DOCX' },
+  { id: 1, title: 'Statutory Declaration Template', category: 'General', format: 'DOCX', link: '/resources/templates/statutory-declaration' },
+  { id: 2, title: 'Employment Reference Letter Template', category: 'Work', format: 'DOCX', link: '/resources/templates/employment-reference' },
+  { id: 3, title: 'Visa Resume/CV Template', category: 'Skilled', format: 'DOCX', link: '/resources/templates/resume' },
+  { id: 4, title: 'Sponsorship Letter Template', category: 'Family', format: 'DOCX', link: '/resources/templates/sponsorship-letter' },
+  { id: 5, title: 'Relationship Statement Template', category: 'Partner', format: 'DOCX', link: '/resources/templates/relationship-statement' },
 ];
 
 export function Templates() {
@@ -60,9 +61,11 @@ export function Templates() {
                   <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6 flex-grow">
                     Category: {item.category}
                   </p>
-                  <Button className="w-full mt-auto">
-                    <Download className="w-4 h-4 mr-2" /> Download Template
-                  </Button>
+                  <Link to={item.link} className="w-full mt-auto">
+                    <Button className="w-full">
+                      <Download className="w-4 h-4 mr-2" /> Get Template
+                    </Button>
+                  </Link>
                 </CardBody>
               </Card>
             </motion.div>

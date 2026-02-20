@@ -53,6 +53,66 @@ const Partners = lazy(() => import('./pages/public/Partners').then(m => ({ defau
 const Press = lazy(() => import('./pages/public/Press').then(m => ({ default: m.Press })));
 const ApiDocs = lazy(() => import('./pages/public/ApiDocs').then(m => ({ default: m.ApiDocs })));
 
+const SkilledIndependentVisaGuide = lazy(() => import('./pages/public/guides/SkilledIndependentVisaGuide').then(m => ({ default: m.SkilledIndependentVisaGuide })));
+const PartnerVisaGuide = lazy(() => import('./pages/public/guides/PartnerVisaGuide').then(m => ({ default: m.PartnerVisaGuide })));
+const StudentVisaGuide = lazy(() => import('./pages/public/guides/StudentVisaGuide').then(m => ({ default: m.StudentVisaGuide })));
+const EmployerNominationGuide = lazy(() => import('./pages/public/guides/EmployerNominationGuide').then(m => ({ default: m.EmployerNominationGuide })));
+const CitizenshipGuide = lazy(() => import('./pages/public/guides/CitizenshipGuide').then(m => ({ default: m.CitizenshipGuide })));
+
+const VisaApplicationChecklist = lazy(() => import('./pages/public/checklists/VisaApplicationChecklist').then(m => ({ default: m.VisaApplicationChecklist })));
+const DocumentGatheringChecklist = lazy(() => import('./pages/public/checklists/DocumentGatheringChecklist').then(m => ({ default: m.DocumentGatheringChecklist })));
+const MedicalExamChecklist = lazy(() => import('./pages/public/checklists/MedicalExamChecklist').then(m => ({ default: m.MedicalExamChecklist })));
+const CharacterAssessmentChecklist = lazy(() => import('./pages/public/checklists/CharacterAssessmentChecklist').then(m => ({ default: m.CharacterAssessmentChecklist })));
+const EnglishTestChecklist = lazy(() => import('./pages/public/checklists/EnglishTestChecklist').then(m => ({ default: m.EnglishTestChecklist })));
+
+const StatutoryDeclarationTemplate = lazy(() => import('./pages/public/templates/StatutoryDeclarationTemplate').then(m => ({ default: m.StatutoryDeclarationTemplate })));
+const EmploymentReferenceTemplate = lazy(() => import('./pages/public/templates/EmploymentReferenceTemplate').then(m => ({ default: m.EmploymentReferenceTemplate })));
+const ResumeTemplate = lazy(() => import('./pages/public/templates/ResumeTemplate').then(m => ({ default: m.ResumeTemplate })));
+const SponsorshipLetterTemplate = lazy(() => import('./pages/public/templates/SponsorshipLetterTemplate').then(m => ({ default: m.SponsorshipLetterTemplate })));
+const RelationshipStatementTemplate = lazy(() => import('./pages/public/templates/RelationshipStatementTemplate').then(m => ({ default: m.RelationshipStatementTemplate })));
+
+const SkilledMigrationWebinar = lazy(() => import('./pages/public/webinars/SkilledMigrationWebinar').then(m => ({ default: m.SkilledMigrationWebinar })));
+const PartnerVisaWebinar = lazy(() => import('./pages/public/webinars/PartnerVisaWebinar').then(m => ({ default: m.PartnerVisaWebinar })));
+const StudentPathwaysWebinar = lazy(() => import('./pages/public/webinars/StudentPathwaysWebinar').then(m => ({ default: m.StudentPathwaysWebinar })));
+const BusinessVisaWebinar = lazy(() => import('./pages/public/webinars/BusinessVisaWebinar').then(m => ({ default: m.BusinessVisaWebinar })));
+const CitizenshipWebinar = lazy(() => import('./pages/public/webinars/CitizenshipWebinar').then(m => ({ default: m.CitizenshipWebinar })));
+
+const PodcastEpisode1 = lazy(() => import('./pages/public/podcast/PodcastEpisode1').then(m => ({ default: m.PodcastEpisode1 })));
+const PodcastEpisode2 = lazy(() => import('./pages/public/podcast/PodcastEpisode2').then(m => ({ default: m.PodcastEpisode2 })));
+const PodcastEpisode3 = lazy(() => import('./pages/public/podcast/PodcastEpisode3').then(m => ({ default: m.PodcastEpisode3 })));
+const PodcastEpisode4 = lazy(() => import('./pages/public/podcast/PodcastEpisode4').then(m => ({ default: m.PodcastEpisode4 })));
+const PodcastEpisode5 = lazy(() => import('./pages/public/podcast/PodcastEpisode5').then(m => ({ default: m.PodcastEpisode5 })));
+
+const MigrationExpoEvent = lazy(() => import('./pages/public/events/MigrationExpoEvent').then(m => ({ default: m.MigrationExpoEvent })));
+const StudentFairEvent = lazy(() => import('./pages/public/events/StudentFairEvent').then(m => ({ default: m.StudentFairEvent })));
+const InvestorSeminarEvent = lazy(() => import('./pages/public/events/InvestorSeminarEvent').then(m => ({ default: m.InvestorSeminarEvent })));
+const NetworkingNightEvent = lazy(() => import('./pages/public/events/NetworkingNightEvent').then(m => ({ default: m.NetworkingNightEvent })));
+const OnlineWorkshopEvent = lazy(() => import('./pages/public/events/OnlineWorkshopEvent').then(m => ({ default: m.OnlineWorkshopEvent })));
+
+const InsurancePartner = lazy(() => import('./pages/public/partners/InsurancePartner').then(m => ({ default: m.InsurancePartner })));
+const EnglishTestPartner = lazy(() => import('./pages/public/partners/EnglishTestPartner').then(m => ({ default: m.EnglishTestPartner })));
+const RelocationPartner = lazy(() => import('./pages/public/partners/RelocationPartner').then(m => ({ default: m.RelocationPartner })));
+const BankingPartner = lazy(() => import('./pages/public/partners/BankingPartner').then(m => ({ default: m.BankingPartner })));
+const EducationAgentPartner = lazy(() => import('./pages/public/partners/EducationAgentPartner').then(m => ({ default: m.EducationAgentPartner })));
+
+const PressRelease1 = lazy(() => import('./pages/public/press/PressRelease1').then(m => ({ default: m.PressRelease1 })));
+const PressRelease2 = lazy(() => import('./pages/public/press/PressRelease2').then(m => ({ default: m.PressRelease2 })));
+const PressRelease3 = lazy(() => import('./pages/public/press/PressRelease3').then(m => ({ default: m.PressRelease3 })));
+const MediaKit = lazy(() => import('./pages/public/press/MediaKit').then(m => ({ default: m.MediaKit })));
+const BrandAssets = lazy(() => import('./pages/public/press/BrandAssets').then(m => ({ default: m.BrandAssets })));
+
+const ApiAuthentication = lazy(() => import('./pages/public/api-docs/ApiAuthentication').then(m => ({ default: m.ApiAuthentication })));
+const ApiEndpoints = lazy(() => import('./pages/public/api-docs/ApiEndpoints').then(m => ({ default: m.ApiEndpoints })));
+const ApiErrors = lazy(() => import('./pages/public/api-docs/ApiErrors').then(m => ({ default: m.ApiErrors })));
+const ApiRateLimits = lazy(() => import('./pages/public/api-docs/ApiRateLimits').then(m => ({ default: m.ApiRateLimits })));
+const ApiChangelog = lazy(() => import('./pages/public/api-docs/ApiChangelog').then(m => ({ default: m.ApiChangelog })));
+
+const StudentVisaLanding = lazy(() => import('./pages/public/landing/StudentVisaLanding').then(m => ({ default: m.StudentVisaLanding })));
+const SkilledVisaLanding = lazy(() => import('./pages/public/landing/SkilledVisaLanding').then(m => ({ default: m.SkilledVisaLanding })));
+const PartnerVisaLanding = lazy(() => import('./pages/public/landing/PartnerVisaLanding').then(m => ({ default: m.PartnerVisaLanding })));
+const BusinessVisaLanding = lazy(() => import('./pages/public/landing/BusinessVisaLanding').then(m => ({ default: m.BusinessVisaLanding })));
+const WorkVisaLanding = lazy(() => import('./pages/public/landing/WorkVisaLanding').then(m => ({ default: m.WorkVisaLanding })));
+
 const UserDashboard = lazy(() => import('./pages/user/UserDashboard').then(m => ({ default: m.UserDashboard })));
 const MyVisas = lazy(() => import('./pages/user/MyVisas').then(m => ({ default: m.MyVisas })));
 const MyDocuments = lazy(() => import('./pages/user/MyDocuments').then(m => ({ default: m.MyDocuments })));
@@ -274,6 +334,66 @@ export default function App() {
                     <Route path="partners" element={<Partners />} />
                     <Route path="press" element={<Press />} />
                     <Route path="api-docs" element={<ApiDocs />} />
+
+                    <Route path="resources/guides/skilled-independent" element={<SkilledIndependentVisaGuide />} />
+                    <Route path="resources/guides/partner-visa" element={<PartnerVisaGuide />} />
+                    <Route path="resources/guides/student-visa" element={<StudentVisaGuide />} />
+                    <Route path="resources/guides/employer-nomination" element={<EmployerNominationGuide />} />
+                    <Route path="resources/guides/citizenship" element={<CitizenshipGuide />} />
+
+                    <Route path="resources/checklists/visa-application" element={<VisaApplicationChecklist />} />
+                    <Route path="resources/checklists/document-gathering" element={<DocumentGatheringChecklist />} />
+                    <Route path="resources/checklists/medical-exam" element={<MedicalExamChecklist />} />
+                    <Route path="resources/checklists/character-assessment" element={<CharacterAssessmentChecklist />} />
+                    <Route path="resources/checklists/english-test" element={<EnglishTestChecklist />} />
+
+                    <Route path="resources/templates/statutory-declaration" element={<StatutoryDeclarationTemplate />} />
+                    <Route path="resources/templates/employment-reference" element={<EmploymentReferenceTemplate />} />
+                    <Route path="resources/templates/resume" element={<ResumeTemplate />} />
+                    <Route path="resources/templates/sponsorship-letter" element={<SponsorshipLetterTemplate />} />
+                    <Route path="resources/templates/relationship-statement" element={<RelationshipStatementTemplate />} />
+
+                    <Route path="resources/webinars/skilled-migration" element={<SkilledMigrationWebinar />} />
+                    <Route path="resources/webinars/partner-visa" element={<PartnerVisaWebinar />} />
+                    <Route path="resources/webinars/student-pathways" element={<StudentPathwaysWebinar />} />
+                    <Route path="resources/webinars/business-visa" element={<BusinessVisaWebinar />} />
+                    <Route path="resources/webinars/citizenship" element={<CitizenshipWebinar />} />
+
+                    <Route path="resources/podcast/episode-1" element={<PodcastEpisode1 />} />
+                    <Route path="resources/podcast/episode-2" element={<PodcastEpisode2 />} />
+                    <Route path="resources/podcast/episode-3" element={<PodcastEpisode3 />} />
+                    <Route path="resources/podcast/episode-4" element={<PodcastEpisode4 />} />
+                    <Route path="resources/podcast/episode-5" element={<PodcastEpisode5 />} />
+
+                    <Route path="resources/events/migration-expo" element={<MigrationExpoEvent />} />
+                    <Route path="resources/events/student-fair" element={<StudentFairEvent />} />
+                    <Route path="resources/events/investor-seminar" element={<InvestorSeminarEvent />} />
+                    <Route path="resources/events/networking-night" element={<NetworkingNightEvent />} />
+                    <Route path="resources/events/online-workshop" element={<OnlineWorkshopEvent />} />
+
+                    <Route path="partners/insurance" element={<InsurancePartner />} />
+                    <Route path="partners/english-test" element={<EnglishTestPartner />} />
+                    <Route path="partners/relocation" element={<RelocationPartner />} />
+                    <Route path="partners/banking" element={<BankingPartner />} />
+                    <Route path="partners/education" element={<EducationAgentPartner />} />
+
+                    <Route path="press/release-1" element={<PressRelease1 />} />
+                    <Route path="press/release-2" element={<PressRelease2 />} />
+                    <Route path="press/release-3" element={<PressRelease3 />} />
+                    <Route path="press/media-kit" element={<MediaKit />} />
+                    <Route path="press/brand-assets" element={<BrandAssets />} />
+
+                    <Route path="api-docs/authentication" element={<ApiAuthentication />} />
+                    <Route path="api-docs/endpoints" element={<ApiEndpoints />} />
+                    <Route path="api-docs/errors" element={<ApiErrors />} />
+                    <Route path="api-docs/rate-limits" element={<ApiRateLimits />} />
+                    <Route path="api-docs/changelog" element={<ApiChangelog />} />
+
+                    <Route path="landing/student" element={<StudentVisaLanding />} />
+                    <Route path="landing/skilled" element={<SkilledVisaLanding />} />
+                    <Route path="landing/partner" element={<PartnerVisaLanding />} />
+                    <Route path="landing/business" element={<BusinessVisaLanding />} />
+                    <Route path="landing/work" element={<WorkVisaLanding />} />
                   </Route>
 
                   {/* Mobile Routes */}

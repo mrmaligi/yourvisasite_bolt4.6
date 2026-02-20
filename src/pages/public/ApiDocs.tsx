@@ -1,6 +1,16 @@
 import { Helmet } from 'react-helmet-async';
 import { Code, Terminal, Key } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
+
+const DOC_LINKS = [
+  { name: 'Introduction', link: '#' },
+  { name: 'Authentication', link: '/api-docs/authentication' },
+  { name: 'Endpoints Reference', link: '/api-docs/endpoints' },
+  { name: 'Errors', link: '/api-docs/errors' },
+  { name: 'Rate Limits', link: '/api-docs/rate-limits' },
+  { name: 'Changelog', link: '/api-docs/changelog' },
+];
 
 export function ApiDocs() {
   return (
@@ -20,7 +30,9 @@ export function ApiDocs() {
           </p>
           <div className="flex gap-4 justify-center">
              <Button size="lg" className="bg-primary-600 hover:bg-primary-700">Get API Key</Button>
-             <Button size="lg" variant="secondary" className="bg-white/10 text-white border-white/20 hover:bg-white/20">Read Docs</Button>
+             <Link to="/api-docs/authentication">
+               <Button size="lg" variant="secondary" className="bg-white/10 text-white border-white/20 hover:bg-white/20">Read Docs</Button>
+             </Link>
           </div>
         </div>
       </section>
@@ -29,11 +41,13 @@ export function ApiDocs() {
         <aside className="hidden md:block">
            <h3 className="font-bold mb-4 text-neutral-900 dark:text-white uppercase text-sm tracking-wider">Reference</h3>
            <ul className="space-y-2 text-neutral-600 dark:text-neutral-400">
-             <li className="font-medium text-primary-600 dark:text-primary-400 cursor-pointer">Introduction</li>
-             <li className="hover:text-primary-600 dark:hover:text-primary-400 cursor-pointer transition-colors">Authentication</li>
-             <li className="hover:text-primary-600 dark:hover:text-primary-400 cursor-pointer transition-colors">Visas Endpoint</li>
-             <li className="hover:text-primary-600 dark:hover:text-primary-400 cursor-pointer transition-colors">Processing Times</li>
-             <li className="hover:text-primary-600 dark:hover:text-primary-400 cursor-pointer transition-colors">Eligibility Check</li>
+             {DOC_LINKS.map((doc, i) => (
+                <li key={i}>
+                  <Link to={doc.link} className={`block py-1 transition-colors ${i === 0 ? 'font-medium text-primary-600 dark:text-primary-400' : 'hover:text-primary-600 dark:hover:text-primary-400'}`}>
+                    {doc.name}
+                  </Link>
+                </li>
+             ))}
            </ul>
         </aside>
 
