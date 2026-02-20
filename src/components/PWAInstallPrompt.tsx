@@ -39,7 +39,7 @@ export function PWAInstallPrompt() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 z-50 flex items-center gap-3 bg-white dark:bg-neutral-800 p-4 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700 animate-in fade-in slide-in-from-bottom-4 max-w-sm w-full md:w-auto">
+    <div className="fixed bottom-6 sm:bottom-4 left-4 z-[60] flex items-center gap-3 bg-white dark:bg-neutral-800 p-4 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700 animate-in fade-in slide-in-from-bottom-4 max-w-sm w-full md:w-auto">
       <div className="flex-1">
         <p className="font-medium text-sm text-neutral-900 dark:text-white">Install VisaBuild</p>
         <p className="text-xs text-neutral-500 dark:text-neutral-400">Add to home screen for faster access</p>
@@ -54,10 +54,10 @@ export function PWAInstallPrompt() {
         </button>
         <button
           onClick={() => setIsVisible(false)}
-          className="text-neutral-400 hover:text-neutral-500 p-1 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+          className="text-neutral-400 hover:text-neutral-500 p-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
           aria-label="Dismiss"
         >
-          <X className="w-4 h-4" />
+          <X className="w-5 h-5" />
         </button>
       </div>
     </div>
