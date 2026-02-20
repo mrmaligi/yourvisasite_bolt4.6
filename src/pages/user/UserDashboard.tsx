@@ -20,7 +20,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 
 export function UserDashboard() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [stats, setStats] = useState({
     savedVisas: 0,
     myVisas: 0,
@@ -28,29 +28,73 @@ export function UserDashboard() {
     upcomingConsultations: 0,
   });
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) {
+    if (user && !authLoading) {
       fetchUserStats();
+    } else if (!authLoading && !user) {
+      setIsLoading(false);
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   const fetchUserStats = async () => {
-    // Get counts
-    const [{ count: saved }, { count: my }, { count: docs }, { count: consultations }] = await Promise.all([
-      supabase.from('saved_visas').select('id', { count: 'exact' }).eq('user_id', user?.id),
-      supabase.from('user_visas').select('id', { count: 'exact' }).eq('user_id', user?.id),
-      supabase.from('user_documents').select('id', { count: 'exact' }).eq('user_id', user?.id),
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('user_id', user?.id).gte('scheduled_at', new Date().toISOString()),
-    ]);
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Get counts with timeout
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      );
+      
+      const fetchPromise = Promise.all([
+        supabase.from('saved_visas').select('id', { count: 'exact', head: true }).eq('user_id', user?.id),
+        supabase.from('user_visas').select('id', { count: 'exact', head: true }).eq('user_id', user?.id),
+        supabase.from('user_documents').select('id', { count: 'exact', head: true }).eq('user_id', user?.id),
+        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('user_id', user?.id).gte('scheduled_at', new Date().toISOString()),
+      ]);
+      
+      const [saved, my, docs, consultations] = await Promise.race([fetchPromise, timeoutPromise]) as any;
 
-    setStats({
-      savedVisas: saved || 0,
-      myVisas: my || 0,
-      documents: docs || 0,
-      upcomingConsultations: consultations || 0,
-    });
+      setStats({
+        savedVisas: saved?.count || 0,
+        myVisas: my?.count || 0,
+        documents: docs?.count || 0,
+        upcomingConsultations: consultations?.count || 0,
+      });
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+      setError('Failed to load dashboard data. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  if (authLoading || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-neutral-600 dark:text-neutral-400">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
+        <div className="text-center max-w-md p-6">
+          <div className="text-red-500 text-4xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold text-neutral-900 dark:text-white mb-2">Error Loading Dashboard</h2>
+          <p className="text-neutral-600 dark:text-neutral-400 mb-4">{error}</p>
+          <Button onClick={fetchUserStats}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
 
   const quickActions = [
     { to: '/visas', icon: Briefcase, label: 'Find Visas', desc: 'Search 78+ visa options' },
