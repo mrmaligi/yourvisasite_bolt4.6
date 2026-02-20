@@ -3,7 +3,11 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ className = '' }: SkeletonProps) {
-  return <div className={`animate-pulse bg-neutral-200 dark:bg-neutral-800 rounded ${className}`} />;
+  return (
+    <div className={`relative overflow-hidden bg-neutral-200 dark:bg-neutral-800 rounded ${className}`}>
+      <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" />
+    </div>
+  );
 }
 
 export function CardSkeleton() {
@@ -176,6 +180,149 @@ export function DashboardSkeleton() {
                             <Skeleton className="h-4 w-32" />
                             <Skeleton className="h-3 w-40" />
                         </div>
+                    </div>
+                ))}
+             </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function UserDashboardSkeleton() {
+  return (
+    <div className="space-y-8 animate-in fade-in duration-500">
+      {/* Stats Grid */}
+      <div className="grid md:grid-cols-4 gap-4 mb-8">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="card p-6 flex items-center gap-4">
+            <Skeleton className="w-12 h-12 rounded-xl flex-shrink-0" />
+            <div className="space-y-2 flex-1">
+              <Skeleton className="h-8 w-16" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Quick Actions & Recent Activity */}
+      <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="card h-full flex flex-col">
+           <div className="p-6 border-b border-neutral-100 dark:border-neutral-700">
+             <Skeleton className="h-6 w-32" />
+           </div>
+           <div className="p-6 grid grid-cols-2 gap-4">
+             {Array.from({ length: 4 }).map((_, i) => (
+               <div key={i} className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
+                 <Skeleton className="w-6 h-6 mb-2" />
+                 <Skeleton className="h-5 w-24 mb-1" />
+                 <Skeleton className="h-3 w-32" />
+               </div>
+             ))}
+           </div>
+        </div>
+
+        <div className="card h-full flex flex-col">
+            <div className="p-6 border-b border-neutral-100 dark:border-neutral-700">
+                <Skeleton className="h-6 w-40" />
+            </div>
+            <div className="p-6 space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
+                        <Skeleton className="w-2 h-2 rounded-full flex-shrink-0" />
+                        <Skeleton className="h-4 w-full" />
+                    </div>
+                ))}
+            </div>
+        </div>
+      </div>
+
+      {/* Recommended Visas */}
+      <div className="card">
+        <div className="p-6 border-b border-neutral-100 dark:border-neutral-700 flex justify-between items-center">
+             <Skeleton className="h-6 w-48" />
+             <Skeleton className="h-4 w-20" />
+        </div>
+        <div className="p-6">
+            <div className="grid md:grid-cols-3 gap-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl space-y-3">
+                        <Skeleton className="h-5 w-3/4" />
+                        <Skeleton className="h-3 w-full" />
+                        <Skeleton className="h-8 w-24 mt-2" />
+                    </div>
+                ))}
+            </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function AdminDashboardSkeleton() {
+  return (
+    <div className="space-y-6 animate-in fade-in duration-500">
+      {/* Stats Grid */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+         {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="card p-6 flex items-center gap-4">
+            <Skeleton className="w-12 h-12 rounded-xl flex-shrink-0" />
+            <div className="space-y-2 flex-1">
+              <Skeleton className="h-8 w-16" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Management Cards */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="card p-6 space-y-4">
+                 <Skeleton className="w-12 h-12 rounded-xl" />
+                 <div className="space-y-2">
+                     <Skeleton className="h-5 w-32" />
+                     <Skeleton className="h-3 w-24" />
+                 </div>
+            </div>
+        ))}
+      </div>
+
+      {/* Recent Activity & Quick Stats */}
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="card">
+            <div className="p-6 border-b border-neutral-100 dark:border-neutral-700">
+                <Skeleton className="h-6 w-32" />
+            </div>
+            <div className="p-6 space-y-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="flex items-center justify-between">
+                        <Skeleton className="h-4 w-32" />
+                        <div className="flex items-center gap-2">
+                            <Skeleton className="w-2 h-2 rounded-full" />
+                            <Skeleton className="h-3 w-20" />
+                        </div>
+                    </div>
+                ))}
+                 <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-8 w-16" />
+                 </div>
+            </div>
+        </div>
+
+        <div className="card">
+             <div className="p-6 border-b border-neutral-100 dark:border-neutral-700">
+                <Skeleton className="h-6 w-32" />
+            </div>
+             <div className="p-6 space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
+                         <div className="space-y-1">
+                             <Skeleton className="h-4 w-32" />
+                             <Skeleton className="h-3 w-24" />
+                         </div>
+                         <Skeleton className="h-8 w-16" />
                     </div>
                 ))}
              </div>

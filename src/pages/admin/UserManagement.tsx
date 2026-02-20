@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { Modal } from '../../components/ui/Modal';
-import { Loading } from '../../components/ui/Loading';
+import { TableRowSkeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
 import type { Profile, UserRole } from '../../types/database';
 
@@ -118,8 +118,6 @@ export function UserManagement() {
     }
   };
 
-  if (loading) return <Loading />;
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -166,15 +164,23 @@ export function UserManagement() {
             </tr>
           </thead>
           <tbody className="divide-y divide-neutral-100">
-            {paginatedUsers.length === 0 ? (
+            {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRowSkeleton key={i} cols={7} className="hover:bg-neutral-50/50 transition-colors" />
+              ))
+            ) : paginatedUsers.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-6 py-12 text-center text-neutral-500">
                   No users found matching your filters.
                 </td>
               </tr>
             ) : (
-              paginatedUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-neutral-50/50 transition-colors">
+              paginatedUsers.map((user, i) => (
+                <tr
+                  key={user.id}
+                  className="hover:bg-neutral-50/50 transition-colors animate-fade-in"
+                  style={{ animationDelay: `${i * 0.05}s`, opacity: 0 }}
+                >
                   <td className="px-6 py-4 font-medium text-neutral-900">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold text-xs uppercase">

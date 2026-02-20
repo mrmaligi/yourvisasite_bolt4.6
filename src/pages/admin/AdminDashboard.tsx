@@ -20,9 +20,12 @@ import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
+import { AdminDashboardSkeleton } from '../../components/ui/Skeleton';
+import { FadeIn } from '../../components/animations/FadeIn';
 
 export function AdminDashboard() {
   const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalLawyers: 0,
@@ -42,51 +45,57 @@ export function AdminDashboard() {
   }, [user]);
 
   const fetchAdminStats = async () => {
-    // Get all stats
-    const [
-      { count: users },
-      { count: lawyers },
-      { count: pendingLawyers },
-      { count: visas },
-      { count: bookings },
-      { count: trackerPending },
-    ] = await Promise.all([
-      supabase.from('profiles').select('id', { count: 'exact' }).eq('role', 'user'),
-      supabase.from('lawyer_profiles').select('id', { count: 'exact' }).eq('verification_status', 'approved'),
-      supabase.from('lawyer_profiles').select('id', { count: 'exact' }).eq('verification_status', 'pending'),
-      supabase.from('visas').select('id', { count: 'exact' }),
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('status', 'completed'),
-      supabase.from('tracker_entries').select('id', { count: 'exact' }).eq('is_verified', false),
-    ]);
+    try {
+      // Get all stats
+      const [
+        { count: users },
+        { count: lawyers },
+        { count: pendingLawyers },
+        { count: visas },
+        { count: bookings },
+        { count: trackerPending },
+      ] = await Promise.all([
+        supabase.from('profiles').select('id', { count: 'exact' }).eq('role', 'user'),
+        supabase.from('lawyer_profiles').select('id', { count: 'exact' }).eq('verification_status', 'approved'),
+        supabase.from('lawyer_profiles').select('id', { count: 'exact' }).eq('verification_status', 'pending'),
+        supabase.from('visas').select('id', { count: 'exact' }),
+        supabase.from('bookings').select('id', { count: 'exact' }).eq('status', 'completed'),
+        supabase.from('tracker_entries').select('id', { count: 'exact' }).eq('is_verified', false),
+      ]);
 
-    setStats({
-      totalUsers: users || 0,
-      totalLawyers: lawyers || 0,
-      pendingVerifications: pendingLawyers || 0,
-      totalVisas: visas || 0,
-      totalBookings: bookings || 0,
-      totalRevenue: (bookings || 0) * 49,
-      pendingTrackerEntries: trackerPending || 0,
-      recentSignups: 12,
-    });
+      setStats({
+        totalUsers: users || 0,
+        totalLawyers: lawyers || 0,
+        pendingVerifications: pendingLawyers || 0,
+        totalVisas: visas || 0,
+        totalBookings: bookings || 0,
+        totalRevenue: (bookings || 0) * 49,
+        pendingTrackerEntries: trackerPending || 0,
+        recentSignups: 12,
+      });
 
-    // Set alerts
-    const newAlerts = [];
-    if (pendingLawyers && pendingLawyers > 0) {
-      newAlerts.push({
-        type: 'warning',
-        message: `${pendingLawyers} lawyer${pendingLawyers > 1 ? 's' : ''} pending verification`,
-        link: '/admin/lawyers',
-      });
+      // Set alerts
+      const newAlerts = [];
+      if (pendingLawyers && pendingLawyers > 0) {
+        newAlerts.push({
+          type: 'warning',
+          message: `${pendingLawyers} lawyer${pendingLawyers > 1 ? 's' : ''} pending verification`,
+          link: '/admin/lawyers',
+        });
+      }
+      if (trackerPending && trackerPending > 0) {
+        newAlerts.push({
+          type: 'info',
+          message: `${trackerPending} tracker entries need review`,
+          link: '/admin/tracker',
+        });
+      }
+      setAlerts(newAlerts);
+    } catch (error) {
+      console.error('Error fetching admin stats:', error);
+    } finally {
+      setLoading(false);
     }
-    if (trackerPending && trackerPending > 0) {
-      newAlerts.push({
-        type: 'info',
-        message: `${trackerPending} tracker entries need review`,
-        link: '/admin/tracker',
-      });
-    }
-    setAlerts(newAlerts);
   };
 
   const sidebarItems = [
@@ -199,9 +208,13 @@ export function AdminDashboard() {
         </header>
 
         <div className="p-6">
-          {/* Alerts */}
-          {alerts.length > 0 && (
-            <div className="mb-6 space-y-2">
+          {loading ? (
+            <AdminDashboardSkeleton />
+          ) : (
+            <FadeIn>
+              {/* Alerts */}
+              {alerts.length > 0 && (
+                <div className="mb-6 space-y-2">
               {alerts.map((alert, i) => (
                 <div
                   key={i}
@@ -381,6 +394,8 @@ export function AdminDashboard() {
               </CardBody>
             </Card>
           </div>
+            </FadeIn>
+          )}
         </div>
       </main>
     </div>

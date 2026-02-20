@@ -18,9 +18,12 @@ import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
+import { UserDashboardSkeleton } from '../../components/ui/Skeleton';
+import { FadeIn } from '../../components/animations/FadeIn';
 
 export function UserDashboard() {
   const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     savedVisas: 0,
     myVisas: 0,
@@ -36,20 +39,26 @@ export function UserDashboard() {
   }, [user]);
 
   const fetchUserStats = async () => {
-    // Get counts
-    const [{ count: saved }, { count: my }, { count: docs }, { count: consultations }] = await Promise.all([
-      supabase.from('saved_visas').select('id', { count: 'exact' }).eq('user_id', user?.id),
-      supabase.from('user_visas').select('id', { count: 'exact' }).eq('user_id', user?.id),
-      supabase.from('user_documents').select('id', { count: 'exact' }).eq('user_id', user?.id),
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('user_id', user?.id).gte('scheduled_at', new Date().toISOString()),
-    ]);
+    try {
+      // Get counts
+      const [{ count: saved }, { count: my }, { count: docs }, { count: consultations }] = await Promise.all([
+        supabase.from('saved_visas').select('id', { count: 'exact' }).eq('user_id', user?.id),
+        supabase.from('user_visas').select('id', { count: 'exact' }).eq('user_id', user?.id),
+        supabase.from('user_documents').select('id', { count: 'exact' }).eq('user_id', user?.id),
+        supabase.from('bookings').select('id', { count: 'exact' }).eq('user_id', user?.id).gte('scheduled_at', new Date().toISOString()),
+      ]);
 
-    setStats({
-      savedVisas: saved || 0,
-      myVisas: my || 0,
-      documents: docs || 0,
-      upcomingConsultations: consultations || 0,
-    });
+      setStats({
+        savedVisas: saved || 0,
+        myVisas: my || 0,
+        documents: docs || 0,
+        upcomingConsultations: consultations || 0,
+      });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const quickActions = [
@@ -133,10 +142,14 @@ export function UserDashboard() {
         </header>
 
         <div className="p-6">
-          {/* Stats Grid */}
-          <div className="grid md:grid-cols-4 gap-4 mb-8">
-            <Card>
-              <CardBody className="flex items-center gap-4">
+          {loading ? (
+            <UserDashboardSkeleton />
+          ) : (
+            <FadeIn>
+              {/* Stats Grid */}
+              <div className="grid md:grid-cols-4 gap-4 mb-8">
+                <Card>
+                  <CardBody className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
                   <Heart className="w-6 h-6 text-blue-600" />
                 </div>
@@ -267,6 +280,8 @@ export function UserDashboard() {
               </div>
             </CardBody>
           </Card>
+            </FadeIn>
+          )}
         </div>
       </main>
     </div>

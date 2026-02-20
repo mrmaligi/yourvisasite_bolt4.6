@@ -9,6 +9,7 @@ import { Input, Select } from '../../components/ui/Input';
 import { Checkbox } from '../../components/ui/Checkbox';
 import { VisaCardSkeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { FadeIn } from '../../components/animations/FadeIn';
 import type { Visa } from '../../types/database';
 
 const CATEGORIES = [
@@ -309,7 +310,7 @@ export function VisaSearch() {
           description="Try adjusting your search or filter criteria."
         />
       ) : (
-        <>
+        <FadeIn>
             <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
                 Showing {filteredVisas.length} of {visas.length} visas
             </p>
@@ -350,7 +351,7 @@ export function VisaSearch() {
                 </Link>
             ))}
             </div>
-        </>
+        </FadeIn>
       )}
     </div>
   );
