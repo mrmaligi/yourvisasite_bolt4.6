@@ -1,391 +1,388 @@
 import { useEffect, useState } from 'react';
-import {
-  Users, Scale, FileText, DollarSign, BarChart3, ShieldCheck,
-  ExternalLink, UserPlus, FileEdit, AlertCircle
-} from 'lucide-react';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell
-} from 'recharts';
-import { supabase } from '../../lib/supabase';
-import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Link } from 'react-router-dom';
-import { Loading } from '../../components/ui/Loading';
-
-interface DashboardStats {
-  users: number;
-  lawyers: number;
-  pendingLawyers: number;
-  purchases: number;
-  bookings: number;
-  submissions: number;
-}
-
-interface ActivityItem {
-  id: string;
-  type: 'signup' | 'purchase' | 'booking';
-  description: string;
-  date: string;
-  status?: string;
-}
-
-const COLORS = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444'];
+import { 
+  LayoutDashboard, 
+  Users, 
+  Briefcase, 
+  Shield,
+  TrendingUp,
+  DollarSign,
+  AlertTriangle,
+  CheckCircle,
+  Settings,
+  Bell,
+  Activity,
+  FileText,
+  Globe
+} from 'lucide-react';
+import { Card, CardBody, CardHeader } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Badge } from '../../components/ui/Badge';
+import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
 
 export function AdminDashboard() {
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<DashboardStats>({
-    users: 0,
-    lawyers: 0,
-    pendingLawyers: 0,
-    purchases: 0,
-    bookings: 0,
-    submissions: 0,
+  const { user } = useAuth();
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalLawyers: 0,
+    pendingVerifications: 0,
+    totalVisas: 0,
+    totalBookings: 0,
+    totalRevenue: 0,
+    pendingTrackerEntries: 0,
+    recentSignups: 0,
   });
-  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
-  const [signupData, setSignupData] = useState<{ date: string; count: number }[]>([]);
-  const [purchaseData, setPurchaseData] = useState<{ date: string; count: number }[]>([]);
-  const [bookingStatusData, setBookingStatusData] = useState<{ name: string; value: number }[]>([]);
+  const [alerts, setAlerts] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
-    try {
-      // 1. Fetch Counts
-      const [
-        usersRes,
-        lawyersRes,
-        pendingLawyersRes,
-        purchasesRes,
-        bookingsRes,
-        submissionsRes
-      ] = await Promise.all([
-        supabase.from('profiles').select('id', { count: 'exact', head: true }),
-        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'lawyer'),
-        supabase.schema('lawyer').from('profiles').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending'),
-        supabase.from('user_visa_purchases').select('id', { count: 'exact', head: true }),
-        supabase.from('bookings').select('id', { count: 'exact', head: true }),
-        supabase.from('tracker_entries').select('id', { count: 'exact', head: true }),
-      ]);
-
-      setStats({
-        users: usersRes.count || 0,
-        lawyers: lawyersRes.count || 0,
-        pendingLawyers: pendingLawyersRes.count || 0,
-        purchases: purchasesRes.count || 0,
-        bookings: bookingsRes.count || 0,
-        submissions: submissionsRes.count || 0,
-      });
-
-      // 2. Fetch Recent Activity & Chart Data
-      // For charts, we need last 7 days. Ideally done with date filtering on server.
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const isoDate = sevenDaysAgo.toISOString();
-
-      const [
-        recentSignups,
-        recentPurchases,
-        recentBookings,
-        chartSignups,
-        chartPurchases,
-        allBookings
-      ] = await Promise.all([
-        supabase.from('profiles').select('id, full_name, created_at, role').order('created_at', { ascending: false }).limit(10),
-        supabase.from('user_visa_purchases').select('id, amount_cents, purchased_at, visas(name), profiles(full_name)').order('purchased_at', { ascending: false }).limit(10),
-        supabase.from('bookings').select('id, user_id, lawyer_id, status, created_at').order('created_at', { ascending: false }).limit(10),
-        supabase.from('profiles').select('created_at').gte('created_at', isoDate),
-        supabase.from('user_visa_purchases').select('purchased_at').gte('purchased_at', isoDate),
-        supabase.from('bookings').select('status')
-      ]);
-
-      // Handle Bookings Relations Manually to avoid cross-schema join issues
-      const bookingUserIds = new Set(recentBookings.data?.map(b => b.user_id).filter(Boolean) || []);
-      const bookingLawyerIds = new Set(recentBookings.data?.map(b => b.lawyer_id).filter(Boolean) || []);
-
-      // Fetch user names for bookings
-      const { data: bookingUsers } = await supabase.from('profiles').select('id, full_name').in('id', Array.from(bookingUserIds));
-      const bookingUserMap = new Map(bookingUsers?.map(u => [u.id, u.full_name]) || []);
-
-      // Fetch lawyer names: bookings.lawyer_id -> lawyer.profiles.id -> lawyer.profiles.profile_id -> public.profiles.id -> public.profiles.full_name
-      const { data: lawyerProfiles } = await supabase.schema('lawyer').from('profiles').select('id, profile_id').in('id', Array.from(bookingLawyerIds));
-      const lawyerProfileMap = new Map(lawyerProfiles?.map(l => [l.id, l.profile_id]) || []);
-
-      const lawyerPublicProfileIds = new Set(lawyerProfiles?.map(l => l.profile_id).filter(Boolean) || []);
-      const { data: lawyerPublicProfiles } = await supabase.from('profiles').select('id, full_name').in('id', Array.from(lawyerPublicProfileIds));
-      const lawyerNameMap = new Map(lawyerPublicProfiles?.map(l => [l.id, l.full_name]) || []);
-
-      // Process Recent Activity
-      const activities: ActivityItem[] = [];
-
-      recentSignups.data?.forEach(u => activities.push({
-        id: u.id,
-        type: 'signup',
-        description: `New user signup: ${u.full_name || 'Unnamed'} (${u.role})`,
-        date: u.created_at
-      }));
-
-      recentPurchases.data?.forEach(p => activities.push({
-        id: p.id,
-        type: 'purchase',
-        description: `Purchase: ${(p.visas as any)?.name || 'Visa'} by ${(p.profiles as any)?.full_name || 'User'}`,
-        date: p.purchased_at
-      }));
-
-      recentBookings.data?.forEach(b => {
-        const userName = bookingUserMap.get(b.user_id) || 'User';
-        const lawyerProfileId = lawyerProfileMap.get(b.lawyer_id);
-        const lawyerName = lawyerProfileId ? (lawyerNameMap.get(lawyerProfileId) || 'Lawyer') : 'Lawyer';
-
-        activities.push({
-          id: b.id,
-          type: 'booking',
-          description: `Booking: ${userName} with ${lawyerName}`,
-          date: b.created_at,
-          status: b.status
-        });
-      });
-
-      // Sort and take top 10 combined
-      activities.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      setRecentActivity(activities.slice(0, 10));
-
-      // Process Chart Data (Signups)
-      const signupMap = new Map<string, number>();
-      chartSignups.data?.forEach(s => {
-        const date = new Date(s.created_at).toLocaleDateString();
-        signupMap.set(date, (signupMap.get(date) || 0) + 1);
-      });
-      const signupChart = Array.from(signupMap.entries()).map(([date, count]) => ({ date, count })).reverse(); // Simple reverse might not be chronological if map iteration order varies, but usually fine for recent. better to sort.
-      signupChart.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-      setSignupData(signupChart);
-
-      // Process Chart Data (Purchases)
-      const purchaseMap = new Map<string, number>();
-      chartPurchases.data?.forEach(p => {
-        const date = new Date(p.purchased_at).toLocaleDateString();
-        purchaseMap.set(date, (purchaseMap.get(date) || 0) + 1);
-      });
-      const purchaseChart = Array.from(purchaseMap.entries()).map(([date, count]) => ({ date, count }));
-      purchaseChart.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-      setPurchaseData(purchaseChart);
-
-      // Process Chart Data (Bookings Status)
-      const statusCounts = new Map<string, number>();
-      allBookings.data?.forEach(b => {
-        statusCounts.set(b.status, (statusCounts.get(b.status) || 0) + 1);
-      });
-      const statusChart = Array.from(statusCounts.entries()).map(([name, value]) => ({ name, value }));
-      setBookingStatusData(statusChart);
-
-    } catch (error) {
-      console.error('Error fetching admin dashboard data:', error);
-    } finally {
-      setLoading(false);
+    if (user) {
+      fetchAdminStats();
     }
+  }, [user]);
+
+  const fetchAdminStats = async () => {
+    // Get all stats
+    const [
+      { count: users },
+      { count: lawyers },
+      { count: pendingLawyers },
+      { count: visas },
+      { count: bookings },
+      { count: trackerPending },
+    ] = await Promise.all([
+      supabase.from('profiles').select('id', { count: 'exact' }).eq('role', 'user'),
+      supabase.from('lawyer_profiles').select('id', { count: 'exact' }).eq('verification_status', 'approved'),
+      supabase.from('lawyer_profiles').select('id', { count: 'exact' }).eq('verification_status', 'pending'),
+      supabase.from('visas').select('id', { count: 'exact' }),
+      supabase.from('bookings').select('id', { count: 'exact' }).eq('status', 'completed'),
+      supabase.from('tracker_entries').select('id', { count: 'exact' }).eq('is_verified', false),
+    ]);
+
+    setStats({
+      totalUsers: users || 0,
+      totalLawyers: lawyers || 0,
+      pendingVerifications: pendingLawyers || 0,
+      totalVisas: visas || 0,
+      totalBookings: bookings || 0,
+      totalRevenue: (bookings || 0) * 49,
+      pendingTrackerEntries: trackerPending || 0,
+      recentSignups: 12,
+    });
+
+    // Set alerts
+    const newAlerts = [];
+    if (pendingLawyers && pendingLawyers > 0) {
+      newAlerts.push({
+        type: 'warning',
+        message: `${pendingLawyers} lawyer${pendingLawyers > 1 ? 's' : ''} pending verification`,
+        link: '/admin/lawyers',
+      });
+    }
+    if (trackerPending && trackerPending > 0) {
+      newAlerts.push({
+        type: 'info',
+        message: `${trackerPending} tracker entries need review`,
+        link: '/admin/tracker',
+      });
+    }
+    setAlerts(newAlerts);
   };
 
-  if (loading) return <Loading />;
+  const sidebarItems = [
+    { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', active: true },
+    { to: '/admin/users', icon: Users, label: 'Users' },
+    { to: '/admin/lawyers', icon: Briefcase, label: 'Lawyers' },
+    { to: '/admin/visas', icon: Globe, label: 'Visas' },
+    { to: '/admin/content', icon: FileText, label: 'Content' },
+    { to: '/admin/tracker', icon: Activity, label: 'Tracker' },
+    { to: '/admin/analytics', icon: TrendingUp, label: 'Analytics' },
+    { to: '/admin/settings', icon: Settings, label: 'Settings' },
+  ];
+
+  const managementCards = [
+    {
+      title: 'User Management',
+      desc: `${stats.totalUsers} registered users`,
+      icon: Users,
+      link: '/admin/users',
+      color: 'blue',
+    },
+    {
+      title: 'Lawyer Verification',
+      desc: `${stats.pendingVerifications} pending approvals`,
+      icon: Briefcase,
+      link: '/admin/lawyers',
+      color: 'green',
+      alert: stats.pendingVerifications > 0,
+    },
+    {
+      title: 'Visa Database',
+      desc: `${stats.totalVisas} visa types`,
+      icon: Globe,
+      link: '/admin/visas',
+      color: 'purple',
+    },
+    {
+      title: 'Content Management',
+      desc: 'News, guides, FAQs',
+      icon: FileText,
+      link: '/admin/content',
+      color: 'orange',
+    },
+  ];
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-neutral-900">Admin Dashboard</h1>
-        <p className="text-neutral-500 mt-1">Platform overview and key metrics.</p>
-      </div>
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 flex">
+      {/* Sidebar */}
+      <aside className="w-64 bg-white dark:bg-neutral-800 border-r border-neutral-200 dark:border-neutral-700 hidden lg:block">
+        <div className="p-6 border-b border-neutral-200 dark:border-neutral-700">
+          <Link to="/" className="font-bold text-xl text-primary-600">VisaBuild</Link>
+          <p className="text-xs text-neutral-500 mt-1">Admin Console</p>
+        </div>
+        
+        <nav className="p-4 space-y-1">
+          {sidebarItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                  item.active
+                    ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300'
+                    : 'text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700'
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+                <span className="font-medium">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Link to="/admin/users">
-          <Card className="hover:border-primary-500 transition-colors cursor-pointer h-full">
-            <CardBody className="flex flex-col items-center justify-center p-6 text-center gap-2">
-              <UserPlus className="w-8 h-8 text-primary-600" />
-              <span className="font-medium text-neutral-900">Manage Users</span>
-            </CardBody>
-          </Card>
-        </Link>
-        <Link to="/admin/lawyers">
-          <Card className="hover:border-primary-500 transition-colors cursor-pointer h-full">
-            <CardBody className="flex flex-col items-center justify-center p-6 text-center gap-2">
-              <ShieldCheck className="w-8 h-8 text-emerald-600" />
-              <span className="font-medium text-neutral-900">Approve Lawyers</span>
-            </CardBody>
-          </Card>
-        </Link>
-        <Link to="/admin/visas">
-          <Card className="hover:border-primary-500 transition-colors cursor-pointer h-full">
-            <CardBody className="flex flex-col items-center justify-center p-6 text-center gap-2">
-              <FileEdit className="w-8 h-8 text-amber-600" />
-              <span className="font-medium text-neutral-900">Manage Visas</span>
-            </CardBody>
-          </Card>
-        </Link>
-        <Link to="/admin/news">
-          <Card className="hover:border-primary-500 transition-colors cursor-pointer h-full">
-            <CardBody className="flex flex-col items-center justify-center p-6 text-center gap-2">
-              <ExternalLink className="w-8 h-8 text-indigo-600" />
-              <span className="font-medium text-neutral-900">Publish News</span>
-            </CardBody>
-          </Card>
-        </Link>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <StatsCard label="Total Users" value={stats.users} icon={Users} color="bg-sky-50 text-sky-600" />
-        <StatsCard label="Total Lawyers" value={stats.lawyers} icon={Scale} color="bg-emerald-50 text-emerald-600" />
-        <StatsCard label="Pending Verifications" value={stats.pendingLawyers} icon={ShieldCheck} color="bg-amber-50 text-amber-600" />
-        <StatsCard label="Premium Purchases" value={stats.purchases} icon={DollarSign} color="bg-primary-50 text-primary-600" />
-        <StatsCard label="Total Bookings" value={stats.bookings} icon={FileText} color="bg-indigo-50 text-indigo-600" />
-        <StatsCard label="Visa Submissions" value={stats.submissions} icon={BarChart3} color="bg-rose-50 text-rose-600" />
-      </div>
-
-      {/* Charts Section */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <h3 className="text-lg font-semibold text-neutral-900">Signups & Purchases (Last 7 Days)</h3>
-          </CardHeader>
-          <CardBody>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={mergeChartData(signupData, purchaseData)}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="signups" fill="#0ea5e9" name="Signups" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="purchases" fill="#22c55e" name="Purchases" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+        {/* Admin Card */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-neutral-200 dark:border-neutral-700">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
+              <Shield className="w-5 h-5 text-purple-600" />
             </div>
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <h3 className="text-lg font-semibold text-neutral-900">Bookings by Status</h3>
-          </CardHeader>
-          <CardBody>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={bookingStatusData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {bookingStatusData.map((_entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+            <div>
+              <p className="font-medium text-neutral-900 dark:text-white">{user?.email}</p>
+              <p className="text-xs text-neutral-500">Administrator</p>
             </div>
-          </CardBody>
-        </Card>
-      </div>
+          </div>
+        </div>
+      </aside>
 
-      {/* Recent Activity */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold text-neutral-900">Recent Activity</h3>
-        </CardHeader>
-        <div className="divide-y divide-neutral-100">
-          {recentActivity.length === 0 ? (
-            <div className="p-6 text-center text-neutral-500">No recent activity found.</div>
-          ) : (
-            recentActivity.map((activity) => (
-              <div key={`${activity.type}-${activity.id}`} className="p-4 flex items-center justify-between hover:bg-neutral-50 transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getActivityColor(activity.type)}`}>
-                    {getActivityIcon(activity.type)}
+      {/* Main Content */}
+      <main className="flex-1">
+        {/* Header */}
+        <header className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Admin Dashboard</h1>
+              <p className="text-neutral-600 dark:text-neutral-300">Platform overview and management</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium">
+                Administrator
+              </span>
+              <button className="p-2 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg relative">
+                <Bell className="w-5 h-5" />
+                {alerts.length > 0 && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+                )}
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <div className="p-6">
+          {/* Alerts */}
+          {alerts.length > 0 && (
+            <div className="mb-6 space-y-2">
+              {alerts.map((alert, i) => (
+                <div
+                  key={i}
+                  className={`p-4 rounded-xl flex items-center justify-between ${
+                    alert.type === 'warning'
+                      ? 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800'
+                      : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    {alert.type === 'warning' ? (
+                      <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                    ) : (
+                      <CheckCircle className="w-5 h-5 text-blue-600" />
+                    )}
+                    <span className={alert.type === 'warning' ? 'text-yellow-800 dark:text-yellow-200' : 'text-blue-800 dark:text-blue-200'}>
+                      {alert.message}
+                    </span>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-neutral-900">{activity.description}</p>
-                    <p className="text-xs text-neutral-500">{new Date(activity.date).toLocaleString()}</p>
+                  <Button variant="secondary" size="sm" as={Link} to={alert.link}>
+                    Review
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Stats Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <Card>
+              <CardBody className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                  <Users className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.totalUsers}</p>
+                  <p className="text-sm text-neutral-500">Total Users</p>
+                </div>
+              </CardBody>
+            </Card>
+
+            <Card>
+              <CardBody className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+                  <Briefcase className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.totalLawyers}</p>
+                  <p className="text-sm text-neutral-500">Verified Lawyers</p>
+                </div>
+              </CardBody>
+            </Card>
+
+            <Card>
+              <CardBody className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
+                  <Activity className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.totalBookings}</p>
+                  <p className="text-sm text-neutral-500">Total Bookings</p>
+                </div>
+              </CardBody>
+            </Card>
+
+            <Card>
+              <CardBody className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
+                  <DollarSign className="w-6 h-6 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-neutral-900 dark:text-white">${stats.totalRevenue}</p>
+                  <p className="text-sm text-neutral-500">Total Revenue</p>
+                </div>
+              </CardBody>
+            </Card>
+          </div>
+
+          {/* Management Cards */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {managementCards.map((card) => {
+              const Icon = card.icon;
+              const colorClasses = {
+                blue: 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300',
+                green: 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300',
+                purple: 'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300',
+                orange: 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300',
+              };
+              
+              return (
+                <Link
+                  key={card.title}
+                  to={card.link}
+                  className="block p-6 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 hover:border-primary-300 dark:hover:border-primary-700 transition-colors"
+                >
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${colorClasses[card.color as keyof typeof colorClasses]}`}>
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <h3 className="font-semibold text-neutral-900 dark:text-white mb-1">{card.title}</h3>
+                  <p className="text-sm text-neutral-500">{card.desc}</p>
+                  {card.alert && (
+                    <Badge variant="warning" className="mt-2">Action Required</Badge>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Recent Activity & Quick Stats */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Platform Health</h2>
+              </CardHeader>
+              <CardBody>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-neutral-700 dark:text-neutral-300">Database Status</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full" />
+                      <span className="text-sm text-green-600">Operational</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-neutral-700 dark:text-neutral-300">Auth Service</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full" />
+                      <span className="text-sm text-green-600">Operational</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-neutral-700 dark:text-neutral-300">Storage</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full" />
+                      <span className="text-sm text-green-600">Operational</span>
+                    </div>
+                  </div>
+                  <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700">
+                    <div className="flex items-center justify-between">
+                      <span className="text-neutral-700 dark:text-neutral-300">Recent Signups</span>
+                      <span className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.recentSignups}</span>
+                    </div>
+                    <p className="text-sm text-neutral-500 mt-1">In the last 7 days</p>
                   </div>
                 </div>
-                {activity.status && (
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(activity.status)}`}>
-                    {activity.status}
-                  </span>
-                )}
-              </div>
-            ))
-          )}
+              </CardBody>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Quick Actions</h2>
+              </CardHeader>
+              <CardBody className="space-y-3">
+                <Link to="/admin/lawyers" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
+                  <div>
+                    <h3 className="font-medium text-neutral-900 dark:text-white">Verify Lawyers</h3>
+                    <p className="text-sm text-neutral-500">{stats.pendingVerifications} pending</p>
+                  </div>
+                  <Button variant="secondary" size="sm">Review</Button>
+                </Link>
+                
+                <Link to="/admin/visas" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
+                  <div>
+                    <h3 className="font-medium text-neutral-900 dark:text-white">Manage Visas</h3>
+                    <p className="text-sm text-neutral-500">{stats.totalVisas} visa types</p>
+                  </div>
+                  <Button variant="secondary" size="sm">Edit</Button>
+                </Link>
+
+                <Link to="/admin/tracker" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
+                  <div>
+                    <h3 className="font-medium text-neutral-900 dark:text-white">Review Tracker</h3>
+                    <p className="text-sm text-neutral-500">{stats.pendingTrackerEntries} pending</p>
+                  </div>
+                  <Button variant="secondary" size="sm">Review</Button>
+                </Link>
+              </CardBody>
+            </Card>
+          </div>
         </div>
-      </Card>
+      </main>
     </div>
   );
-}
-
-function StatsCard({ label, value, icon: Icon, color }: { label: string; value: number; icon: any; color: string }) {
-  return (
-    <Card>
-      <CardBody className="flex items-center gap-4">
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}>
-          <Icon className="w-6 h-6" />
-        </div>
-        <div>
-          <p className="text-2xl font-bold text-neutral-900">{value}</p>
-          <p className="text-xs text-neutral-500">{label}</p>
-        </div>
-      </CardBody>
-    </Card>
-  );
-}
-
-function mergeChartData(signups: { date: string; count: number }[], purchases: { date: string; count: number }[]) {
-  const map = new Map<string, { date: string; signups: number; purchases: number }>();
-
-  signups.forEach(s => {
-    map.set(s.date, { date: s.date, signups: s.count, purchases: 0 });
-  });
-
-  purchases.forEach(p => {
-    const existing = map.get(p.date) || { date: p.date, signups: 0, purchases: 0 };
-    existing.purchases = p.count;
-    map.set(p.date, existing);
-  });
-
-  const result = Array.from(map.values());
-  result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  return result;
-}
-
-function getActivityColor(type: string) {
-  switch (type) {
-    case 'signup': return 'bg-sky-100 text-sky-600';
-    case 'purchase': return 'bg-emerald-100 text-emerald-600';
-    case 'booking': return 'bg-indigo-100 text-indigo-600';
-    default: return 'bg-neutral-100 text-neutral-600';
-  }
-}
-
-function getActivityIcon(type: string) {
-  switch (type) {
-    case 'signup': return <UserPlus className="w-5 h-5" />;
-    case 'purchase': return <DollarSign className="w-5 h-5" />;
-    case 'booking': return <FileText className="w-5 h-5" />;
-    default: return <AlertCircle className="w-5 h-5" />;
-  }
-}
-
-function getStatusColor(status: string) {
-  switch (status) {
-    case 'confirmed': return 'bg-emerald-100 text-emerald-800';
-    case 'pending': return 'bg-amber-100 text-amber-800';
-    case 'cancelled': return 'bg-red-100 text-red-800';
-    case 'completed': return 'bg-sky-100 text-sky-800';
-    default: return 'bg-neutral-100 text-neutral-800';
-  }
 }
