@@ -10,6 +10,7 @@ import { PublicLayout } from './components/layout/PublicLayout';
 import { ProtectedRoute, RoleRedirect } from './components/auth/RoleGuard';
 import { Loading } from './components/ui/Loading';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 const Landing = lazy(() => import('./pages/public/Landing').then(m => ({ default: m.Landing })));
 const UnifiedLogin = lazy(() => import('./pages/public/UnifiedLogin').then(m => ({ default: m.UnifiedLogin })));
@@ -158,6 +159,7 @@ export default function App() {
                 </Suspense>
               </GlobalSearchProvider>
             </BrowserRouter>
+            <SpeedInsights />
           </ErrorBoundary>
         </ToastProvider>
       </AuthProvider>
