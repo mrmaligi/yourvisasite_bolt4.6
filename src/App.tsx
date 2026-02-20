@@ -7,6 +7,7 @@ import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { GlobalSearchProvider } from './contexts/GlobalSearchContext';
 import { GlobalSearch } from './components/GlobalSearch';
 import { PublicLayout } from './components/layout/PublicLayout';
+import { UserDashboardLayout } from './components/layout/UserDashboardLayout';
 import { ProtectedRoute, RoleRedirect } from './components/auth/RoleGuard';
 import { Loading } from './components/ui/Loading';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
@@ -49,6 +50,17 @@ const UserMarketplacePurchases = lazy(() => import('./pages/user/MarketplacePurc
 const UserSettings = lazy(() => import('./pages/user/UserSettings').then(m => ({ default: m.UserSettings })));
 const SavedVisas = lazy(() => import('./pages/user/SavedVisas').then(m => ({ default: m.SavedVisas })));
 const Referrals = lazy(() => import('./pages/user/Referrals').then(m => ({ default: m.Referrals })));
+
+const Welcome = lazy(() => import('./pages/user/Welcome').then(m => ({ default: m.Welcome })));
+const Tour = lazy(() => import('./pages/user/Tour').then(m => ({ default: m.Tour })));
+const GettingStarted = lazy(() => import('./pages/user/GettingStarted').then(m => ({ default: m.GettingStarted })));
+const VisaRoadmap = lazy(() => import('./pages/user/VisaRoadmap').then(m => ({ default: m.VisaRoadmap })));
+const DocumentChecklist = lazy(() => import('./pages/user/DocumentChecklist').then(m => ({ default: m.DocumentChecklist })));
+const ApplicationTimeline = lazy(() => import('./pages/user/ApplicationTimeline').then(m => ({ default: m.ApplicationTimeline })));
+const DeadlineAlerts = lazy(() => import('./pages/user/DeadlineAlerts').then(m => ({ default: m.DeadlineAlerts })));
+const UserProfile = lazy(() => import('./pages/user/Profile').then(m => ({ default: m.Profile })));
+const Notifications = lazy(() => import('./pages/user/Notifications').then(m => ({ default: m.Notifications })));
+const Billing = lazy(() => import('./pages/user/Billing').then(m => ({ default: m.Billing })));
 
 const PortalLanding = lazy(() => import('./pages/lawyer/PortalLanding').then(m => ({ default: m.PortalLanding })));
 const LawyerDashboard = lazy(() => import('./pages/lawyer/LawyerDashboard').then(m => ({ default: m.LawyerDashboard })));
@@ -127,6 +139,20 @@ export default function App() {
                   <Route path="dashboard/marketplace" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserMarketplacePurchases /></ProtectedRoute>} />
                   <Route path="dashboard/settings" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserSettings /></ProtectedRoute>} />
                   <Route path="dashboard/referrals" element={<ProtectedRoute allowedRoles={['user', 'admin']}><Referrals /></ProtectedRoute>} />
+
+                  {/* New User Pages with Layout */}
+                  <Route element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserDashboardLayout /></ProtectedRoute>}>
+                    <Route path="dashboard/welcome" element={<Welcome />} />
+                    <Route path="dashboard/tour" element={<Tour />} />
+                    <Route path="dashboard/getting-started" element={<GettingStarted />} />
+                    <Route path="dashboard/roadmap" element={<VisaRoadmap />} />
+                    <Route path="dashboard/checklist" element={<DocumentChecklist />} />
+                    <Route path="dashboard/timeline" element={<ApplicationTimeline />} />
+                    <Route path="dashboard/deadlines" element={<DeadlineAlerts />} />
+                    <Route path="dashboard/profile" element={<UserProfile />} />
+                    <Route path="dashboard/notifications" element={<Notifications />} />
+                    <Route path="dashboard/billing" element={<Billing />} />
+                  </Route>
 
                   {/* Lawyer Routes - Each has its own layout */}
                   <Route path="lawyer" element={<PortalLanding />} />
