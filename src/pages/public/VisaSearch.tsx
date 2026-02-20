@@ -9,6 +9,7 @@ import { Input, Select } from '../../components/ui/Input';
 import { Checkbox } from '../../components/ui/Checkbox';
 import { VisaCardSkeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 import type { Visa } from '../../types/database';
 
 const CATEGORIES = [
@@ -147,9 +148,10 @@ export function VisaSearch() {
     search.length > 0;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">Visa Search</h1>
+    <ErrorBoundary>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="mb-10">
+          <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">Visa Search</h1>
         <p className="text-neutral-500 dark:text-neutral-400">
           Find detailed information, processing times, and expert guides for Australian visas.
         </p>
@@ -352,6 +354,7 @@ export function VisaSearch() {
             </div>
         </>
       )}
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }
