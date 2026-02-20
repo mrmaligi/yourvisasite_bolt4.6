@@ -34,7 +34,7 @@ export function LawyerTracker() {
     if (!profile) return;
 
     // Use profile.id directly as submitted_by references public.profiles
-    const [trackerRes] = await Promise.all([
+    const [trackerRes, visasRes] = await Promise.all([
       supabase
         .from('tracker_entries')
         .select('id, visa_id, outcome, processing_days, application_date, decision_date, created_at')
