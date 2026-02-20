@@ -62,6 +62,7 @@ const LawyerMarketplace = lazy(() => import('./pages/lawyer/Marketplace').then(m
 const LawyerSettings = lazy(() => import('./pages/lawyer/LawyerSettings').then(m => ({ default: m.LawyerSettings })));
 
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const AdminDashboardLayout = lazy(() => import('./components/layout/AdminDashboardLayout').then(m => ({ default: m.AdminDashboardLayout })));
 const AdminActivityLog = lazy(() => import('./pages/admin/ActivityLog').then(m => ({ default: m.ActivityLog })));
 const UserManagement = lazy(() => import('./pages/admin/UserManagement').then(m => ({ default: m.UserManagement })));
 const LawyerManagement = lazy(() => import('./pages/admin/LawyerManagement').then(m => ({ default: m.LawyerManagement })));
@@ -73,6 +74,18 @@ const AdminPricing = lazy(() => import('./pages/admin/Pricing').then(m => ({ def
 const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagement').then(m => ({ default: m.PromoCodeManagement })));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings').then(m => ({ default: m.AdminSettings })));
 const YouTubeManagement = lazy(() => import('./pages/admin/YouTubeManagement').then(m => ({ default: m.YouTubeManagement })));
+
+// New Admin Pages
+const AdminMedia = lazy(() => import('./pages/admin/Media').then(m => ({ default: m.Media })));
+const AdminSupport = lazy(() => import('./pages/admin/SupportTickets').then(m => ({ default: m.SupportTickets })));
+const AdminChat = lazy(() => import('./pages/admin/LiveChat').then(m => ({ default: m.LiveChat })));
+const AdminFeedback = lazy(() => import('./pages/admin/UserFeedback').then(m => ({ default: m.UserFeedback })));
+const AdminAbuse = lazy(() => import('./pages/admin/AbuseReports').then(m => ({ default: m.AbuseReports })));
+const AdminAnalytics = lazy(() => import('./pages/admin/Analytics').then(m => ({ default: m.Analytics })));
+const AdminReports = lazy(() => import('./pages/admin/Reports').then(m => ({ default: m.Reports })));
+const AdminAudit = lazy(() => import('./pages/admin/AuditLog').then(m => ({ default: m.AuditLog })));
+const AdminPerformance = lazy(() => import('./pages/admin/Performance').then(m => ({ default: m.Performance })));
+const AdminFinance = lazy(() => import('./pages/admin/Finance').then(m => ({ default: m.Finance })));
 
 export default function App() {
   return (
@@ -143,17 +156,45 @@ export default function App() {
 
                   {/* Admin Routes - Each has its own layout */}
                   <Route path="admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+
+                  {/* New Admin Pages with Layout */}
+                  <Route element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboardLayout /></ProtectedRoute>}>
+                    <Route path="admin/media" element={<AdminMedia />} />
+                    <Route path="admin/support" element={<AdminSupport />} />
+                    <Route path="admin/chat" element={<AdminChat />} />
+                    <Route path="admin/feedback" element={<AdminFeedback />} />
+                    <Route path="admin/abuse" element={<AdminAbuse />} />
+                    <Route path="admin/analytics" element={<AdminAnalytics />} />
+                    <Route path="admin/reports" element={<AdminReports />} />
+                    <Route path="admin/audit" element={<AdminAudit />} />
+                    <Route path="admin/performance" element={<AdminPerformance />} />
+                    <Route path="admin/finance" element={<AdminFinance />} />
+
+                    {/* Existing pages mapped to /admin/ path if desired, or keep them as is.
+                        To avoid breaking existing functionality, I will keep existing routes as is,
+                        but I also add aliases or fix them here if they were broken.
+                        However, the sidebar uses /admin/users, /admin/visas etc.
+                        So I should map these routes to the components.
+                    */}
+                    <Route path="admin/users" element={<UserManagement />} />
+                    <Route path="admin/lawyers" element={<LawyerManagement />} />
+                    <Route path="admin/visas" element={<VisaManagement />} />
+                    <Route path="admin/premium" element={<PremiumContent />} />
+                    <Route path="admin/news" element={<NewsManagement />} />
+                    <Route path="admin/youtube" element={<YouTubeManagement />} />
+                    <Route path="admin/tracker" element={<TrackerManagement />} />
+                    <Route path="admin/pricing" element={<AdminPricing />} />
+                    <Route path="admin/promos" element={<PromoCodeManagement />} />
+                    <Route path="admin/settings" element={<AdminSettings />} />
+                    <Route path="admin/activity" element={<AdminActivityLog />} />
+                  </Route>
+
+                  {/* Maintain legacy routes for backward compatibility if any links use them directly */}
                     <Route path="activity" element={<AdminActivityLog />} />
                     <Route path="users" element={<UserManagement />} />
                     <Route path="lawyers" element={<LawyerManagement />} />
                     <Route path="visas" element={<VisaManagement />} />
                     <Route path="premium" element={<PremiumContent />} />
-                    <Route path="admin/news" element={<ProtectedRoute allowedRoles={['admin']}><NewsManagement /></ProtectedRoute>} />
-                  <Route path="admin/youtube" element={<ProtectedRoute allowedRoles={['admin']}><YouTubeManagement /></ProtectedRoute>} />
-                  <Route path="admin/tracker" element={<ProtectedRoute allowedRoles={['admin']}><TrackerManagement /></ProtectedRoute>} />
-                  <Route path="admin/pricing" element={<ProtectedRoute allowedRoles={['admin']}><AdminPricing /></ProtectedRoute>} />
-                  <Route path="admin/promos" element={<ProtectedRoute allowedRoles={['admin']}><PromoCodeManagement /></ProtectedRoute>} />
-                  <Route path="admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
                   </Routes>
                 </Suspense>
               </GlobalSearchProvider>
