@@ -1,8 +1,17 @@
 import { Helmet } from 'react-helmet-async';
 import { CheckCircle, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
+
+const PARTNER_CATEGORIES = [
+  { name: 'Health Insurance', description: 'Compare and choose the best health insurance.', link: '/partners/insurance' },
+  { name: 'English Test Providers', description: 'Official partners for English language testing.', link: '/partners/english-test' },
+  { name: 'Relocation Services', description: 'Get help moving to Australia.', link: '/partners/relocation' },
+  { name: 'Banking and Finance', description: 'Set up your finances before you arrive.', link: '/partners/banking' },
+  { name: 'Education Agents', description: 'Find the right course and institution.', link: '/partners/education' },
+];
 
 export function Partners() {
   return (
@@ -55,6 +64,27 @@ export function Partners() {
               </form>
             </CardBody>
           </Card>
+        </div>
+      </section>
+
+      <section className="bg-neutral-50 dark:bg-neutral-800 py-24 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold mb-12 text-center text-neutral-900 dark:text-white">Our Partner Categories</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            {PARTNER_CATEGORIES.map((cat, index) => (
+              <Link key={index} to={cat.link} className="block group">
+                <Card className="h-full hover:shadow-lg transition-shadow duration-300 dark:bg-neutral-900 dark:border-neutral-700">
+                  <CardBody className="p-8">
+                    <h3 className="text-xl font-bold mb-2 text-neutral-900 dark:text-white group-hover:text-primary-600 transition-colors">{cat.name}</h3>
+                    <p className="text-neutral-600 dark:text-neutral-400">{cat.description}</p>
+                    <div className="mt-4 flex items-center text-primary-600 dark:text-primary-400 font-medium">
+                      View Partners <ArrowRight className="ml-2 w-4 h-4" />
+                    </div>
+                  </CardBody>
+                </Card>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
     </div>
