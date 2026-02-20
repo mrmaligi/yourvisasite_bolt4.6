@@ -4,7 +4,6 @@ import { ArrowLeft } from 'lucide-react';
 import { ForumTopicList } from '../../components/forum/ForumTopicList';
 import { ForumNewTopic } from '../../components/forum/ForumNewTopic';
 import { Card, CardBody } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Tabs';
 import { supabase } from '../../lib/supabase';
 import type { ForumCategory } from '../../types/database';

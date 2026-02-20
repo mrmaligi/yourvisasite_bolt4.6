@@ -1,4 +1,4 @@
-import { type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { type ButtonHTMLAttributes, type ReactNode, type ElementType, type MouseEvent } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useRipple, Ripple } from './Ripple';
 
@@ -10,6 +10,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: Size;
   loading?: boolean;
   children: ReactNode;
+  as?: ElementType;
+  to?: string;
 }
 
 const variantClasses: Record<Variant, string> = {
@@ -33,15 +35,17 @@ export function Button({
   disabled,
   className = '',
   onMouseDown,
+  as,
   ...props
 }: ButtonProps) {
   const { ripples, addRipple } = useRipple();
+  const Component = as || 'button';
 
   return (
-    <button
+    <Component
       className={`${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       disabled={disabled || loading}
-      onMouseDown={(e) => {
+      onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
         if (!disabled && !loading) {
           addRipple(e);
         }
@@ -52,6 +56,6 @@ export function Button({
       {loading && <Loader2 className="w-4 h-4 animate-spin" />}
       {children}
       <Ripple ripples={ripples} />
-    </button>
+    </Component>
   );
 }

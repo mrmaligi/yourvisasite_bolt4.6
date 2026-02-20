@@ -14,7 +14,7 @@ import {
 import { Button } from '../ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { toast } from '../ui/Toast';
+import { useToast } from '../ui/Toast';
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -30,11 +30,12 @@ interface NavItem {
 
 export function DashboardShell({ children, role }: DashboardShellProps) {
   const { user, signOut } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const [profile, setProfile] = useState<any>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState(0);
+  const [notifications] = useState(0);
 
   useEffect(() => {
     if (user) {
