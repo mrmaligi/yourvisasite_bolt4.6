@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { TrackerTimeline } from '../../components/tracker/TrackerTimeline';
 import { 
   LayoutDashboard, 
   Briefcase, 
@@ -28,10 +29,12 @@ export function UserDashboard() {
     upcomingConsultations: 0,
   });
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [myApplications, setMyApplications] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) {
       fetchUserStats();
+      fetchMyApplications();
     }
   }, [user]);
 
@@ -50,6 +53,16 @@ export function UserDashboard() {
       documents: docs || 0,
       upcomingConsultations: consultations || 0,
     });
+  };
+
+  const fetchMyApplications = async () => {
+    const { data } = await supabase
+      .from('tracker_entries')
+      .select('*, visas(name, subclass)')
+      .eq('submitted_by', user!.id)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false });
+    setMyApplications(data || []);
   };
 
   const quickActions = [
@@ -133,6 +146,39 @@ export function UserDashboard() {
         </header>
 
         <div className="p-6">
+          {/* My Applications Tracker */}
+          {myApplications.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">My Application Journey</h2>
+              <div className="grid gap-6">
+                {myApplications.map((app: any) => (
+                  <Card key={app.id}>
+                    <CardBody>
+                      <div className="flex justify-between items-start mb-6">
+                        <div>
+                          <h3 className="font-bold text-lg text-neutral-900 dark:text-white">{app.visas.subclass} - {app.visas.name}</h3>
+                          <p className="text-sm text-neutral-500">Applied on {new Date(app.application_date).toLocaleDateString()}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-neutral-900 dark:text-white">In Progress</p>
+                          <p className="text-xs text-neutral-500">{Math.floor((Date.now() - new Date(app.application_date).getTime()) / (1000 * 60 * 60 * 24))} days elapsed</p>
+                        </div>
+                      </div>
+
+                      <TrackerTimeline
+                        steps={[
+                          { id: '1', label: 'Received', status: 'completed', date: new Date(app.application_date).toLocaleDateString() },
+                          { id: '2', label: 'Processing', status: 'current', description: 'Your application is being assessed by the Department.' },
+                          { id: '3', label: 'Final Decision', status: 'upcoming' }
+                        ]}
+                      />
+                    </CardBody>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Stats Grid */}
           <div className="grid md:grid-cols-4 gap-4 mb-8">
             <Card>
