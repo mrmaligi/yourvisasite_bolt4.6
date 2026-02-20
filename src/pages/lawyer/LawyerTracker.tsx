@@ -1,23 +1,25 @@
 import { useEffect, useState } from 'react';
-import { TrendingUp, Plus, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { TrendingUp, Plus, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
-import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { TrackerStatusBadge } from '../../components/tracker/TrackerStatusBadge';
+import type { TrackerOutcome } from '../../types/database';
 
 interface TrackerEntry {
   id: string;
   visa_id: string;
   visa_name: string | null;
-  outcome: 'approved' | 'denied' | 'pending';
+  outcome: TrackerOutcome;
   processing_days: number | null;
   application_date: string;
   decision_date: string | null;
+  stage?: 'received' | 'processing' | 'assessment' | 'decision';
   created_at: string;
 }
 
@@ -30,10 +32,11 @@ export function LawyerTracker() {
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     visa_id: '',
-    outcome: 'approved' as 'approved' | 'denied' | 'pending',
+    outcome: 'approved' as TrackerOutcome,
     processing_days: '',
     application_date: '',
     decision_date: '',
+    stage: 'processing' as 'received' | 'processing' | 'assessment' | 'decision',
   });
 
   useEffect(() => {
@@ -43,11 +46,10 @@ export function LawyerTracker() {
   const fetchData = async () => {
     if (!profile) return;
 
-    // Use profile.id directly as submitted_by references public.profiles
     const [trackerRes, visasRes] = await Promise.all([
       supabase
         .from('tracker_entries')
-        .select('id, visa_id, outcome, processing_days, application_date, decision_date, created_at')
+        .select('id, visa_id, outcome, processing_days, application_date, decision_date, stage, created_at')
         .eq('submitted_by', profile.id)
         .order('created_at', { ascending: false }),
       supabase.from('visas').select('id, name').order('name'),
@@ -85,16 +87,24 @@ export function LawyerTracker() {
        return;
     }
 
+    // Determine status based on stage/outcome logic
+    let status = 'pending';
+    let stage = formData.stage;
+
+    if (formData.outcome !== 'pending') {
+        status = 'completed';
+        stage = 'decision';
+    }
+
     const { error } = await supabase.from('tracker_entries').insert({
       visa_id: formData.visa_id,
       submitted_by: profile.id,
       submitter_role: 'lawyer',
       outcome: formData.outcome,
-      // processing_days is calculated by trigger, but we can pass null or omit it
-      // actually the form has processing_days input, but it's redundant if we have dates.
-      // let's omit it and let the trigger handle it.
       application_date: formData.application_date,
       decision_date: formData.decision_date || null,
+      stage: stage,
+      status: status as 'pending' | 'completed',
     });
 
     if (error) {
@@ -111,19 +121,15 @@ export function LawyerTracker() {
       processing_days: '',
       application_date: '',
       decision_date: '',
+      stage: 'processing',
     });
     fetchData();
   };
 
-  const outcomeVariant = {
-    approved: 'success' as const,
-    denied: 'danger' as const,
-    pending: 'warning' as const,
-  };
-
   const outcomeIcon = {
     approved: CheckCircle,
-    denied: XCircle,
+    refused: XCircle,
+    withdrawn: AlertTriangle,
     pending: Clock,
   };
 
@@ -164,7 +170,7 @@ export function LawyerTracker() {
       ) : (
         <div className="space-y-3">
           {entries.map((entry) => {
-            const Icon = outcomeIcon[entry.outcome];
+            const Icon = outcomeIcon[entry.outcome] || Clock;
             return (
               <Card key={entry.id}>
                 <CardBody className="flex items-center justify-between">
@@ -182,7 +188,7 @@ export function LawyerTracker() {
                       </div>
                     </div>
                   </div>
-                  <Badge variant={outcomeVariant[entry.outcome]}>{entry.outcome}</Badge>
+                  <TrackerStatusBadge outcome={entry.outcome} stage={entry.stage} />
                 </CardBody>
               </Card>
             );
@@ -229,17 +235,33 @@ export function LawyerTracker() {
             <select
               value={formData.outcome}
               onChange={(e) =>
-                setFormData({ ...formData, outcome: e.target.value as 'approved' | 'denied' | 'pending' })
+                setFormData({ ...formData, outcome: e.target.value as TrackerOutcome })
               }
               className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="approved">Approved</option>
-              <option value="denied">Denied</option>
+              <option value="refused">Refused</option>
+              <option value="withdrawn">Withdrawn</option>
               <option value="pending">Pending</option>
             </select>
           </div>
 
-          {/* Processing Days is calculated automatically, so we remove the input */}
+          {formData.outcome === 'pending' && (
+             <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-1">
+                  Current Stage
+                </label>
+                <select
+                  value={formData.stage}
+                  onChange={(e) => setFormData({ ...formData, stage: e.target.value as any })}
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="received">Received</option>
+                  <option value="processing">Processing</option>
+                  <option value="assessment">Assessment</option>
+                </select>
+             </div>
+          )}
 
           <Input
             label="Application Date *"

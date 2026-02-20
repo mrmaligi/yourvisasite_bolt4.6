@@ -112,6 +112,7 @@ export interface TrackerEntry {
   outcome: TrackerOutcome;
   weight: number;
   status: 'pending' | 'completed';
+  stage?: 'received' | 'processing' | 'assessment' | 'decision';
   created_at: string;
 }
 
