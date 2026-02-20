@@ -107,6 +107,7 @@ const AdminPricing = lazy(() => import('./pages/admin/Pricing').then(m => ({ def
 const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagement').then(m => ({ default: m.PromoCodeManagement })));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings').then(m => ({ default: m.AdminSettings })));
 const YouTubeManagement = lazy(() => import('./pages/admin/YouTubeManagement').then(m => ({ default: m.YouTubeManagement })));
+const PerformanceRouter = lazy(() => import('./pages/admin/performance/PerformanceRouter').then(m => ({ default: m.PerformanceRouter })));
 
 export default function App() {
   return (
@@ -210,6 +211,7 @@ export default function App() {
 
                   {/* Admin Routes - Each has its own layout */}
                   <Route path="admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+                  <Route path="admin/performance/*" element={<ProtectedRoute allowedRoles={['admin']}><PerformanceRouter /></ProtectedRoute>} />
                     <Route path="activity" element={<AdminActivityLog />} />
                     <Route path="admin/content" element={<ProtectedRoute allowedRoles={['admin']}><AdminContent /></ProtectedRoute>} />
                     <Route path="admin/pages" element={<ProtectedRoute allowedRoles={['admin']}><AdminPages /></ProtectedRoute>} />
