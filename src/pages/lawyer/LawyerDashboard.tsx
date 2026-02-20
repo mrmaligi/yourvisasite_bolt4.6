@@ -32,7 +32,6 @@ export function LawyerDashboard() {
     averageRating: 0,
     totalEarnings: 0,
   });
-  const [recentClients, setRecentClients] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -51,7 +50,7 @@ export function LawyerDashboard() {
     setLawyerProfile(profile);
 
     // Get stats
-    const [{ count: clients }, { count: upcoming }, { count: completed }, { count: reviews }] = await Promise.all([
+    const [{ count: clients }, { count: upcoming }, { count: completed }] = await Promise.all([
       supabase.from('bookings').select('user_id', { count: 'exact', head: true }).eq('lawyer_id', profile?.id),
       supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile?.id).eq('status', 'confirmed').gte('scheduled_at', new Date().toISOString()),
       supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile?.id).eq('status', 'completed'),

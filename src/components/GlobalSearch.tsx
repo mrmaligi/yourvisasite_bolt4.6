@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useGlobalSearch } from '../contexts/GlobalSearchContext';
 import { supabase } from '../lib/supabase';
+import type { LawyerProfile } from '../types/database';
 
 interface SearchResult {
   id: string;
