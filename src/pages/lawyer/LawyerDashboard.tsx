@@ -22,7 +22,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 
 export function LawyerDashboard() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [lawyerProfile, setLawyerProfile] = useState<any>(null);
   const [stats, setStats] = useState({
     totalClients: 0,
@@ -33,40 +33,79 @@ export function LawyerDashboard() {
     totalEarnings: 0,
   });
   const [recentClients, setRecentClients] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) {
+    if (user && !authLoading) {
       fetchLawyerData();
+    } else if (!authLoading && !user) {
+      setIsLoading(false);
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   const fetchLawyerData = async () => {
-    // Get lawyer profile
-    const { data: profile } = await supabase
-      .from('lawyer_profiles')
-      .select('*')
-      .eq('user_id', user?.id)
-      .single();
-    
-    setLawyerProfile(profile);
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Get lawyer profile
+      const { data: profile, error: profileError } = await supabase
+        .from('lawyer_profiles')
+        .select('*')
+        .eq('user_id', user?.id)
+        .single();
+      
+      if (profileError) throw profileError;
+      
+      setLawyerProfile(profile);
 
-    // Get stats
-    const [{ count: clients }, { count: upcoming }, { count: completed }, { count: reviews }] = await Promise.all([
-      supabase.from('bookings').select('user_id', { count: 'exact', head: true }).eq('lawyer_id', profile?.id),
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile?.id).eq('status', 'confirmed').gte('scheduled_at', new Date().toISOString()),
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile?.id).eq('status', 'completed'),
-      supabase.from('lawyer_reviews').select('id', { count: 'exact' }).eq('lawyer_id', profile?.id),
-    ]);
+      // Get stats
+      const [{ count: clients }, { count: upcoming }, { count: completed }] = await Promise.all([
+        supabase.from('bookings').select('user_id', { count: 'exact', head: true }).eq('lawyer_id', profile?.id),
+        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('lawyer_id', profile?.id).eq('status', 'confirmed').gte('scheduled_at', new Date().toISOString()),
+        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('lawyer_id', profile?.id).eq('status', 'completed'),
+      ]);
 
-    setStats({
-      totalClients: clients || 0,
-      upcomingConsultations: upcoming || 0,
-      completedConsultations: completed || 0,
-      pendingReviews: 0,
-      averageRating: 4.8,
-      totalEarnings: completed ? completed * 150 : 0,
-    });
+      setStats({
+        totalClients: clients || 0,
+        upcomingConsultations: upcoming || 0,
+        completedConsultations: completed || 0,
+        pendingReviews: 0,
+        averageRating: 4.8,
+        totalEarnings: completed ? completed * 150 : 0,
+      });
+    } catch (err) {
+      console.error('Error fetching lawyer data:', err);
+      setError('Failed to load dashboard data. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  if (authLoading || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-neutral-600 dark:text-neutral-400">Loading lawyer dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
+        <div className="text-center max-w-md p-6">
+          <div className="text-red-500 text-4xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold text-neutral-900 dark:text-white mb-2">Error Loading Dashboard</h2>
+          <p className="text-neutral-600 dark:text-neutral-400 mb-4">{error}</p>
+          <Button onClick={fetchLawyerData}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
 
   const sidebarItems = [
     { to: '/lawyer/dashboard', icon: LayoutDashboard, label: 'Dashboard', active: true },

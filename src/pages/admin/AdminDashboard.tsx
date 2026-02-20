@@ -22,7 +22,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 
 export function AdminDashboard() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalLawyers: 0,
@@ -34,50 +34,58 @@ export function AdminDashboard() {
     recentSignups: 0,
   });
   const [alerts, setAlerts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) {
+    if (user && !authLoading) {
       fetchAdminStats();
+    } else if (!authLoading && !user) {
+      setIsLoading(false);
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   const fetchAdminStats = async () => {
-    // Get all stats
-    const [
-      { count: users },
-      { count: lawyers },
-      { count: pendingLawyers },
-      { count: visas },
-      { count: bookings },
-      { count: trackerPending },
-    ] = await Promise.all([
-      supabase.from('profiles').select('id', { count: 'exact' }).eq('role', 'user'),
-      supabase.from('lawyer_profiles').select('id', { count: 'exact' }).eq('verification_status', 'approved'),
-      supabase.from('lawyer_profiles').select('id', { count: 'exact' }).eq('verification_status', 'pending'),
-      supabase.from('visas').select('id', { count: 'exact' }),
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('status', 'completed'),
-      supabase.from('tracker_entries').select('id', { count: 'exact' }).eq('is_verified', false),
-    ]);
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Get all stats
+      const [
+        { count: users },
+        { count: lawyers },
+        { count: pendingLawyers },
+        { count: visas },
+        { count: bookings },
+        { count: trackerPending },
+      ] = await Promise.all([
+        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'user'),
+        supabase.from('lawyer_profiles').select('id', { count: 'exact', head: true }).eq('verification_status', 'approved'),
+        supabase.from('lawyer_profiles').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending'),
+        supabase.from('visas').select('id', { count: 'exact', head: true }),
+        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
+        supabase.from('tracker_entries').select('id', { count: 'exact', head: true }).eq('is_verified', false),
+      ]);
 
-    setStats({
-      totalUsers: users || 0,
-      totalLawyers: lawyers || 0,
-      pendingVerifications: pendingLawyers || 0,
-      totalVisas: visas || 0,
-      totalBookings: bookings || 0,
-      totalRevenue: (bookings || 0) * 49,
-      pendingTrackerEntries: trackerPending || 0,
-      recentSignups: 12,
-    });
-
-    // Set alerts
-    const newAlerts = [];
-    if (pendingLawyers && pendingLawyers > 0) {
-      newAlerts.push({
-        type: 'warning',
-        message: `${pendingLawyers} lawyer${pendingLawyers > 1 ? 's' : ''} pending verification`,
-        link: '/admin/lawyers',
+      setStats({
+        totalUsers: users || 0,
+        totalLawyers: lawyers || 0,
+        pendingVerifications: pendingLawyers || 0,
+        totalVisas: visas || 0,
+        totalBookings: bookings || 0,
+        totalRevenue: (bookings || 0) * 49,
+        pendingTrackerEntries: trackerPending || 0,
+        recentSignups: 12,
       });
+
+      // Set alerts
+      const newAlerts = [];
+      if (pendingLawyers && pendingLawyers > 0) {
+        newAlerts.push({
+          type: 'warning',
+          message: `${pendingLawyers} lawyer${pendingLawyers > 1 ? 's' : ''} pending verification`,
+          link: '/admin/lawyers',
+        });
     }
     if (trackerPending && trackerPending > 0) {
       newAlerts.push({
@@ -87,9 +95,39 @@ export function AdminDashboard() {
       });
     }
     setAlerts(newAlerts);
-  };
+  } catch (err) {
+    console.error('Error fetching admin stats:', err);
+    setError('Failed to load admin dashboard. Please try again.');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-  const sidebarItems = [
+if (authLoading || isLoading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
+      <div className="text-center">
+        <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+        <p className="text-neutral-600 dark:text-neutral-400">Loading admin dashboard...</p>
+      </div>
+    </div>
+  );
+}
+
+if (error) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
+      <div className="text-center max-w-md p-6">
+        <div className="text-red-500 text-4xl mb-4">⚠️</div>
+        <h2 className="text-xl font-bold text-neutral-900 dark:text-white mb-2">Error Loading Dashboard</h2>
+        <p className="text-neutral-600 dark:text-neutral-400 mb-4">{error}</p>
+        <Button onClick={fetchAdminStats}>Retry</Button>
+      </div>
+    </div>
+  );
+}
+
+const sidebarItems = [
     { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', active: true },
     { to: '/admin/users', icon: Users, label: 'Users' },
     { to: '/admin/lawyers', icon: Briefcase, label: 'Lawyers' },
