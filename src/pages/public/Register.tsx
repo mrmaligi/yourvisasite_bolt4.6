@@ -8,7 +8,7 @@ import { useToast } from '../../components/ui/Toast';
 import { Logo } from '../../components/ui/Logo';
 
 export function Register() {
-  const { user, isLoading, signUpWithEmail, signInWithGoogle } = useAuth();
+  const { user, profile, isLoading, signUpWithEmail, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [fullName, setFullName] = useState('');
@@ -17,7 +17,7 @@ export function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  if (!isLoading && user) {
+  if (!isLoading && user && profile) {
     return <Navigate to="/dashboard" replace />;
   }
 
