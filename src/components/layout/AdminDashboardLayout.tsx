@@ -11,6 +11,9 @@ import {
   Tag,
   Settings,
   Youtube,
+  Library,
+  Files,
+  PenTool,
 } from 'lucide-react';
 import { DashboardLayout } from './DashboardLayout';
 
@@ -21,6 +24,9 @@ const sidebarItems = [
   { to: '/admin/lawyers', label: 'Lawyers', icon: Scale },
   { to: '/admin/visas', label: 'Visas', icon: FileText },
   { to: '/admin/premium', label: 'Premium Content', icon: BookOpen },
+  { to: '/admin/content', label: 'Content CMS', icon: Library },
+  { to: '/admin/pages', label: 'Pages', icon: Files },
+  { to: '/admin/blog', label: 'Blog', icon: PenTool },
   { to: '/admin/news', label: 'News', icon: Newspaper },
   { to: '/admin/youtube', label: 'YouTube Feed', icon: Youtube },
   { to: '/admin/tracker', label: 'Tracker', icon: BarChart3 },
@@ -29,6 +35,10 @@ const sidebarItems = [
   { to: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
-export function AdminDashboardLayout() {
-  return <DashboardLayout sidebarItems={sidebarItems} title="Admin" />;
+interface AdminDashboardLayoutProps {
+  children?: React.ReactNode;
+}
+
+export function AdminDashboardLayout({ children }: AdminDashboardLayoutProps) {
+  return <DashboardLayout sidebarItems={sidebarItems} title="Admin">{children}</DashboardLayout>;
 }

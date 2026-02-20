@@ -13,13 +13,9 @@ import {
   Bell,
   CheckCircle,
   AlertCircle,
-  MessageSquare,
   FileText,
-  BarChart as BarChartIcon,
   Activity,
-  UserCheck,
   ChevronRight,
-  Search
 } from 'lucide-react';
 import {
   BarChart,
@@ -99,11 +95,10 @@ export function LawyerDashboard() {
     setLawyerProfile(profile);
 
     // Get stats
-    const [{ count: clients }, { count: upcoming }, { count: completed }, { count: reviews }] = await Promise.all([
+    const [{ count: clients }, { count: upcoming }, { count: completed }] = await Promise.all([
       supabase.from('bookings').select('user_id', { count: 'exact', head: true }).eq('lawyer_id', profile?.id),
       supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile?.id).eq('status', 'confirmed').gte('scheduled_at', new Date().toISOString()),
       supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile?.id).eq('status', 'completed'),
-      supabase.from('lawyer_reviews').select('id', { count: 'exact' }).eq('lawyer_id', profile?.id),
     ]);
 
     setStats({
@@ -261,7 +256,7 @@ export function LawyerDashboard() {
                 <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
                   Your account is currently under review. Complete your profile to expedite the process.
                 </p>
-                <Button variant="outline" size="sm" className="mt-3 border-yellow-600 text-yellow-700 hover:bg-yellow-100">
+                <Button variant="secondary" size="sm" className="mt-3 border-yellow-600 text-yellow-700 hover:bg-yellow-100">
                   Complete Profile
                 </Button>
               </div>
@@ -454,7 +449,7 @@ export function LawyerDashboard() {
                         <p className="font-medium text-sm text-neutral-900 dark:text-white truncate">{doc.documentName}</p>
                         <p className="text-xs text-neutral-500 truncate">For {doc.clientName}</p>
                       </div>
-                      <Button size="sm" variant="outline" className="h-8 text-xs">Review</Button>
+                      <Button size="sm" variant="secondary" className="h-8 text-xs">Review</Button>
                     </div>
                   ))}
                   <Button variant="ghost" size="sm" className="w-full text-neutral-500 text-xs">View All Pending Reviews</Button>

@@ -60,8 +60,18 @@ const LawyerTracker = lazy(() => import('./pages/lawyer/LawyerTracker').then(m =
 const LawyerNews = lazy(() => import('./pages/lawyer/LawyerNews').then(m => ({ default: m.LawyerNews })));
 const LawyerMarketplace = lazy(() => import('./pages/lawyer/Marketplace').then(m => ({ default: m.Marketplace })));
 const LawyerSettings = lazy(() => import('./pages/lawyer/LawyerSettings').then(m => ({ default: m.LawyerSettings })));
+const LawyerTeam = lazy(() => import('./pages/lawyer/Team').then(m => ({ default: m.Team })));
+const LawyerCases = lazy(() => import('./pages/lawyer/Cases').then(m => ({ default: m.Cases })));
+const LawyerDocuments = lazy(() => import('./pages/lawyer/Documents').then(m => ({ default: m.Documents })));
+const LawyerNotes = lazy(() => import('./pages/lawyer/Notes').then(m => ({ default: m.Notes })));
+const LawyerLeadCapture = lazy(() => import('./pages/lawyer/LeadCapture').then(m => ({ default: m.LeadCapture })));
+const LawyerTestimonials = lazy(() => import('./pages/lawyer/Testimonials').then(m => ({ default: m.Testimonials })));
+const LawyerClientDetail = lazy(() => import('./pages/lawyer/ClientDetail').then(m => ({ default: m.ClientDetail })));
 
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const AdminContent = lazy(() => import('./pages/admin/Content').then(m => ({ default: m.Content })));
+const AdminPages = lazy(() => import('./pages/admin/Pages').then(m => ({ default: m.Pages })));
+const AdminBlog = lazy(() => import('./pages/admin/Blog').then(m => ({ default: m.Blog })));
 const AdminActivityLog = lazy(() => import('./pages/admin/ActivityLog').then(m => ({ default: m.ActivityLog })));
 const UserManagement = lazy(() => import('./pages/admin/UserManagement').then(m => ({ default: m.UserManagement })));
 const LawyerManagement = lazy(() => import('./pages/admin/LawyerManagement').then(m => ({ default: m.LawyerManagement })));
@@ -140,10 +150,20 @@ export default function App() {
                   <Route path="lawyer/news" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerNews /></ProtectedRoute>} />
                   <Route path="lawyer/marketplace" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerMarketplace /></ProtectedRoute>} />
                   <Route path="lawyer/settings" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerSettings /></ProtectedRoute>} />
+                  <Route path="lawyer/team" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerTeam /></ProtectedRoute>} />
+                  <Route path="lawyer/cases" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerCases /></ProtectedRoute>} />
+                  <Route path="lawyer/documents" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerDocuments /></ProtectedRoute>} />
+                  <Route path="lawyer/notes" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerNotes /></ProtectedRoute>} />
+                  <Route path="lawyer/leads" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerLeadCapture /></ProtectedRoute>} />
+                  <Route path="lawyer/testimonials" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerTestimonials /></ProtectedRoute>} />
+                  <Route path="lawyer/clients/:id" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerClientDetail /></ProtectedRoute>} />
 
                   {/* Admin Routes - Each has its own layout */}
                   <Route path="admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
                     <Route path="activity" element={<AdminActivityLog />} />
+                    <Route path="admin/content" element={<ProtectedRoute allowedRoles={['admin']}><AdminContent /></ProtectedRoute>} />
+                    <Route path="admin/pages" element={<ProtectedRoute allowedRoles={['admin']}><AdminPages /></ProtectedRoute>} />
+                    <Route path="admin/blog" element={<ProtectedRoute allowedRoles={['admin']}><AdminBlog /></ProtectedRoute>} />
                     <Route path="users" element={<UserManagement />} />
                     <Route path="lawyers" element={<LawyerManagement />} />
                     <Route path="visas" element={<VisaManagement />} />
