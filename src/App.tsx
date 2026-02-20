@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
@@ -39,6 +40,17 @@ const ForumCategoryPage = lazy(() => import('./pages/public/ForumCategoryPage').
 const ForumTopicPage = lazy(() => import('./pages/public/ForumTopicPage').then(m => ({ default: m.ForumTopicPage })));
 const LawyerRegister = lazy(() => import('./pages/lawyer/LawyerRegister').then(m => ({ default: m.LawyerRegister })));
 const LawyerPending = lazy(() => import('./pages/lawyer/LawyerPending').then(m => ({ default: m.LawyerPending })));
+
+const Resources = lazy(() => import('./pages/public/Resources').then(m => ({ default: m.Resources })));
+const Guides = lazy(() => import('./pages/public/Guides').then(m => ({ default: m.Guides })));
+const Checklists = lazy(() => import('./pages/public/Checklists').then(m => ({ default: m.Checklists })));
+const Templates = lazy(() => import('./pages/public/Templates').then(m => ({ default: m.Templates })));
+const Webinars = lazy(() => import('./pages/public/Webinars').then(m => ({ default: m.Webinars })));
+const Podcast = lazy(() => import('./pages/public/Podcast').then(m => ({ default: m.Podcast })));
+const Events = lazy(() => import('./pages/public/Events').then(m => ({ default: m.Events })));
+const Partners = lazy(() => import('./pages/public/Partners').then(m => ({ default: m.Partners })));
+const Press = lazy(() => import('./pages/public/Press').then(m => ({ default: m.Press })));
+const ApiDocs = lazy(() => import('./pages/public/ApiDocs').then(m => ({ default: m.ApiDocs })));
 
 const UserDashboard = lazy(() => import('./pages/user/UserDashboard').then(m => ({ default: m.UserDashboard })));
 const MyVisas = lazy(() => import('./pages/user/MyVisas').then(m => ({ default: m.MyVisas })));
@@ -100,6 +112,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
+        <HelmetProvider>
         <ToastProvider>
           <ErrorBoundary>
             <PWAInstallPrompt />
@@ -136,6 +149,17 @@ export default function App() {
                     <Route path="forum" element={<ForumHomePage />} />
                     <Route path="forum/:categorySlug" element={<ForumCategoryPage />} />
                     <Route path="forum/:categorySlug/:topicSlug" element={<ForumTopicPage />} />
+
+                    <Route path="resources" element={<Resources />} />
+                    <Route path="resources/guides" element={<Guides />} />
+                    <Route path="resources/checklists" element={<Checklists />} />
+                    <Route path="resources/templates" element={<Templates />} />
+                    <Route path="resources/webinars" element={<Webinars />} />
+                    <Route path="resources/podcast" element={<Podcast />} />
+                    <Route path="resources/events" element={<Events />} />
+                    <Route path="partners" element={<Partners />} />
+                    <Route path="press" element={<Press />} />
+                    <Route path="api-docs" element={<ApiDocs />} />
                   </Route>
 
                   {/* User Routes - Each has its own layout */}
@@ -206,6 +230,7 @@ export default function App() {
             </BrowserRouter>
           </ErrorBoundary>
         </ToastProvider>
+        </HelmetProvider>
       </AuthProvider>
     </ThemeProvider>
   );
