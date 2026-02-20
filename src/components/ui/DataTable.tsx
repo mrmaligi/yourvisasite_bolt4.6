@@ -68,22 +68,22 @@ export function DataTable<T>({
               setPage(0);
             }}
             placeholder={searchPlaceholder}
-            className="input-field pl-11"
+            className="input-field pl-11 transition-colors duration-200"
           />
         </div>
       )}
       <div className={
         isMobileCardView
-          ? 'md:overflow-x-auto md:rounded-2xl md:border md:border-neutral-200/80 md:shadow-soft'
-          : 'overflow-x-auto rounded-2xl border border-neutral-200/80 shadow-soft'
+          ? 'md:overflow-x-auto md:rounded-2xl md:border md:border-neutral-200/80 md:shadow-soft dark:md:border-neutral-700/80 transition-colors duration-200'
+          : 'overflow-x-auto rounded-2xl border border-neutral-200/80 shadow-soft dark:border-neutral-700/80 transition-colors duration-200'
       }>
         <table className={`w-full text-sm ${isMobileCardView ? 'block md:table' : 'table'}`}>
           <thead className={isMobileCardView ? 'hidden md:table-header-group' : 'table-header-group'}>
-            <tr className={`bg-neutral-50/80 border-b border-neutral-200/80 ${isMobileCardView ? 'block md:table-row' : 'table-row'}`}>
+            <tr className={`bg-neutral-50/80 border-b border-neutral-200/80 dark:bg-neutral-800/80 dark:border-neutral-700/80 ${isMobileCardView ? 'block md:table-row' : 'table-row'} transition-colors duration-200`}>
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={`px-4 py-3.5 text-left font-semibold text-neutral-500 text-xs uppercase tracking-wider ${isMobileCardView ? 'block md:table-cell' : 'table-cell'} ${col.sortable ? 'cursor-pointer select-none hover:text-neutral-900 transition-colors' : ''}`}
+                  className={`px-4 py-3.5 text-left font-semibold text-neutral-500 dark:text-neutral-400 text-xs uppercase tracking-wider ${isMobileCardView ? 'block md:table-cell' : 'table-cell'} ${col.sortable ? 'cursor-pointer select-none hover:text-neutral-900 dark:hover:text-neutral-200 transition-colors duration-200' : ''}`}
                   onClick={col.sortable ? () => handleSort(col.key) : undefined}
                 >
                   <span className="inline-flex items-center gap-1">
@@ -96,35 +96,35 @@ export function DataTable<T>({
               ))}
             </tr>
           </thead>
-          <tbody className={`${isMobileCardView ? 'block space-y-4 md:space-y-0 md:table-row-group' : 'table-row-group'} ${!isMobileCardView ? 'divide-y divide-neutral-100' : 'md:divide-y md:divide-neutral-100'}`}>
+          <tbody className={`${isMobileCardView ? 'block space-y-4 md:space-y-0 md:table-row-group' : 'table-row-group'} ${!isMobileCardView ? 'divide-y divide-neutral-100 dark:divide-neutral-800' : 'md:divide-y md:divide-neutral-100 dark:md:divide-neutral-800'}`}>
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRowSkeleton
                   key={i}
                   cols={columns.length}
-                  className={isMobileCardView ? 'block rounded-xl border border-neutral-200 bg-white p-4 shadow-sm md:table-row md:border-b md:border-neutral-100 md:shadow-none md:bg-transparent md:p-0' : 'table-row'}
+                  className={isMobileCardView ? 'block rounded-xl border border-neutral-200 bg-white p-4 shadow-sm md:table-row md:border-b md:border-neutral-100 md:shadow-none md:bg-transparent md:p-0 dark:bg-neutral-800 dark:border-neutral-700' : 'table-row'}
                 />
               ))
             ) : pagedData.length === 0 ? (
               <tr className={isMobileCardView ? 'block md:table-row' : 'table-row'}>
-                <td colSpan={columns.length} className={`px-4 py-16 text-center text-neutral-500 ${isMobileCardView ? 'block md:table-cell' : 'table-cell'}`}>
+                <td colSpan={columns.length} className={`px-4 py-16 text-center text-neutral-500 dark:text-neutral-400 ${isMobileCardView ? 'block md:table-cell' : 'table-cell'}`}>
                   No results found
                 </td>
               </tr>
             ) : (
               pagedData.map((row) => (
-                <tr key={keyExtractor(row)} className={`transition-colors duration-150 ${isMobileCardView ? 'block rounded-xl border border-neutral-200 bg-white p-4 shadow-sm md:table-row md:border-b md:border-neutral-100 md:shadow-none md:bg-transparent md:p-0 md:hover:bg-neutral-50/60' : 'hover:bg-neutral-50/60 table-row'}`}>
+                <tr key={keyExtractor(row)} className={`transition-colors duration-200 ${isMobileCardView ? 'block rounded-xl border border-neutral-200 bg-white dark:bg-neutral-800 dark:border-neutral-700 p-4 shadow-sm md:table-row md:border-b md:border-neutral-100 md:shadow-none md:bg-transparent md:p-0 md:hover:bg-neutral-50/60 dark:md:hover:bg-neutral-800/60' : 'hover:bg-neutral-50/60 dark:hover:bg-neutral-800/60 table-row'}`}>
                   {columns.map((col) => (
                     <td
                       key={col.key}
                       className={
                         isMobileCardView
-                          ? `${col.hideOnMobile ? 'hidden md:table-cell' : 'flex justify-between items-center py-2 border-b border-neutral-50 last:border-0 md:table-cell md:py-3.5 md:border-b-0'} text-neutral-700 md:px-4`
-                          : 'px-4 py-3.5 text-neutral-700 table-cell'
+                          ? `${col.hideOnMobile ? 'hidden md:table-cell' : 'flex justify-between items-center py-2 border-b border-neutral-50 dark:border-neutral-700 last:border-0 md:table-cell md:py-3.5 md:border-b-0'} text-neutral-700 dark:text-neutral-300 md:px-4 transition-colors duration-200`
+                          : 'px-4 py-3.5 text-neutral-700 dark:text-neutral-300 table-cell transition-colors duration-200'
                       }
                     >
                       {isMobileCardView && (
-                        <span className={`md:hidden font-semibold text-neutral-500 text-xs uppercase pr-4 ${col.hideOnMobile ? 'hidden' : ''}`}>
+                        <span className={`md:hidden font-semibold text-neutral-500 dark:text-neutral-400 text-xs uppercase pr-4 ${col.hideOnMobile ? 'hidden' : ''}`}>
                           {col.header}
                         </span>
                       )}
@@ -140,7 +140,7 @@ export function DataTable<T>({
         </table>
       </div>
       {totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm text-neutral-600">
+        <div className="flex items-center justify-between text-sm text-neutral-600 dark:text-neutral-400">
           <span>
             Showing {page * pageSize + 1}-{Math.min((page + 1) * pageSize, data.length)} of {data.length}
           </span>
@@ -148,17 +148,17 @@ export function DataTable<T>({
             <button
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
-              className="p-2 rounded-xl hover:bg-neutral-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-200"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="px-3 py-1 text-sm font-medium text-neutral-700">
+            <span className="px-3 py-1 text-sm font-medium text-neutral-700 dark:text-neutral-300 transition-colors duration-200">
               {page + 1} / {totalPages}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1}
-              className="p-2 rounded-xl hover:bg-neutral-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-200"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
