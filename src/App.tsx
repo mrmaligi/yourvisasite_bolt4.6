@@ -75,6 +75,8 @@ const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagement
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings').then(m => ({ default: m.AdminSettings })));
 const YouTubeManagement = lazy(() => import('./pages/admin/YouTubeManagement').then(m => ({ default: m.YouTubeManagement })));
 
+const UserRoutes = lazy(() => import('./routes/UserRoutes').then(m => ({ default: m.UserRoutes })));
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -155,6 +157,9 @@ export default function App() {
                   <Route path="admin/pricing" element={<ProtectedRoute allowedRoles={['admin']}><AdminPricing /></ProtectedRoute>} />
                   <Route path="admin/promos" element={<ProtectedRoute allowedRoles={['admin']}><PromoCodeManagement /></ProtectedRoute>} />
                   <Route path="admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
+
+                  {/* Batch 1: User Experience Foundation Pages */}
+                  <Route path="/*" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserRoutes /></ProtectedRoute>} />
                   </Routes>
                 </Suspense>
               </GlobalSearchProvider>
