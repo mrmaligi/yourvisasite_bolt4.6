@@ -108,6 +108,57 @@ const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagement
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings').then(m => ({ default: m.AdminSettings })));
 const YouTubeManagement = lazy(() => import('./pages/admin/YouTubeManagement').then(m => ({ default: m.YouTubeManagement })));
 
+const AdminContentArticles = lazy(() => import('./pages/admin/content/Articles').then(m => ({ default: m.Articles })));
+const AdminContentCreateArticle = lazy(() => import('./pages/admin/content/CreateArticle').then(m => ({ default: m.CreateArticle })));
+const AdminContentEditArticle = lazy(() => import('./pages/admin/content/EditArticle').then(m => ({ default: m.EditArticle })));
+const AdminContentMediaLibrary = lazy(() => import('./pages/admin/content/MediaLibrary').then(m => ({ default: m.MediaLibrary })));
+const AdminContentCategories = lazy(() => import('./pages/admin/content/Categories').then(m => ({ default: m.Categories })));
+const AdminContentTags = lazy(() => import('./pages/admin/content/Tags').then(m => ({ default: m.Tags })));
+const AdminContentComments = lazy(() => import('./pages/admin/content/Comments').then(m => ({ default: m.Comments })));
+const AdminContentSEO = lazy(() => import('./pages/admin/content/SEO').then(m => ({ default: m.SEO })));
+const AdminContentTemplates = lazy(() => import('./pages/admin/content/Templates').then(m => ({ default: m.Templates })));
+const AdminContentWorkflow = lazy(() => import('./pages/admin/content/Workflow').then(m => ({ default: m.Workflow })));
+const AdminUsersUserList = lazy(() => import('./pages/admin/users/UserList').then(m => ({ default: m.UserList })));
+const AdminUsersCreateUser = lazy(() => import('./pages/admin/users/CreateUser').then(m => ({ default: m.CreateUser })));
+const AdminUsersEditUser = lazy(() => import('./pages/admin/users/EditUser').then(m => ({ default: m.EditUser })));
+const AdminUsersRoles = lazy(() => import('./pages/admin/users/Roles').then(m => ({ default: m.Roles })));
+const AdminUsersPermissions = lazy(() => import('./pages/admin/users/Permissions').then(m => ({ default: m.Permissions })));
+const AdminUsersGroups = lazy(() => import('./pages/admin/users/Groups').then(m => ({ default: m.Groups })));
+const AdminUsersActivity = lazy(() => import('./pages/admin/users/Activity').then(m => ({ default: m.Activity })));
+const AdminUsersBannedUsers = lazy(() => import('./pages/admin/users/BannedUsers').then(m => ({ default: m.BannedUsers })));
+const AdminUsersVerificationRequests = lazy(() => import('./pages/admin/users/VerificationRequests').then(m => ({ default: m.VerificationRequests })));
+const AdminUsersInvitations = lazy(() => import('./pages/admin/users/Invitations').then(m => ({ default: m.Invitations })));
+const AdminSupportTickets = lazy(() => import('./pages/admin/support/Tickets').then(m => ({ default: m.Tickets })));
+const AdminSupportTicketDetail = lazy(() => import('./pages/admin/support/TicketDetail').then(m => ({ default: m.TicketDetail })));
+const AdminSupportKnowledgeBase = lazy(() => import('./pages/admin/support/KnowledgeBase').then(m => ({ default: m.KnowledgeBase })));
+const AdminSupportChatLogs = lazy(() => import('./pages/admin/support/ChatLogs').then(m => ({ default: m.ChatLogs })));
+const AdminSupportReports = lazy(() => import('./pages/admin/support/Reports').then(m => ({ default: m.Reports })));
+const AdminSupportModerationQueue = lazy(() => import('./pages/admin/support/ModerationQueue').then(m => ({ default: m.ModerationQueue })));
+const AdminSupportFeedback = lazy(() => import('./pages/admin/support/Feedback').then(m => ({ default: m.Feedback })));
+const AdminSupportAutomatedResponses = lazy(() => import('./pages/admin/support/AutomatedResponses').then(m => ({ default: m.AutomatedResponses })));
+const AdminSupportEscalations = lazy(() => import('./pages/admin/support/Escalations').then(m => ({ default: m.Escalations })));
+const AdminSupportSLADashboard = lazy(() => import('./pages/admin/support/SLADashboard').then(m => ({ default: m.SLADashboard })));
+const AdminAnalyticsOverview = lazy(() => import('./pages/admin/analytics/Overview').then(m => ({ default: m.Overview })));
+const AdminAnalyticsTraffic = lazy(() => import('./pages/admin/analytics/Traffic').then(m => ({ default: m.Traffic })));
+const AdminAnalyticsUsers = lazy(() => import('./pages/admin/analytics/Users').then(m => ({ default: m.Users })));
+const AdminAnalyticsRevenue = lazy(() => import('./pages/admin/analytics/Revenue').then(m => ({ default: m.Revenue })));
+const AdminAnalyticsContentPerformance = lazy(() => import('./pages/admin/analytics/ContentPerformance').then(m => ({ default: m.ContentPerformance })));
+const AdminAnalyticsConversionRates = lazy(() => import('./pages/admin/analytics/ConversionRates').then(m => ({ default: m.ConversionRates })));
+const AdminAnalyticsGeography = lazy(() => import('./pages/admin/analytics/Geography').then(m => ({ default: m.Geography })));
+const AdminAnalyticsDevices = lazy(() => import('./pages/admin/analytics/Devices').then(m => ({ default: m.Devices })));
+const AdminAnalyticsCustomReports = lazy(() => import('./pages/admin/analytics/CustomReports').then(m => ({ default: m.CustomReports })));
+const AdminAnalyticsExportData = lazy(() => import('./pages/admin/analytics/ExportData').then(m => ({ default: m.ExportData })));
+const AdminSystemSettings = lazy(() => import('./pages/admin/system/Settings').then(m => ({ default: m.Settings })));
+const AdminSystemLogs = lazy(() => import('./pages/admin/system/Logs').then(m => ({ default: m.Logs })));
+const AdminSystemBackup = lazy(() => import('./pages/admin/system/Backup').then(m => ({ default: m.Backup })));
+const AdminSystemSecurity = lazy(() => import('./pages/admin/system/Security').then(m => ({ default: m.Security })));
+const AdminSystemIntegrations = lazy(() => import('./pages/admin/system/Integrations').then(m => ({ default: m.Integrations })));
+const AdminSystemAPIKeys = lazy(() => import('./pages/admin/system/APIKeys').then(m => ({ default: m.APIKeys })));
+const AdminSystemWebhooks = lazy(() => import('./pages/admin/system/Webhooks').then(m => ({ default: m.Webhooks })));
+const AdminSystemMaintenance = lazy(() => import('./pages/admin/system/Maintenance').then(m => ({ default: m.Maintenance })));
+const AdminSystemNotifications = lazy(() => import('./pages/admin/system/Notifications').then(m => ({ default: m.Notifications })));
+const AdminSystemSystemHealth = lazy(() => import('./pages/admin/system/SystemHealth').then(m => ({ default: m.SystemHealth })));
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -224,6 +275,56 @@ export default function App() {
                   <Route path="admin/pricing" element={<ProtectedRoute allowedRoles={['admin']}><AdminPricing /></ProtectedRoute>} />
                   <Route path="admin/promos" element={<ProtectedRoute allowedRoles={['admin']}><PromoCodeManagement /></ProtectedRoute>} />
                   <Route path="admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
+                  <Route path="admin/content/articles" element={<ProtectedRoute allowedRoles={['admin']}><AdminContentArticles /></ProtectedRoute>} />
+                  <Route path="admin/content/create-article" element={<ProtectedRoute allowedRoles={['admin']}><AdminContentCreateArticle /></ProtectedRoute>} />
+                  <Route path="admin/content/edit-article" element={<ProtectedRoute allowedRoles={['admin']}><AdminContentEditArticle /></ProtectedRoute>} />
+                  <Route path="admin/content/media-library" element={<ProtectedRoute allowedRoles={['admin']}><AdminContentMediaLibrary /></ProtectedRoute>} />
+                  <Route path="admin/content/categories" element={<ProtectedRoute allowedRoles={['admin']}><AdminContentCategories /></ProtectedRoute>} />
+                  <Route path="admin/content/tags" element={<ProtectedRoute allowedRoles={['admin']}><AdminContentTags /></ProtectedRoute>} />
+                  <Route path="admin/content/comments" element={<ProtectedRoute allowedRoles={['admin']}><AdminContentComments /></ProtectedRoute>} />
+                  <Route path="admin/content/seo" element={<ProtectedRoute allowedRoles={['admin']}><AdminContentSEO /></ProtectedRoute>} />
+                  <Route path="admin/content/templates" element={<ProtectedRoute allowedRoles={['admin']}><AdminContentTemplates /></ProtectedRoute>} />
+                  <Route path="admin/content/workflow" element={<ProtectedRoute allowedRoles={['admin']}><AdminContentWorkflow /></ProtectedRoute>} />
+                  <Route path="admin/users/user-list" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsersUserList /></ProtectedRoute>} />
+                  <Route path="admin/users/create-user" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsersCreateUser /></ProtectedRoute>} />
+                  <Route path="admin/users/edit-user" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsersEditUser /></ProtectedRoute>} />
+                  <Route path="admin/users/roles" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsersRoles /></ProtectedRoute>} />
+                  <Route path="admin/users/permissions" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsersPermissions /></ProtectedRoute>} />
+                  <Route path="admin/users/groups" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsersGroups /></ProtectedRoute>} />
+                  <Route path="admin/users/activity" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsersActivity /></ProtectedRoute>} />
+                  <Route path="admin/users/banned-users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsersBannedUsers /></ProtectedRoute>} />
+                  <Route path="admin/users/verification-requests" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsersVerificationRequests /></ProtectedRoute>} />
+                  <Route path="admin/users/invitations" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsersInvitations /></ProtectedRoute>} />
+                  <Route path="admin/support/tickets" element={<ProtectedRoute allowedRoles={['admin']}><AdminSupportTickets /></ProtectedRoute>} />
+                  <Route path="admin/support/ticket-detail" element={<ProtectedRoute allowedRoles={['admin']}><AdminSupportTicketDetail /></ProtectedRoute>} />
+                  <Route path="admin/support/knowledge-base" element={<ProtectedRoute allowedRoles={['admin']}><AdminSupportKnowledgeBase /></ProtectedRoute>} />
+                  <Route path="admin/support/chat-logs" element={<ProtectedRoute allowedRoles={['admin']}><AdminSupportChatLogs /></ProtectedRoute>} />
+                  <Route path="admin/support/reports" element={<ProtectedRoute allowedRoles={['admin']}><AdminSupportReports /></ProtectedRoute>} />
+                  <Route path="admin/support/moderation-queue" element={<ProtectedRoute allowedRoles={['admin']}><AdminSupportModerationQueue /></ProtectedRoute>} />
+                  <Route path="admin/support/feedback" element={<ProtectedRoute allowedRoles={['admin']}><AdminSupportFeedback /></ProtectedRoute>} />
+                  <Route path="admin/support/automated-responses" element={<ProtectedRoute allowedRoles={['admin']}><AdminSupportAutomatedResponses /></ProtectedRoute>} />
+                  <Route path="admin/support/escalations" element={<ProtectedRoute allowedRoles={['admin']}><AdminSupportEscalations /></ProtectedRoute>} />
+                  <Route path="admin/support/sla-dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminSupportSLADashboard /></ProtectedRoute>} />
+                  <Route path="admin/analytics/overview" element={<ProtectedRoute allowedRoles={['admin']}><AdminAnalyticsOverview /></ProtectedRoute>} />
+                  <Route path="admin/analytics/traffic" element={<ProtectedRoute allowedRoles={['admin']}><AdminAnalyticsTraffic /></ProtectedRoute>} />
+                  <Route path="admin/analytics/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminAnalyticsUsers /></ProtectedRoute>} />
+                  <Route path="admin/analytics/revenue" element={<ProtectedRoute allowedRoles={['admin']}><AdminAnalyticsRevenue /></ProtectedRoute>} />
+                  <Route path="admin/analytics/content-performance" element={<ProtectedRoute allowedRoles={['admin']}><AdminAnalyticsContentPerformance /></ProtectedRoute>} />
+                  <Route path="admin/analytics/conversion-rates" element={<ProtectedRoute allowedRoles={['admin']}><AdminAnalyticsConversionRates /></ProtectedRoute>} />
+                  <Route path="admin/analytics/geography" element={<ProtectedRoute allowedRoles={['admin']}><AdminAnalyticsGeography /></ProtectedRoute>} />
+                  <Route path="admin/analytics/devices" element={<ProtectedRoute allowedRoles={['admin']}><AdminAnalyticsDevices /></ProtectedRoute>} />
+                  <Route path="admin/analytics/custom-reports" element={<ProtectedRoute allowedRoles={['admin']}><AdminAnalyticsCustomReports /></ProtectedRoute>} />
+                  <Route path="admin/analytics/export-data" element={<ProtectedRoute allowedRoles={['admin']}><AdminAnalyticsExportData /></ProtectedRoute>} />
+                  <Route path="admin/system/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSystemSettings /></ProtectedRoute>} />
+                  <Route path="admin/system/logs" element={<ProtectedRoute allowedRoles={['admin']}><AdminSystemLogs /></ProtectedRoute>} />
+                  <Route path="admin/system/backup" element={<ProtectedRoute allowedRoles={['admin']}><AdminSystemBackup /></ProtectedRoute>} />
+                  <Route path="admin/system/security" element={<ProtectedRoute allowedRoles={['admin']}><AdminSystemSecurity /></ProtectedRoute>} />
+                  <Route path="admin/system/integrations" element={<ProtectedRoute allowedRoles={['admin']}><AdminSystemIntegrations /></ProtectedRoute>} />
+                  <Route path="admin/system/api-keys" element={<ProtectedRoute allowedRoles={['admin']}><AdminSystemAPIKeys /></ProtectedRoute>} />
+                  <Route path="admin/system/webhooks" element={<ProtectedRoute allowedRoles={['admin']}><AdminSystemWebhooks /></ProtectedRoute>} />
+                  <Route path="admin/system/maintenance" element={<ProtectedRoute allowedRoles={['admin']}><AdminSystemMaintenance /></ProtectedRoute>} />
+                  <Route path="admin/system/notifications" element={<ProtectedRoute allowedRoles={['admin']}><AdminSystemNotifications /></ProtectedRoute>} />
+                  <Route path="admin/system/system-health" element={<ProtectedRoute allowedRoles={['admin']}><AdminSystemSystemHealth /></ProtectedRoute>} />
                   </Routes>
                 </Suspense>
               </GlobalSearchProvider>
