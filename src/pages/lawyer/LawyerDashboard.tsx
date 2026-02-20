@@ -1,19 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  LayoutDashboard, 
   Users, 
   Calendar, 
   Clock,
   TrendingUp,
   DollarSign,
   Star,
-  Briefcase,
-  Settings,
   Bell,
   CheckCircle,
   AlertCircle,
-  MessageSquare
+  MessageSquare,
 } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -32,7 +29,6 @@ export function LawyerDashboard() {
     averageRating: 0,
     totalEarnings: 0,
   });
-  const [recentClients, setRecentClients] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -68,68 +64,12 @@ export function LawyerDashboard() {
     });
   };
 
-  const sidebarItems = [
-    { to: '/lawyer/dashboard', icon: LayoutDashboard, label: 'Dashboard', active: true },
-    { to: '/lawyer/clients', icon: Users, label: 'Clients' },
-    { to: '/lawyer/consultations', icon: Calendar, label: 'Consultations' },
-    { to: '/lawyer/availability', icon: Clock, label: 'Availability' },
-    { to: '/lawyer/marketing', icon: TrendingUp, label: 'Marketing' },
-    { to: '/lawyer/reviews', icon: Star, label: 'Reviews' },
-    { to: '/lawyer/settings', icon: Settings, label: 'Settings' },
-  ];
-
   const isVerified = lawyerProfile?.verification_status === 'approved';
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 flex">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white dark:bg-neutral-800 border-r border-neutral-200 dark:border-neutral-700 hidden lg:block">
-        <div className="p-6 border-b border-neutral-200 dark:border-neutral-700">
-          <Link to="/" className="font-bold text-xl text-primary-600">VisaBuild</Link>
-          <p className="text-xs text-neutral-500 mt-1">Lawyer Portal</p>
-        </div>
-        
-        <nav className="p-4 space-y-1">
-          {sidebarItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                  item.active
-                    ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300'
-                    : 'text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700'
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Lawyer Card */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-neutral-200 dark:border-neutral-700">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-              <Briefcase className="w-5 h-5 text-green-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-neutral-900 dark:text-white truncate">{user?.email}</p>
-              <div className="flex items-center gap-1">
-                <p className="text-xs text-neutral-500">Lawyer</p>
-                {isVerified && <CheckCircle className="w-3 h-3 text-green-500" />}
-              </div>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1">
+    <div>
         {/* Header */}
-        <header className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 px-6 py-4">
+        <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Lawyer Dashboard</h1>
@@ -148,9 +88,9 @@ export function LawyerDashboard() {
               </button>
             </div>
           </div>
-        </header>
+        </div>
 
-        <div className="p-6">
+        <div>
           {/* Verification Alert */}
           {!isVerified && (
             <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl flex items-start gap-3">
@@ -313,7 +253,6 @@ export function LawyerDashboard() {
             </CardBody>
           </Card>
         </div>
-      </main>
     </div>
   );
 }

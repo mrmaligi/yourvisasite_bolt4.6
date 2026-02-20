@@ -7,6 +7,9 @@ import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { GlobalSearchProvider } from './contexts/GlobalSearchContext';
 import { GlobalSearch } from './components/GlobalSearch';
 import { PublicLayout } from './components/layout/PublicLayout';
+import { UserDashboardLayout } from './components/layout/UserDashboardLayout';
+import { LawyerDashboardLayout } from './components/layout/LawyerDashboardLayout';
+import { AdminDashboardLayout } from './components/layout/AdminDashboardLayout';
 import { ProtectedRoute, RoleRedirect } from './components/auth/RoleGuard';
 import { Loading } from './components/ui/Loading';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
@@ -87,73 +90,80 @@ export default function App() {
                 <Suspense fallback={<Loading fullScreen />}>
                   <Routes>
                     <Route element={<PublicLayout />}>
-                    <Route index element={<Landing />} />
-                    <Route path="login" element={<UnifiedLogin />} />
-                    <Route path="role-select" element={<RoleRedirect />} />
-                    <Route path="register" element={<Register />} />
-                    <Route path="register/lawyer" element={<LawyerRegister />} />
-                    <Route path="visas" element={<VisaSearch />} />
-                    <Route path="visas/compare" element={<VisaCompare />} />
-                    <Route path="visas/:id" element={<VisaDetail />} />
-                    <Route path="tracker" element={<Tracker />} />
-                    <Route path="lawyers" element={<LawyerDirectory />} />
-                    <Route path="lawyers/:id" element={<LawyerProfile />} />
-                    <Route path="news" element={<News />} />
-                    <Route path="news/:slug" element={<NewsDetail />} />
-                    <Route path="marketplace" element={<PublicMarketplace />} />
-                    <Route path="pricing" element={<Pricing />} />
-                    <Route path="success" element={<Success />} />
-                    <Route path="quiz" element={<EligibilityQuizPage />} />
-                    <Route path="stories" element={<SuccessStoriesPage />} />
-                    <Route path="about" element={<AboutPage />} />
-                    <Route path="contact" element={<ContactPage />} />
-                    <Route path="faq" element={<FAQPage />} />
-                    <Route path="terms" element={<TermsPage />} />
-                    <Route path="privacy" element={<PrivacyPage />} />
-                    <Route path="careers" element={<CareersPage />} />
-                    <Route path="forum" element={<ForumHomePage />} />
-                    <Route path="forum/:categorySlug" element={<ForumCategoryPage />} />
-                    <Route path="forum/:categorySlug/:topicSlug" element={<ForumTopicPage />} />
-                  </Route>
+                      <Route index element={<Landing />} />
+                      <Route path="login" element={<UnifiedLogin />} />
+                      <Route path="role-select" element={<RoleRedirect />} />
+                      <Route path="register" element={<Register />} />
+                      <Route path="register/lawyer" element={<LawyerRegister />} />
+                      <Route path="visas" element={<VisaSearch />} />
+                      <Route path="visas/compare" element={<VisaCompare />} />
+                      <Route path="visas/:id" element={<VisaDetail />} />
+                      <Route path="tracker" element={<Tracker />} />
+                      <Route path="lawyers" element={<LawyerDirectory />} />
+                      <Route path="lawyers/:id" element={<LawyerProfile />} />
+                      <Route path="news" element={<News />} />
+                      <Route path="news/:slug" element={<NewsDetail />} />
+                      <Route path="marketplace" element={<PublicMarketplace />} />
+                      <Route path="pricing" element={<Pricing />} />
+                      <Route path="success" element={<Success />} />
+                      <Route path="quiz" element={<EligibilityQuizPage />} />
+                      <Route path="stories" element={<SuccessStoriesPage />} />
+                      <Route path="about" element={<AboutPage />} />
+                      <Route path="contact" element={<ContactPage />} />
+                      <Route path="faq" element={<FAQPage />} />
+                      <Route path="terms" element={<TermsPage />} />
+                      <Route path="privacy" element={<PrivacyPage />} />
+                      <Route path="careers" element={<CareersPage />} />
+                      <Route path="forum" element={<ForumHomePage />} />
+                      <Route path="forum/:categorySlug" element={<ForumCategoryPage />} />
+                      <Route path="forum/:categorySlug/:topicSlug" element={<ForumTopicPage />} />
+                    </Route>
 
-                  {/* User Routes - Each has its own layout */}
-                  <Route path="dashboard" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserDashboard /></ProtectedRoute>} />
-                  <Route path="dashboard/visas" element={<ProtectedRoute allowedRoles={['user', 'admin']}><MyVisas /></ProtectedRoute>} />
-                  <Route path="dashboard/saved" element={<ProtectedRoute allowedRoles={['user', 'admin']}><SavedVisas /></ProtectedRoute>} />
-                  <Route path="dashboard/documents" element={<ProtectedRoute allowedRoles={['user', 'admin']}><MyDocuments /></ProtectedRoute>} />
-                  <Route path="dashboard/consultations" element={<ProtectedRoute allowedRoles={['user', 'admin']}><Consultations /></ProtectedRoute>} />
-                  <Route path="dashboard/book-consultation/:lawyerId" element={<ProtectedRoute allowedRoles={['user', 'admin']}><BookConsultation /></ProtectedRoute>} />
-                  <Route path="dashboard/premium" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserPremiumContent /></ProtectedRoute>} />
-                  <Route path="dashboard/marketplace" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserMarketplacePurchases /></ProtectedRoute>} />
-                  <Route path="dashboard/settings" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserSettings /></ProtectedRoute>} />
-                  <Route path="dashboard/referrals" element={<ProtectedRoute allowedRoles={['user', 'admin']}><Referrals /></ProtectedRoute>} />
+                    {/* User Routes - Wrapped with UserDashboardLayout */}
+                    <Route path="dashboard" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserDashboardLayout /></ProtectedRoute>}>
+                      <Route index element={<UserDashboard />} />
+                      <Route path="visas" element={<MyVisas />} />
+                      <Route path="saved" element={<SavedVisas />} />
+                      <Route path="documents" element={<MyDocuments />} />
+                      <Route path="consultations" element={<Consultations />} />
+                      <Route path="book-consultation/:lawyerId" element={<BookConsultation />} />
+                      <Route path="premium" element={<UserPremiumContent />} />
+                      <Route path="marketplace" element={<UserMarketplacePurchases />} />
+                      <Route path="settings" element={<UserSettings />} />
+                      <Route path="referrals" element={<Referrals />} />
+                    </Route>
 
-                  {/* Lawyer Routes - Each has its own layout */}
-                  <Route path="lawyer" element={<PortalLanding />} />
-                  <Route path="lawyer/pending" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerPending /></ProtectedRoute>} />
-                  <Route path="lawyer/dashboard" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerDashboard /></ProtectedRoute>} />
-                  <Route path="lawyer/clients" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerClients /></ProtectedRoute>} />
-                  <Route path="lawyer/consultations" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerConsultations /></ProtectedRoute>} />
-                  <Route path="lawyer/availability" element={<ProtectedRoute allowedRoles={['lawyer']}><Availability /></ProtectedRoute>} />
-                  <Route path="lawyer/marketing" element={<ProtectedRoute allowedRoles={['lawyer']}><Marketing /></ProtectedRoute>} />
-                  <Route path="lawyer/tracker" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerTracker /></ProtectedRoute>} />
-                  <Route path="lawyer/news" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerNews /></ProtectedRoute>} />
-                  <Route path="lawyer/marketplace" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerMarketplace /></ProtectedRoute>} />
-                  <Route path="lawyer/settings" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerSettings /></ProtectedRoute>} />
+                    {/* Lawyer Routes */}
+                    <Route path="lawyer" element={<PortalLanding />} />
+                    <Route path="lawyer/pending" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerPending /></ProtectedRoute>} />
 
-                  {/* Admin Routes - Each has its own layout */}
-                  <Route path="admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
-                    <Route path="activity" element={<AdminActivityLog />} />
-                    <Route path="users" element={<UserManagement />} />
-                    <Route path="lawyers" element={<LawyerManagement />} />
-                    <Route path="visas" element={<VisaManagement />} />
-                    <Route path="premium" element={<PremiumContent />} />
-                    <Route path="admin/news" element={<ProtectedRoute allowedRoles={['admin']}><NewsManagement /></ProtectedRoute>} />
-                  <Route path="admin/youtube" element={<ProtectedRoute allowedRoles={['admin']}><YouTubeManagement /></ProtectedRoute>} />
-                  <Route path="admin/tracker" element={<ProtectedRoute allowedRoles={['admin']}><TrackerManagement /></ProtectedRoute>} />
-                  <Route path="admin/pricing" element={<ProtectedRoute allowedRoles={['admin']}><AdminPricing /></ProtectedRoute>} />
-                  <Route path="admin/promos" element={<ProtectedRoute allowedRoles={['admin']}><PromoCodeManagement /></ProtectedRoute>} />
-                  <Route path="admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
+                    <Route path="lawyer" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerDashboardLayout /></ProtectedRoute>}>
+                      <Route path="dashboard" element={<LawyerDashboard />} />
+                      <Route path="clients" element={<LawyerClients />} />
+                      <Route path="consultations" element={<LawyerConsultations />} />
+                      <Route path="availability" element={<Availability />} />
+                      <Route path="marketing" element={<Marketing />} />
+                      <Route path="tracker" element={<LawyerTracker />} />
+                      <Route path="news" element={<LawyerNews />} />
+                      <Route path="marketplace" element={<LawyerMarketplace />} />
+                      <Route path="settings" element={<LawyerSettings />} />
+                    </Route>
+
+                    {/* Admin Routes - Wrapped with AdminDashboardLayout */}
+                    <Route path="admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboardLayout /></ProtectedRoute>}>
+                      <Route index element={<AdminDashboard />} />
+                      <Route path="activity" element={<AdminActivityLog />} />
+                      <Route path="users" element={<UserManagement />} />
+                      <Route path="lawyers" element={<LawyerManagement />} />
+                      <Route path="visas" element={<VisaManagement />} />
+                      <Route path="premium" element={<PremiumContent />} />
+                      <Route path="news" element={<NewsManagement />} />
+                      <Route path="youtube" element={<YouTubeManagement />} />
+                      <Route path="tracker" element={<TrackerManagement />} />
+                      <Route path="pricing" element={<AdminPricing />} />
+                      <Route path="promos" element={<PromoCodeManagement />} />
+                      <Route path="settings" element={<AdminSettings />} />
+                    </Route>
                   </Routes>
                 </Suspense>
               </GlobalSearchProvider>

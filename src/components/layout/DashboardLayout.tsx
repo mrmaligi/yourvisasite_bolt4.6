@@ -24,7 +24,8 @@ export function DashboardLayout({ sidebarItems, mobileNavItems, title }: Dashboa
         <div className="flex items-center gap-3">
           <button
             onClick={() => setMobileOpen(true)}
-            className="p-2 -ml-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-300 transition-colors"
+            className="p-2 -ml-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-300 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+            aria-label="Open menu"
           >
             <Menu className="w-5 h-5" />
           </button>

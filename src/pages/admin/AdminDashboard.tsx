@@ -1,15 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  LayoutDashboard, 
   Users, 
   Briefcase, 
-  Shield,
   TrendingUp,
   DollarSign,
   AlertTriangle,
   CheckCircle,
-  Settings,
   Bell,
   Activity,
   FileText,
@@ -89,17 +86,6 @@ export function AdminDashboard() {
     setAlerts(newAlerts);
   };
 
-  const sidebarItems = [
-    { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', active: true },
-    { to: '/admin/users', icon: Users, label: 'Users' },
-    { to: '/admin/lawyers', icon: Briefcase, label: 'Lawyers' },
-    { to: '/admin/visas', icon: Globe, label: 'Visas' },
-    { to: '/admin/content', icon: FileText, label: 'Content' },
-    { to: '/admin/tracker', icon: Activity, label: 'Tracker' },
-    { to: '/admin/analytics', icon: TrendingUp, label: 'Analytics' },
-    { to: '/admin/settings', icon: Settings, label: 'Settings' },
-  ];
-
   const managementCards = [
     {
       title: 'User Management',
@@ -133,52 +119,9 @@ export function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 flex">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white dark:bg-neutral-800 border-r border-neutral-200 dark:border-neutral-700 hidden lg:block">
-        <div className="p-6 border-b border-neutral-200 dark:border-neutral-700">
-          <Link to="/" className="font-bold text-xl text-primary-600">VisaBuild</Link>
-          <p className="text-xs text-neutral-500 mt-1">Admin Console</p>
-        </div>
-        
-        <nav className="p-4 space-y-1">
-          {sidebarItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                  item.active
-                    ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300'
-                    : 'text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700'
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Admin Card */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-neutral-200 dark:border-neutral-700">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
-              <Shield className="w-5 h-5 text-purple-600" />
-            </div>
-            <div>
-              <p className="font-medium text-neutral-900 dark:text-white">{user?.email}</p>
-              <p className="text-xs text-neutral-500">Administrator</p>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1">
+    <div>
         {/* Header */}
-        <header className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 px-6 py-4">
+        <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Admin Dashboard</h1>
@@ -196,9 +139,9 @@ export function AdminDashboard() {
               </button>
             </div>
           </div>
-        </header>
+        </div>
 
-        <div className="p-6">
+        <div>
           {/* Alerts */}
           {alerts.length > 0 && (
             <div className="mb-6 space-y-2">
@@ -382,7 +325,6 @@ export function AdminDashboard() {
             </Card>
           </div>
         </div>
-      </main>
     </div>
   );
 }

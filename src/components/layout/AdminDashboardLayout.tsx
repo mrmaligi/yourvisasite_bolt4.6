@@ -29,6 +29,13 @@ const sidebarItems = [
   { to: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
+const mobileNavItems = [
+  { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/admin/users', label: 'Users', icon: Users },
+  { to: '/admin/lawyers', label: 'Lawyers', icon: Scale },
+  { to: '/admin/settings', label: 'Settings', icon: Settings },
+];
+
 export function AdminDashboardLayout() {
-  return <DashboardLayout sidebarItems={sidebarItems} title="Admin" />;
+  return <DashboardLayout sidebarItems={sidebarItems} mobileNavItems={mobileNavItems} title="Admin" />;
 }

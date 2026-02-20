@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { Logo } from '../ui/Logo';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { UserMenu } from './UserMenu';
 import { SearchTrigger } from '../ui/SearchTrigger';
+import { MobileDrawer } from './MobileDrawer';
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -54,17 +55,18 @@ export function Navbar() {
              <SearchTrigger variant="icon" />
              <ThemeToggle />
              <button
-              className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-neutral-700 dark:text-neutral-200"
-              onClick={() => setMobileOpen(!mobileOpen)}
+              className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-neutral-700 dark:text-neutral-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
             >
-              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              <Menu className="w-5 h-5" />
             </button>
           </div>
         </div>
       </div>
 
-      {mobileOpen && (
-        <div className="lg:hidden fixed inset-x-0 top-16 bottom-0 z-30 border-t border-neutral-200/60 dark:border-neutral-700/60 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl px-4 py-4 space-y-1 animate-fade-in overflow-y-auto">
+      <MobileDrawer isOpen={mobileOpen} onClose={() => setMobileOpen(false)} side="right">
+        <div className="p-4 space-y-1">
           {publicLinks.map((link) => (
             <Link
               key={link.to}
@@ -80,7 +82,7 @@ export function Navbar() {
              <UserMenu />
           </div>
         </div>
-      )}
+      </MobileDrawer>
     </nav>
   );
 }
