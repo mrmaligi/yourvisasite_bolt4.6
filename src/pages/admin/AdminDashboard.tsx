@@ -20,6 +20,9 @@ import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
+import { UserGrowthChart } from '../../components/charts/UserGrowthChart';
+import { RevenueChart } from '../../components/charts/RevenueChart';
+import { useRealtimeSubscription } from '../../hooks/useRealtimeStats';
 
 export function AdminDashboard() {
   const { user } = useAuth();
@@ -34,12 +37,6 @@ export function AdminDashboard() {
     recentSignups: 0,
   });
   const [alerts, setAlerts] = useState<any[]>([]);
-
-  useEffect(() => {
-    if (user) {
-      fetchAdminStats();
-    }
-  }, [user]);
 
   const fetchAdminStats = async () => {
     // Get all stats
@@ -88,6 +85,18 @@ export function AdminDashboard() {
     }
     setAlerts(newAlerts);
   };
+
+  useEffect(() => {
+    if (user) {
+      fetchAdminStats();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  // Real-time updates
+  useRealtimeSubscription(['profiles', 'bookings', 'visas', 'tracker_entries'], () => {
+    fetchAdminStats();
+  });
 
   const sidebarItems = [
     { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', active: true },
@@ -176,9 +185,9 @@ export function AdminDashboard() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1">
+      <main className="flex-1 overflow-y-auto h-screen">
         {/* Header */}
-        <header className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 px-6 py-4">
+        <header className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 px-6 py-4 sticky top-0 z-10">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Admin Dashboard</h1>
@@ -280,6 +289,27 @@ export function AdminDashboard() {
             </Card>
           </div>
 
+          {/* Analytics Charts */}
+          <div className="grid lg:grid-cols-2 gap-6 mb-8">
+            <Card>
+              <CardHeader>
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">User Growth</h2>
+              </CardHeader>
+              <CardBody>
+                <UserGrowthChart />
+              </CardBody>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Revenue Breakdown</h2>
+              </CardHeader>
+              <CardBody>
+                <RevenueChart />
+              </CardBody>
+            </Card>
+          </div>
+
           {/* Management Cards */}
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {managementCards.map((card) => {
@@ -354,7 +384,7 @@ export function AdminDashboard() {
               <CardHeader>
                 <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Quick Actions</h2>
               </CardHeader>
-              <CardBody className="space-y-3">
+              <CardBody>
                 <Link to="/admin/lawyers" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
                   <div>
                     <h3 className="font-medium text-neutral-900 dark:text-white">Verify Lawyers</h3>

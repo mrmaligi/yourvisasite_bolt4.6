@@ -20,10 +20,28 @@ import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
+import { EarningsChart } from '../../components/charts/EarningsChart';
+import { useRealtimeSubscription } from '../../hooks/useRealtimeStats';
+
+interface Client {
+  id: string;
+  clientName: string;
+  email: string;
+  status: string;
+  created_at: string;
+  user_id: string;
+  scheduled_at: string;
+}
+
+interface LawyerProfile {
+  id: string;
+  user_id: string;
+  verification_status: string;
+}
 
 export function LawyerDashboard() {
   const { user } = useAuth();
-  const [lawyerProfile, setLawyerProfile] = useState<any>(null);
+  const [lawyerProfile, setLawyerProfile] = useState<LawyerProfile | null>(null);
   const [stats, setStats] = useState({
     totalClients: 0,
     upcomingConsultations: 0,
@@ -32,41 +50,77 @@ export function LawyerDashboard() {
     averageRating: 0,
     totalEarnings: 0,
   });
-  const [recentClients, setRecentClients] = useState<any[]>([]);
-
-  useEffect(() => {
-    if (user) {
-      fetchLawyerData();
-    }
-  }, [user]);
+  const [recentClients, setRecentClients] = useState<Client[]>([]);
 
   const fetchLawyerData = async () => {
+    if (!user) return;
+
     // Get lawyer profile
     const { data: profile } = await supabase
       .from('lawyer_profiles')
       .select('*')
-      .eq('user_id', user?.id)
+      .eq('user_id', user.id)
       .single();
     
+    if (!profile) return;
+
     setLawyerProfile(profile);
 
     // Get stats
     const [{ count: clients }, { count: upcoming }, { count: completed }, { count: reviews }] = await Promise.all([
-      supabase.from('bookings').select('user_id', { count: 'exact', head: true }).eq('lawyer_id', profile?.id),
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile?.id).eq('status', 'confirmed').gte('scheduled_at', new Date().toISOString()),
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile?.id).eq('status', 'completed'),
-      supabase.from('lawyer_reviews').select('id', { count: 'exact' }).eq('lawyer_id', profile?.id),
+      supabase.from('bookings').select('user_id', { count: 'exact', head: true }).eq('lawyer_id', profile.id),
+      supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile.id).eq('status', 'confirmed').gte('scheduled_at', new Date().toISOString()),
+      supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile.id).eq('status', 'completed'),
+      supabase.from('lawyer_reviews').select('id', { count: 'exact' }).eq('lawyer_id', profile.id),
     ]);
 
     setStats({
       totalClients: clients || 0,
       upcomingConsultations: upcoming || 0,
       completedConsultations: completed || 0,
-      pendingReviews: 0,
+      pendingReviews: reviews || 0,
       averageRating: 4.8,
       totalEarnings: completed ? completed * 150 : 0,
     });
+
+    // Fetch recent clients (bookings)
+    const { data: bookings } = await supabase
+      .from('bookings')
+      .select(`
+        id,
+        status,
+        scheduled_at,
+        created_at,
+        user_id
+      `)
+      .eq('lawyer_id', profile.id)
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    if (bookings) {
+      const clientsWithDetails = await Promise.all(bookings.map(async (booking) => {
+         const { data: userProfile } = await supabase.from('profiles').select('email, first_name, last_name').eq('id', booking.user_id).single();
+         return {
+           ...booking,
+           clientName: userProfile ? `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || userProfile.email : 'Unknown Client',
+           email: userProfile?.email
+         };
+      }));
+      setRecentClients(clientsWithDetails as Client[]);
+    }
   };
+
+  useEffect(() => {
+    if (user) {
+      fetchLawyerData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  // Real-time subscription
+  useRealtimeSubscription(['bookings', 'lawyer_reviews'], () => {
+    fetchLawyerData();
+  });
 
   const sidebarItems = [
     { to: '/lawyer/dashboard', icon: LayoutDashboard, label: 'Dashboard', active: true },
@@ -127,9 +181,9 @@ export function LawyerDashboard() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1">
+      <main className="flex-1 overflow-y-auto h-screen">
         {/* Header */}
-        <header className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 px-6 py-4">
+        <header className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 px-6 py-4 sticky top-0 z-10">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Lawyer Dashboard</h1>
@@ -215,103 +269,137 @@ export function LawyerDashboard() {
             </Card>
           </div>
 
-          {/* Quick Actions */}
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <Card>
-              <CardHeader>
-                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Quick Actions</h2>
-              </CardHeader>
-              <CardBody className="space-y-3">
-                <Link to="/lawyer/availability" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-green-300 dark:hover:border-green-700 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <Clock className="w-5 h-5 text-green-600" />
-                    <div>
-                      <h3 className="font-medium text-neutral-900 dark:text-white">Set Availability</h3>
-                      <p className="text-sm text-neutral-500">Manage your consultation slots</p>
-                    </div>
-                  </div>
-                  <Button variant="secondary" size="sm">Manage</Button>
-                </Link>
+          <div className="grid lg:grid-cols-3 gap-6 mb-8">
+            {/* Main Column */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Earnings Chart */}
+              <Card>
+                <CardHeader>
+                  <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Earnings Overview</h2>
+                </CardHeader>
+                <CardBody>
+                  <EarningsChart />
+                </CardBody>
+              </Card>
 
-                <Link to="/lawyer/marketing" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-green-300 dark:hover:border-green-700 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <TrendingUp className="w-5 h-5 text-green-600" />
-                    <div>
-                      <h3 className="font-medium text-neutral-900 dark:text-white">Marketing</h3>
-                      <p className="text-sm text-neutral-500">Promote your services</p>
-                    </div>
+              {/* Client Table */}
+              <Card>
+                <CardHeader className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Recent Clients</h2>
+                  <Link to="/lawyer/clients" className="text-primary-600 hover:underline text-sm">View All</Link>
+                </CardHeader>
+                <CardBody>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead>
+                        <tr className="border-b border-neutral-200 dark:border-neutral-700">
+                          <th className="pb-3 text-xs font-medium text-neutral-500 uppercase">Name</th>
+                          <th className="pb-3 text-xs font-medium text-neutral-500 uppercase">Status</th>
+                          <th className="pb-3 text-xs font-medium text-neutral-500 uppercase">Date</th>
+                          <th className="pb-3 text-xs font-medium text-neutral-500 uppercase">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-200 dark:divide-neutral-700">
+                        {recentClients.length === 0 ? (
+                          <tr>
+                            <td colSpan={4} className="py-4 text-center text-sm text-neutral-500">No recent clients found</td>
+                          </tr>
+                        ) : (
+                          recentClients.map((client) => (
+                            <tr key={client.id}>
+                              <td className="py-3 text-sm font-medium text-neutral-900 dark:text-white">
+                                {client.clientName}
+                                <div className="text-xs text-neutral-500 font-normal">{client.email}</div>
+                              </td>
+                              <td className="py-3">
+                                <Badge variant={client.status === 'confirmed' ? 'success' : client.status === 'completed' ? 'default' : 'warning'}>
+                                  {client.status}
+                                </Badge>
+                              </td>
+                              <td className="py-3 text-sm text-neutral-500">
+                                {new Date(client.created_at).toLocaleDateString()}
+                              </td>
+                              <td className="py-3">
+                                <Button size="sm" variant="secondary" as={Link} to={`/lawyer/clients/${client.id}`}>
+                                  Details
+                                </Button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
                   </div>
-                  <Button variant="secondary" size="sm">Promote</Button>
-                </Link>
+                </CardBody>
+              </Card>
+            </div>
 
-                <Link to="/lawyer/clients" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-green-300 dark:hover:border-green-700 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <Users className="w-5 h-5 text-green-600" />
-                    <div>
-                      <h3 className="font-medium text-neutral-900 dark:text-white">View Clients</h3>
-                      <p className="text-sm text-neutral-500">See your client list</p>
+            {/* Side Column */}
+            <div className="space-y-6">
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Quick Actions</h2>
+                </CardHeader>
+                <CardBody className="space-y-3">
+                  <Link to="/lawyer/availability" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-green-300 dark:hover:border-green-700 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <Clock className="w-5 h-5 text-green-600" />
+                      <div>
+                        <h3 className="font-medium text-neutral-900 dark:text-white">Set Availability</h3>
+                        <p className="text-sm text-neutral-500">Manage your consultation slots</p>
+                      </div>
                     </div>
-                  </div>
-                  <Button variant="secondary" size="sm">View</Button>
-                </Link>
-              </CardBody>
-            </Card>
+                    <Button variant="secondary" size="sm">Manage</Button>
+                  </Link>
 
-            <Card>
-              <CardHeader>
-                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Upcoming Consultations</h2>
-              </CardHeader>
-              <CardBody>
-                {stats.upcomingConsultations === 0 ? (
-                  <div className="text-center py-8 text-neutral-500">
-                    <Calendar className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>No upcoming consultations</p>
-                    <p className="text-sm">Set your availability to get bookings</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
-                      <p className="text-sm text-neutral-700 dark:text-neutral-300">Sample booking would appear here</p>
+                  <Link to="/lawyer/marketing" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-green-300 dark:hover:border-green-700 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <TrendingUp className="w-5 h-5 text-green-600" />
+                      <div>
+                        <h3 className="font-medium text-neutral-900 dark:text-white">Marketing</h3>
+                        <p className="text-sm text-neutral-500">Promote your services</p>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </CardBody>
-            </Card>
+                    <Button variant="secondary" size="sm">Promote</Button>
+                  </Link>
+
+                  <Link to="/lawyer/clients" className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-green-300 dark:hover:border-green-700 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <Users className="w-5 h-5 text-green-600" />
+                      <div>
+                        <h3 className="font-medium text-neutral-900 dark:text-white">View Clients</h3>
+                        <p className="text-sm text-neutral-500">See your client list</p>
+                      </div>
+                    </div>
+                    <Button variant="secondary" size="sm">View</Button>
+                  </Link>
+                </CardBody>
+              </Card>
+
+              {/* Upcoming Consultations */}
+              <Card>
+                <CardHeader>
+                  <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Upcoming Consultations</h2>
+                </CardHeader>
+                <CardBody>
+                  {stats.upcomingConsultations === 0 ? (
+                    <div className="text-center py-8 text-neutral-500">
+                      <Calendar className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                      <p>No upcoming consultations</p>
+                      <p className="text-sm">Set your availability to get bookings</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
+                        <p className="text-sm text-neutral-700 dark:text-neutral-300">You have {stats.upcomingConsultations} upcoming bookings.</p>
+                      </div>
+                    </div>
+                  )}
+                </CardBody>
+              </Card>
+            </div>
           </div>
-
-          {/* Profile Completion */}
-          <Card>
-            <CardHeader>
-              <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Profile Completion</h2>
-            </CardHeader>
-            <CardBody>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="text-neutral-700 dark:text-neutral-300">Basic Information</span>
-                  </div>
-                  <Badge variant="success">Complete</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="text-neutral-700 dark:text-neutral-300">Bar Number Verification</span>
-                  </div>
-                  <Badge variant="success">Complete</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {isVerified ? <CheckCircle className="w-5 h-5 text-green-500" /> : <AlertCircle className="w-5 h-5 text-yellow-500" />}
-                    <span className="text-neutral-700 dark:text-neutral-300">Account Verification</span>
-                  </div>
-                  <Badge variant={isVerified ? 'success' : 'warning'}>
-                    {isVerified ? 'Verified' : 'Pending'}
-                  </Badge>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
         </div>
       </main>
     </div>

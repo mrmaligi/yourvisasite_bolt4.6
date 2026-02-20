@@ -12,12 +12,20 @@ import {
   TrendingUp,
   Clock,
   ChevronRight,
-  Gift
+  Gift,
+  Activity
 } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
+import { VisaTrendsChart } from '../../components/charts/VisaTrendsChart';
+import { useRealtimeSubscription } from '../../hooks/useRealtimeStats';
+
+interface ActivityItem {
+  description: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
 
 export function UserDashboard() {
   const { user } = useAuth();
@@ -27,21 +35,18 @@ export function UserDashboard() {
     documents: 0,
     upcomingConsultations: 0,
   });
-  const [recentActivity, setRecentActivity] = useState<any[]>([]);
-
-  useEffect(() => {
-    if (user) {
-      fetchUserStats();
-    }
-  }, [user]);
+  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
+  const [notifications, setNotifications] = useState<string[]>([]);
 
   const fetchUserStats = async () => {
+    if (!user) return;
+
     // Get counts
     const [{ count: saved }, { count: my }, { count: docs }, { count: consultations }] = await Promise.all([
-      supabase.from('saved_visas').select('id', { count: 'exact' }).eq('user_id', user?.id),
-      supabase.from('user_visas').select('id', { count: 'exact' }).eq('user_id', user?.id),
-      supabase.from('user_documents').select('id', { count: 'exact' }).eq('user_id', user?.id),
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('user_id', user?.id).gte('scheduled_at', new Date().toISOString()),
+      supabase.from('saved_visas').select('id', { count: 'exact' }).eq('user_id', user.id),
+      supabase.from('user_visas').select('id', { count: 'exact' }).eq('user_id', user.id),
+      supabase.from('user_documents').select('id', { count: 'exact' }).eq('user_id', user.id),
+      supabase.from('bookings').select('id', { count: 'exact' }).eq('user_id', user.id).gte('scheduled_at', new Date().toISOString()),
     ]);
 
     setStats({
@@ -51,6 +56,20 @@ export function UserDashboard() {
       upcomingConsultations: consultations || 0,
     });
   };
+
+  useEffect(() => {
+    if (user) {
+      fetchUserStats();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  // Subscribe to real-time changes
+  useRealtimeSubscription(['saved_visas', 'user_visas', 'user_documents', 'bookings'], () => {
+    fetchUserStats();
+    setNotifications(prev => [`New activity detected at ${new Date().toLocaleTimeString()}`, ...prev].slice(0, 5));
+    setRecentActivity(prev => [{ description: `Activity updated at ${new Date().toLocaleTimeString()}` }, ...prev].slice(0, 5));
+  });
 
   const quickActions = [
     { to: '/visas', icon: Briefcase, label: 'Find Visas', desc: 'Search 78+ visa options' },
@@ -113,9 +132,9 @@ export function UserDashboard() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1">
+      <main className="flex-1 overflow-y-auto h-screen">
         {/* Header */}
-        <header className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 px-6 py-4">
+        <header className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 px-6 py-4 sticky top-0 z-10">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Welcome Back!</h1>
@@ -125,14 +144,29 @@ export function UserDashboard() {
               <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
                 Applicant
               </span>
-              <button className="p-2 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg">
+              <button className="p-2 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg relative">
                 <Bell className="w-5 h-5" />
+                {notifications.length > 0 && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+                )}
               </button>
             </div>
           </div>
         </header>
 
         <div className="p-6">
+          {/* Notifications */}
+          {notifications.length > 0 && (
+            <div className="mb-6 space-y-2">
+              {notifications.map((note, i) => (
+                <div key={i} className="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 px-4 py-3 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+                  <Activity className="w-5 h-5" />
+                  <span className="text-sm font-medium">{note}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Stats Grid */}
           <div className="grid md:grid-cols-4 gap-4 mb-8">
             <Card>
@@ -184,89 +218,92 @@ export function UserDashboard() {
             </Card>
           </div>
 
-          {/* Quick Actions */}
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <Card>
-              <CardHeader>
-                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Quick Actions</h2>
-              </CardHeader>
-              <CardBody className="grid grid-cols-2 gap-4">
-                {quickActions.map((action) => {
-                  const Icon = action.icon;
-                  return (
-                    <Link
-                      key={action.to}
-                      to={action.to}
-                      className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-primary-300 dark:hover:border-primary-700 transition-colors"
-                    >
-                      <Icon className="w-6 h-6 text-primary-600 mb-2" />
-                      <h3 className="font-medium text-neutral-900 dark:text-white">{action.label}</h3>
-                      <p className="text-sm text-neutral-500">{action.desc}</p>
-                    </Link>
-                  );
-                })}
-              </CardBody>
-            </Card>
+          {/* Main Layout */}
+          <div className="grid lg:grid-cols-3 gap-6 mb-8">
+            {/* Left Column (2/3) */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Visa Trends Chart */}
+              <Card>
+                <CardHeader>
+                  <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Visa Interest Trends</h2>
+                </CardHeader>
+                <CardBody>
+                  <VisaTrendsChart />
+                </CardBody>
+              </Card>
 
-            <Card>
-              <CardHeader>
-                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Recent Activity</h2>
-              </CardHeader>
-              <CardBody>
-                {recentActivity.length === 0 ? (
-                  <div className="text-center py-8 text-neutral-500">
-                    <Clock className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>No recent activity</p>
-                    <p className="text-sm">Start by exploring visas or taking the quiz</p>
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Quick Actions</h2>
+                </CardHeader>
+                <CardBody className="grid sm:grid-cols-2 gap-4">
+                  {quickActions.map((action) => {
+                    const Icon = action.icon;
+                    return (
+                      <Link
+                        key={action.to}
+                        to={action.to}
+                        className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-primary-300 dark:hover:border-primary-700 transition-colors"
+                      >
+                        <Icon className="w-6 h-6 text-primary-600 mb-2" />
+                        <h3 className="font-medium text-neutral-900 dark:text-white">{action.label}</h3>
+                        <p className="text-sm text-neutral-500">{action.desc}</p>
+                      </Link>
+                    );
+                  })}
+                </CardBody>
+              </Card>
+            </div>
+
+            {/* Right Column (1/3) */}
+            <div className="space-y-6">
+              {/* Recent Activity */}
+              <Card className="h-full">
+                <CardHeader>
+                  <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Recent Activity</h2>
+                </CardHeader>
+                <CardBody>
+                  {recentActivity.length === 0 ? (
+                    <div className="text-center py-8 text-neutral-500">
+                      <Clock className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                      <p>No recent activity</p>
+                      <p className="text-sm">Start by exploring visas or taking the quiz</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {recentActivity.map((activity, i) => (
+                        <div key={i} className="flex items-center gap-3 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
+                          <div className="w-2 h-2 bg-primary-500 rounded-full" />
+                          <p className="text-sm text-neutral-700 dark:text-neutral-300">{activity.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardBody>
+              </Card>
+
+              {/* Recommended Visas */}
+              <Card>
+                <CardHeader className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Recommended</h2>
+                  <Link to="/visas" className="text-primary-600 hover:underline text-xs flex items-center gap-1">
+                    View All <ChevronRight className="w-3 h-3" />
+                  </Link>
+                </CardHeader>
+                <CardBody className="space-y-3">
+                  <div className="p-3 border border-neutral-200 dark:border-neutral-700 rounded-xl">
+                    <h3 className="font-semibold text-neutral-900 dark:text-white text-sm">Skilled Independent (189)</h3>
+                    <p className="text-xs text-neutral-500 mt-1">Permanent visa for skilled workers</p>
                   </div>
-                ) : (
-                  <div className="space-y-3">
-                    {recentActivity.map((activity, i) => (
-                      <div key={i} className="flex items-center gap-3 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
-                        <div className="w-2 h-2 bg-primary-500 rounded-full" />
-                        <p className="text-sm text-neutral-700 dark:text-neutral-300">{activity.description}</p>
-                      </div>
-                    ))}
+                  <div className="p-3 border border-neutral-200 dark:border-neutral-700 rounded-xl">
+                    <h3 className="font-semibold text-neutral-900 dark:text-white text-sm">Student Visa (500)</h3>
+                    <p className="text-xs text-neutral-500 mt-1">Study at Australian institutions</p>
                   </div>
-                )}
-              </CardBody>
-            </Card>
+                </CardBody>
+              </Card>
+            </div>
           </div>
-
-          {/* Recommended Visas */}
-          <Card>
-            <CardHeader className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Recommended for You</h2>
-              <Link to="/visas" className="text-primary-600 hover:underline text-sm flex items-center gap-1">
-                View All <ChevronRight className="w-4 h-4" />
-              </Link>
-            </CardHeader>
-            <CardBody>
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
-                  <h3 className="font-semibold text-neutral-900 dark:text-white">Skilled Independent (189)</h3>
-                  <p className="text-sm text-neutral-500 mt-1">Permanent visa for skilled workers</p>
-                  <Button variant="secondary" size="sm" className="mt-3" as={Link} to="/visas/189">
-                    Learn More
-                  </Button>
-                </div>
-                <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
-                  <h3 className="font-semibold text-neutral-900 dark:text-white">Student Visa (500)</h3>
-                  <p className="text-sm text-neutral-500 mt-1">Study at Australian institutions</p>
-                  <Button variant="secondary" size="sm" className="mt-3" as={Link} to="/visas/500">
-                    Learn More
-                  </Button>
-                </div>
-                <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
-                  <h3 className="font-semibold text-neutral-900 dark:text-white">Working Holiday (417)</h3>
-                  <p className="text-sm text-neutral-500 mt-1">Work and travel in Australia</p>
-                  <Button variant="secondary" size="sm" className="mt-3" as={Link} to="/visas/417">
-                    Learn More
-                  </Button>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
         </div>
       </main>
     </div>
