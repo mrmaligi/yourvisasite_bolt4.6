@@ -110,7 +110,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
          .upsert(purchaseData, { onConflict: 'user_id, visa_id' });
 
        if (error) {
-         console.error('Error upserting user_visa_purchase:', error);
+         console.error('Failed to upsert user_visa_purchase:', error);
        } else {
          console.log('Successfully recorded premium purchase for user', userId);
 
@@ -148,7 +148,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
         .eq('id', bookingId);
 
       if (error) {
-        console.error('Error updating booking status:', error);
+        console.error('Failed to update booking status:', error);
       } else {
         console.log('Successfully confirmed booking', bookingId);
 

@@ -52,7 +52,7 @@ export function UserDashboard() {
       
       const fetchPromise = Promise.all([
         supabase.from('saved_visas').select('id', { count: 'exact', head: true }).eq('user_id', user?.id),
-        supabase.from('user_visas').select('id', { count: 'exact', head: true }).eq('user_id', user?.id),
+        supabase.from('user_visa_purchases').select('id', { count: 'exact', head: true }).eq('user_id', user?.id),
         supabase.from('user_documents').select('id', { count: 'exact', head: true }).eq('user_id', user?.id),
         supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('user_id', user?.id).gte('scheduled_at', new Date().toISOString()),
       ]);
