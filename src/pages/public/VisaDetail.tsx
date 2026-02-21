@@ -20,6 +20,7 @@ import { Button } from '../../components/ui/Button';
 import { VisaDetailSkeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
 import { ShareButton } from '../../components/ShareButton';
+import { Breadcrumbs } from '../../components/ui/Breadcrumbs';
 import type { Visa, TrackerStats, VisaPremiumContent, Product, UserVisaPurchase, TrackerEntry, NewsArticle } from '../../types/database';
 
 export function VisaDetail() {
@@ -186,13 +187,14 @@ export function VisaDetail() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Breadcrumbs & Back */}
-      <div className="flex items-center gap-2 text-sm text-neutral-500 mb-6 no-print">
-        <Link to="/" className="hover:text-primary-600">Home</Link>
-        <ChevronRight className="w-4 h-4" />
-        <Link to="/visas" className="hover:text-primary-600">Visas</Link>
-        <ChevronRight className="w-4 h-4" />
-        <span className="text-neutral-900 font-medium truncate">{visa.name}</span>
-      </div>
+      <Breadcrumbs
+        className="mb-6 no-print"
+        items={[
+          { label: 'Home', to: '/' },
+          { label: 'Visas', to: '/visas' },
+          { label: visa.name }
+        ]}
+      />
 
       <div className="flex items-center justify-between mb-8 no-print">
         <Link to="/visas" className="inline-flex items-center text-sm font-medium text-neutral-500 hover:text-neutral-900 transition-colors">

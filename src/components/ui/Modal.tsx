@@ -54,11 +54,11 @@ export function Modal({ isOpen, onClose, title, children, footer, size = 'md' }:
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 10 }}
             transition={{ type: "spring", duration: 0.3, bounce: 0 }}
-            className={`bg-white dark:bg-neutral-800 w-full h-full sm:h-auto rounded-none sm:rounded-2xl shadow-elevated ${sizeClasses[size]} max-h-screen sm:max-h-[85vh] flex flex-col border-0 sm:border border-neutral-200/50 dark:border-neutral-700`}
+            className={`bg-white dark:bg-neutral-800 dark:text-neutral-100 w-full h-full sm:h-auto rounded-none sm:rounded-2xl shadow-elevated ${sizeClasses[size]} max-h-screen sm:max-h-[85vh] flex flex-col border-0 sm:border border-neutral-200/50 dark:border-neutral-700`}
           >
             {title && (
               <div className="flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 border-b border-neutral-100 dark:border-neutral-700 shrink-0">
-                <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">{title}</h2>
+                <h2 className="text-lg font-bold text-neutral-900 dark:text-white">{title}</h2>
                 <button
                   onClick={onClose}
                   className="p-1.5 rounded-xl text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-all duration-200"

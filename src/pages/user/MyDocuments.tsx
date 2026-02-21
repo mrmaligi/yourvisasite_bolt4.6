@@ -40,6 +40,8 @@ import { Modal } from '../../components/ui/Modal';
 import { FileUpload } from '../../components/ui/FileUpload';
 import { useToast } from '../../components/ui/Toast';
 import { useDocuments } from '../../hooks/useDocuments';
+import { EmptyState } from '../../components/ui/EmptyState';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import type { UserDocument } from '../../types/database';
 
 // Map icon strings from DB to Lucide components
@@ -94,6 +96,7 @@ export function MyDocuments() {
   const [inlineUploadCategory, setInlineUploadCategory] = useState<string | null>(null);
   const [expandedHelp, setExpandedHelp] = useState<Record<string, boolean>>({});
   const [highlightedCategory, setHighlightedCategory] = useState<string | null>(null);
+  const [documentToDelete, setDocumentToDelete] = useState<UserDocument | null>(null);
 
   // Filters
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
@@ -152,15 +155,19 @@ export function MyDocuments() {
     }
   };
 
-  const handleDelete = async (doc: UserDocument) => {
-    if (window.confirm('Are you sure you want to delete this document?')) {
-      const { error } = await deleteDocument(doc);
-      if (error) {
-        toast('error', 'Failed to delete document');
-      } else {
-        toast('success', 'Document deleted');
-      }
+  const handleDelete = (doc: UserDocument) => {
+    setDocumentToDelete(doc);
+  };
+
+  const confirmDelete = async () => {
+    if (!documentToDelete) return;
+    const { error } = await deleteDocument(documentToDelete);
+    if (error) {
+      toast('error', 'Failed to delete document');
+    } else {
+      toast('success', 'Document deleted');
     }
+    setDocumentToDelete(null);
   };
 
   const handleDownload = async (doc: UserDocument) => {
@@ -308,8 +315,12 @@ export function MyDocuments() {
                 <CardBody className="pt-3 border-t border-neutral-100 flex-1 flex flex-col">
                   <div className="space-y-2 flex-1">
                     {categoryDocs.length === 0 ? (
-                      <div className="text-center py-3 flex-1 flex flex-col items-center justify-center">
-                        <p className="text-xs text-neutral-400">No documents</p>
+                      <div className="flex-1 flex flex-col items-center justify-center py-4">
+                         <EmptyState
+                            icon={FolderOpen}
+                            title="No documents"
+                            description=""
+                         />
                       </div>
                     ) : (
                       <div className="space-y-1.5">
@@ -435,6 +446,16 @@ export function MyDocuments() {
           )}
         </div>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={!!documentToDelete}
+        onClose={() => setDocumentToDelete(null)}
+        onConfirm={confirmDelete}
+        title="Delete Document"
+        description={`Are you sure you want to delete "${documentToDelete?.file_name}"? This action cannot be undone.`}
+        confirmText="Delete"
+        variant="danger"
+      />
 
     </div>
   );
