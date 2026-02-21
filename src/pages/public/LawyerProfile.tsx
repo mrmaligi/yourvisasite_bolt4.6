@@ -265,7 +265,7 @@ export function LawyerProfile() {
         className="mb-8"
       />
 
-      <div className="flex flex-col sm:flex-row items-start gap-6 mb-8">
+      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8 text-center sm:text-left">
         {lawyer.avatar_url ? (
           <img
             src={lawyer.avatar_url}
@@ -277,8 +277,8 @@ export function LawyerProfile() {
             <Scale className="w-8 h-8 text-white" />
           </div>
         )}
-        <div className="flex-1">
-          <div className="flex items-center gap-3 flex-wrap mb-1">
+        <div className="flex-1 w-full">
+          <div className="flex items-center justify-center sm:justify-start gap-3 flex-wrap mb-1">
             <h1 className="text-2xl font-bold text-neutral-900">
               {lawyer.full_name || 'Immigration Lawyer'}
             </h1>
@@ -287,7 +287,7 @@ export function LawyerProfile() {
               Verified
             </Badge>
           </div>
-          <div className="flex items-center gap-4 text-sm text-neutral-500 mt-1.5 flex-wrap">
+          <div className="flex items-center justify-center sm:justify-start gap-4 text-sm text-neutral-500 mt-1.5 flex-wrap">
             {reviews.length > 0 && (
               <span className="flex items-center gap-1.5 text-yellow-600 font-medium">
                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />

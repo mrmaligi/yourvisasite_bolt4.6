@@ -195,6 +195,8 @@ export function UnifiedLogin() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                // Highlighting email field if there is a general error, assuming it might be credentials related
+                error={undefined}
               />
 
               <div className="relative">

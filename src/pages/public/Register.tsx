@@ -16,6 +16,7 @@ export function Register() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!isLoading && user && profile) {
     return <Navigate to="/dashboard" replace />;
@@ -23,9 +24,12 @@ export function Register() {
 
   const handleRegister = async (e: FormEvent) => {
     e.preventDefault();
+    setError(null);
     if (!fullName || !email || !password) return;
     if (password.length < 6) {
-      toast('error', 'Password must be at least 6 characters.');
+      const msg = 'Password must be at least 6 characters.';
+      toast('error', msg);
+      setError(msg);
       return;
     }
     setSubmitting(true);
@@ -76,6 +80,7 @@ export function Register() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="new-password"
+                error={error ? error : undefined}
               />
               <button
                 type="button"
