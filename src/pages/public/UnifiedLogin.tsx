@@ -34,11 +34,14 @@ export function UnifiedLogin() {
       
       if (error) throw error;
 
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No user found');
+
       // Get user role
       const { data: profile } = await supabase
         .from('profiles')
         .select('role, is_active, lawyer_profiles(verification_status)')
-        .eq('email', email)
+        .eq('id', user.id)
         .single();
 
       if (!profile?.is_active) {
