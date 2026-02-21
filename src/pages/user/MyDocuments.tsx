@@ -276,7 +276,9 @@ export function MyDocuments() {
                     <button
                       onClick={() => setExpandedHelp(prev => ({ ...prev, [category.key]: !prev[category.key] }))}
                       className={`p-1 rounded hover:bg-neutral-100 transition-colors ${expandedHelp[category.key] ? 'text-primary-600 bg-primary-50' : 'text-neutral-400 hover:text-neutral-600'}`}
-                      title="View details and examples"
+                      title="Click for explanation and examples"
+                      aria-label="Show document explanation"
+                      aria-expanded={expandedHelp[category.key]}
                     >
                       <HelpCircle className="w-4 h-4" />
                     </button>

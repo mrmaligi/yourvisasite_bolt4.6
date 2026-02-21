@@ -115,13 +115,20 @@ export function VisaDetail() {
       setRecentEntries(entriesData || []);
 
       // 7. Fetch Visa-Specific News
-      const { data: newsData } = await supabase
+      let newsQuery = supabase
         .from('news_articles')
         .select('*')
-        .contains('visa_ids', [id])
         .eq('is_published', true)
         .order('published_at', { ascending: false })
         .limit(3);
+
+      if (visaData?.category) {
+        newsQuery = newsQuery.or(`visa_ids.cs.{${id}},category.eq.${visaData.category}`);
+      } else {
+        newsQuery = newsQuery.contains('visa_ids', [id]);
+      }
+
+      const { data: newsData } = await newsQuery;
       setVisaNews(newsData || []);
 
       setLoading(false);

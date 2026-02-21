@@ -24,6 +24,7 @@ import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { usePremiumContent } from '../../hooks/usePremiumContent';
 import { StripeCheckout } from '../../components/StripeCheckout';
+import { ExampleApplication } from '../../components/premium/ExampleApplication';
 
 interface PurchasedGuide {
   id: string;
@@ -588,6 +589,8 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                                 <ChevronRight className="w-4 h-4 ml-2" />
                             </Button>
                         </div>
+
+                        <ExampleApplication />
                     </div>
                  ) : (
                      <div className="text-center py-12 text-neutral-500">
