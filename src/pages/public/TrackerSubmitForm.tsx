@@ -60,7 +60,6 @@ export function TrackerSubmitForm({ onSuccess, preselectedVisaId, initialEntry }
       application_date: applicationDate,
       decision_date: isPending ? null : decisionDate,
       outcome: isPending ? 'pending' as TrackerOutcome : outcome,
-      status: isPending ? 'pending' : 'completed',
     };
 
     let error;

@@ -116,7 +116,6 @@ Deno.serve(async (req) => {
 
        // Fetch slot details
        const { data: slot, error: slotError } = await supabase
-         .schema('lawyer')
          .from('consultation_slots')
          .select('*')
          .eq('id', slot_id)
@@ -130,11 +129,10 @@ Deno.serve(async (req) => {
 
        // Fetch lawyer details
        const { data: lawyer, error: lawyerError } = await supabase
-         .schema('lawyer')
          .from('profiles')
-         .select('id, profile_id, hourly_rate_cents, jurisdiction')
+         .select('id, hourly_rate_cents, jurisdiction')
          .eq('id', lawyer_id)
-         .eq('is_verified', true)
+         .eq('role', 'lawyer')
          .single();
 
        if (lawyerError || !lawyer) {
