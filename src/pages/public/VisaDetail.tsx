@@ -332,43 +332,49 @@ export function VisaDetail() {
                             </div>
 
                             <div className="no-print">
-                                {user ? (
-                                    <Button
-                                        onClick={async () => {
-                                            // DUMMY UNLOCK - No real payment
-                                            try {
-                                                const { error } = await supabase
-                                                    .from('user_visas')
-                                                    .insert({
-                                                        user_id: user.id,
-                                                        visa_id: visa.id,
-                                                        status: 'active',
-                                                        purchased_at: new Date().toISOString()
-                                                    })
-                                                    .select()
-                                                    .single();
+                                <Button
+                                    onClick={async () => {
+                                        if (!user) {
+                                            toast('info', 'Please log in to unlock');
+                                            return;
+                                        }
 
-                                                if (error) throw error;
+                                        try {
+                                            const { data: { session }, error } = await supabase.auth.getSession();
+                                            if (error || !session) throw new Error('Not authenticated');
 
-                                                toast('success', 'Content unlocked! (Demo mode)');
-                                                setHasAccess(true); // Refresh to show content
-                                            } catch (err) {
-                                                console.error('Unlock error:', err);
-                                                toast('error', 'Failed to unlock. Please try again.');
+                                            const baseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '');
+                                            const response = await fetch(`${baseUrl}/functions/v1/stripe-checkout`, {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Authorization': `Bearer ${session.access_token}`,
+                                                    'Content-Type': 'application/json',
+                                                },
+                                                body: JSON.stringify({
+                                                    type: 'premium',
+                                                    visa_id: visa.id,
+                                                    redirect_path: `/visas/${visa.id}`
+                                                }),
+                                            });
+
+                                            if (!response.ok) {
+                                                const errText = await response.text();
+                                                throw new Error(errText);
                                             }
-                                        }}
-                                        className="w-full sm:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-primary-900/20"
-                                    >
-                                        Unlock Now — ${price} (Demo)
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        onClick={() => toast('info', 'Please log in to unlock')}
-                                        className="w-full sm:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-primary-900/20"
-                                    >
-                                        Unlock Now — ${price}
-                                    </Button>
-                                )}
+
+                                            const { url, error: apiError } = await response.json();
+                                            if (apiError) throw new Error(apiError);
+                                            if (url) window.location.href = url;
+
+                                        } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+                                            console.error('Purchase error:', err);
+                                            toast('error', err.message || 'Failed to initiate purchase');
+                                        }
+                                    }}
+                                    className="w-full sm:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-primary-900/20"
+                                >
+                                    Unlock Now — ${price}
+                                </Button>
                             </div>
                         </div>
                     </Card>

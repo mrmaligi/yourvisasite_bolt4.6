@@ -19,6 +19,7 @@ interface AuthContextValue {
   signInWithEmail: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signUpWithEmail: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
   signInWithGoogle: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
 }
 
 const AuthContext = createContext<AuthContextValue>({
@@ -35,6 +36,7 @@ const AuthContext = createContext<AuthContextValue>({
   signInWithEmail: async () => ({ error: null }),
   signUpWithEmail: async () => ({ error: null }),
   signInWithGoogle: async () => {},
+  resetPassword: async () => ({ error: null }),
 });
 
 export function useAuth() {
@@ -144,6 +146,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) await fetchOrCreateProfile(user);
   };
 
+  const resetPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    return { error };
+  };
+
   const role = profile?.role || null;
   const isAuthenticated = !!user;
 
@@ -163,6 +172,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signInWithEmail: signIn,
         signUpWithEmail: signUp,
         signInWithGoogle,
+        resetPassword,
       }}
     >
       {children}
