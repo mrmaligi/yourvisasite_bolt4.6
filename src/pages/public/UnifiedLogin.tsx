@@ -23,7 +23,9 @@ export function UnifiedLogin() {
   const [loading, setLoading] = useState(false);
   const [isResetMode, setIsResetMode] = useState(false);
 
-  const from = (location.state as any)?.from?.pathname || '/';
+  const stateFrom = (location.state as any)?.from?.pathname;
+  // Default to dashboard if no previous location or if previous location was home
+  const from = (stateFrom && stateFrom !== '/') ? stateFrom : '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +103,7 @@ export function UnifiedLogin() {
           break;
         }
         default:
-          navigate(from || '/dashboard');
+          navigate(from);
       }
     } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       toast('error', error.message || 'Invalid credentials');
