@@ -45,7 +45,7 @@ export const Specializations = () => {
       return newSpecs;
     },
     onSuccess: () => {
-      addToast('Specializations updated', 'success');
+      addToast('success', 'Specializations updated');
       refetch();
     }
   });

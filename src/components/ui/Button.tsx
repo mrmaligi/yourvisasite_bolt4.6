@@ -1,5 +1,7 @@
+
 import { type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useRipple, Ripple } from './Ripple';
 
 type Variant = 'primary' | 'secondary' | 'danger' | 'ghost';
@@ -9,6 +11,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
   loading?: boolean;
+  to?: string;
   children: ReactNode;
 }
 
@@ -29,6 +32,7 @@ export function Button({
   variant = 'primary',
   size = 'md',
   loading = false,
+  to,
   children,
   disabled,
   className = '',
@@ -36,10 +40,31 @@ export function Button({
   ...props
 }: ButtonProps) {
   const { ripples, addRipple } = useRipple();
+  const commonClasses = `${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
+
+  if (to) {
+    return (
+      <Link
+        to={to}
+        className={`${commonClasses} inline-flex items-center justify-center`}
+        onMouseDown={(e) => {
+          if (!disabled && !loading) {
+            addRipple(e);
+          }
+          onMouseDown?.(e as any);
+        }}
+        {...(props as any)}
+      >
+        {loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+        {children}
+        <Ripple ripples={ripples} />
+      </Link>
+    );
+  }
 
   return (
     <button
-      className={`${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={commonClasses}
       disabled={disabled || loading}
       onMouseDown={(e) => {
         if (!disabled && !loading) {

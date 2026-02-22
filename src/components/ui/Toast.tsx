@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 import { CheckCircle, XCircle, Info, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,9 +13,13 @@ interface Toast {
 
 interface ToastContextValue {
   toast: (type: ToastType, message: string) => void;
+  addToast: (type: ToastType, message: string) => void;
 }
 
-const ToastContext = createContext<ToastContextValue>({ toast: () => {} });
+const ToastContext = createContext<ToastContextValue>({
+  toast: () => {},
+  addToast: () => {}
+});
 
 export function useToast() {
   return useContext(ToastContext);
@@ -38,7 +43,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <ToastContext.Provider value={{ toast: addToast }}>
+    <ToastContext.Provider value={{ toast: addToast, addToast }}>
       {children}
       <div className="fixed bottom-4 right-4 z-[100] space-y-2 max-w-sm w-full pointer-events-none">
         <AnimatePresence>

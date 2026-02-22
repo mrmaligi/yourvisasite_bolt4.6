@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Card, CardBody } from '../components/ui/Card';
+import { supabase } from '../../lib/supabase';
+import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
+import { Card, CardBody } from '../../components/ui/Card';
 
 export function DirectLogin() {
   const navigate = useNavigate();

@@ -41,10 +41,10 @@ export const EditProfile = () => {
       return data;
     },
     onSuccess: () => {
-      addToast('Profile updated successfully', 'success');
+      addToast('success', 'Profile updated successfully');
     },
     onError: () => {
-      addToast('Failed to update profile', 'error');
+      addToast('error', 'Failed to update profile');
     }
   });
 

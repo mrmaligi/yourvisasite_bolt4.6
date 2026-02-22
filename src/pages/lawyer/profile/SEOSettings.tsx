@@ -38,10 +38,10 @@ export const SEOSettings = () => {
       return data;
     },
     onSuccess: () => {
-      addToast('SEO settings updated', 'success');
+      addToast('success', 'SEO settings updated');
     },
     onError: () => {
-      addToast('Failed to update SEO settings', 'error');
+      addToast('error', 'Failed to update SEO settings');
     }
   });
 

@@ -14,7 +14,7 @@ export const ReferralProgram = () => {
 
   const copyLink = () => {
     navigator.clipboard.writeText(referralLink);
-    addToast('Referral link copied', 'success');
+    addToast('success', 'Referral link copied');
   };
 
   return (

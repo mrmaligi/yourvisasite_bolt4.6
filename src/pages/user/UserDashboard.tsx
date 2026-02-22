@@ -284,21 +284,21 @@ export function UserDashboard() {
                 <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
                   <h3 className="font-semibold text-neutral-900 dark:text-white">Skilled Independent (189)</h3>
                   <p className="text-sm text-neutral-500 mt-1">Permanent visa for skilled workers</p>
-                  <Button variant="secondary" size="sm" className="mt-3" as={Link} to="/visas/189">
+                  <Button variant="secondary" size="sm" className="mt-3" to="/visas/189">
                     Learn More
                   </Button>
                 </div>
                 <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
                   <h3 className="font-semibold text-neutral-900 dark:text-white">Student Visa (500)</h3>
                   <p className="text-sm text-neutral-500 mt-1">Study at Australian institutions</p>
-                  <Button variant="secondary" size="sm" className="mt-3" as={Link} to="/visas/500">
+                  <Button variant="secondary" size="sm" className="mt-3" to="/visas/500">
                     Learn More
                   </Button>
                 </div>
                 <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
                   <h3 className="font-semibold text-neutral-900 dark:text-white">Working Holiday (417)</h3>
                   <p className="text-sm text-neutral-500 mt-1">Work and travel in Australia</p>
-                  <Button variant="secondary" size="sm" className="mt-3" as={Link} to="/visas/417">
+                  <Button variant="secondary" size="sm" className="mt-3" to="/visas/417">
                     Learn More
                   </Button>
                 </div>

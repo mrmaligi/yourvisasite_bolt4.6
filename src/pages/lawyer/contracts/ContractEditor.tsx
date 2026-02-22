@@ -4,6 +4,7 @@ import { Save, FileText, ArrowLeft, Type, AlignLeft } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Input, Textarea } from '../../../components/ui/Input';
+import { Badge } from '../../../components/ui/Badge';
 import { Link } from 'react-router-dom';
 import { useToast } from '../../../components/ui/Toast';
 
@@ -15,7 +16,7 @@ export const ContractEditor = () => {
   const handleSave = () => {
     // Simulate save
     setTimeout(() => {
-      addToast('Contract saved to drafts', 'success');
+      addToast('success', 'Contract saved to drafts');
     }, 500);
   };
 

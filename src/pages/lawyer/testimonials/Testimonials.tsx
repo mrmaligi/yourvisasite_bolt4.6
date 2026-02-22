@@ -49,13 +49,13 @@ export const Testimonials = () => {
       return { id: Math.random().toString(), ...data };
     },
     onSuccess: () => {
-      addToast('Testimonial added', 'success');
+      addToast('success', 'Testimonial added');
       setIsAdding(false);
       setNewTestimonial({ clientName: '', quote: '', source: '' });
       refetch();
     },
     onError: () => {
-      addToast('Failed to add testimonial', 'error');
+      addToast('error', 'Failed to add testimonial');
     }
   });
 
@@ -65,7 +65,7 @@ export const Testimonials = () => {
       return id;
     },
     onSuccess: () => {
-      addToast('Testimonial removed', 'success');
+      addToast('success', 'Testimonial removed');
       refetch();
     }
   });

@@ -28,7 +28,7 @@ export const ClientOnboarding = () => {
   });
 
   const handleSendReminder = () => {
-    addToast('Reminder sent to client', 'success');
+    addToast('success', 'Reminder sent to client');
   };
 
   if (isLoading) return <Skeleton className="h-96 w-full" />;

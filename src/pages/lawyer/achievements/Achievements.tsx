@@ -49,13 +49,13 @@ export const Achievements = () => {
       return { id: Math.random().toString(), ...data };
     },
     onSuccess: () => {
-      addToast('Achievement added', 'success');
+      addToast('success', 'Achievement added');
       setIsAdding(false);
       setNewItem({});
       refetch();
     },
     onError: () => {
-      addToast('Failed to add achievement', 'error');
+      addToast('error', 'Failed to add achievement');
     }
   });
 
@@ -65,7 +65,7 @@ export const Achievements = () => {
       return id;
     },
     onSuccess: () => {
-      addToast('Achievement removed', 'success');
+      addToast('success', 'Achievement removed');
       refetch();
     }
   });
