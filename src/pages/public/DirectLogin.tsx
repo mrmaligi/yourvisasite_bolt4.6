@@ -34,7 +34,7 @@ export function DirectLogin() {
           .eq('id', data.user.id)
           .single();
 
-        if (!profile?.is_active) {
+        if (profile?.is_active === false) {
           setError('Account disabled');
           return;
         }

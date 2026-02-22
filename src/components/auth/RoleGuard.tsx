@@ -68,7 +68,7 @@ export function ProtectedRoute({
   }
 
   // Account disabled
-  if (!profile.is_active) {
+  if (profile.is_active === false) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
         <div className="text-center p-8">

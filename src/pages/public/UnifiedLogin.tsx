@@ -63,7 +63,7 @@ export function UnifiedLogin() {
         .eq('id', user.id)
         .single();
 
-      if (!profile?.is_active) {
+      if (profile?.is_active === false) {
         toast('error', 'Account disabled');
         return;
       }
