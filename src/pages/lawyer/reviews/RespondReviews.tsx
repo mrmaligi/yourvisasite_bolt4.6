@@ -48,13 +48,13 @@ export const RespondReviews = () => {
       return { id, reply };
     },
     onSuccess: () => {
-      addToast('Reply posted successfully', 'success');
+      addToast('success', 'Reply posted successfully');
       setReplyText('');
       setActiveReviewId(null);
       refetch();
     },
     onError: () => {
-      addToast('Failed to post reply', 'error');
+      addToast('error', 'Failed to post reply');
     }
   });
 

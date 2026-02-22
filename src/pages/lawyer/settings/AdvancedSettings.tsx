@@ -12,7 +12,7 @@ export const AdvancedSettings = () => {
   const { addToast } = useToast();
 
   const handleSave = () => {
-    addToast('Settings saved', 'success');
+    addToast('success', 'Settings saved');
   };
 
   return (

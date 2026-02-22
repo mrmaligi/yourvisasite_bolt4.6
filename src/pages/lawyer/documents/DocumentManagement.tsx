@@ -42,7 +42,7 @@ export const DocumentManagement = () => {
     // Simulate upload
     setTimeout(() => {
       setUploading(false);
-      addToast(`Uploaded ${file.name}`, 'success');
+      addToast('success', `Uploaded ${file.name}`);
     }, 1500);
   };
 

@@ -53,7 +53,7 @@ export const TaskManagement = () => {
     },
     onSuccess: () => {
       setNewTaskTitle('');
-      addToast('Task added', 'success');
+      addToast('success', 'Task added');
       refetch();
     }
   });

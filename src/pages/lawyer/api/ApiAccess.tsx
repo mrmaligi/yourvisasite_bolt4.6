@@ -16,7 +16,7 @@ export const ApiAccess = () => {
 
   const copyKey = () => {
     navigator.clipboard.writeText(apiKey);
-    addToast('API Key copied', 'success');
+    addToast('success', 'API Key copied');
   };
 
   return (

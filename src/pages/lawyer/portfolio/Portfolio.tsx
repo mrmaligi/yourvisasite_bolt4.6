@@ -50,13 +50,13 @@ export const Portfolio = () => {
       return { id: Math.random().toString(), ...data };
     },
     onSuccess: () => {
-      addToast('Portfolio item added', 'success');
+      addToast('success', 'Portfolio item added');
       setIsAdding(false);
       setNewItem({});
       refetch();
     },
     onError: () => {
-      addToast('Failed to add item', 'error');
+      addToast('error', 'Failed to add item');
     }
   });
 

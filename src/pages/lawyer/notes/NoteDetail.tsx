@@ -43,7 +43,7 @@ export const NoteDetail = () => {
       await new Promise(resolve => setTimeout(resolve, 800));
     },
     onSuccess: () => {
-      addToast('Note saved', 'success');
+      addToast('success', 'Note saved');
     },
   });
 
@@ -52,7 +52,7 @@ export const NoteDetail = () => {
       await new Promise(resolve => setTimeout(resolve, 800));
     },
     onSuccess: () => {
-      addToast('Note deleted', 'success');
+      addToast('success', 'Note deleted');
       navigate('/lawyer/notes');
     },
   });

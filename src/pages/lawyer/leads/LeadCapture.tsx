@@ -14,7 +14,7 @@ export const LeadCapture = () => {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(embedCode);
-    addToast('Embed code copied', 'success');
+    addToast('success', 'Embed code copied');
   };
 
   return (

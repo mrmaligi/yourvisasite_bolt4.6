@@ -14,7 +14,7 @@ export const WebsiteBuilder = () => {
   const [primaryColor, setPrimaryColor] = useState('#4F46E5');
 
   const handleSave = () => {
-    addToast('Website settings saved', 'success');
+    addToast('success', 'Website settings saved');
   };
 
   return (
