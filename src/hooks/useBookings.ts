@@ -76,6 +76,7 @@ export function useBookings() {
 
         // Fetch Slots (for time)
         const { data: slots } = await supabase
+          // Explicitly use lawyer schema
           .schema('lawyer')
           .from('consultation_slots')
           .select('id, start_time')

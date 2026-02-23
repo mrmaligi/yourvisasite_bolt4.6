@@ -304,17 +304,6 @@ export interface ReviewWithUser extends LawyerReview {
   };
 }
 
-// Consultation slots for lawyer availability
-export interface ConsultationSlot {
-  id: string;
-  lawyer_id: string;
-  day_of_week: number;
-  start_time: string;
-  end_time: string;
-  is_available: boolean;
-  created_at: string;
-}
-
 // Saved visas for users
 export interface SavedVisa {
   id: string;
