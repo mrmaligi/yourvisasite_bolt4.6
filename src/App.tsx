@@ -12,13 +12,12 @@ import { UserDashboardLayout } from './components/layout/UserDashboardLayout';
 import { ProtectedRoute, RoleRedirect } from './components/auth/RoleGuard';
 import { Loading } from './components/ui/Loading';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
-import { MobileRoutes } from './routes/MobileRoutes';
 
 const Landing = lazy(() => import('./pages/public/Landing').then(m => ({ default: m.Landing })));
 const UnifiedLogin = lazy(() => import('./pages/public/UnifiedLogin').then(m => ({ default: m.UnifiedLogin })));
 const Register = lazy(() => import('./pages/public/Register').then(m => ({ default: m.Register })));
 const VisaSearch = lazy(() => import('./pages/public/VisaSearch').then(m => ({ default: m.VisaSearch })));
-const VisaComparison = lazy(() => import('./pages/public/VisaComparison').then(m => ({ default: m.VisaComparison })));
+const VisaCompare = lazy(() => import('./pages/public/VisaCompare').then(m => ({ default: m.VisaCompare })));
 const VisaDetail = lazy(() => import('./pages/public/VisaDetail').then(m => ({ default: m.VisaDetail })));
 const Tracker = lazy(() => import('./pages/public/Tracker').then(m => ({ default: m.Tracker })));
 const LawyerDirectory = lazy(() => import('./pages/public/LawyerDirectory').then(m => ({ default: m.LawyerDirectory })));
@@ -52,66 +51,6 @@ const Events = lazy(() => import('./pages/public/Events').then(m => ({ default: 
 const Partners = lazy(() => import('./pages/public/Partners').then(m => ({ default: m.Partners })));
 const Press = lazy(() => import('./pages/public/Press').then(m => ({ default: m.Press })));
 const ApiDocs = lazy(() => import('./pages/public/ApiDocs').then(m => ({ default: m.ApiDocs })));
-
-const SkilledIndependentVisaGuide = lazy(() => import('./pages/public/guides/SkilledIndependentVisaGuide').then(m => ({ default: m.SkilledIndependentVisaGuide })));
-const PartnerVisaGuide = lazy(() => import('./pages/public/guides/PartnerVisaGuide').then(m => ({ default: m.PartnerVisaGuide })));
-const StudentVisaGuide = lazy(() => import('./pages/public/guides/StudentVisaGuide').then(m => ({ default: m.StudentVisaGuide })));
-const EmployerNominationGuide = lazy(() => import('./pages/public/guides/EmployerNominationGuide').then(m => ({ default: m.EmployerNominationGuide })));
-const CitizenshipGuide = lazy(() => import('./pages/public/guides/CitizenshipGuide').then(m => ({ default: m.CitizenshipGuide })));
-
-const VisaApplicationChecklist = lazy(() => import('./pages/public/checklists/VisaApplicationChecklist').then(m => ({ default: m.VisaApplicationChecklist })));
-const DocumentGatheringChecklist = lazy(() => import('./pages/public/checklists/DocumentGatheringChecklist').then(m => ({ default: m.DocumentGatheringChecklist })));
-const MedicalExamChecklist = lazy(() => import('./pages/public/checklists/MedicalExamChecklist').then(m => ({ default: m.MedicalExamChecklist })));
-const CharacterAssessmentChecklist = lazy(() => import('./pages/public/checklists/CharacterAssessmentChecklist').then(m => ({ default: m.CharacterAssessmentChecklist })));
-const EnglishTestChecklist = lazy(() => import('./pages/public/checklists/EnglishTestChecklist').then(m => ({ default: m.EnglishTestChecklist })));
-
-const StatutoryDeclarationTemplate = lazy(() => import('./pages/public/templates/StatutoryDeclarationTemplate').then(m => ({ default: m.StatutoryDeclarationTemplate })));
-const EmploymentReferenceTemplate = lazy(() => import('./pages/public/templates/EmploymentReferenceTemplate').then(m => ({ default: m.EmploymentReferenceTemplate })));
-const ResumeTemplate = lazy(() => import('./pages/public/templates/ResumeTemplate').then(m => ({ default: m.ResumeTemplate })));
-const SponsorshipLetterTemplate = lazy(() => import('./pages/public/templates/SponsorshipLetterTemplate').then(m => ({ default: m.SponsorshipLetterTemplate })));
-const RelationshipStatementTemplate = lazy(() => import('./pages/public/templates/RelationshipStatementTemplate').then(m => ({ default: m.RelationshipStatementTemplate })));
-
-const SkilledMigrationWebinar = lazy(() => import('./pages/public/webinars/SkilledMigrationWebinar').then(m => ({ default: m.SkilledMigrationWebinar })));
-const PartnerVisaWebinar = lazy(() => import('./pages/public/webinars/PartnerVisaWebinar').then(m => ({ default: m.PartnerVisaWebinar })));
-const StudentPathwaysWebinar = lazy(() => import('./pages/public/webinars/StudentPathwaysWebinar').then(m => ({ default: m.StudentPathwaysWebinar })));
-const BusinessVisaWebinar = lazy(() => import('./pages/public/webinars/BusinessVisaWebinar').then(m => ({ default: m.BusinessVisaWebinar })));
-const CitizenshipWebinar = lazy(() => import('./pages/public/webinars/CitizenshipWebinar').then(m => ({ default: m.CitizenshipWebinar })));
-
-const PodcastEpisode1 = lazy(() => import('./pages/public/podcast/PodcastEpisode1').then(m => ({ default: m.PodcastEpisode1 })));
-const PodcastEpisode2 = lazy(() => import('./pages/public/podcast/PodcastEpisode2').then(m => ({ default: m.PodcastEpisode2 })));
-const PodcastEpisode3 = lazy(() => import('./pages/public/podcast/PodcastEpisode3').then(m => ({ default: m.PodcastEpisode3 })));
-const PodcastEpisode4 = lazy(() => import('./pages/public/podcast/PodcastEpisode4').then(m => ({ default: m.PodcastEpisode4 })));
-const PodcastEpisode5 = lazy(() => import('./pages/public/podcast/PodcastEpisode5').then(m => ({ default: m.PodcastEpisode5 })));
-
-const MigrationExpoEvent = lazy(() => import('./pages/public/events/MigrationExpoEvent').then(m => ({ default: m.MigrationExpoEvent })));
-const StudentFairEvent = lazy(() => import('./pages/public/events/StudentFairEvent').then(m => ({ default: m.StudentFairEvent })));
-const InvestorSeminarEvent = lazy(() => import('./pages/public/events/InvestorSeminarEvent').then(m => ({ default: m.InvestorSeminarEvent })));
-const NetworkingNightEvent = lazy(() => import('./pages/public/events/NetworkingNightEvent').then(m => ({ default: m.NetworkingNightEvent })));
-const OnlineWorkshopEvent = lazy(() => import('./pages/public/events/OnlineWorkshopEvent').then(m => ({ default: m.OnlineWorkshopEvent })));
-
-const InsurancePartner = lazy(() => import('./pages/public/partners/InsurancePartner').then(m => ({ default: m.InsurancePartner })));
-const EnglishTestPartner = lazy(() => import('./pages/public/partners/EnglishTestPartner').then(m => ({ default: m.EnglishTestPartner })));
-const RelocationPartner = lazy(() => import('./pages/public/partners/RelocationPartner').then(m => ({ default: m.RelocationPartner })));
-const BankingPartner = lazy(() => import('./pages/public/partners/BankingPartner').then(m => ({ default: m.BankingPartner })));
-const EducationAgentPartner = lazy(() => import('./pages/public/partners/EducationAgentPartner').then(m => ({ default: m.EducationAgentPartner })));
-
-const PressRelease1 = lazy(() => import('./pages/public/press/PressRelease1').then(m => ({ default: m.PressRelease1 })));
-const PressRelease2 = lazy(() => import('./pages/public/press/PressRelease2').then(m => ({ default: m.PressRelease2 })));
-const PressRelease3 = lazy(() => import('./pages/public/press/PressRelease3').then(m => ({ default: m.PressRelease3 })));
-const MediaKit = lazy(() => import('./pages/public/press/MediaKit').then(m => ({ default: m.MediaKit })));
-const BrandAssets = lazy(() => import('./pages/public/press/BrandAssets').then(m => ({ default: m.BrandAssets })));
-
-const ApiAuthentication = lazy(() => import('./pages/public/api-docs/ApiAuthentication').then(m => ({ default: m.ApiAuthentication })));
-const ApiEndpoints = lazy(() => import('./pages/public/api-docs/ApiEndpoints').then(m => ({ default: m.ApiEndpoints })));
-const ApiErrors = lazy(() => import('./pages/public/api-docs/ApiErrors').then(m => ({ default: m.ApiErrors })));
-const ApiRateLimits = lazy(() => import('./pages/public/api-docs/ApiRateLimits').then(m => ({ default: m.ApiRateLimits })));
-const ApiChangelog = lazy(() => import('./pages/public/api-docs/ApiChangelog').then(m => ({ default: m.ApiChangelog })));
-
-const StudentVisaLanding = lazy(() => import('./pages/public/landing/StudentVisaLanding').then(m => ({ default: m.StudentVisaLanding })));
-const SkilledVisaLanding = lazy(() => import('./pages/public/landing/SkilledVisaLanding').then(m => ({ default: m.SkilledVisaLanding })));
-const PartnerVisaLanding = lazy(() => import('./pages/public/landing/PartnerVisaLanding').then(m => ({ default: m.PartnerVisaLanding })));
-const BusinessVisaLanding = lazy(() => import('./pages/public/landing/BusinessVisaLanding').then(m => ({ default: m.BusinessVisaLanding })));
-const WorkVisaLanding = lazy(() => import('./pages/public/landing/WorkVisaLanding').then(m => ({ default: m.WorkVisaLanding })));
 
 const UserDashboard = lazy(() => import('./pages/user/UserDashboard').then(m => ({ default: m.UserDashboard })));
 const MyVisas = lazy(() => import('./pages/user/MyVisas').then(m => ({ default: m.MyVisas })));
@@ -168,119 +107,62 @@ const AdminPricing = lazy(() => import('./pages/admin/Pricing').then(m => ({ def
 const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagement').then(m => ({ default: m.PromoCodeManagement })));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings').then(m => ({ default: m.AdminSettings })));
 const YouTubeManagement = lazy(() => import('./pages/admin/YouTubeManagement').then(m => ({ default: m.YouTubeManagement })));
-const AIRoutes = lazy(() => import('./pages/ai/AIRoutes').then(m => ({ default: m.AIRoutes })));
-
-// Gamification
-const Achievements = lazy(() => import('./pages/user/gamification/Achievements').then(m => ({ default: m.Achievements })));
-const AchievementDetail = lazy(() => import('./pages/user/gamification/AchievementDetail').then(m => ({ default: m.AchievementDetail })));
-const Leaderboard = lazy(() => import('./pages/user/gamification/Leaderboard').then(m => ({ default: m.Leaderboard })));
-const Streaks = lazy(() => import('./pages/user/gamification/Streaks').then(m => ({ default: m.Streaks })));
-const Rewards = lazy(() => import('./pages/user/gamification/Rewards').then(m => ({ default: m.Rewards })));
-const Challenges = lazy(() => import('./pages/user/gamification/Challenges').then(m => ({ default: m.Challenges })));
-const Badges = lazy(() => import('./pages/user/gamification/Badges').then(m => ({ default: m.Badges })));
-const Points = lazy(() => import('./pages/user/gamification/Points').then(m => ({ default: m.Points })));
-const Levels = lazy(() => import('./pages/user/gamification/Levels').then(m => ({ default: m.Levels })));
-const Certificates = lazy(() => import('./pages/user/gamification/Certificates').then(m => ({ default: m.Certificates })));
-
-// Planning
-const Planner = lazy(() => import('./pages/user/planning/Planner').then(m => ({ default: m.Planner })));
-const PlannerTimeline = lazy(() => import('./pages/user/planning/PlannerTimeline').then(m => ({ default: m.PlannerTimeline })));
-const Budget = lazy(() => import('./pages/user/planning/Budget').then(m => ({ default: m.Budget })));
-const BudgetPlanner = lazy(() => import('./pages/user/planning/BudgetPlanner').then(m => ({ default: m.BudgetPlanner })));
-const ChecklistBuilder = lazy(() => import('./pages/user/planning/ChecklistBuilder').then(m => ({ default: m.ChecklistBuilder })));
-const FormFiller = lazy(() => import('./pages/user/planning/FormFiller').then(m => ({ default: m.FormFiller })));
-const DocumentScanner = lazy(() => import('./pages/user/planning/DocumentScanner').then(m => ({ default: m.DocumentScanner })));
-const Translator = lazy(() => import('./pages/user/planning/Translator').then(m => ({ default: m.Translator })));
-const Comparator = lazy(() => import('./pages/user/planning/Comparator').then(m => ({ default: m.Comparator })));
-const Recommendations = lazy(() => import('./pages/user/planning/Recommendations').then(m => ({ default: m.Recommendations })));
-
-// Social
-const CommunityFeed = lazy(() => import('./pages/user/social/CommunityFeed').then(m => ({ default: m.CommunityFeed })));
-const CommunityGroups = lazy(() => import('./pages/user/social/CommunityGroups').then(m => ({ default: m.CommunityGroups })));
-const CommunityEvents = lazy(() => import('./pages/user/social/CommunityEvents').then(m => ({ default: m.CommunityEvents })));
-const CommunityStories = lazy(() => import('./pages/user/social/CommunityStories').then(m => ({ default: m.CommunityStories })));
-const CommunityMentors = lazy(() => import('./pages/user/social/CommunityMentors').then(m => ({ default: m.CommunityMentors })));
-const CommunityBuddies = lazy(() => import('./pages/user/social/CommunityBuddies').then(m => ({ default: m.CommunityBuddies })));
-const CommunityDiscussions = lazy(() => import('./pages/user/social/CommunityDiscussions').then(m => ({ default: m.CommunityDiscussions })));
-const CommunityQuestions = lazy(() => import('./pages/user/social/CommunityQuestions').then(m => ({ default: m.CommunityQuestions })));
-const CommunityResources = lazy(() => import('./pages/user/social/CommunityResources').then(m => ({ default: m.CommunityResources })));
-const Network = lazy(() => import('./pages/user/social/Network').then(m => ({ default: m.Network })));
-
-// Advanced
-const AiAssistant = lazy(() => import('./pages/user/advanced/AiAssistant').then(m => ({ default: m.AiAssistant })));
-const AiDocumentReview = lazy(() => import('./pages/user/advanced/AiDocumentReview').then(m => ({ default: m.AiDocumentReview })));
-const EligibilityCalculator = lazy(() => import('./pages/user/advanced/EligibilityCalculator').then(m => ({ default: m.EligibilityCalculator })));
-const ProcessingEstimator = lazy(() => import('./pages/user/advanced/ProcessingEstimator').then(m => ({ default: m.ProcessingEstimator })));
-const CostCalculator = lazy(() => import('./pages/user/advanced/CostCalculator').then(m => ({ default: m.CostCalculator })));
-const RiskAssessment = lazy(() => import('./pages/user/advanced/RiskAssessment').then(m => ({ default: m.RiskAssessment })));
-const DocumentVerifier = lazy(() => import('./pages/user/advanced/DocumentVerifier').then(m => ({ default: m.DocumentVerifier })));
-const SpellChecker = lazy(() => import('./pages/user/advanced/SpellChecker').then(m => ({ default: m.SpellChecker })));
-const FormValidator = lazy(() => import('./pages/user/advanced/FormValidator').then(m => ({ default: m.FormValidator })));
-const RequirementsChecker = lazy(() => import('./pages/user/advanced/RequirementsChecker').then(m => ({ default: m.RequirementsChecker })));
 
 // Integrations
-const Integrations = lazy(() => import('./pages/user/integrations/Integrations').then(m => ({ default: m.Integrations })));
-const CalendarIntegration = lazy(() => import('./pages/user/integrations/CalendarIntegration').then(m => ({ default: m.CalendarIntegration })));
-const CloudIntegration = lazy(() => import('./pages/user/integrations/CloudIntegration').then(m => ({ default: m.CloudIntegration })));
-const EmailIntegration = lazy(() => import('./pages/user/integrations/EmailIntegration').then(m => ({ default: m.EmailIntegration })));
-const SlackIntegration = lazy(() => import('./pages/user/integrations/SlackIntegration').then(m => ({ default: m.SlackIntegration })));
-const DiscordIntegration = lazy(() => import('./pages/user/integrations/DiscordIntegration').then(m => ({ default: m.DiscordIntegration })));
-const WhatsAppIntegration = lazy(() => import('./pages/user/integrations/WhatsAppIntegration').then(m => ({ default: m.WhatsAppIntegration })));
-const Backup = lazy(() => import('./pages/user/integrations/Backup').then(m => ({ default: m.Backup })));
-const Import = lazy(() => import('./pages/user/integrations/Import').then(m => ({ default: m.Import })));
-const AdvancedSettings = lazy(() => import('./pages/user/integrations/AdvancedSettings').then(m => ({ default: m.AdvancedSettings })));
+const IntegrationsDashboard = lazy(() => import('./pages/admin/integrations/IntegrationsDashboard').then(m => ({ default: m.IntegrationsDashboard })));
+const GoogleIntegration = lazy(() => import('./pages/admin/integrations/platforms/GoogleIntegration').then(m => ({ default: m.GoogleIntegration })));
+const MicrosoftIntegration = lazy(() => import('./pages/admin/integrations/platforms/MicrosoftIntegration').then(m => ({ default: m.MicrosoftIntegration })));
+const SlackIntegration = lazy(() => import('./pages/admin/integrations/platforms/SlackIntegration').then(m => ({ default: m.SlackIntegration })));
+const ZoomIntegration = lazy(() => import('./pages/admin/integrations/platforms/ZoomIntegration').then(m => ({ default: m.ZoomIntegration })));
+const SalesforceIntegration = lazy(() => import('./pages/admin/integrations/platforms/SalesforceIntegration').then(m => ({ default: m.SalesforceIntegration })));
+const HubSpotIntegration = lazy(() => import('./pages/admin/integrations/platforms/HubSpotIntegration').then(m => ({ default: m.HubSpotIntegration })));
+const StripeIntegration = lazy(() => import('./pages/admin/integrations/platforms/StripeIntegration').then(m => ({ default: m.StripeIntegration })));
+const PayPalIntegration = lazy(() => import('./pages/admin/integrations/platforms/PayPalIntegration').then(m => ({ default: m.PayPalIntegration })));
+const ZapierIntegration = lazy(() => import('./pages/admin/integrations/platforms/ZapierIntegration').then(m => ({ default: m.ZapierIntegration })));
+const MailchimpIntegration = lazy(() => import('./pages/admin/integrations/platforms/MailchimpIntegration').then(m => ({ default: m.MailchimpIntegration })));
+const DropboxIntegration = lazy(() => import('./pages/admin/integrations/platforms/DropboxIntegration').then(m => ({ default: m.DropboxIntegration })));
+const JiraIntegration = lazy(() => import('./pages/admin/integrations/platforms/JiraIntegration').then(m => ({ default: m.JiraIntegration })));
+const TrelloIntegration = lazy(() => import('./pages/admin/integrations/platforms/TrelloIntegration').then(m => ({ default: m.TrelloIntegration })));
+const AsanaIntegration = lazy(() => import('./pages/admin/integrations/platforms/AsanaIntegration').then(m => ({ default: m.AsanaIntegration })));
+const NotionIntegration = lazy(() => import('./pages/admin/integrations/platforms/NotionIntegration').then(m => ({ default: m.NotionIntegration })));
+const TwilioIntegration = lazy(() => import('./pages/admin/integrations/platforms/TwilioIntegration').then(m => ({ default: m.TwilioIntegration })));
+const SendGridIntegration = lazy(() => import('./pages/admin/integrations/platforms/SendGridIntegration').then(m => ({ default: m.SendGridIntegration })));
+const AWSIntegration = lazy(() => import('./pages/admin/integrations/platforms/AWSIntegration').then(m => ({ default: m.AWSIntegration })));
+const XeroIntegration = lazy(() => import('./pages/admin/integrations/platforms/XeroIntegration').then(m => ({ default: m.XeroIntegration })));
+const QuickBooksIntegration = lazy(() => import('./pages/admin/integrations/platforms/QuickBooksIntegration').then(m => ({ default: m.QuickBooksIntegration })));
+const ShopifyIntegration = lazy(() => import('./pages/admin/integrations/platforms/ShopifyIntegration').then(m => ({ default: m.ShopifyIntegration })));
+const IntercomIntegration = lazy(() => import('./pages/admin/integrations/platforms/IntercomIntegration').then(m => ({ default: m.IntercomIntegration })));
 
-// Security Imports
-const TwoFactorIntro = lazy(() => import('./pages/security/2fa/TwoFactorIntro'));
-const TwoFactorMethod = lazy(() => import('./pages/security/2fa/TwoFactorMethod'));
-const TwoFactorQR = lazy(() => import('./pages/security/2fa/TwoFactorQR'));
-const TwoFactorVerify = lazy(() => import('./pages/security/2fa/TwoFactorVerify'));
-const TwoFactorBackup = lazy(() => import('./pages/security/2fa/TwoFactorBackup'));
-const TwoFactorSuccess = lazy(() => import('./pages/security/2fa/TwoFactorSuccess'));
-const TwoFactorRecovery = lazy(() => import('./pages/security/2fa/TwoFactorRecovery'));
-const TwoFactorHistory = lazy(() => import('./pages/security/2fa/TwoFactorHistory'));
-const TwoFactorDisable = lazy(() => import('./pages/security/2fa/TwoFactorDisable'));
-const TwoFactorDevices = lazy(() => import('./pages/security/2fa/TwoFactorDevices'));
-const ActiveSessions = lazy(() => import('./pages/security/sessions/ActiveSessions'));
-const SessionDetail = lazy(() => import('./pages/security/sessions/SessionDetail'));
-const RevokeSession = lazy(() => import('./pages/security/sessions/RevokeSession'));
-const TimeoutSettings = lazy(() => import('./pages/security/sessions/TimeoutSettings'));
-const LoginHistory = lazy(() => import('./pages/security/sessions/LoginHistory'));
-const SuspiciousActivity = lazy(() => import('./pages/security/sessions/SuspiciousActivity'));
-const DeviceManagement = lazy(() => import('./pages/security/sessions/DeviceManagement'));
-const SessionSecurity = lazy(() => import('./pages/security/sessions/SessionSecurity'));
-const UserMonitor = lazy(() => import('./pages/security/sessions/UserMonitor'));
-const ForceLogout = lazy(() => import('./pages/security/sessions/ForceLogout'));
-const ComplianceDashboard = lazy(() => import('./pages/security/compliance/ComplianceDashboard'));
-const GDPRRequest = lazy(() => import('./pages/security/compliance/GDPRRequest'));
-const DataExport = lazy(() => import('./pages/security/compliance/DataExport'));
-const DataDeletion = lazy(() => import('./pages/security/compliance/DataDeletion'));
-const TermsOfService = lazy(() => import('./pages/security/compliance/TermsOfService'));
-const PrivacyPolicy = lazy(() => import('./pages/security/compliance/PrivacyPolicy'));
-const CookieSettings = lazy(() => import('./pages/security/compliance/CookieSettings'));
-const AuditLogs = lazy(() => import('./pages/security/compliance/AuditLogs'));
-const ComplianceReports = lazy(() => import('./pages/security/compliance/ComplianceReports'));
-const RegulatorySettings = lazy(() => import('./pages/security/compliance/RegulatorySettings'));
-const PrivacyDashboard = lazy(() => import('./pages/security/privacy/PrivacyDashboard'));
-const ProfileVisibility = lazy(() => import('./pages/security/privacy/ProfileVisibility'));
-const DataSharing = lazy(() => import('./pages/security/privacy/DataSharing'));
-const SearchVisibility = lazy(() => import('./pages/security/privacy/SearchVisibility'));
-const ContactPreferences = lazy(() => import('./pages/security/privacy/ContactPreferences'));
-const BlockedUsers = lazy(() => import('./pages/security/privacy/BlockedUsers'));
-const ActivityVisibility = lazy(() => import('./pages/security/privacy/ActivityVisibility'));
-const AdPreferences = lazy(() => import('./pages/security/privacy/AdPreferences'));
-const SocialAccounts = lazy(() => import('./pages/security/privacy/SocialAccounts'));
-const PrivacyAudit = lazy(() => import('./pages/security/privacy/PrivacyAudit'));
-const AccessDashboard = lazy(() => import('./pages/security/access/AccessDashboard'));
-const RoleManagement = lazy(() => import('./pages/security/access/RoleManagement'));
-const PermissionSets = lazy(() => import('./pages/security/access/PermissionSets'));
-const UserAccessReview = lazy(() => import('./pages/security/access/UserAccessReview'));
-const ApiKeys = lazy(() => import('./pages/security/access/ApiKeys'));
-const IpWhitelist = lazy(() => import('./pages/security/access/IpWhitelist'));
-const AccessLogs = lazy(() => import('./pages/security/access/AccessLogs'));
-const InviteUser = lazy(() => import('./pages/security/access/InviteUser'));
-const TeamAccess = lazy(() => import('./pages/security/access/TeamAccess'));
-const SecurityPolicy = lazy(() => import('./pages/security/access/SecurityPolicy'));
+const ApiDashboard = lazy(() => import('./pages/admin/integrations/api/ApiDashboard').then(m => ({ default: m.ApiDashboard })));
+const ApiKeys = lazy(() => import('./pages/admin/integrations/api/ApiKeys').then(m => ({ default: m.ApiKeys })));
+const ApiLogs = lazy(() => import('./pages/admin/integrations/api/ApiLogs').then(m => ({ default: m.ApiLogs })));
+const ApiRateLimits = lazy(() => import('./pages/admin/integrations/api/ApiRateLimits').then(m => ({ default: m.ApiRateLimits })));
+const AdminApiDocs = lazy(() => import('./pages/admin/integrations/api/ApiDocs').then(m => ({ default: m.ApiDocs })));
+const ApiSettings = lazy(() => import('./pages/admin/integrations/api/ApiSettings').then(m => ({ default: m.ApiSettings })));
+const ApiScopes = lazy(() => import('./pages/admin/integrations/api/ApiScopes').then(m => ({ default: m.ApiScopes })));
+const ApiTokens = lazy(() => import('./pages/admin/integrations/api/ApiTokens').then(m => ({ default: m.ApiTokens })));
+
+const WebhookDashboard = lazy(() => import('./pages/admin/integrations/webhooks/WebhookDashboard').then(m => ({ default: m.WebhookDashboard })));
+const WebhookList = lazy(() => import('./pages/admin/integrations/webhooks/WebhookList').then(m => ({ default: m.WebhookList })));
+const WebhookCreate = lazy(() => import('./pages/admin/integrations/webhooks/WebhookCreate').then(m => ({ default: m.WebhookCreate })));
+const WebhookEvents = lazy(() => import('./pages/admin/integrations/webhooks/WebhookEvents').then(m => ({ default: m.WebhookEvents })));
+const WebhookHistory = lazy(() => import('./pages/admin/integrations/webhooks/WebhookHistory').then(m => ({ default: m.WebhookHistory })));
+const WebhookSecurity = lazy(() => import('./pages/admin/integrations/webhooks/WebhookSecurity').then(m => ({ default: m.WebhookSecurity })));
+const WebhookRetryPolicy = lazy(() => import('./pages/admin/integrations/webhooks/WebhookRetryPolicy').then(m => ({ default: m.WebhookRetryPolicy })));
+
+const SsoDashboard = lazy(() => import('./pages/admin/integrations/sso/SsoDashboard').then(m => ({ default: m.SsoDashboard })));
+const SsoProviders = lazy(() => import('./pages/admin/integrations/sso/SsoProviders').then(m => ({ default: m.SsoProviders })));
+const SamlConfiguration = lazy(() => import('./pages/admin/integrations/sso/SamlConfiguration').then(m => ({ default: m.SamlConfiguration })));
+const OidcConfiguration = lazy(() => import('./pages/admin/integrations/sso/OidcConfiguration').then(m => ({ default: m.OidcConfiguration })));
+const SsoAuditLogs = lazy(() => import('./pages/admin/integrations/sso/SsoAuditLogs').then(m => ({ default: m.SsoAuditLogs })));
+const SsoSettings = lazy(() => import('./pages/admin/integrations/sso/SsoSettings').then(m => ({ default: m.SsoSettings })));
+
+const SyncDashboard = lazy(() => import('./pages/admin/integrations/sync/SyncDashboard').then(m => ({ default: m.SyncDashboard })));
+const SyncStatus = lazy(() => import('./pages/admin/integrations/sync/SyncStatus').then(m => ({ default: m.SyncStatus })));
+const SyncHistory = lazy(() => import('./pages/admin/integrations/sync/SyncHistory').then(m => ({ default: m.SyncHistory })));
+const SyncMapping = lazy(() => import('./pages/admin/integrations/sync/SyncMapping').then(m => ({ default: m.SyncMapping })));
+const SyncConflicts = lazy(() => import('./pages/admin/integrations/sync/SyncConflicts').then(m => ({ default: m.SyncConflicts })));
+const SyncSchedule = lazy(() => import('./pages/admin/integrations/sync/SyncSchedule').then(m => ({ default: m.SyncSchedule })));
 
 export default function App() {
   return (
@@ -302,7 +184,7 @@ export default function App() {
                     <Route path="register" element={<Register />} />
                     <Route path="register/lawyer" element={<LawyerRegister />} />
                     <Route path="visas" element={<VisaSearch />} />
-                    <Route path="visas/compare" element={<VisaComparison />} />
+                    <Route path="visas/compare" element={<VisaCompare />} />
                     <Route path="visas/:id" element={<VisaDetail />} />
                     <Route path="tracker" element={<Tracker />} />
                     <Route path="lawyers" element={<LawyerDirectory />} />
@@ -334,71 +216,6 @@ export default function App() {
                     <Route path="partners" element={<Partners />} />
                     <Route path="press" element={<Press />} />
                     <Route path="api-docs" element={<ApiDocs />} />
-
-                    <Route path="resources/guides/skilled-independent" element={<SkilledIndependentVisaGuide />} />
-                    <Route path="resources/guides/partner-visa" element={<PartnerVisaGuide />} />
-                    <Route path="resources/guides/student-visa" element={<StudentVisaGuide />} />
-                    <Route path="resources/guides/employer-nomination" element={<EmployerNominationGuide />} />
-                    <Route path="resources/guides/citizenship" element={<CitizenshipGuide />} />
-
-                    <Route path="resources/checklists/visa-application" element={<VisaApplicationChecklist />} />
-                    <Route path="resources/checklists/document-gathering" element={<DocumentGatheringChecklist />} />
-                    <Route path="resources/checklists/medical-exam" element={<MedicalExamChecklist />} />
-                    <Route path="resources/checklists/character-assessment" element={<CharacterAssessmentChecklist />} />
-                    <Route path="resources/checklists/english-test" element={<EnglishTestChecklist />} />
-
-                    <Route path="resources/templates/statutory-declaration" element={<StatutoryDeclarationTemplate />} />
-                    <Route path="resources/templates/employment-reference" element={<EmploymentReferenceTemplate />} />
-                    <Route path="resources/templates/resume" element={<ResumeTemplate />} />
-                    <Route path="resources/templates/sponsorship-letter" element={<SponsorshipLetterTemplate />} />
-                    <Route path="resources/templates/relationship-statement" element={<RelationshipStatementTemplate />} />
-
-                    <Route path="resources/webinars/skilled-migration" element={<SkilledMigrationWebinar />} />
-                    <Route path="resources/webinars/partner-visa" element={<PartnerVisaWebinar />} />
-                    <Route path="resources/webinars/student-pathways" element={<StudentPathwaysWebinar />} />
-                    <Route path="resources/webinars/business-visa" element={<BusinessVisaWebinar />} />
-                    <Route path="resources/webinars/citizenship" element={<CitizenshipWebinar />} />
-
-                    <Route path="resources/podcast/episode-1" element={<PodcastEpisode1 />} />
-                    <Route path="resources/podcast/episode-2" element={<PodcastEpisode2 />} />
-                    <Route path="resources/podcast/episode-3" element={<PodcastEpisode3 />} />
-                    <Route path="resources/podcast/episode-4" element={<PodcastEpisode4 />} />
-                    <Route path="resources/podcast/episode-5" element={<PodcastEpisode5 />} />
-
-                    <Route path="resources/events/migration-expo" element={<MigrationExpoEvent />} />
-                    <Route path="resources/events/student-fair" element={<StudentFairEvent />} />
-                    <Route path="resources/events/investor-seminar" element={<InvestorSeminarEvent />} />
-                    <Route path="resources/events/networking-night" element={<NetworkingNightEvent />} />
-                    <Route path="resources/events/online-workshop" element={<OnlineWorkshopEvent />} />
-
-                    <Route path="partners/insurance" element={<InsurancePartner />} />
-                    <Route path="partners/english-test" element={<EnglishTestPartner />} />
-                    <Route path="partners/relocation" element={<RelocationPartner />} />
-                    <Route path="partners/banking" element={<BankingPartner />} />
-                    <Route path="partners/education" element={<EducationAgentPartner />} />
-
-                    <Route path="press/release-1" element={<PressRelease1 />} />
-                    <Route path="press/release-2" element={<PressRelease2 />} />
-                    <Route path="press/release-3" element={<PressRelease3 />} />
-                    <Route path="press/media-kit" element={<MediaKit />} />
-                    <Route path="press/brand-assets" element={<BrandAssets />} />
-
-                    <Route path="api-docs/authentication" element={<ApiAuthentication />} />
-                    <Route path="api-docs/endpoints" element={<ApiEndpoints />} />
-                    <Route path="api-docs/errors" element={<ApiErrors />} />
-                    <Route path="api-docs/rate-limits" element={<ApiRateLimits />} />
-                    <Route path="api-docs/changelog" element={<ApiChangelog />} />
-
-                    <Route path="landing/student" element={<StudentVisaLanding />} />
-                    <Route path="landing/skilled" element={<SkilledVisaLanding />} />
-                    <Route path="landing/partner" element={<PartnerVisaLanding />} />
-                    <Route path="landing/business" element={<BusinessVisaLanding />} />
-                    <Route path="landing/work" element={<WorkVisaLanding />} />
-                  </Route>
-
-                  {/* Mobile Routes */}
-                  <Route path="mobile">
-                    {MobileRoutes}
                   </Route>
 
                   {/* User Routes - Each has its own layout */}
@@ -425,70 +242,7 @@ export default function App() {
                     <Route path="dashboard/profile" element={<UserProfile />} />
                     <Route path="dashboard/notifications" element={<Notifications />} />
                     <Route path="dashboard/billing" element={<Billing />} />
-
-                    {/* Gamification */}
-                    <Route path="achievements" element={<Achievements />} />
-                    <Route path="achievements/:id" element={<AchievementDetail />} />
-                    <Route path="leaderboard" element={<Leaderboard />} />
-                    <Route path="streaks" element={<Streaks />} />
-                    <Route path="rewards" element={<Rewards />} />
-                    <Route path="challenges" element={<Challenges />} />
-                    <Route path="badges" element={<Badges />} />
-                    <Route path="points" element={<Points />} />
-                    <Route path="levels" element={<Levels />} />
-                    <Route path="certificates" element={<Certificates />} />
-
-                    {/* Planning */}
-                    <Route path="planner" element={<Planner />} />
-                    <Route path="planner/timeline" element={<PlannerTimeline />} />
-                    <Route path="budget" element={<Budget />} />
-                    <Route path="budget/planner" element={<BudgetPlanner />} />
-                    <Route path="checklist-builder" element={<ChecklistBuilder />} />
-                    <Route path="form-filler" element={<FormFiller />} />
-                    <Route path="document-scanner" element={<DocumentScanner />} />
-                    <Route path="translator" element={<Translator />} />
-                    <Route path="comparator" element={<Comparator />} />
-                    <Route path="recommendations" element={<Recommendations />} />
-
-                    {/* Social */}
-                    <Route path="community/feed" element={<CommunityFeed />} />
-                    <Route path="community/groups" element={<CommunityGroups />} />
-                    <Route path="community/events" element={<CommunityEvents />} />
-                    <Route path="community/stories" element={<CommunityStories />} />
-                    <Route path="community/mentors" element={<CommunityMentors />} />
-                    <Route path="community/buddies" element={<CommunityBuddies />} />
-                    <Route path="community/discussions" element={<CommunityDiscussions />} />
-                    <Route path="community/questions" element={<CommunityQuestions />} />
-                    <Route path="community/resources" element={<CommunityResources />} />
-                    <Route path="network" element={<Network />} />
-
-                    {/* Advanced */}
-                    <Route path="ai-assistant" element={<AiAssistant />} />
-                    <Route path="ai-document-review" element={<AiDocumentReview />} />
-                    <Route path="eligibility-calculator" element={<EligibilityCalculator />} />
-                    <Route path="processing-estimator" element={<ProcessingEstimator />} />
-                    <Route path="cost-calculator" element={<CostCalculator />} />
-                    <Route path="risk-assessment" element={<RiskAssessment />} />
-                    <Route path="document-verifier" element={<DocumentVerifier />} />
-                    <Route path="spell-checker" element={<SpellChecker />} />
-                    <Route path="form-validator" element={<FormValidator />} />
-                    <Route path="requirements-checker" element={<RequirementsChecker />} />
-
-                    {/* Integrations */}
-                    <Route path="integrations" element={<Integrations />} />
-                    <Route path="integrations/calendar" element={<CalendarIntegration />} />
-                    <Route path="integrations/cloud" element={<CloudIntegration />} />
-                    <Route path="integrations/email" element={<EmailIntegration />} />
-                    <Route path="integrations/slack" element={<SlackIntegration />} />
-                    <Route path="integrations/discord" element={<DiscordIntegration />} />
-                    <Route path="integrations/whatsapp" element={<WhatsAppIntegration />} />
-                    <Route path="backup" element={<Backup />} />
-                    <Route path="import" element={<Import />} />
-                    <Route path="settings/advanced" element={<AdvancedSettings />} />
                   </Route>
-
-                  {/* AI Routes */}
-                  <Route path="ai/*" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}><AIRoutes /></ProtectedRoute>} />
 
                   {/* Lawyer Routes - Each has its own layout */}
                   <Route path="lawyer" element={<PortalLanding />} />
@@ -526,63 +280,63 @@ export default function App() {
                   <Route path="admin/pricing" element={<ProtectedRoute allowedRoles={['admin']}><AdminPricing /></ProtectedRoute>} />
                   <Route path="admin/promos" element={<ProtectedRoute allowedRoles={['admin']}><PromoCodeManagement /></ProtectedRoute>} />
                   <Route path="admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
-                                    {/* Security Pages */}
-                  {/* 2FA */}
-                  <Route path="dashboard/security/2fa/two-factor-intro" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorIntro /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/2fa/two-factor-method" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorMethod /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/2fa/two-factor-q-r" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorQR /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/2fa/two-factor-verify" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorVerify /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/2fa/two-factor-backup" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorBackup /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/2fa/two-factor-success" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorSuccess /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/2fa/two-factor-recovery" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorRecovery /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/2fa/two-factor-history" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorHistory /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/2fa/two-factor-disable" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorDisable /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/2fa/two-factor-devices" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TwoFactorDevices /> </ProtectedRoute>} />
-                  {/* SESSIONS */}
-                  <Route path="dashboard/security/sessions/active-sessions" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <ActiveSessions /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/sessions/session-detail" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <SessionDetail /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/sessions/revoke-session" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <RevokeSession /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/sessions/timeout-settings" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TimeoutSettings /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/sessions/login-history" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <LoginHistory /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/sessions/suspicious-activity" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <SuspiciousActivity /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/sessions/device-management" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <DeviceManagement /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/sessions/session-security" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <SessionSecurity /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/sessions/user-monitor" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <UserMonitor /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/sessions/force-logout" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <ForceLogout /> </ProtectedRoute>} />
-                  {/* COMPLIANCE */}
-                  <Route path="dashboard/security/compliance/compliance-dashboard" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <ComplianceDashboard /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/compliance/g-d-p-r-request" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <GDPRRequest /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/compliance/data-export" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <DataExport /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/compliance/data-deletion" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <DataDeletion /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/compliance/terms-of-service" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TermsOfService /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/compliance/privacy-policy" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <PrivacyPolicy /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/compliance/cookie-settings" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <CookieSettings /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/compliance/audit-logs" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <AuditLogs /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/compliance/compliance-reports" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <ComplianceReports /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/compliance/regulatory-settings" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <RegulatorySettings /> </ProtectedRoute>} />
-                  {/* PRIVACY */}
-                  <Route path="dashboard/security/privacy/privacy-dashboard" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <PrivacyDashboard /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/privacy/profile-visibility" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <ProfileVisibility /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/privacy/data-sharing" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <DataSharing /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/privacy/search-visibility" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <SearchVisibility /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/privacy/contact-preferences" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <ContactPreferences /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/privacy/blocked-users" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <BlockedUsers /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/privacy/activity-visibility" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <ActivityVisibility /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/privacy/ad-preferences" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <AdPreferences /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/privacy/social-accounts" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <SocialAccounts /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/privacy/privacy-audit" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <PrivacyAudit /> </ProtectedRoute>} />
-                  {/* ACCESS */}
-                  <Route path="dashboard/security/access/access-dashboard" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <AccessDashboard /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/access/role-management" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <RoleManagement /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/access/permission-sets" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <PermissionSets /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/access/user-access-review" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <UserAccessReview /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/access/api-keys" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <ApiKeys /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/access/ip-whitelist" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <IpWhitelist /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/access/access-logs" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <AccessLogs /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/access/invite-user" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <InviteUser /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/access/team-access" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <TeamAccess /> </ProtectedRoute>} />
-                  <Route path="dashboard/security/access/security-policy" element={<ProtectedRoute allowedRoles={['user', 'admin', 'lawyer']}> <SecurityPolicy /> </ProtectedRoute>} />
-</Routes>
+
+                  {/* Admin Integrations */}
+                  <Route path="admin/integrations" element={<ProtectedRoute allowedRoles={['admin']}><IntegrationsDashboard /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/google" element={<ProtectedRoute allowedRoles={['admin']}><GoogleIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/microsoft" element={<ProtectedRoute allowedRoles={['admin']}><MicrosoftIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/slack" element={<ProtectedRoute allowedRoles={['admin']}><SlackIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/zoom" element={<ProtectedRoute allowedRoles={['admin']}><ZoomIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/salesforce" element={<ProtectedRoute allowedRoles={['admin']}><SalesforceIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/hubspot" element={<ProtectedRoute allowedRoles={['admin']}><HubSpotIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/stripe" element={<ProtectedRoute allowedRoles={['admin']}><StripeIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/paypal" element={<ProtectedRoute allowedRoles={['admin']}><PayPalIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/zapier" element={<ProtectedRoute allowedRoles={['admin']}><ZapierIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/mailchimp" element={<ProtectedRoute allowedRoles={['admin']}><MailchimpIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/dropbox" element={<ProtectedRoute allowedRoles={['admin']}><DropboxIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/jira" element={<ProtectedRoute allowedRoles={['admin']}><JiraIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/trello" element={<ProtectedRoute allowedRoles={['admin']}><TrelloIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/asana" element={<ProtectedRoute allowedRoles={['admin']}><AsanaIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/notion" element={<ProtectedRoute allowedRoles={['admin']}><NotionIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/twilio" element={<ProtectedRoute allowedRoles={['admin']}><TwilioIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/sendgrid" element={<ProtectedRoute allowedRoles={['admin']}><SendGridIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/aws" element={<ProtectedRoute allowedRoles={['admin']}><AWSIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/xero" element={<ProtectedRoute allowedRoles={['admin']}><XeroIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/quickbooks" element={<ProtectedRoute allowedRoles={['admin']}><QuickBooksIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/shopify" element={<ProtectedRoute allowedRoles={['admin']}><ShopifyIntegration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/platforms/intercom" element={<ProtectedRoute allowedRoles={['admin']}><IntercomIntegration /></ProtectedRoute>} />
+
+                  <Route path="admin/integrations/api" element={<ProtectedRoute allowedRoles={['admin']}><ApiDashboard /></ProtectedRoute>} />
+                  <Route path="admin/integrations/api/keys" element={<ProtectedRoute allowedRoles={['admin']}><ApiKeys /></ProtectedRoute>} />
+                  <Route path="admin/integrations/api/logs" element={<ProtectedRoute allowedRoles={['admin']}><ApiLogs /></ProtectedRoute>} />
+                  <Route path="admin/integrations/api/limits" element={<ProtectedRoute allowedRoles={['admin']}><ApiRateLimits /></ProtectedRoute>} />
+                  <Route path="admin/integrations/api/docs" element={<ProtectedRoute allowedRoles={['admin']}><AdminApiDocs /></ProtectedRoute>} />
+                  <Route path="admin/integrations/api/settings" element={<ProtectedRoute allowedRoles={['admin']}><ApiSettings /></ProtectedRoute>} />
+                  <Route path="admin/integrations/api/scopes" element={<ProtectedRoute allowedRoles={['admin']}><ApiScopes /></ProtectedRoute>} />
+                  <Route path="admin/integrations/api/tokens" element={<ProtectedRoute allowedRoles={['admin']}><ApiTokens /></ProtectedRoute>} />
+
+                  <Route path="admin/integrations/webhooks" element={<ProtectedRoute allowedRoles={['admin']}><WebhookDashboard /></ProtectedRoute>} />
+                  <Route path="admin/integrations/webhooks/list" element={<ProtectedRoute allowedRoles={['admin']}><WebhookList /></ProtectedRoute>} />
+                  <Route path="admin/integrations/webhooks/create" element={<ProtectedRoute allowedRoles={['admin']}><WebhookCreate /></ProtectedRoute>} />
+                  <Route path="admin/integrations/webhooks/events" element={<ProtectedRoute allowedRoles={['admin']}><WebhookEvents /></ProtectedRoute>} />
+                  <Route path="admin/integrations/webhooks/history" element={<ProtectedRoute allowedRoles={['admin']}><WebhookHistory /></ProtectedRoute>} />
+                  <Route path="admin/integrations/webhooks/security" element={<ProtectedRoute allowedRoles={['admin']}><WebhookSecurity /></ProtectedRoute>} />
+                  <Route path="admin/integrations/webhooks/retry" element={<ProtectedRoute allowedRoles={['admin']}><WebhookRetryPolicy /></ProtectedRoute>} />
+
+                  <Route path="admin/integrations/sso" element={<ProtectedRoute allowedRoles={['admin']}><SsoDashboard /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sso/providers" element={<ProtectedRoute allowedRoles={['admin']}><SsoProviders /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sso/saml" element={<ProtectedRoute allowedRoles={['admin']}><SamlConfiguration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sso/oidc" element={<ProtectedRoute allowedRoles={['admin']}><OidcConfiguration /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sso/audit" element={<ProtectedRoute allowedRoles={['admin']}><SsoAuditLogs /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sso/settings" element={<ProtectedRoute allowedRoles={['admin']}><SsoSettings /></ProtectedRoute>} />
+
+                  <Route path="admin/integrations/sync" element={<ProtectedRoute allowedRoles={['admin']}><SyncDashboard /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sync/status" element={<ProtectedRoute allowedRoles={['admin']}><SyncStatus /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sync/history" element={<ProtectedRoute allowedRoles={['admin']}><SyncHistory /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sync/mapping" element={<ProtectedRoute allowedRoles={['admin']}><SyncMapping /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sync/conflicts" element={<ProtectedRoute allowedRoles={['admin']}><SyncConflicts /></ProtectedRoute>} />
+                  <Route path="admin/integrations/sync/schedule" element={<ProtectedRoute allowedRoles={['admin']}><SyncSchedule /></ProtectedRoute>} />
+                  </Routes>
                 </Suspense>
               </GlobalSearchProvider>
             </BrowserRouter>
