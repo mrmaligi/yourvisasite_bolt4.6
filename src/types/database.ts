@@ -30,7 +30,7 @@ export interface YouTubeFeed {
 
 export interface Visa {
   id: string;
-  subclass: string;
+  subclass_number: string;
   name: string;
   country: string;
   category: string;

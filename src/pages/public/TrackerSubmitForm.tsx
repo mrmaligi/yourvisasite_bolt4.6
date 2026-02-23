@@ -15,7 +15,7 @@ interface Props {
 export function TrackerSubmitForm({ onSuccess, preselectedVisaId, initialEntry }: Props) {
   const { user, role } = useAuth();
   const { toast } = useToast();
-  const [visas, setVisas] = useState<Pick<Visa, 'id' | 'name' | 'subclass'>[]>([]);
+  const [visas, setVisas] = useState<Pick<Visa, 'id' | 'name' | 'subclass_number'>[]>([]);
   const [visaId, setVisaId] = useState(initialEntry?.visa_id || preselectedVisaId || '');
   const [applicationDate, setApplicationDate] = useState(initialEntry?.application_date || '');
   const [decisionDate, setDecisionDate] = useState(initialEntry?.decision_date || '');
@@ -26,7 +26,7 @@ export function TrackerSubmitForm({ onSuccess, preselectedVisaId, initialEntry }
   useEffect(() => {
     supabase
       .from('visas')
-      .select('id, name, subclass')
+      .select('id, name, subclass_number')
       .eq('is_active', true)
       .order('name')
       .then(({ data }) => setVisas(data || []));
@@ -116,7 +116,7 @@ export function TrackerSubmitForm({ onSuccess, preselectedVisaId, initialEntry }
             <option value="">Select a visa...</option>
             {visas.map((v) => (
               <option key={v.id} value={v.id}>
-                {v.subclass} - {v.name}
+                {v.subclass_number} - {v.name}
               </option>
             ))}
           </select>

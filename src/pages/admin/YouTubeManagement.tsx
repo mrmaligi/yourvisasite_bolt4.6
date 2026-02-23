@@ -9,7 +9,7 @@ import type { YouTubeFeed } from '../../types/database';
 
 interface VisaOption {
   id: string;
-  subclass: string;
+  subclass_number: string;
   name: string;
 }
 
@@ -35,7 +35,7 @@ export function YouTubeManagement() {
     try {
       const [feedsRes, visasRes] = await Promise.all([
         supabase.from('youtube_feeds').select('*').order('created_at', { ascending: false }),
-        supabase.from('visas').select('id, subclass, name').eq('is_active', true).order('subclass')
+        supabase.from('visas').select('id, subclass_number, name').eq('is_active', true).order('subclass_number')
       ]);
 
       if (feedsRes.error) throw feedsRes.error;
@@ -169,7 +169,7 @@ export function YouTubeManagement() {
                 <option value="">Select a Visa...</option>
                 {visas.map(visa => (
                   <option key={visa.id} value={visa.id}>
-                    {visa.subclass} - {visa.name}
+                    {visa.subclass_number} - {visa.name}
                   </option>
                 ))}
               </select>
@@ -211,7 +211,7 @@ export function YouTubeManagement() {
                   <p className="font-medium text-primary-600 dark:text-primary-400">{feed.channel_name}</p>
                   {feed.visa_id && (
                     <span className="inline-block mt-1 px-2 py-0.5 bg-neutral-100 dark:bg-neutral-800 rounded text-xs border border-neutral-200 dark:border-neutral-700">
-                      {visas.find(v => v.id === feed.visa_id)?.subclass}
+                      {visas.find(v => v.id === feed.visa_id)?.subclass_number}
                     </span>
                   )}
                 </div>

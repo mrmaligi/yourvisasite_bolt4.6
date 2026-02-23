@@ -69,7 +69,7 @@ export function useVisas(
           query = query.eq('category', category);
         }
         if (search) {
-          query = query.or(`name.ilike.%${search}%,subclass.ilike.%${search}%`);
+          query = query.or(`name.ilike.%${search}%,subclass_number.ilike.%${search}%`);
         }
 
         // Pagination

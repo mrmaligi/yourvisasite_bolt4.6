@@ -92,7 +92,7 @@ export function VisaSearch() {
     .filter((visa) => {
       const matchesSearch =
         visa.name.toLowerCase().includes(search.toLowerCase()) ||
-        visa.subclass.toLowerCase().includes(search.toLowerCase());
+        visa.subclass_number.toLowerCase().includes(search.toLowerCase());
 
       const matchesCategory =
         selectedCategories.length === 0 || selectedCategories.includes(visa.category);
@@ -112,7 +112,7 @@ export function VisaSearch() {
         return a.name.localeCompare(b.name);
       }
       if (sortBy === 'subclass_asc') {
-        return a.subclass.localeCompare(b.subclass);
+        return a.subclass_number.localeCompare(b.subclass_number);
       }
       if (sortBy === 'cost_asc') {
         const costA = a.base_cost_aud || 0;
@@ -322,7 +322,7 @@ export function VisaSearch() {
                         <CardBody className="space-y-4">
                           <div className="flex items-start justify-between">
                             <div className="flex items-center gap-2">
-                              <Badge variant="navy">{visa.subclass}</Badge>
+                              <Badge variant="navy">{visa.subclass_number}</Badge>
                               <Badge variant="default">{visa.category}</Badge>
                             </div>
                             <ArrowUpRight className="w-4 h-4 text-neutral-400 group-hover:text-navy-600 transition-colors" />
