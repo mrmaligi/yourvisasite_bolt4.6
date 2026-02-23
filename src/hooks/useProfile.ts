@@ -23,6 +23,7 @@ export function useProfile() {
       const { data, error: updateError } = await supabase
         .from('profiles')
         .update(updates)
+        // Ensure we use 'id' (PK) and not 'user_id' for profiles table updates
         .eq('id', user.id)
         .select()
         .single();
