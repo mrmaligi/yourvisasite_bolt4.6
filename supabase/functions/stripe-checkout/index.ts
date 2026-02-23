@@ -129,7 +129,15 @@ Deno.serve(async (req) => {
          .eq('is_booked', false)
          .single();
 
-       if (slotError || !slot) {
+       if (slotError) {
+         console.error('Error fetching consultation slot:', slotError);
+         // Check for schema/table missing errors (Postgres codes 42P01, 3F000)
+         if (slotError.code === '42P01' || slotError.code === '3F000') {
+            throw new Error('System configuration error: Lawyer schema or table missing. Please contact support.');
+         }
+         throw new Error('Slot not available');
+       }
+       if (!slot) {
          throw new Error('Slot not available');
        }
 
@@ -142,7 +150,14 @@ Deno.serve(async (req) => {
          .eq('role', 'lawyer')
          .single();
 
-       if (lawyerError || !lawyer) {
+       if (lawyerError) {
+         console.error('Error fetching lawyer profile:', lawyerError);
+         if (lawyerError.code === '42P01' || lawyerError.code === '3F000') {
+             throw new Error('System configuration error: Lawyer schema or table missing. Please contact support.');
+         }
+         throw new Error('Lawyer not found');
+       }
+       if (!lawyer) {
          throw new Error('Lawyer not found');
        }
 

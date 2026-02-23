@@ -161,6 +161,9 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
           if (slotError) {
             console.error('Error updating consultation slot:', slotError);
+            if (slotError.code === '42P01' || slotError.code === '3F000') {
+               console.error('CRITICAL: Lawyer schema or table missing during webhook processing.');
+            }
           }
         }
 
@@ -226,11 +229,15 @@ async function handleCheckoutSessionExpired(session: Stripe.Checkout.Session) {
     }
 
     if (slotId) {
-       await supabase
+       const { error: slotError } = await supabase
          .schema('lawyer')
          .from('consultation_slots')
          .update({ is_reserved: false, reserved_until: null })
          .eq('id', slotId);
+
+       if (slotError) {
+          console.error('Error releasing slot reservation:', slotError);
+       }
     }
   }
 }
@@ -250,11 +257,15 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
         }
 
         if (slotId) {
-            await supabase
+            const { error: slotError } = await supabase
              .schema('lawyer')
              .from('consultation_slots')
              .update({ is_reserved: false, reserved_until: null })
              .eq('id', slotId);
+
+            if (slotError) {
+               console.error('Error releasing slot reservation:', slotError);
+            }
         }
     } else if (type === 'premium') {
         // Just log it, user can try again
