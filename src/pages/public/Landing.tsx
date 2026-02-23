@@ -1,297 +1,230 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Search,
-  Clock,
-  FileText,
-  ArrowRight,
-  CheckCircle,
-  BarChart3,
-  BookOpen,
-  Phone,
-  Sparkles
-} from 'lucide-react';
+import { BarChart3, Scale, FileCheck, BookOpen, ArrowRight, Globe, Shield, Clock, Users, ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Button } from '../../components/ui/Button';
 import { Card, CardBody } from '../../components/ui/Card';
-import { QuickCallBanner } from '../../components/QuickCallBanner';
-import { YouTubeFeed } from '../../components/YouTubeFeed';
+import { Button } from '../../components/ui/Button';
+import type { NewsArticle } from '../../types/database';
+import { USE_MOCK } from '../../lib/mockData';
 
 export function Landing() {
-  const [stats, setStats] = useState({
-    visas: 0,
-    entries: 0,
-    lawyers: 0
-  });
+  const [news, setNews] = useState<NewsArticle[]>([]);
+  const [counts, setCounts] = useState({ entries: 0, lawyers: 0, visas: 0 });
 
   useEffect(() => {
-    // Fetch real stats
+    if (USE_MOCK) {
+      setCounts({ entries: 1250, lawyers: 45, visas: 12 });
+      return;
+    }
+
+    supabase
+      .from('news_articles')
+      .select('*')
+      .eq('is_published', true)
+      .order('published_at', { ascending: false })
+      .limit(3)
+      .then(({ data }) => setNews(data || []));
+
     Promise.all([
-      supabase.from('visas').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('country', 'Australia'),
       supabase.from('tracker_entries').select('id', { count: 'exact', head: true }),
-      supabase.schema('lawyer').from('profiles').select('id', { count: 'exact', head: true }).eq('is_verified', true)
-    ]).then(([visas, entries, lawyers]) => {
-      setStats({
-        visas: visas.count || 78,
+      supabase.from('visas').select('id', { count: 'exact', head: true }).eq('is_active', true),
+      supabase.schema('lawyer').from('profiles').select('id', { count: 'exact', head: true }).eq('is_verified', true),
+    ]).then(([entries, visas, lawyers]) => {
+      setCounts({
         entries: entries.count || 0,
-        lawyers: lawyers.count || 0
+        lawyers: lawyers.count || 0,
+        visas: visas.count || 0,
       });
     });
   }, []);
 
   return (
-    <div className="bg-white dark:bg-neutral-900 transition-colors duration-300">
-      <QuickCallBanner />
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-neutral-900 py-24 sm:py-32">
-        <div className="absolute inset-0 z-0 opacity-20">
-            <div className="absolute inset-0 bg-gradient-to-r from-neutral-900 to-neutral-800" />
-            <div className="h-full w-full bg-[radial-gradient(#4b5563_1px,transparent_1px)] [background-size:16px_16px]" />
+    <div>
+      <section className="relative overflow-hidden bg-neutral-950">
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-primary-600/10 rounded-full blur-[120px]" />
+          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-primary-500/5 rounded-full blur-[100px]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6">
-            Navigate Australian Immigration <br className="hidden sm:block" />
-            <span className="text-primary-400">with Confidence</span>
-          </h1>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-28 md:pt-28 md:pb-36">
+          <div className="max-w-3xl animate-fade-in-up">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/[0.06] border border-white/10 rounded-full text-primary-300 text-sm font-medium mb-8 backdrop-blur-sm">
+              <Globe className="w-4 h-4" />
+              <span>Global Mobility Platform</span>
+              <ChevronRight className="w-3.5 h-3.5 text-primary-400/60" />
+            </div>
 
-          <p className="mt-6 text-lg sm:text-xl text-neutral-300 max-w-2xl mx-auto mb-10">
-            {stats.visas}+ visa subclasses. Expert guides. Real processing times.
-            The most transparent platform for your Australian visa journey.
-          </p>
+            <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-extrabold leading-[1.08] text-white mb-6 tracking-tight">
+              Navigate visa processing
+              <br />
+              with <span className="text-gradient">transparency</span>
+            </h1>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/visas">
-              <Button size="lg" className="w-full sm:w-auto text-lg px-8">
-                Search Visas
-                <Search className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
-            <Link to="/lawyers?filter=available">
-              <Button size="lg" className="w-full sm:w-auto text-lg px-8 bg-emerald-600 hover:bg-emerald-700 text-white border-transparent">
-                Quick Call
-                <Phone className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
-            <Link to="/tracker">
-              <Button variant="secondary" size="lg" className="w-full sm:w-auto text-lg px-8 bg-white/10 text-white border-white/20 hover:bg-white/20">
-                Track Processing Times
-                <Clock className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
+            <p className="text-lg md:text-xl text-neutral-400 mb-10 max-w-2xl leading-relaxed">
+              Real processing times from real applicants. Expert guides and verified
+              lawyers to help you through every step of your immigration journey.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link to="/tracker">
+                <Button size="lg" className="w-full sm:w-auto shadow-glow-primary">
+                  Check Processing Times
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+              </Link>
+              <Link to="/visas">
+                <Button variant="secondary" size="lg" className="w-full sm:w-auto bg-white/[0.06] border-white/10 text-white hover:bg-white/10 hover:border-white/20">
+                  Browse Visas
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          <div className="mt-16 md:mt-20 grid grid-cols-3 gap-px bg-white/[0.06] rounded-2xl overflow-hidden border border-white/[0.06] max-w-xl animate-fade-in-up stagger-2" style={{ animationFillMode: 'both', opacity: 0 }}>
+            {[
+              { value: counts.entries.toLocaleString(), label: 'Data Points' },
+              { value: counts.visas.toString(), label: 'Visa Types' },
+              { value: counts.lawyers.toString(), label: 'Verified Lawyers' },
+            ].map((stat, i) => (
+              <div key={i} className="bg-white/[0.03] backdrop-blur-sm px-6 py-5 text-center">
+                <p className="text-2xl md:text-3xl font-bold text-white">{stat.value}</p>
+                <p className="text-xs text-neutral-500 mt-1 font-medium">{stat.label}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Stats Bar */}
-      <section className="bg-primary-50 dark:bg-primary-900/10 border-y border-primary-100 dark:border-primary-900/20 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center md:divide-x divide-primary-200/50 dark:divide-primary-800/50">
-            <div className="space-y-1">
-              <p className="text-3xl font-bold text-primary-700 dark:text-primary-400">{stats.visas}+</p>
-              <p className="text-sm font-medium text-primary-600 dark:text-primary-300">Visa Subclasses</p>
-            </div>
-            <div className="space-y-1 md:pl-4">
-              <p className="text-3xl font-bold text-primary-700 dark:text-primary-400">19</p>
-              <p className="text-sm font-medium text-primary-600 dark:text-primary-300">Document Categories</p>
-            </div>
-            <div className="space-y-1 md:pl-4">
-              <p className="text-3xl font-bold text-primary-700 dark:text-primary-400">Real</p>
-              <p className="text-sm font-medium text-primary-600 dark:text-primary-300">Processing Data</p>
-            </div>
-            <div className="space-y-1 md:pl-4">
-              <p className="text-3xl font-bold text-primary-700 dark:text-primary-400">Expert</p>
-              <p className="text-sm font-medium text-primary-600 dark:text-primary-300">Lawyers</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Eligibility Quiz CTA */}
-      <section className="bg-gradient-to-r from-primary-600 to-primary-700 py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-white/90 text-sm font-medium mb-6">
-            <Sparkles className="w-4 h-4" />
-            <span>Free 2-Minute Assessment</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Not sure which visa is right for you?
-          </h2>
-          <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
-            Answer 9 simple questions about your situation and get personalized visa recommendations 
-            with eligibility scores sent straight to your inbox.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/quiz">
-              <Button size="lg" className="w-full sm:w-auto text-lg px-8 bg-white text-primary-600 hover:bg-white/90">
-                <Sparkles className="mr-2 w-5 h-5" />
-                Start Free Assessment
-              </Button>
-            </Link>
-            <Link to="/stories">
-              <Button variant="secondary" size="lg" className="w-full sm:w-auto text-lg px-8 bg-white/10 text-white border-white/20 hover:bg-white/20">
-                Read Success Stories
-              </Button>
-            </Link>
-          </div>
-          <p className="mt-6 text-sm text-white/60">
-            Join 10,000+ applicants who found their perfect visa match
-          </p>
-        </div>
-      </section>
-
-      {/* Feature Cards */}
-      <section className="py-24 bg-neutral-50 dark:bg-neutral-900 transition-colors duration-300">
+      <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-4">Everything you need to succeed</h2>
-            <p className="text-neutral-500 dark:text-neutral-400 max-w-2xl mx-auto">
-              We combine data, technology, and legal expertise to simplify your migration journey.
-            </p>
+            <p className="text-sm font-semibold text-primary-600 tracking-wide uppercase mb-3">How it works</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">Three steps to clarity</h2>
+            <p className="text-neutral-500 max-w-lg mx-auto text-lg">Get from uncertainty to action in minutes, not weeks.</p>
           </div>
+          <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+            {[
+              { icon: BarChart3, title: 'Track processing times', desc: 'Browse real data from applicants worldwide or submit your own processing experience.', step: '01' },
+              { icon: BookOpen, title: 'Unlock expert guides', desc: 'Access step-by-step premium guides with document checklists tailored to your visa type.', step: '02' },
+              { icon: Scale, title: 'Connect with lawyers', desc: 'Book consultations with verified immigration lawyers who specialize in your visa.', step: '03' },
+            ].map((item, i) => (
+              <div key={i} className="relative group">
+                <div className="flex items-center gap-4 mb-5">
+                  <div className="w-12 h-12 bg-primary-50 rounded-2xl flex items-center justify-center group-hover:bg-primary-100 transition-colors duration-300">
+                    <item.icon className="w-6 h-6 text-primary-600" />
+                  </div>
+                  <span className="text-5xl font-extrabold text-neutral-100 leading-none select-none">{item.step}</span>
+                </div>
+                <h3 className="text-lg font-semibold text-neutral-900 mb-2">{item.title}</h3>
+                <p className="text-neutral-500 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
+      <section className="py-24 bg-neutral-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <p className="text-sm font-semibold text-primary-600 tracking-wide uppercase mb-3">Features</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">Everything you need</h2>
+            <p className="text-neutral-500 max-w-lg mx-auto text-lg">Comprehensive tools for navigating the visa process with confidence.</p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { icon: BarChart3, title: 'Processing Tracker', desc: 'Crowdsourced, weighted processing times updated in real time.', color: 'bg-sky-50 text-sky-600' },
+              { icon: Scale, title: 'Verified Lawyers', desc: 'Vetted immigration professionals ready to help.', color: 'bg-emerald-50 text-emerald-600' },
+              { icon: FileCheck, title: 'Document Helper', desc: 'Upload and organize your documents with guided checklists.', color: 'bg-amber-50 text-amber-600' },
+              { icon: BookOpen, title: 'Premium Guides', desc: 'Expert visa guides with step-by-step instructions.', color: 'bg-primary-50 text-primary-600' },
+            ].map((feature, i) => (
+              <Card key={i} hover className="p-6 group">
+                <CardBody className="p-0">
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-5 ${feature.color} transition-transform duration-300 group-hover:scale-110`}>
+                    <feature.icon className="w-6 h-6" />
+                  </div>
+                  <h3 className="font-semibold text-neutral-900 mb-2">{feature.title}</h3>
+                  <p className="text-sm text-neutral-500 leading-relaxed">{feature.desc}</p>
+                </CardBody>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="h-full hover:shadow-lg transition-shadow duration-300 dark:bg-neutral-800 dark:border-neutral-700">
-              <CardBody className="p-8 space-y-4">
-                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
-                  <Search className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">Visa Search Engine</h3>
-                <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed">
-                  Instantly find the right visa for your situation. Search by name, subclass, or category with our comprehensive database of 78+ Australian visas.
-                </p>
-                <div className="pt-4">
-                  <Link to="/visas" className="text-blue-600 font-medium hover:underline inline-flex items-center">
-                    Start Searching <ArrowRight className="w-4 h-4 ml-1" />
-                  </Link>
-                </div>
-              </CardBody>
-            </Card>
-
-            <Card className="h-full hover:shadow-lg transition-shadow duration-300 dark:bg-neutral-800 dark:border-neutral-700">
-              <CardBody className="p-8 space-y-4">
-                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center text-purple-600 dark:text-purple-400">
-                  <BarChart3 className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">Processing Time Tracker</h3>
-                <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed">
-                  Stop guessing. Access real-world processing times crowdsourced from thousands of actual applicants and verified by lawyers.
-                </p>
-                <div className="pt-4">
-                  <Link to="/tracker" className="text-purple-600 font-medium hover:underline inline-flex items-center">
-                    View Data <ArrowRight className="w-4 h-4 ml-1" />
-                  </Link>
-                </div>
-              </CardBody>
-            </Card>
-
-            <Card className="h-full hover:shadow-lg transition-shadow duration-300 border-primary-200 dark:border-primary-900/50 dark:bg-neutral-800">
-              <CardBody className="p-8 space-y-4">
-                <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center text-primary-600 dark:text-primary-400">
-                  <BookOpen className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">Premium Guides</h3>
-                <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed">
-                  Unlock step-by-step application guides, document checklists, and expert tips for just $49. Save thousands on legal fees.
-                </p>
-                <div className="pt-4">
-                  <span className="text-primary-600 font-medium inline-flex items-center">
-                    Available on Visa Pages <ArrowRight className="w-4 h-4 ml-1" />
-                  </span>
-                </div>
-              </CardBody>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      <YouTubeFeed />
-
-      {/* Testimonials */}
-      <section className="py-24 bg-white dark:bg-neutral-900 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center text-neutral-900 dark:text-neutral-100 mb-16">Trusted by applicants</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
-              {
-                quote: "The processing time tracker gave me peace of mind when my 189 visa was taking longer than expected.",
-                author: "Sarah J.",
-                role: "Software Engineer from UK"
-              },
-              {
-                quote: "The premium guide for the Partner Visa was worth every cent. The document checklist was a lifesaver.",
-                author: "Michael & Chen",
-                role: "Applicants from China"
-              },
-              {
-                quote: "Finally a site that explains visa requirements in plain English. Highly recommended!",
-                author: "Priya R.",
-                role: "Student from India"
-              }
-            ].map((t, i) => (
-              <div key={i} className="bg-neutral-50 dark:bg-neutral-800 p-8 rounded-2xl border border-neutral-100 dark:border-neutral-700 transition-colors duration-300">
-                <div className="flex gap-1 text-amber-400 mb-4">
-                  {[...Array(5)].map((_, i) => <span key={i}>★</span>)}
+              { icon: Shield, title: 'Data you can trust', desc: 'Every data point is weighted by source reliability. Lawyers, verified users, and anonymous submissions all contribute differently.' },
+              { icon: Clock, title: 'Always up to date', desc: 'Our EWMA algorithm prioritizes recent data, so you always see the most relevant processing trends.' },
+              { icon: Users, title: 'Community driven', desc: 'Join thousands of applicants sharing their real experiences to build transparency in immigration.' },
+            ].map((item, i) => (
+              <div key={i} className="p-8 rounded-2xl bg-neutral-50 border border-neutral-100 hover:border-neutral-200 transition-all duration-300">
+                <div className="w-10 h-10 rounded-xl bg-white border border-neutral-200 flex items-center justify-center mb-5 shadow-sm">
+                  <item.icon className="w-5 h-5 text-neutral-700" />
                 </div>
-                <p className="text-neutral-600 dark:text-neutral-300 mb-6 italic">"{t.quote}"</p>
-                <div>
-                  <p className="font-bold text-neutral-900 dark:text-neutral-100">{t.author}</p>
-                  <p className="text-sm text-neutral-500 dark:text-neutral-400">{t.role}</p>
-                </div>
+                <h3 className="text-lg font-semibold text-neutral-900 mb-2">{item.title}</h3>
+                <p className="text-neutral-500 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-24 bg-neutral-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">How It Works</h2>
-            <p className="text-neutral-400 max-w-2xl mx-auto">
-              Your path to Australian permanent residency starts here.
+      {news.length > 0 && (
+        <section className="py-24 bg-neutral-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-end justify-between mb-10">
+              <div>
+                <p className="text-sm font-semibold text-primary-600 tracking-wide uppercase mb-3">Updates</p>
+                <h2 className="text-3xl font-bold text-neutral-900">Latest news</h2>
+              </div>
+              <Link to="/news" className="text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1 transition-colors">
+                View all
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              {news.map((article) => (
+                <Link key={article.id} to={`/news/${article.slug}`}>
+                  <Card hover className="overflow-hidden group h-full">
+                    {article.image_url && (
+                      <div className="overflow-hidden">
+                        <img
+                          src={article.image_url}
+                          alt=""
+                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                    )}
+                    <CardBody>
+                      <p className="text-xs text-neutral-400 mb-2.5 font-medium">
+                        {article.published_at && new Date(article.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                      <h3 className="font-semibold text-neutral-900 mb-2 line-clamp-2 group-hover:text-primary-700 transition-colors">{article.title}</h3>
+                      <p className="text-sm text-neutral-500 line-clamp-3">{article.body}</p>
+                    </CardBody>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="relative overflow-hidden">
+        <div className="bg-gradient-to-br from-primary-700 via-primary-600 to-primary-700 py-24">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:48px_48px]" />
+          <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Start your visa journey today</h2>
+            <p className="text-primary-100 mb-10 text-lg max-w-xl mx-auto">
+              Join thousands of applicants who trust VisaBuild for transparent, reliable immigration data.
             </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-12 relative">
-            <div className="absolute top-12 left-0 w-full h-0.5 bg-neutral-800 hidden md:block" />
-
-            {[
-              { title: "Search", desc: "Find your visa subclass", icon: Search },
-              { title: "Unlock", desc: "Get the premium guide", icon: FileText },
-              { title: "Apply", desc: "Submit with confidence", icon: CheckCircle },
-            ].map((step, i) => (
-              <div key={i} className="relative z-10 text-center">
-                <div className="w-24 h-24 bg-neutral-800 rounded-full border-4 border-neutral-900 mx-auto flex items-center justify-center mb-6">
-                  <step.icon className="w-10 h-10 text-primary-400" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-                <p className="text-neutral-400">{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Bottom CTA */}
-      <section className="py-24 bg-primary-600 text-center">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Ready to start your application?
-          </h2>
-          <p className="text-primary-100 text-lg mb-10 max-w-2xl mx-auto">
-            Join thousands of others who have successfully navigated the Australian immigration system with VisaBuild.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/visas">
-              <Button size="lg" className="bg-white text-primary-600 hover:bg-neutral-100 w-full sm:w-auto">
-                Find My Visa
-              </Button>
-            </Link>
             <Link to="/tracker">
-              <Button size="lg" variant="secondary" className="bg-primary-700 text-white border-primary-500 hover:bg-primary-800 w-full sm:w-auto">
-                Check Processing Times
+              <Button size="lg" className="bg-white text-primary-700 hover:bg-neutral-100 shadow-elevated">
+                Get Started
+                <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
           </div>
