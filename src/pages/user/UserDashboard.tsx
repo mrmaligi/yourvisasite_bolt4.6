@@ -27,7 +27,7 @@ export function UserDashboard() {
     documents: 0,
     upcomingConsultations: 0,
   });
-  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [recentActivity] = useState<any[]>([]);
   const [myApplications, setMyApplications] = useState<any[]>([]);
 
   useEffect(() => {

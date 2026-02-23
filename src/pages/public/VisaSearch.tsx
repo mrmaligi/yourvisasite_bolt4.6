@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, FileText, ArrowUpRight, Filter, X, ChevronDown, ChevronUp, ArrowRight, AlertCircle } from 'lucide-react';
+import { Search, FileText, ArrowUpRight, Filter, X, ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
@@ -154,11 +154,7 @@ export function VisaSearch() {
         setSelectedVisas(selectedVisas.filter(id => id !== visaId));
     } else {
         if (selectedVisas.length >= 3) {
-            toast({
-                title: "Limit reached",
-                description: "You can compare up to 3 visas at a time.",
-                type: "error"
-            });
+            toast('error', 'Limit reached: You can compare up to 3 visas at a time.');
             return;
         }
         setSelectedVisas([...selectedVisas, visaId]);

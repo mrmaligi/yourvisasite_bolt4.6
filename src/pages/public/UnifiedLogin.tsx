@@ -64,7 +64,7 @@ export function UnifiedLogin() {
         case 'admin':
           navigate('/admin');
           break;
-        case 'lawyer':
+        case 'lawyer': {
           const lawyerProfile = profile.lawyer_profiles?.[0];
           if (lawyerProfile?.verification_status === 'approved') {
             navigate('/lawyer/dashboard');
@@ -72,6 +72,7 @@ export function UnifiedLogin() {
             navigate('/lawyer/pending');
           }
           break;
+        }
         default:
           navigate(from || '/dashboard');
       }

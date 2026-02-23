@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { MobileLayout } from '../../components/mobile/MobileLayout';
 import { MobileCard } from '../../components/mobile/MobileCard';
 import { MobileButton } from '../../components/mobile/MobileButton';

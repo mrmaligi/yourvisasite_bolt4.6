@@ -42,8 +42,6 @@ export function UserDashboard() {
 
     const fetchData = async () => {
       try {
-        const now = new Date().toISOString();
-
         // Fetch counts
         const [purchasesCount, savedCount, docsCount] = await Promise.all([
           supabase.from('user_visa_purchases').select('id', { count: 'exact', head: true }).eq('user_id', profile.id),
