@@ -18,7 +18,7 @@ const Landing = lazy(() => import('./pages/public/Landing').then(m => ({ default
 const UnifiedLogin = lazy(() => import('./pages/public/UnifiedLogin').then(m => ({ default: m.UnifiedLogin })));
 const Register = lazy(() => import('./pages/public/Register').then(m => ({ default: m.Register })));
 const VisaSearch = lazy(() => import('./pages/public/VisaSearch').then(m => ({ default: m.VisaSearch })));
-const VisaCompare = lazy(() => import('./pages/public/VisaCompare').then(m => ({ default: m.VisaCompare })));
+const VisaComparison = lazy(() => import('./pages/public/VisaComparison').then(m => ({ default: m.VisaComparison })));
 const VisaDetail = lazy(() => import('./pages/public/VisaDetail').then(m => ({ default: m.VisaDetail })));
 const Tracker = lazy(() => import('./pages/public/Tracker').then(m => ({ default: m.Tracker })));
 const LawyerDirectory = lazy(() => import('./pages/public/LawyerDirectory').then(m => ({ default: m.LawyerDirectory })));
@@ -302,7 +302,7 @@ export default function App() {
                     <Route path="register" element={<Register />} />
                     <Route path="register/lawyer" element={<LawyerRegister />} />
                     <Route path="visas" element={<VisaSearch />} />
-                    <Route path="visas/compare" element={<VisaCompare />} />
+                    <Route path="visas/compare" element={<VisaComparison />} />
                     <Route path="visas/:id" element={<VisaDetail />} />
                     <Route path="tracker" element={<Tracker />} />
                     <Route path="lawyers" element={<LawyerDirectory />} />

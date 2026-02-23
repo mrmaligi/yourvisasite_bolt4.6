@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, FileText, ArrowUpRight, Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Search, FileText, ArrowUpRight, Filter, X, ChevronDown, ChevronUp, ArrowRight, AlertCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
@@ -9,6 +9,7 @@ import { Input, Select } from '../../components/ui/Input';
 import { Checkbox } from '../../components/ui/Checkbox';
 import { VisaCardSkeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { useToast } from '../../components/ui/Toast';
 import type { Visa } from '../../types/database';
 
 const CATEGORIES = [
@@ -36,12 +37,15 @@ const SORTS = [
 ];
 
 export function VisaSearch() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [visas, setVisas] = useState<Visa[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedCostRanges, setSelectedCostRanges] = useState<string[]>([]);
   const [selectedTimeRanges, setSelectedTimeRanges] = useState<string[]>([]);
+  const [selectedVisas, setSelectedVisas] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('name_asc');
   const [showFilters, setShowFilters] = useState(false);
 
@@ -130,6 +134,22 @@ export function VisaSearch() {
       setter(current.filter((v) => v !== value));
     } else {
       setter([...current, value]);
+    }
+  };
+
+  const toggleVisaSelection = (visaId: string) => {
+    if (selectedVisas.includes(visaId)) {
+        setSelectedVisas(selectedVisas.filter(id => id !== visaId));
+    } else {
+        if (selectedVisas.length >= 3) {
+            toast({
+                title: "Limit reached",
+                description: "You can compare up to 3 visas at a time.",
+                type: "error"
+            });
+            return;
+        }
+        setSelectedVisas([...selectedVisas, visaId]);
     }
   };
 
@@ -313,44 +333,86 @@ export function VisaSearch() {
             <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
                 Showing {filteredVisas.length} of {visas.length} visas
             </p>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
             {filteredVisas.map((visa) => (
-                <Link key={visa.id} to={`/visas/${visa.id}`}>
-                <Card hover className="h-full group">
-                    <CardBody className="space-y-4">
-                    <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-2">
-                        <Badge>{visa.subclass}</Badge>
-                        <Badge variant="primary">{visa.category}</Badge>
-                        </div>
-                        <ArrowUpRight className="w-4 h-4 text-neutral-400 group-hover:text-primary-600 transition-colors" />
+                <div key={visa.id} className="relative group">
+                    <div className="absolute top-4 right-4 z-10" onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }}>
+                         <div className="bg-white/90 dark:bg-neutral-800/90 backdrop-blur-sm rounded-md shadow-sm p-1 border border-neutral-200 dark:border-neutral-700">
+                            <Checkbox
+                                checked={selectedVisas.includes(visa.id)}
+                                onChange={() => toggleVisaSelection(visa.id)}
+                                aria-label="Select for comparison"
+                            />
+                         </div>
                     </div>
+                    <Link to={`/visas/${visa.id}`} className="block h-full">
+                        <Card hover className="h-full">
+                            <CardBody className="space-y-4">
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-center gap-2">
+                                <Badge>{visa.subclass}</Badge>
+                                <Badge variant="primary">{visa.category}</Badge>
+                                </div>
+                                <ArrowUpRight className="w-4 h-4 text-neutral-400 group-hover:text-primary-600 transition-colors" />
+                            </div>
 
-                    <div>
-                        <h3 className="font-semibold text-neutral-900 dark:text-white mb-1 group-hover:text-primary-700 dark:group-hover:text-primary-400 transition-colors">
-                            {visa.name}
-                        </h3>
-                        <p className="text-sm text-neutral-500 dark:text-neutral-400 line-clamp-2">
-                            {visa.summary}
-                        </p>
-                    </div>
+                            <div className="pr-8">
+                                <h3 className="font-semibold text-neutral-900 dark:text-white mb-1 group-hover:text-primary-700 dark:group-hover:text-primary-400 transition-colors">
+                                    {visa.name}
+                                </h3>
+                                <p className="text-sm text-neutral-500 dark:text-neutral-400 line-clamp-2">
+                                    {visa.summary}
+                                </p>
+                            </div>
 
-                    <div className="pt-4 border-t border-neutral-100 dark:border-neutral-700 flex items-center justify-between text-sm">
-                        <span className="text-neutral-600 dark:text-neutral-300 font-medium">
-                            {visa.cost_aud ? visa.cost_aud : 'Free / Varies'}
-                        </span>
-                        {visa.processing_time_range && (
-                             <span className="text-neutral-500 dark:text-neutral-400">
-                                {visa.processing_time_range}
-                             </span>
-                        )}
-                    </div>
-                    </CardBody>
-                </Card>
-                </Link>
+                            <div className="pt-4 border-t border-neutral-100 dark:border-neutral-700 flex items-center justify-between text-sm">
+                                <span className="text-neutral-600 dark:text-neutral-300 font-medium">
+                                    {visa.cost_aud ? visa.cost_aud : 'Free / Varies'}
+                                </span>
+                                {visa.processing_time_range && (
+                                    <span className="text-neutral-500 dark:text-neutral-400">
+                                        {visa.processing_time_range}
+                                    </span>
+                                )}
+                            </div>
+                            </CardBody>
+                        </Card>
+                    </Link>
+                </div>
             ))}
             </div>
         </>
+      )}
+
+      {/* Comparison Floating Bar */}
+      {selectedVisas.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 z-50 animate-in slide-in-from-bottom-4 duration-300">
+            <div className="bg-white dark:bg-neutral-800 rounded-2xl shadow-xl border border-neutral-200 dark:border-neutral-700 p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-3 py-1 rounded-full text-sm font-medium">
+                        {selectedVisas.length} selected
+                    </div>
+                    <p className="text-sm text-neutral-500 dark:text-neutral-400 hidden sm:block">
+                        Select up to 3 visas to compare
+                    </p>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => setSelectedVisas([])}>
+                        Clear
+                    </Button>
+                    <Button
+                        disabled={selectedVisas.length < 2}
+                        onClick={() => navigate(`/visas/compare?ids=${selectedVisas.join(',')}`)}
+                    >
+                        Compare Visas
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                </div>
+            </div>
+        </div>
       )}
     </div>
   );
