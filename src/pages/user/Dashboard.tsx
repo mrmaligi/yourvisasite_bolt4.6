@@ -14,6 +14,7 @@ import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { DashboardSkeleton } from '../../components/ui/Skeleton';
+import { useRealtime } from '../../hooks/useRealtime';
 
 type ActivityType = 'purchase' | 'document' | 'booking';
 
@@ -36,6 +37,8 @@ export function UserDashboard() {
   });
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [otherActivities, setOtherActivities] = useState<ActivityItem[]>([]);
+  const [initialBookings, setInitialBookings] = useState<any[]>([]);
 
   useEffect(() => {
     if (!profile) return;
@@ -102,20 +105,9 @@ export function UserDashboard() {
           link: '/dashboard/documents'
         }));
 
-        const bookingItems: ActivityItem[] = (recentBookings.data || []).map((b: any) => ({
-          id: b.id,
-          type: 'booking',
-          date: b.created_at,
-          title: 'Consultation Booked',
-          description: `Status: ${b.status || 'pending'}`,
-          link: '/dashboard/consultations'
-        }));
+        setOtherActivities([...purchaseItems, ...docItems]);
+        setInitialBookings(recentBookings.data || []);
 
-        const allActivities = [...purchaseItems, ...docItems, ...bookingItems]
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-          .slice(0, 5);
-
-        setActivities(allActivities);
       } catch (error) {
         console.error('Error loading dashboard:', error);
       } finally {
@@ -125,6 +117,31 @@ export function UserDashboard() {
 
     fetchData();
   }, [profile]);
+
+  // Realtime bookings
+  const bookings = useRealtime('bookings', initialBookings, {
+    filter: profile ? `user_id=eq.${profile.id}` : undefined,
+    enabled: !!profile
+  });
+
+  useEffect(() => {
+    if (loading) return;
+
+    const bookingItems: ActivityItem[] = bookings.map((b: any) => ({
+      id: b.id,
+      type: 'booking',
+      date: b.created_at,
+      title: 'Consultation Booked',
+      description: `Status: ${b.status || 'pending'}`,
+      link: '/dashboard/consultations'
+    }));
+
+    const allActivities = [...otherActivities, ...bookingItems]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 5);
+
+    setActivities(allActivities);
+  }, [bookings, otherActivities, loading]);
 
   const statCards = [
     { label: 'Purchased Visas', value: counts.purchases, icon: FileText, to: '/dashboard/visas', color: 'text-blue-600', bg: 'bg-blue-50' },

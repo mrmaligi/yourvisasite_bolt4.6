@@ -32,6 +32,7 @@ import { Badge } from '../../components/ui/Badge';
 import { DataTable, type Column } from '../../components/ui/DataTable';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
+import { useRealtime } from '../../hooks/useRealtime';
 
 // Mock Data
 const WEEKLY_EARNINGS = [
@@ -51,13 +52,6 @@ const MONTHLY_EARNINGS = [
   { name: 'Week 4', amount: 2200 },
 ];
 
-const MOCK_CLIENTS = [
-  { id: '1', name: 'Sarah Johnson', status: 'active', service: 'Partner Visa (820)', nextAction: 'Review Documents', date: '2024-03-10' },
-  { id: '2', name: 'Michael Chen', status: 'pending', service: 'Skilled Independent (189)', nextAction: 'Initial Consultation', date: '2024-03-12' },
-  { id: '3', name: 'Emma Wilson', status: 'completed', service: 'Student Visa (500)', nextAction: 'None', date: '2024-02-28' },
-  { id: '4', name: 'James Rodriguez', status: 'active', service: 'Employer Nomination (186)', nextAction: 'Submit Application', date: '2024-03-15' },
-];
-
 const MOCK_DOCUMENTS = [
   { id: '1', documentName: 'Passport Copy', clientName: 'Sarah Johnson', date: '2024-03-10' },
   { id: '2', documentName: 'Employment Contract', clientName: 'James Rodriguez', date: '2024-03-11' },
@@ -69,6 +63,7 @@ export function LawyerDashboard() {
   const [lawyerProfile, setLawyerProfile] = useState<any>(null);
   const [earningsView, setEarningsView] = useState<'weekly' | 'monthly'>('weekly');
   const [isAvailable, setIsAvailable] = useState(true);
+  const [initialBookings, setInitialBookings] = useState<any[]>([]);
   const [stats, setStats] = useState({
     totalClients: 0,
     upcomingConsultations: 0,
@@ -94,22 +89,56 @@ export function LawyerDashboard() {
     
     setLawyerProfile(profile);
 
-    // Get stats
-    const [{ count: clients }, { count: upcoming }, { count: completed }] = await Promise.all([
-      supabase.from('bookings').select('user_id', { count: 'exact', head: true }).eq('lawyer_id', profile?.id),
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile?.id).eq('status', 'confirmed').gte('scheduled_at', new Date().toISOString()),
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile?.id).eq('status', 'completed'),
-    ]);
+    if (profile) {
+      // Get initial bookings for the table
+      const { data: bookings } = await supabase
+        .from('bookings')
+        .select('*, user:user_id(full_name, email)')
+        .eq('lawyer_id', profile.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
 
-    setStats({
-      totalClients: clients || 12, // Fallback to mock if 0 for demo
-      upcomingConsultations: upcoming || 3,
-      completedConsultations: completed || 45,
-      pendingReviews: 2,
-      averageRating: 4.9,
-      totalEarnings: completed ? completed * 150 : 5450,
-    });
+      setInitialBookings(bookings || []);
+
+      // Get stats
+      const [{ count: clients }, { count: upcoming }, { count: completed }] = await Promise.all([
+        supabase.from('bookings').select('user_id', { count: 'exact', head: true }).eq('lawyer_id', profile.id),
+        supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile.id).eq('status', 'confirmed').gte('scheduled_at', new Date().toISOString()),
+        supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile.id).eq('status', 'completed'),
+      ]);
+
+      setStats({
+        totalClients: clients || 0,
+        upcomingConsultations: upcoming || 0,
+        completedConsultations: completed || 0,
+        pendingReviews: 2,
+        averageRating: 4.9,
+        totalEarnings: completed ? completed * 150 : 0,
+      });
+    }
   };
+
+  const bookings = useRealtime('bookings', initialBookings, {
+    filter: lawyerProfile ? `lawyer_id=eq.${lawyerProfile.id}` : undefined,
+    enabled: !!lawyerProfile,
+    fetchRow: async (id) => {
+      const { data } = await supabase
+        .from('bookings')
+        .select('*, user:user_id(full_name, email)')
+        .eq('id', id)
+        .single();
+      return data;
+    }
+  });
+
+  const clientData = bookings.map(b => ({
+    id: b.id,
+    name: b.user?.full_name || b.user?.email || 'Unknown Client',
+    status: b.status,
+    service: b.notes ? (b.notes.length > 30 ? b.notes.substring(0, 30) + '...' : b.notes) : 'General Consultation',
+    nextAction: b.status === 'pending' ? 'Review Request' : b.status === 'confirmed' ? 'Prepare for Meeting' : 'View Details',
+    date: new Date(b.created_at).toLocaleDateString()
+  }));
 
   const sidebarItems = [
     { to: '/lawyer/dashboard', icon: LayoutDashboard, label: 'Dashboard', active: true },
@@ -121,7 +150,7 @@ export function LawyerDashboard() {
     { to: '/lawyer/settings', icon: Settings, label: 'Settings' },
   ];
 
-  const clientColumns: Column<typeof MOCK_CLIENTS[0]>[] = [
+  const clientColumns: Column<any>[] = [
     {
       key: 'name',
       header: 'Client',
@@ -134,7 +163,7 @@ export function LawyerDashboard() {
       header: 'Status',
       render: (row) => (
         <Badge variant={
-          row.status === 'active' ? 'success' :
+          row.status === 'confirmed' ? 'success' :
           row.status === 'pending' ? 'warning' : 'default'
         }>
           {row.status.charAt(0).toUpperCase() + row.status.slice(1)}
@@ -400,7 +429,7 @@ export function LawyerDashboard() {
                 <CardBody>
                   <DataTable
                     columns={clientColumns}
-                    data={MOCK_CLIENTS}
+                    data={clientData}
                     keyExtractor={(row) => row.id}
                     searchable={false}
                     pageSize={5}
