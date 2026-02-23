@@ -33,6 +33,8 @@ import {
   X
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
+import { BUCKETS, uploadFile, validateFile } from '../../lib/storage';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -82,15 +84,16 @@ export function MyDocuments() {
   const {
     documents: docs,
     categories,
-    uploadDocument,
     deleteDocument,
     getDocumentUrl,
-    loading: docsLoading
+    loading: docsLoading,
+    refresh
   } = useDocuments();
 
   const [modalCategoryKey, setModalCategoryKey] = useState<string | null>(null);
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadFileState, setUploadFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [inlineUploadCategory, setInlineUploadCategory] = useState<string | null>(null);
   const [expandedHelp, setExpandedHelp] = useState<Record<string, boolean>>({});
   const [highlightedCategory, setHighlightedCategory] = useState<string | null>(null);
@@ -116,39 +119,92 @@ export function MyDocuments() {
   }, [searchParams, categories]);
 
   const handleModalUpload = async () => {
-    if (!user || !uploadFile || !modalCategoryKey) return;
-    setUploading(true);
+    if (!user || !uploadFileState || !modalCategoryKey) return;
 
     try {
-      const { error } = await uploadDocument(uploadFile, modalCategoryKey);
-      if (error) throw error;
+      if (validateFile(uploadFileState)) {
+        setUploading(true);
+        setUploadProgress(0);
 
-      toast('success', 'Document uploaded successfully');
-      setModalCategoryKey(null);
-      setUploadFile(null);
+        const path = `${user.id}/${Date.now()}_${uploadFileState.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+
+        await uploadFile({
+          bucket: BUCKETS.DOCUMENTS,
+          path,
+          file: uploadFileState,
+          onProgress: setUploadProgress,
+        });
+
+        const { error: insertError } = await supabase
+          .from('user_documents')
+          .insert([
+            {
+              user_id: user.id,
+              document_category: modalCategoryKey,
+              file_name: uploadFileState.name,
+              storage_path: path,
+              status: 'pending',
+            },
+          ]);
+
+        if (insertError) throw insertError;
+
+        await refresh();
+        toast('success', 'Document uploaded successfully');
+        setModalCategoryKey(null);
+        setUploadFile(null);
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Upload failed';
       toast('error', message);
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   };
 
   const handleInlineUpload = async (file: File, categoryKey: string) => {
     if (!user) return;
-    setInlineUploadCategory(categoryKey);
-    setUploading(true);
 
     try {
-      const { error } = await uploadDocument(file, categoryKey);
-      if (error) throw error;
-      toast('success', 'Document uploaded successfully');
+      if (validateFile(file)) {
+        setInlineUploadCategory(categoryKey);
+        setUploading(true);
+        setUploadProgress(0);
+
+        const path = `${user.id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+
+        await uploadFile({
+          bucket: BUCKETS.DOCUMENTS,
+          path,
+          file,
+          onProgress: setUploadProgress,
+        });
+
+        const { error: insertError } = await supabase
+          .from('user_documents')
+          .insert([
+            {
+              user_id: user.id,
+              document_category: categoryKey,
+              file_name: file.name,
+              storage_path: path,
+              status: 'pending',
+            },
+          ]);
+
+        if (insertError) throw insertError;
+
+        await refresh();
+        toast('success', 'Document uploaded successfully');
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Upload failed';
       toast('error', message);
     } finally {
       setUploading(false);
       setInlineUploadCategory(null);
+      setUploadProgress(0);
     }
   };
 
@@ -369,6 +425,7 @@ export function MyDocuments() {
                       compact
                       onFileSelect={(file) => handleInlineUpload(file, category.key)}
                       uploading={uploading && inlineUploadCategory === category.key}
+                      progress={uploading && inlineUploadCategory === category.key ? uploadProgress : 0}
                       className="mt-2"
                     />
                   </div>
@@ -393,7 +450,7 @@ export function MyDocuments() {
             </Button>
             <Button
               loading={uploading}
-              disabled={!uploadFile}
+              disabled={!uploadFileState}
               onClick={handleModalUpload}
             >
               Upload
@@ -424,13 +481,15 @@ export function MyDocuments() {
             <FileUpload
                 key={modalCategoryKey || 'new'}
                 onFileSelect={setUploadFile}
+                uploading={uploading && !!modalCategoryKey}
+                progress={uploadProgress}
             />
           </div>
 
-          {uploadFile && (
+          {uploadFileState && (
             <div className="flex items-center gap-2 p-3 bg-neutral-50 rounded-lg border border-neutral-100">
               <FileText className="w-4 h-4 text-neutral-500" />
-              <span className="text-sm text-neutral-700 truncate">{uploadFile.name}</span>
+              <span className="text-sm text-neutral-700 truncate">{uploadFileState.name}</span>
             </div>
           )}
         </div>

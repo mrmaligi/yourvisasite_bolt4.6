@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Scale } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
+import { BUCKETS, uploadFile, validateFile } from '../../lib/storage';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Input, Textarea } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
@@ -22,6 +23,17 @@ export function LawyerRegister() {
   const [bio, setBio] = useState('');
   const [verificationFile, setVerificationFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const handleFileSelect = (file: File) => {
+    try {
+      if (validateFile(file)) {
+        setVerificationFile(file);
+      }
+    } catch (error) {
+      toast('error', error instanceof Error ? error.message : 'Invalid file');
+    }
+  };
 
   const handleSubmit = async () => {
     if (!user) {
@@ -30,21 +42,18 @@ export function LawyerRegister() {
     }
 
     setSubmitting(true);
+    setUploadProgress(0);
 
     try {
       let verificationUrl = '';
       if (verificationFile) {
-        const path = `${user.id}/${Date.now()}_${verificationFile.name}`;
-        const { error: uploadError } = await supabase.storage
-          .from('lawyer-verification')
-          .upload(path, verificationFile, {
-            cacheControl: '3600',
-            upsert: false
-          });
-
-        if (uploadError) {
-          throw new Error(`Upload failed: ${uploadError.message}`);
-        }
+        const path = `${user.id}/${Date.now()}_${verificationFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        await uploadFile({
+          bucket: BUCKETS.LAWYER_CREDENTIALS,
+          path,
+          file: verificationFile,
+          onProgress: (progress) => setUploadProgress(progress),
+        });
         verificationUrl = path;
       }
 
@@ -127,7 +136,7 @@ export function LawyerRegister() {
           <CardHeader><h2 className="font-semibold text-neutral-900">Step 2: Verification Document</h2></CardHeader>
           <CardBody className="space-y-4">
             <p className="text-sm text-neutral-500">Upload proof of legal practice (bar license, professional ID).</p>
-            <FileUpload onFileSelect={(f) => setVerificationFile(f)} />
+            <FileUpload onFileSelect={handleFileSelect} />
             <div className="flex justify-between">
               <Button variant="secondary" onClick={() => setStep(1)}>Back</Button>
               <Button onClick={() => setStep(3)} disabled={!verificationFile}>Next</Button>
@@ -148,8 +157,24 @@ export function LawyerRegister() {
               <p><span className="font-medium text-neutral-700">Hourly Rate:</span> ${hourlyRate}/hr</p>
               <p><span className="font-medium text-neutral-700">Document:</span> {verificationFile?.name}</p>
             </div>
+
+            {submitting && uploadProgress > 0 && uploadProgress < 100 && (
+               <div className="space-y-1">
+                 <div className="flex justify-between text-xs text-neutral-500">
+                   <span>Uploading document...</span>
+                   <span>{Math.round(uploadProgress)}%</span>
+                 </div>
+                 <div className="w-full bg-neutral-100 rounded-full h-1.5 overflow-hidden">
+                   <div
+                     className="bg-primary-600 h-full rounded-full transition-all duration-300 ease-out"
+                     style={{ width: `${uploadProgress}%` }}
+                   />
+                 </div>
+               </div>
+            )}
+
             <div className="flex justify-between">
-              <Button variant="secondary" onClick={() => setStep(2)}>Back</Button>
+              <Button variant="secondary" onClick={() => setStep(2)} disabled={submitting}>Back</Button>
               <Button loading={submitting} onClick={handleSubmit}>Submit Registration</Button>
             </div>
           </CardBody>

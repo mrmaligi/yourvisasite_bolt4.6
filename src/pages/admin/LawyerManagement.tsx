@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import { BUCKETS } from '../../lib/storage';
 import { useAuth } from '../../contexts/AuthContext';
 import { DataTable, type Column } from '../../components/ui/DataTable';
 import { Badge } from '../../components/ui/Badge';
@@ -102,7 +103,7 @@ export function LawyerManagement() {
     }
 
     const { data } = await supabase.storage
-      .from('lawyer-verification')
+      .from(BUCKETS.LAWYER_CREDENTIALS)
       .createSignedUrl(lawyer.verification_document_url, 300);
 
     if (data?.signedUrl) {
