@@ -45,7 +45,7 @@ const formatCost = (visa: Visa) => {
       maximumFractionDigits: 0,
     }).format(visa.base_cost_aud);
   }
-  return visa.cost_aud || 'Free / Varies';
+  return 'Free / Varies';
 };
 
 export function VisaSearch() {

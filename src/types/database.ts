@@ -38,7 +38,6 @@ export interface Visa {
   summary: string | null;
   description: string | null;
   base_cost_aud: number | null;
-  cost_aud: string | null;
   processing_time_range: string | null;
   duration: string | null;
   key_requirements: string | null;

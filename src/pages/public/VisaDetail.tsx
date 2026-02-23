@@ -161,7 +161,11 @@ export function VisaDetail() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 bg-neutral-50 rounded-2xl border border-neutral-100">
             <div>
                 <p className="text-sm text-neutral-500 mb-1">Cost</p>
-                <p className="font-semibold text-neutral-900">{visa.cost_aud || 'Varies'}</p>
+                <p className="font-semibold text-neutral-900">
+                  {visa.base_cost_aud !== null
+                    ? (visa.base_cost_aud === 0 ? 'Free' : new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 }).format(visa.base_cost_aud))
+                    : 'Varies'}
+                </p>
             </div>
             <div>
                 <p className="text-sm text-neutral-500 mb-1">Processing Time</p>
