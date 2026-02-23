@@ -37,9 +37,16 @@ export function LawyerDashboard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user && !authLoading) {
-      fetchLawyerData();
-    } else if (!authLoading && !user) {
+    // Wait for auth to be fully ready
+    if (authLoading) return;
+    
+    if (user) {
+      // Small delay to ensure JWT token is propagated
+      const timer = setTimeout(() => {
+        fetchLawyerData();
+      }, 100);
+      return () => clearTimeout(timer);
+    } else {
       setIsLoading(false);
     }
   }, [user, authLoading]);
