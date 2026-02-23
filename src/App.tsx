@@ -17,7 +17,7 @@ const Landing = lazy(() => import('./pages/public/Landing').then(m => ({ default
 const UnifiedLogin = lazy(() => import('./pages/public/UnifiedLogin').then(m => ({ default: m.UnifiedLogin })));
 const Register = lazy(() => import('./pages/public/Register').then(m => ({ default: m.Register })));
 const VisaSearch = lazy(() => import('./pages/public/VisaSearch').then(m => ({ default: m.VisaSearch })));
-const VisaCompare = lazy(() => import('./pages/public/VisaCompare').then(m => ({ default: m.VisaCompare })));
+const VisaCompare = lazy(() => import('./pages/public/VisaComparison').then(m => ({ default: m.VisaComparison })));
 const VisaDetail = lazy(() => import('./pages/public/VisaDetail').then(m => ({ default: m.VisaDetail })));
 const Tracker = lazy(() => import('./pages/public/Tracker').then(m => ({ default: m.Tracker })));
 const LawyerDirectory = lazy(() => import('./pages/public/LawyerDirectory').then(m => ({ default: m.LawyerDirectory })));
@@ -263,14 +263,14 @@ export default function App() {
                   {/* Admin Routes - Each has its own layout */}
                   <Route path="admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
                   <Route path="admin/performance/*" element={<ProtectedRoute allowedRoles={['admin']}><PerformanceRouter /></ProtectedRoute>} />
-                    <Route path="activity" element={<AdminActivityLog />} />
+                    <Route path="admin/activity" element={<ProtectedRoute allowedRoles={['admin']}><AdminActivityLog /></ProtectedRoute>} />
                     <Route path="admin/content" element={<ProtectedRoute allowedRoles={['admin']}><AdminContent /></ProtectedRoute>} />
                     <Route path="admin/pages" element={<ProtectedRoute allowedRoles={['admin']}><AdminPages /></ProtectedRoute>} />
                     <Route path="admin/blog" element={<ProtectedRoute allowedRoles={['admin']}><AdminBlog /></ProtectedRoute>} />
-                    <Route path="users" element={<UserManagement />} />
-                    <Route path="lawyers" element={<LawyerManagement />} />
-                    <Route path="visas" element={<VisaManagement />} />
-                    <Route path="premium" element={<PremiumContent />} />
+                    <Route path="admin/users" element={<ProtectedRoute allowedRoles={['admin']}><UserManagement /></ProtectedRoute>} />
+                    <Route path="admin/lawyers" element={<ProtectedRoute allowedRoles={['admin']}><LawyerManagement /></ProtectedRoute>} />
+                    <Route path="admin/visas" element={<ProtectedRoute allowedRoles={['admin']}><VisaManagement /></ProtectedRoute>} />
+                    <Route path="admin/premium" element={<ProtectedRoute allowedRoles={['admin']}><PremiumContent /></ProtectedRoute>} />
                     <Route path="admin/news" element={<ProtectedRoute allowedRoles={['admin']}><NewsManagement /></ProtectedRoute>} />
                   <Route path="admin/youtube" element={<ProtectedRoute allowedRoles={['admin']}><YouTubeManagement /></ProtectedRoute>} />
                   <Route path="admin/tracker" element={<ProtectedRoute allowedRoles={['admin']}><TrackerManagement /></ProtectedRoute>} />

@@ -112,6 +112,7 @@ export interface TrackerEntry {
   outcome: TrackerOutcome;
   weight: number;
   status: 'pending' | 'completed';
+  notes?: string | null;
   created_at: string;
 }
 
@@ -163,6 +164,7 @@ export interface Product {
 
 export interface LawyerProfile {
   id: string;
+  user_id: string;
   profile_id: string;
   bar_number: string;
   jurisdiction: string;
@@ -302,17 +304,6 @@ export interface ReviewWithUser extends LawyerReview {
     full_name: string | null;
     avatar_url: string | null;
   };
-}
-
-// Consultation slots for lawyer availability
-export interface ConsultationSlot {
-  id: string;
-  lawyer_id: string;
-  day_of_week: number;
-  start_time: string;
-  end_time: string;
-  is_available: boolean;
-  created_at: string;
 }
 
 // Saved visas for users

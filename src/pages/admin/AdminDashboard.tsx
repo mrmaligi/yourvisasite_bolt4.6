@@ -95,9 +95,9 @@ export function AdminDashboard() {
     ] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact' }).eq('role', 'user'),
       supabase.from('lawyer_profiles').select('id', { count: 'exact' }).eq('verification_status', 'approved'),
-      supabase.from('lawyer_profiles').select('*, profiles:profile_id(full_name, email)').eq('verification_status', 'pending'),
+      supabase.from('lawyer_profiles').select('*, profiles:user_id(full_name, email)').eq('verification_status', 'pending'),
       supabase.from('visas').select('id', { count: 'exact' }),
-      supabase.from('tracker_entries').select('id', { count: 'exact' }).eq('is_verified', false),
+      supabase.from('tracker_entries').select('id', { count: 'exact' }).eq('status', 'pending'),
       supabase.from('profiles').select('created_at').eq('role', 'user').order('created_at', { ascending: true }),
       supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(5),
       supabase.from('bookings').select('total_price_cents').eq('status', 'completed'),

@@ -61,6 +61,7 @@ export function TrackerSubmitForm({ onSuccess, preselectedVisaId, initialEntry }
       decision_date: isPending ? null : decisionDate,
       outcome: isPending ? 'pending' as TrackerOutcome : outcome,
       status: isPending ? 'pending' : 'completed',
+      notes: notes || null,
     };
 
     let error;
@@ -203,9 +204,6 @@ export function TrackerSubmitForm({ onSuccess, preselectedVisaId, initialEntry }
             className="input-field w-full py-2"
             placeholder="Any details about your case (e.g., complexity, requests for info)..."
           />
-          <p className="text-xs text-neutral-400 mt-1">
-            (Note: Currently notes are not stored in the database but may be used for future analysis)
-          </p>
         </div>
       </div>
 
