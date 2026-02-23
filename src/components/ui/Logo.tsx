@@ -13,17 +13,18 @@ const sizes = {
 
 export function Logo({ className = '', size = 'md', variant = 'dark', showText = true }: LogoProps) {
   const s = sizes[size];
-  const textColor = variant === 'dark' ? 'text-neutral-900 dark:text-neutral-50' : 'text-white';
+  const textColor = variant === 'dark' ? 'text-navy-700' : 'text-white';
 
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>
-      <div className={`${s.box} relative rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-sm`}>
-        <span className={`${s.text} font-bold tracking-wide text-white`}>UVS</span>
-        <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/20" />
+      <div className={`${s.box} relative bg-navy-600 flex items-center justify-center rounded`}>
+        <span className={`${s.text} font-bold tracking-wide text-white uppercase`}>UVS</span>
+        {/* Gold accent line at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gold-500" />
       </div>
       {showText && (
         <div className="flex flex-col leading-none">
-          <span className={`${s.brand} font-bold tracking-tight ${textColor}`}>
+          <span className={`${s.brand} font-heading font-bold ${textColor}`}>
             VisaBuild
           </span>
         </div>
