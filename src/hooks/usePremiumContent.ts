@@ -38,33 +38,17 @@ export function usePremiumContent(visaId: string | null) {
       if (visaError) throw visaError;
       setVisa(visaData);
 
-      let isOwned = false;
+      // Premium content is now free for everyone
+      setIsPurchased(true);
 
-      if (user) {
-        const { data: purchase } = await supabase
-          .from('user_visa_purchases')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('visa_id', visaId)
-          .maybeSingle();
+      const { data: steps, error: contentError } = await supabase
+        .from('visa_premium_content')
+        .select('*')
+        .eq('visa_id', visaId)
+        .order('section_number');
 
-        isOwned = !!purchase;
-      }
-
-      setIsPurchased(isOwned);
-
-      if (isOwned) {
-        const { data: steps, error: contentError } = await supabase
-          .from('visa_premium_content')
-          .select('*')
-          .eq('visa_id', visaId)
-          .order('section_number');
-
-        if (contentError) throw contentError;
-        setContent(steps || []);
-      } else {
-        setContent([]);
-      }
+      if (contentError) throw contentError;
+      setContent(steps || []);
 
     } catch (err) {
       console.error('Error fetching content:', err);

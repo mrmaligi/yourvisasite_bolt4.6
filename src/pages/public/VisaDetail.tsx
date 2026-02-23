@@ -3,14 +3,15 @@ import { useParams, Link } from 'react-router-dom';
 import {
   ExternalLink,
   Clock,
-  CheckCircle,
   BookOpen,
   ArrowUpRight,
   ChevronRight,
+  ChevronLeft,
   ArrowLeft,
   AlertCircle,
   TrendingUp,
-  Printer
+  Printer,
+  CheckCircle
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -18,25 +19,21 @@ import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { VisaDetailSkeleton } from '../../components/ui/Skeleton';
-import { useToast } from '../../components/ui/Toast';
 import { ShareButton } from '../../components/ShareButton';
-import type { Visa, TrackerStats, VisaPremiumContent, Product, UserVisaPurchase, TrackerEntry, NewsArticle } from '../../types/database';
+import type { Visa, TrackerStats, VisaPremiumContent, TrackerEntry, NewsArticle } from '../../types/database';
 
 export function VisaDetail() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const { toast } = useToast();
 
   const [visa, setVisa] = useState<Visa | null>(null);
   const [stats, setStats] = useState<TrackerStats | null>(null);
   const [relatedVisas, setRelatedVisas] = useState<Visa[]>([]);
   const [premiumContent, setPremiumContent] = useState<VisaPremiumContent[]>([]);
-  const [product, setProduct] = useState<Product | null>(null);
-  const [purchase, setPurchase] = useState<UserVisaPurchase | null>(null);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [recentEntries, setRecentEntries] = useState<TrackerEntry[]>([]);
   const [visaNews, setVisaNews] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [unlocking, setUnlocking] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -78,35 +75,15 @@ export function VisaDetail() {
         setRelatedVisas(relatedData || []);
       }
 
-      // 4. Fetch Product info
-      const { data: productData } = await supabase
-        .from('products')
+      // 4. Fetch Premium Content (now free)
+      const { data: contentData } = await supabase
+        .from('visa_premium_content')
         .select('*')
         .eq('visa_id', id)
-        .maybeSingle();
-      setProduct(productData);
+        .order('step_number');
+      setPremiumContent(contentData || []);
 
-      // 5. Fetch Purchase & Premium Content (if user logged in)
-      if (user) {
-         const { data: purchaseData } = await supabase
-            .from('user_visa_purchases')
-            .select('*')
-            .eq('user_id', user.id)
-            .eq('visa_id', id)
-            .maybeSingle();
-         setPurchase(purchaseData);
-
-         if (purchaseData) {
-            const { data: contentData } = await supabase
-              .from('visa_premium_content')
-              .select('*')
-              .eq('visa_id', id)
-              .order('step_number');
-            setPremiumContent(contentData || []);
-         }
-      }
-
-      // 6. Fetch Recent Entries
+      // 5. Fetch Recent Entries
       const { data: entriesData } = await supabase
         .from('tracker_entries')
         .select('*')
@@ -131,66 +108,6 @@ export function VisaDetail() {
     fetchData();
   }, [id, user]);
 
-  const handleDummyUnlock = async () => {
-    if (!user || !visa) {
-      toast('info', 'Please log in to purchase');
-      return;
-    }
-
-    setUnlocking(true);
-
-    try {
-      // 1. Add to user_visas
-      const { error: visaError } = await supabase
-        .from('user_visas')
-        .upsert({
-          user_id: user.id,
-          visa_id: visa.id,
-          status: 'active'
-        }, { onConflict: 'user_id, visa_id' });
-      
-      if (visaError) {
-        console.error('Error adding to user_visas:', visaError);
-        // Continue anyway as purchase is more critical for this page
-      }
-
-      // 2. Add to user_visa_purchases
-      const purchaseData = {
-        user_id: user.id,
-        visa_id: visa.id,
-        amount_cents: product?.price_cents || 4900,
-        payment_provider: 'dummy_unlock',
-        purchased_at: new Date().toISOString(),
-      };
-
-      const { data: newPurchase, error: purchaseError } = await supabase
-        .from('user_visa_purchases')
-        .upsert(purchaseData, { onConflict: 'user_id, visa_id' })
-        .select()
-        .single();
-
-      if (purchaseError) throw purchaseError;
-
-      // 3. Fetch premium content
-      const { data: contentData } = await supabase
-        .from('visa_premium_content')
-        .select('*')
-        .eq('visa_id', visa.id)
-        .order('step_number');
-
-      setPurchase(newPurchase as any);
-      setPremiumContent(contentData || []);
-
-      toast('success', 'This is a demo. Content unlocked!');
-
-    } catch (error) {
-      console.error('Error unlocking:', error);
-      toast('error', 'Failed to unlock content');
-    } finally {
-      setUnlocking(false);
-    }
-  };
-
   if (loading) {
     return <VisaDetailSkeleton />;
   }
@@ -206,8 +123,7 @@ export function VisaDetail() {
     );
   }
 
-  const hasPurchased = !!purchase;
-  const price = product?.price_cents ? product.price_cents / 100 : 49;
+  const currentStep = premiumContent[currentStepIndex];
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -296,86 +212,68 @@ export function VisaDetail() {
             <section id="premium-guide">
                  <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-bold text-neutral-900">Application Guide</h2>
-                    {hasPurchased && <Badge variant="success">Unlocked</Badge>}
+                    {premiumContent.length > 0 && (
+                      <Badge variant="success">Step {currentStepIndex + 1} of {premiumContent.length}</Badge>
+                    )}
                  </div>
 
-                 {hasPurchased && premiumContent.length > 0 ? (
+                 {premiumContent.length > 0 && currentStep ? (
                     <div className="space-y-6">
-                        {premiumContent.map((step) => (
-                            <Card key={step.id} className="overflow-hidden">
-                                <CardHeader className="bg-primary-50/50 border-b border-primary-100">
-                                    <h3 className="font-semibold text-primary-900 flex items-center">
-                                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary-100 text-primary-700 text-xs font-bold mr-3">
-                                            {step.step_number}
-                                        </span>
-                                        {step.title}
-                                    </h3>
-                                </CardHeader>
-                                <CardBody>
-                                    <div className="prose prose-sm max-w-none text-neutral-600 whitespace-pre-wrap">
-                                        {step.body}
-                                    </div>
+                        <Card key={currentStep.id} className="overflow-hidden">
+                            <CardHeader className="bg-primary-50/50 border-b border-primary-100">
+                                <h3 className="font-semibold text-primary-900 flex items-center">
+                                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary-100 text-primary-700 text-xs font-bold mr-3">
+                                        {currentStep.step_number}
+                                    </span>
+                                    {currentStep.title}
+                                </h3>
+                            </CardHeader>
+                            <CardBody>
+                                <div className="prose prose-sm max-w-none text-neutral-600 whitespace-pre-wrap">
+                                    {currentStep.body}
+                                </div>
 
-                                    {step.document_category && (
-                                        <div className="mt-4 p-3 bg-neutral-50 rounded-lg border border-neutral-100 text-sm">
-                                            <span className="font-medium text-neutral-700">Required Document: </span>
-                                            <Badge variant="info" className="ml-2">{step.document_category}</Badge>
-                                            {step.document_explanation && (
-                                                <p className="mt-2 text-neutral-600">{step.document_explanation}</p>
-                                            )}
-                                        </div>
-                                    )}
-                                </CardBody>
-                            </Card>
-                        ))}
+                                {currentStep.document_category && (
+                                    <div className="mt-4 p-3 bg-neutral-50 rounded-lg border border-neutral-100 text-sm">
+                                        <span className="font-medium text-neutral-700">Required Document: </span>
+                                        <Badge variant="info" className="ml-2">{currentStep.document_category}</Badge>
+                                        {currentStep.document_explanation && (
+                                            <p className="mt-2 text-neutral-600">{currentStep.document_explanation}</p>
+                                        )}
+                                    </div>
+                                )}
+
+                                <div className="flex items-center justify-between mt-8 pt-6 border-t border-neutral-100">
+                                    <Button
+                                      variant="secondary"
+                                      disabled={currentStepIndex === 0}
+                                      onClick={() => setCurrentStepIndex(i => i - 1)}
+                                    >
+                                      <ChevronLeft className="w-4 h-4 mr-2" />
+                                      Previous
+                                    </Button>
+
+                                    <Button
+                                      variant="primary"
+                                      disabled={currentStepIndex === premiumContent.length - 1}
+                                      onClick={() => setCurrentStepIndex(i => i + 1)}
+                                    >
+                                      Next Step
+                                      <ChevronRight className="w-4 h-4 ml-2" />
+                                    </Button>
+                                </div>
+                            </CardBody>
+                        </Card>
                     </div>
                  ) : (
-                    <Card className="overflow-hidden border-primary-200 shadow-sm">
-                        <div className="bg-gradient-to-br from-neutral-900 to-neutral-800 p-8 text-center text-white">
-                            <BookOpen className="w-12 h-12 text-primary-400 mx-auto mb-4" />
-                            <h3 className="text-2xl font-bold mb-2">Unlock the Premium Guide</h3>
-                            <p className="text-neutral-300 mb-8 max-w-md mx-auto">
-                                Get step-by-step instructions, document checklists, and expert tips for a successful {visa.subclass} application.
-                            </p>
-
-                            <div className="grid sm:grid-cols-2 gap-4 max-w-lg mx-auto mb-8 text-left">
-                                <div className="flex gap-3">
-                                    <CheckCircle className="w-5 h-5 text-primary-400 flex-shrink-0" />
-                                    <span className="text-sm text-neutral-200">Step-by-step instructions</span>
-                                </div>
-                                <div className="flex gap-3">
-                                    <CheckCircle className="w-5 h-5 text-primary-400 flex-shrink-0" />
-                                    <span className="text-sm text-neutral-200">Document checklists</span>
-                                </div>
-                                <div className="flex gap-3">
-                                    <CheckCircle className="w-5 h-5 text-primary-400 flex-shrink-0" />
-                                    <span className="text-sm text-neutral-200">Example declarations</span>
-                                </div>
-                                <div className="flex gap-3">
-                                    <CheckCircle className="w-5 h-5 text-primary-400 flex-shrink-0" />
-                                    <span className="text-sm text-neutral-200">Expert tips & warnings</span>
-                                </div>
-                            </div>
-
-                            <div className="no-print">
-                                {user ? (
-                                    <Button
-                                        onClick={handleDummyUnlock}
-                                        disabled={unlocking}
-                                        className="w-full sm:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-primary-900/20"
-                                    >
-                                        {unlocking ? 'Unlocking...' : `Unlock Now — $${price}`}
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        onClick={() => toast('info', 'Please log in to purchase')}
-                                        className="w-full sm:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-primary-900/20"
-                                    >
-                                        Unlock Now — ${price}
-                                    </Button>
-                                )}
-                            </div>
-                        </div>
+                    <Card>
+                      <CardBody className="py-12 text-center text-neutral-500">
+                        <BookOpen className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-neutral-900 mb-2">Guide Coming Soon</h3>
+                        <p className="text-neutral-500">
+                          The step-by-step application guide for this visa is currently being prepared.
+                        </p>
+                      </CardBody>
                     </Card>
                  )}
             </section>
