@@ -184,7 +184,7 @@ export function VisaDetail() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-wrap items-center gap-3 mb-4">
-            <Badge variant="navy" className="text-sm px-3 py-1">Subclass {visa.subclass}</Badge>
+            <Badge variant="navy" className="text-sm px-3 py-1">Subclass {visa.subclass_number}</Badge>
             <Badge variant="default" className="text-sm px-3 py-1">{visa.category}</Badge>
             {hasPurchased && <Badge variant="success">Unlocked</Badge>}
           </div>
@@ -306,7 +306,7 @@ export function VisaDetail() {
                     </div>
                     <h3 className="text-2xl font-heading font-bold mb-2">Unlock the Premium Guide</h3>
                     <p className="text-navy-100 mb-8 max-w-md mx-auto">
-                      Get step-by-step instructions, document checklists, and expert tips for a successful {visa.subclass} application.
+                      Get step-by-step instructions, document checklists, and expert tips for a successful {visa.subclass_number} application.
                     </p>
 
                     <div className="grid sm:grid-cols-2 gap-4 max-w-lg mx-auto mb-8 text-left">
@@ -400,7 +400,7 @@ export function VisaDetail() {
                       <Link key={v.id} to={`/visas/${v.id}`} className="block p-4 hover:bg-neutral-50 transition-colors">
                         <div className="flex items-start justify-between">
                           <div>
-                            <Badge variant="navy" className="mb-1">{v.subclass}</Badge>
+                            <Badge variant="navy" className="mb-1">{v.subclass_number}</Badge>
                             <h4 className="font-medium text-navy-700">{v.name}</h4>
                           </div>
                           <ArrowUpRight className="w-4 h-4 text-neutral-400" />

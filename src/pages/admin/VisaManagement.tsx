@@ -22,7 +22,7 @@ const CATEGORY_OPTIONS = [
 ];
 
 const EMPTY_VISA = {
-  subclass: '', name: '', country: 'Australia', category: 'work' as string,
+  subclass_number: '', name: '', country: 'Australia', category: 'work' as string,
   official_link: '', summary: '', processing_fee_description: '',
 };
 
@@ -104,7 +104,7 @@ export function VisaManagement() {
   const openEdit = (v: Visa) => {
     setEditing(v);
     setForm({
-      subclass: v.subclass, name: v.name, country: v.country,
+      subclass_number: v.subclass_number, name: v.name, country: v.country,
       category: v.category, official_link: v.official_link || '',
       summary: v.summary || '', processing_fee_description: v.processing_fee_description || '',
     });
@@ -199,13 +199,13 @@ export function VisaManagement() {
     const lower = q.toLowerCase();
     setFiltered(visas.filter((v) =>
       v.name.toLowerCase().includes(lower) ||
-      v.subclass.toLowerCase().includes(lower) ||
+      v.subclass_number.toLowerCase().includes(lower) ||
       v.country.toLowerCase().includes(lower)
     ));
   };
 
   const columns: Column<Visa>[] = [
-    { key: 'subclass', header: 'Subclass', render: (r) => <Badge>{r.subclass}</Badge>, sortable: true },
+    { key: 'subclass_number', header: 'Subclass', render: (r) => <Badge>{r.subclass_number}</Badge>, sortable: true },
     { key: 'name', header: 'Name', render: (r) => (
       <div>
         <span className="font-medium text-neutral-900">{r.name}</span>
@@ -250,7 +250,7 @@ export function VisaManagement() {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={editing ? `Edit: ${editing.subclass} ${editing.name}` : 'Create Visa'}
+        title={editing ? `Edit: ${editing.subclass_number} ${editing.name}` : 'Create Visa'}
         size="lg"
         footer={
           <>
@@ -289,7 +289,7 @@ export function VisaManagement() {
         {activeTab === 'details' ? (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <Input label="Subclass Number" value={form.subclass} onChange={(e) => setForm({ ...form, subclass: e.target.value })} placeholder="e.g. 189" />
+              <Input label="Subclass Number" value={form.subclass_number} onChange={(e) => setForm({ ...form, subclass_number: e.target.value })} placeholder="e.g. 189" />
               <Input label="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Skilled Independent" />
             </div>
             <div className="grid grid-cols-2 gap-4">

@@ -67,7 +67,7 @@ export function GlobalSearch() {
       // 1. Fetch Visas
       const { data: visas } = await supabase
         .from('visas')
-        .select('id, name, subclass, category')
+        .select('id, name, subclass_number, category')
         .eq('is_active', true);
 
       // 2. Fetch Lawyers (only approved)
@@ -104,7 +104,7 @@ export function GlobalSearch() {
       const visaResults: SearchResult[] = (visas || []).map(v => ({
         id: v.id,
         type: 'visa',
-        title: `${v.subclass} - ${v.name}`,
+        title: `${v.subclass_number} - ${v.name}`,
         subtitle: v.category,
         url: `/visas/${v.id}`,
         icon: FileText

@@ -55,7 +55,7 @@ export function VisaCompare() {
 
   const attributes = [
     { label: 'Name', key: 'name' },
-    { label: 'Subclass', key: 'subclass' },
+    { label: 'Subclass', key: 'subclass_number' },
     { label: 'Category', key: 'category' },
     { label: 'Cost (AUD)', key: 'cost_aud' },
     { label: 'Processing Time', key: 'processing_time_range' },
@@ -97,7 +97,7 @@ export function VisaCompare() {
                 <th key={visa.id} className="p-6 text-left w-1/4 border-b border-neutral-200 dark:border-neutral-700 min-w-[250px]">
                   <div className="flex flex-col gap-3">
                     <div>
-                        <Badge variant="secondary" className="mb-2">{visa.subclass}</Badge>
+                        <Badge variant="secondary" className="mb-2">{visa.subclass_number}</Badge>
                         <h3 className="text-lg font-bold text-neutral-900 dark:text-white leading-tight">{visa.name}</h3>
                     </div>
                     <Link to={`/visas/${visa.id}`} className="block">

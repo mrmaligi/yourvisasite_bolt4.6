@@ -85,7 +85,7 @@ export function MyVisas() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-neutral-500">Subclass</span>
-                    <span className="font-medium text-neutral-900">{p.visas.subclass}</span>
+                    <span className="font-medium text-neutral-900">{p.visas.subclass_number}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-neutral-500">Category</span>

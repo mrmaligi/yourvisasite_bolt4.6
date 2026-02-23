@@ -118,7 +118,7 @@ export function PremiumContent() {
           setSelectedVisaId(val);
           setSearchParams(val ? { visa_id: val } : {});
         }}
-        options={[{ value: '', label: 'Choose a visa...' }, ...visas.map((v) => ({ value: v.id, label: `${v.subclass} - ${v.name}` }))]}
+        options={[{ value: '', label: 'Choose a visa...' }, ...visas.map((v) => ({ value: v.id, label: `${v.subclass_number} - ${v.name}` }))]}
       />
 
       {selectedVisaId && (

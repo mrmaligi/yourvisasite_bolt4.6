@@ -84,7 +84,7 @@ export function VirtualizedVisaList({
                             <CardBody className="space-y-4 h-full flex flex-col">
                             <div className="flex items-start justify-between">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                <Badge>{visa.subclass}</Badge>
+                                <Badge>{visa.subclass_number}</Badge>
                                 <Badge variant="primary">{visa.category}</Badge>
                                 </div>
                                 <ArrowUpRight className="w-4 h-4 text-neutral-400 group-hover:text-primary-600 transition-colors flex-shrink-0" />

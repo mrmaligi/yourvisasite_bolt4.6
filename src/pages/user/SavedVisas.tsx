@@ -117,7 +117,7 @@ export function SavedVisas() {
                   <div className="flex items-start justify-between">
                     <div className="space-y-1 pr-8">
                        <div className="flex items-center gap-2 mb-2">
-                        <Badge>{sv.visa.subclass}</Badge>
+                        <Badge>{sv.visa.subclass_number}</Badge>
                       </div>
                       <h3 className="text-lg font-bold text-neutral-900 line-clamp-1" title={sv.visa.name}>
                         {sv.visa.name}

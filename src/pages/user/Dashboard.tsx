@@ -62,7 +62,7 @@ export function UserDashboard() {
         });
 
         const [recentPurchases, recentDocs, recentBookings] = await Promise.all([
-          supabase.from('user_visa_purchases').select('id, purchased_at, visas(id, name, subclass)').eq('user_id', profile.id).order('purchased_at', { ascending: false }).limit(5),
+          supabase.from('user_visa_purchases').select('id, purchased_at, visas(id, name, subclass_number)').eq('user_id', profile.id).order('purchased_at', { ascending: false }).limit(5),
           supabase.from('user_documents').select('id, file_name, uploaded_at').eq('user_id', profile.id).order('uploaded_at', { ascending: false }).limit(5),
           supabase.from('bookings').select('id, created_at, status').eq('user_id', profile.id).order('created_at', { ascending: false }).limit(5)
         ]);
@@ -72,7 +72,7 @@ export function UserDashboard() {
           type: 'purchase',
           date: p.purchased_at,
           title: 'Premium Guide Unlocked',
-          description: `${p.visas?.subclass} - ${p.visas?.name}`,
+          description: `${p.visas?.subclass_number} - ${p.visas?.name}`,
           link: `/visas/${p.visas?.id}`
         }));
 
