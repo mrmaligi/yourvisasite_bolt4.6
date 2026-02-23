@@ -5,8 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import type { NewsArticle } from '../../types/database';
-
-const USE_MOCK = true;
+import { USE_MOCK } from '../../lib/mockData';
 
 export function Landing() {
   const [news, setNews] = useState<NewsArticle[]>([]);

@@ -3,9 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { DataTable, type Column } from '../../components/ui/DataTable';
 import { Badge } from '../../components/ui/Badge';
 import type { Profile } from '../../types/database';
-import { ALL_MOCK_PROFILES } from '../../lib/mockData';
-
-const USE_MOCK = true;
+import { ALL_MOCK_PROFILES, USE_MOCK } from '../../lib/mockData';
 
 const roleVariant = {
   user: 'primary' as const,

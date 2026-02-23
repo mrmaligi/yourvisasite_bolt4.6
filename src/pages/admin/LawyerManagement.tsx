@@ -8,9 +8,7 @@ import { Modal } from '../../components/ui/Modal';
 import { Textarea } from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
 import type { LawyerProfile } from '../../types/database';
-import { MOCK_LAWYER_PROFILES } from '../../lib/mockData';
-
-const USE_MOCK = true;
+import { MOCK_LAWYER_PROFILES, USE_MOCK } from '../../lib/mockData';
 
 const statusVariant = {
   pending: 'warning' as const,

@@ -2,10 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { type Session, type User, type AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import type { Profile, UserRole } from '../types/database';
-import { MOCK_USERS, MOCK_ADMINS, MOCK_LAWYER_USERS } from '../lib/mockData';
-
-// FLAG TO TOGGLE MOCK AUTH
-const USE_MOCK = true;
+import { MOCK_USERS, MOCK_ADMINS, MOCK_LAWYER_USERS, USE_MOCK } from '../lib/mockData';
 
 interface AuthContextValue {
   session: Session | null;

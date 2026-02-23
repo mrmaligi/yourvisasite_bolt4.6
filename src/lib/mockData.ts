@@ -1,5 +1,7 @@
 import type { Profile, LawyerProfile } from '../types/database';
 
+export const USE_MOCK = true;
+
 // Mock Users (Applicants)
 export const MOCK_USERS: Profile[] = Array.from({ length: 10 }, (_, i) => ({
   id: `user-${i + 1}`,

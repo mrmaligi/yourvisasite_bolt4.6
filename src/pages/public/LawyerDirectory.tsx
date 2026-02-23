@@ -6,9 +6,7 @@ import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
-import { MOCK_LAWYER_DIRECTORY_ITEMS } from '../../lib/mockData';
-
-const USE_MOCK = true;
+import { MOCK_LAWYER_DIRECTORY_ITEMS, USE_MOCK } from '../../lib/mockData';
 
 interface LawyerListItem {
   id: string;
