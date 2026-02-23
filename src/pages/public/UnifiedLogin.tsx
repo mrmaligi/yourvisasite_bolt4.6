@@ -15,7 +15,7 @@ export function UnifiedLogin() {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { signIn, signInWithGoogle, resetPassword } = useAuth();
+  const { signInWithEmail: signIn, signInWithGoogle, resetPassword } = useAuth();
   
   const [loginType, setLoginType] = useState<LoginType>('user');
   const [email, setEmail] = useState('');
