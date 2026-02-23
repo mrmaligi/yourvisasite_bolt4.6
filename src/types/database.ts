@@ -79,7 +79,7 @@ export interface VisaPremiumContent {
   content: string;
   tips: string | null;
   common_mistakes: string | null;
-  examples: Record<string, any> | null;
+  examples: Record<string, unknown> | null;
   estimated_minutes: number | null;
   required_documents: string[] | null;
   application_example_json: ApplicationExampleField[] | null;
@@ -216,9 +216,15 @@ export interface UserVisaPurchase {
   user_id: string;
   visa_id: string;
   amount_cents: number;
-  payment_provider: string;
-  payment_id: string | null;
+  payment_provider?: string;
+  payment_id?: string | null;
+  status: string;
+  currency?: string;
+  stripe_payment_intent_id?: string | null;
+  stripe_checkout_session_id?: string | null;
+  expires_at?: string | null;
   purchased_at: string;
+  created_at?: string;
 }
 
 export interface UserDocument {
@@ -331,14 +337,16 @@ export interface MarketplaceListing {
   id: string;
   lawyer_id: string;
   title: string;
-  description: string | null;
+  description: string;
+  short_description: string | null;
   price_cents: number;
   category_id: string | null;
-  visa_id: string | null;
-  file_url: string | null;
-  preview_url: string | null;
+  listing_type: 'service' | 'product';
+  duration_minutes: number | null;
+  delivery_days: number | null;
   is_active: boolean;
-  download_count: number;
+  image_url: string | null;
+  features: string[] | null;
   created_at: string;
   updated_at: string;
 }

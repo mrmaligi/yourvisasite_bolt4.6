@@ -178,7 +178,7 @@ export function VisaDetail() {
         .eq('visa_id', visa.id)
         .order('step_number');
 
-      setPurchase(newPurchase as any);
+      setPurchase(newPurchase);
       setPremiumContent(contentData || []);
 
       toast('success', 'This is a demo. Content unlocked!');
