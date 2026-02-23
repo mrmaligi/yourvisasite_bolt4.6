@@ -49,22 +49,23 @@ export function LawyerDashboard() {
       setIsLoading(true);
       setError(null);
       
-      // Get lawyer profile
+      // Get lawyer profile from profiles table (has all lawyer fields)
       const { data: profile, error: profileError } = await supabase
-        .from('lawyer_profiles')
-        .select('*')
-        .eq('user_id', user?.id)
+        .from('profiles')
+        .select('*, bar_number, jurisdiction, years_experience, is_verified, verification_status, bio, hourly_rate_cents')
+        .eq('id', user?.id)
+        .eq('role', 'lawyer')
         .single();
       
       if (profileError) throw profileError;
       
       setLawyerProfile(profile);
 
-      // Get stats
+      // Get stats - use user.id since bookings references lawyer user_id directly
       const [{ count: clients }, { count: upcoming }, { count: completed }] = await Promise.all([
-        supabase.from('bookings').select('user_id', { count: 'exact', head: true }).eq('lawyer_id', profile?.id),
-        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('lawyer_id', profile?.id).eq('status', 'confirmed').gte('scheduled_at', new Date().toISOString()),
-        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('lawyer_id', profile?.id).eq('status', 'completed'),
+        supabase.from('bookings').select('user_id', { count: 'exact', head: true }).eq('lawyer_id', user?.id),
+        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('lawyer_id', user?.id).eq('status', 'confirmed'),
+        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('lawyer_id', user?.id).eq('status', 'completed'),
       ]);
 
       setStats({
