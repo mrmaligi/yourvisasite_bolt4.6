@@ -49,25 +49,12 @@ export function Availability() {
 
   useEffect(() => {
     if (!profile) return;
-    supabase
-      .schema('lawyer')
-      .from('profiles')
-      .select('id')
-      .eq('profile_id', profile.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data) {
-          setLawyerId(data.id);
-          fetchSlots(data.id);
-        } else {
-          setLoading(false);
-        }
-      });
+    setLawyerId(profile.id);
+    fetchSlots(profile.id);
   }, [profile]);
 
   const fetchSlots = async (lid: string) => {
     const { data } = await supabase
-      .schema('lawyer')
       .from('consultation_slots')
       .select('*')
       .eq('lawyer_id', lid)
@@ -103,7 +90,6 @@ export function Availability() {
 
     setSaving(true);
     const { error } = await supabase
-      .schema('lawyer')
       .from('consultation_slots')
       .insert({ lawyer_id: lawyerId, start_time: startTime, end_time: endTime });
     setSaving(false);
@@ -120,7 +106,7 @@ export function Availability() {
 
   const handleDelete = async (id: string) => {
     if (!lawyerId) return;
-    await supabase.schema('lawyer').from('consultation_slots').delete().eq('id', id);
+    await supabase.from('consultation_slots').delete().eq('id', id);
     toast('success', 'Slot removed');
     fetchSlots(lawyerId);
   };

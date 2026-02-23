@@ -77,7 +77,7 @@ async function sendNotification(userId: string, type: string, data: any) {
 }
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
-  const { metadata, id: sessionId, payment_intent, amount_total, currency, payment_status } = session;
+  const { metadata, id: sessionId, payment_intent, amount_total, payment_status } = session;
 
   if (payment_status !== 'paid') {
     console.log('Payment not paid:', payment_status);
@@ -94,14 +94,13 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
     if (userId && visaId) {
        // Upsert into user_visa_purchases
+       // Align with public.user_visa_purchases schema:
+       // id, user_id, visa_id, purchased_at, amount_paid_cents, stripe_session_id
        const purchaseData = {
          user_id: userId,
          visa_id: visaId,
-         stripe_payment_intent_id: typeof payment_intent === 'string' ? payment_intent : payment_intent?.id,
-         stripe_checkout_session_id: sessionId,
-         amount_cents: amount_total,
-         currency: currency,
-         status: 'active',
+         stripe_session_id: sessionId,
+         amount_paid_cents: amount_total,
          purchased_at: new Date().toISOString()
        };
 
@@ -110,7 +109,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
          .upsert(purchaseData, { onConflict: 'user_id, visa_id' });
 
        if (error) {
-         console.error('Error upserting user_visa_purchase:', error);
+         console.error('Failed to upsert user_visa_purchase:', error);
        } else {
          console.log('Successfully recorded premium purchase for user', userId);
 
@@ -148,7 +147,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
         .eq('id', bookingId);
 
       if (error) {
-        console.error('Error updating booking status:', error);
+        console.error('Failed to update booking status:', error);
       } else {
         console.log('Successfully confirmed booking', bookingId);
 

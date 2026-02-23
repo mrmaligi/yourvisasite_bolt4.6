@@ -1,16 +1,15 @@
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { CheckSquare, Download, FileText, Eye } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody } from '@/components/ui/Card';
 
 const CHECKLISTS = [
-  { id: 1, title: 'Visa Application Checklist', category: 'General', pages: 4, link: '/resources/checklists/visa-application' },
-  { id: 2, title: 'Document Gathering Checklist', category: 'General', pages: 3, link: '/resources/checklists/document-gathering' },
-  { id: 3, title: 'Medical Examination Checklist', category: 'Health', pages: 2, link: '/resources/checklists/medical-exam' },
-  { id: 4, title: 'Character Assessment Checklist', category: 'Character', pages: 5, link: '/resources/checklists/character-assessment' },
-  { id: 5, title: 'English Language Test Checklist', category: 'Language', pages: 1, link: '/resources/checklists/english-test' },
+  { id: 1, title: 'Partner Visa (820/801) Evidence Checklist', category: 'Family', pages: 4 },
+  { id: 2, title: 'Employer Nomination Document List', category: 'Work', pages: 3 },
+  { id: 3, title: 'Student Visa Financial Capacity', category: 'Student', pages: 2 },
+  { id: 4, title: 'General Skilled Migration Points Test', category: 'Skilled', pages: 5 },
+  { id: 5, title: 'Citizenship Ceremony Preparation', category: 'Citizenship', pages: 1 },
 ];
 
 export function Checklists() {
@@ -62,11 +61,9 @@ export function Checklists() {
                     Category: {item.category}
                   </p>
                   <div className="flex gap-3 mt-auto">
-                    <Link to={item.link} className="flex-1">
-                      <Button variant="secondary" size="sm" className="w-full">
-                        <Eye className="w-4 h-4 mr-2" /> View
-                      </Button>
-                    </Link>
+                    <Button variant="secondary" size="sm" className="flex-1">
+                      <Eye className="w-4 h-4 mr-2" /> Preview
+                    </Button>
                     <Button size="sm" className="flex-1">
                       <Download className="w-4 h-4 mr-2" /> PDF
                     </Button>

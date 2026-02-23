@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 import { CheckCircle, XCircle, Info, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,9 +13,13 @@ interface Toast {
 
 interface ToastContextValue {
   toast: (type: ToastType, message: string) => void;
+  addToast: (type: ToastType, message: string) => void;
 }
 
-const ToastContext = createContext<ToastContextValue>({ toast: () => {} });
+const ToastContext = createContext<ToastContextValue>({
+  toast: () => {},
+  addToast: () => {}
+});
 
 export function useToast() {
   return useContext(ToastContext);
@@ -38,9 +43,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <ToastContext.Provider value={{ toast: addToast }}>
+    <ToastContext.Provider value={{ toast: addToast, addToast }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-[100] space-y-2 max-w-sm w-full">
+      <div className="fixed bottom-4 right-4 z-[100] space-y-2 max-w-sm w-full pointer-events-none">
         <AnimatePresence>
           {toasts.map((t) => (
             <ToastItem key={t.id} toast={t} onDismiss={() => removeToast(t.id)} />
@@ -65,6 +70,8 @@ const colors: Record<ToastType, string> = {
 
 function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
   const Icon = icons[toast.type];
+  const isError = toast.type === 'error';
+
   return (
     <motion.div
       layout
@@ -72,11 +79,18 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
       animate={{ opacity: 1, x: 0, scale: 1 }}
       exit={{ opacity: 0, x: 20, scale: 0.95 }}
       transition={{ type: "spring", duration: 0.3, bounce: 0 }}
-      className={`flex items-start gap-3 px-4 py-3 rounded-lg border-l-4 shadow-lg ${colors[toast.type]} dark:border-opacity-80`}
+      role={isError ? "alert" : "status"}
+      aria-live={isError ? "assertive" : "polite"}
+      aria-atomic="true"
+      className={`pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-lg border-l-4 shadow-lg ${colors[toast.type]} dark:border-opacity-80`}
     >
-      <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" />
+      <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" aria-hidden="true" />
       <p className="text-sm flex-1 font-medium">{toast.message}</p>
-      <button onClick={onDismiss} className="flex-shrink-0 p-0.5 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+      <button
+        onClick={onDismiss}
+        aria-label="Dismiss"
+        className="flex-shrink-0 p-0.5 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+      >
         <X className="w-4 h-4" />
       </button>
     </motion.div>

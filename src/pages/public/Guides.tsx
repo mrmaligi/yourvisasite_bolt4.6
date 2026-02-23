@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Search, ChevronRight, Clock } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 
@@ -12,16 +11,15 @@ interface Guide {
   category: string;
   readTime: string;
   description: string;
-  link: string;
 }
 
 const GUIDES: Guide[] = [
-  { id: 1, title: 'Skilled Independent Visa (189) Guide', category: 'Skilled', readTime: '15 min', description: 'Complete walkthrough for points-tested skilled migration.', link: '/resources/guides/skilled-independent' },
-  { id: 2, title: 'Partner Visa (820/801) Application Steps', category: 'Family', readTime: '20 min', description: 'How to prove your relationship and apply for a partner visa.', link: '/resources/guides/partner-visa' },
-  { id: 3, title: 'Student Visa (500) Requirements', category: 'Student', readTime: '10 min', description: 'Everything international students need to know before applying.', link: '/resources/guides/student-visa' },
-  { id: 4, title: 'Employer Nomination Scheme (186)', category: 'Employer Sponsored', readTime: '18 min', description: 'Permanent residence for skilled workers nominated by employers.', link: '/resources/guides/employer-nomination' },
-  { id: 5, title: 'Citizenship Application Process', category: 'Citizenship', readTime: '12 min', description: 'From permanent resident to Australian citizen.', link: '/resources/guides/citizenship' },
-  { id: 6, title: 'Bridging Visas Explained', category: 'General', readTime: '8 min', description: 'Understanding your status between visas.', link: '#' },
+  { id: 1, title: 'Skilled Independent Visa (189) Guide', category: 'Skilled', readTime: '15 min', description: 'Complete walkthrough for points-tested skilled migration.' },
+  { id: 2, title: 'Partner Visa (820/801) Application Steps', category: 'Family', readTime: '20 min', description: 'How to prove your relationship and apply for a partner visa.' },
+  { id: 3, title: 'Student Visa (500) Requirements', category: 'Student', readTime: '10 min', description: 'Everything international students need to know before applying.' },
+  { id: 4, title: 'Employer Nomination Scheme (186)', category: 'Employer Sponsored', readTime: '18 min', description: 'Permanent residence for skilled workers nominated by employers.' },
+  { id: 5, title: 'Citizenship Application Process', category: 'Citizenship', readTime: '12 min', description: 'From permanent resident to Australian citizen.' },
+  { id: 6, title: 'Bridging Visas Explained', category: 'General', readTime: '8 min', description: 'Understanding your status between visas.' },
 ];
 
 export function Guides() {
@@ -66,27 +64,25 @@ export function Guides() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
             >
-              <Link to={guide.link} className="block h-full">
-                <Card className="h-full hover:border-primary-500 hover:shadow-md transition-all cursor-pointer dark:bg-neutral-800 dark:border-neutral-700">
-                  <CardBody className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
-                        {guide.category}
-                      </span>
-                      <span className="flex items-center text-xs text-neutral-500 dark:text-neutral-400">
-                        <Clock className="w-3 h-3 mr-1" /> {guide.readTime}
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">{guide.title}</h3>
-                    <p className="text-neutral-500 dark:text-neutral-400 text-sm mb-4 line-clamp-2">
-                      {guide.description}
-                    </p>
-                    <div className="flex items-center text-primary-600 dark:text-primary-400 text-sm font-medium">
-                      Read Guide <ChevronRight className="w-4 h-4 ml-1" />
-                    </div>
-                  </CardBody>
-                </Card>
-              </Link>
+              <Card className="h-full hover:border-primary-500 hover:shadow-md transition-all cursor-pointer dark:bg-neutral-800 dark:border-neutral-700">
+                <CardBody className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
+                      {guide.category}
+                    </span>
+                    <span className="flex items-center text-xs text-neutral-500 dark:text-neutral-400">
+                      <Clock className="w-3 h-3 mr-1" /> {guide.readTime}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">{guide.title}</h3>
+                  <p className="text-neutral-500 dark:text-neutral-400 text-sm mb-4 line-clamp-2">
+                    {guide.description}
+                  </p>
+                  <div className="flex items-center text-primary-600 dark:text-primary-400 text-sm font-medium">
+                    Read Guide <ChevronRight className="w-4 h-4 ml-1" />
+                  </div>
+                </CardBody>
+              </Card>
             </motion.div>
           ))}
           {filteredGuides.length === 0 && (

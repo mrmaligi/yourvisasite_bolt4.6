@@ -8,7 +8,11 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+
+// Use anon key for auth validation, service key for database operations
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -30,11 +34,12 @@ Deno.serve(async (req) => {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
 
     if (authError || !user) {
+      console.error('Auth error:', authError);
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
+        JSON.stringify({ error: 'Unauthorized', details: authError?.message }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -43,7 +48,7 @@ Deno.serve(async (req) => {
     const origin = req.headers.get('origin') || 'http://localhost:5173';
 
     // Get or create Stripe customer
-    const { data: customerData } = await supabase
+    const { data: customerData } = await supabaseAdmin
       .from('stripe_customers')
       .select('customer_id')
       .eq('user_id', user.id)
@@ -59,7 +64,7 @@ Deno.serve(async (req) => {
         },
       });
       customerId = newCustomer.id;
-      await supabase.from('stripe_customers').insert({
+      await supabaseAdmin.from('stripe_customers').insert({
         user_id: user.id,
         customer_id: customerId,
       });
@@ -116,7 +121,6 @@ Deno.serve(async (req) => {
 
        // Fetch slot details
        const { data: slot, error: slotError } = await supabase
-         .schema('lawyer')
          .from('consultation_slots')
          .select('*')
          .eq('id', slot_id)
@@ -130,11 +134,10 @@ Deno.serve(async (req) => {
 
        // Fetch lawyer details
        const { data: lawyer, error: lawyerError } = await supabase
-         .schema('lawyer')
          .from('profiles')
-         .select('id, profile_id, hourly_rate_cents, jurisdiction')
+         .select('id, hourly_rate_cents, jurisdiction')
          .eq('id', lawyer_id)
-         .eq('is_verified', true)
+         .eq('role', 'lawyer')
          .single();
 
        if (lawyerError || !lawyer) {

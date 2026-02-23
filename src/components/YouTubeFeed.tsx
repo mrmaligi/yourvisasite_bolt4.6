@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Youtube, Play } from 'lucide-react';
+import { Youtube } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Card, CardBody } from './ui/Card';
 import type { YouTubeFeed as YouTubeFeedType } from '../types/database';
@@ -29,6 +29,11 @@ export function YouTubeFeed() {
     fetchFeeds();
   }, []);
 
+  const getYoutubeVideoId = (url: string) => {
+    const match = url.match(/(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/);
+    return match ? match[1] : null;
+  };
+
   if (loading) return null;
   if (feeds.length === 0) return null;
 
@@ -41,41 +46,29 @@ export function YouTubeFeed() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {feeds.map((feed) => (
-            <a
-              key={feed.id}
-              href={feed.youtube_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block group"
-            >
-              <Card className="h-full overflow-hidden hover:shadow-lg transition-all duration-300 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700">
+          {feeds.map((feed) => {
+            const videoId = getYoutubeVideoId(feed.youtube_url);
+
+            return (
+              <Card key={feed.id} className="h-full overflow-hidden hover:shadow-lg transition-all duration-300 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700">
                 <div className="relative aspect-video bg-neutral-100 dark:bg-neutral-900 overflow-hidden">
-                  {feed.thumbnail_url ? (
-                    <img
-                      src={feed.thumbnail_url}
-                      alt={feed.title}
-                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-                      onError={(e) => {
-                         const videoIdMatch = feed.youtube_url.match(/(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/);
-                         if (videoIdMatch && videoIdMatch[1]) {
-                           (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${videoIdMatch[1]}/hqdefault.jpg`;
-                         }
-                      }}
+                  {videoId ? (
+                    <iframe
+                      src={`https://www.youtube.com/embed/${videoId}`}
+                      title={feed.title}
+                      className="w-full h-full"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
                     />
                   ) : (
                     <div className="flex items-center justify-center h-full">
                       <Youtube className="w-12 h-12 text-neutral-300" />
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                    <div className="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform shadow-lg">
-                      <Play className="w-5 h-5 fill-current ml-0.5" />
-                    </div>
-                  </div>
                 </div>
                 <CardBody className="p-4">
-                  <h3 className="font-semibold text-neutral-900 dark:text-neutral-100 line-clamp-2 mb-2 group-hover:text-primary-600 transition-colors">
+                  <h3 className="font-semibold text-neutral-900 dark:text-neutral-100 line-clamp-2 mb-2">
                     {feed.title}
                   </h3>
                   <p className="text-sm text-neutral-500 dark:text-neutral-400">
@@ -83,8 +76,8 @@ export function YouTubeFeed() {
                   </p>
                 </CardBody>
               </Card>
-            </a>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

@@ -1,16 +1,14 @@
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Mic, Play, Clock, Share2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody } from '@/components/ui/Card';
 
 const EPISODES = [
-  { id: 1, title: 'Episode 5: Common Visa Mistakes', date: 'Oct 24', duration: '32 min', desc: 'Avoid these common errors in your application.', link: '/resources/podcast/episode-5' },
-  { id: 2, title: 'Episode 4: Skilled Occupation Lists', date: 'Oct 17', duration: '45 min', desc: 'Navigating the skilled occupation lists.', link: '/resources/podcast/episode-4' },
-  { id: 3, title: 'Episode 3: Regional Migration Explained', date: 'Oct 10', duration: '28 min', desc: 'Opportunities in regional Australia.', link: '/resources/podcast/episode-3' },
-  { id: 4, title: 'Episode 2: Interview with a Migration Agent', date: 'Oct 03', duration: '35 min', desc: 'Insights from a registered migration agent.', link: '/resources/podcast/episode-2' },
-  { id: 5, title: 'Episode 1: Visa Changes 2024', date: 'Sep 26', duration: '40 min', desc: 'Discussing the latest immigration policy updates.', link: '/resources/podcast/episode-1' },
+  { id: 1, title: 'Episode 42: The Future of SkillSelect', date: 'Oct 10', duration: '32 min', desc: 'We discuss the upcoming changes to the SkillSelect system.' },
+  { id: 2, title: 'Episode 41: Interview with a Visa Officer', date: 'Oct 03', duration: '45 min', desc: 'An exclusive interview revealing what really happens behind the scenes.' },
+  { id: 3, title: 'Episode 40: Common Mistakes to Avoid', date: 'Sep 26', duration: '28 min', desc: 'Top 5 errors applicants make and how to fix them.' },
+  { id: 4, title: 'Episode 39: Regional Visas Explained', date: 'Sep 19', duration: '35 min', desc: 'Why regional Australia might be your best pathway to PR.' },
 ];
 
 export function Podcast() {
@@ -56,18 +54,16 @@ export function Podcast() {
             >
               <Card className="hover:shadow-md transition-shadow dark:bg-neutral-800 dark:border-neutral-700">
                 <CardBody className="p-6 flex flex-col md:flex-row items-center gap-6">
-                  <Link to={ep.link} className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center text-primary-600 dark:text-primary-400 flex-shrink-0 cursor-pointer hover:scale-105 transition-transform">
+                  <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center text-primary-600 dark:text-primary-400 flex-shrink-0 cursor-pointer hover:scale-105 transition-transform">
                     <Play className="w-5 h-5 ml-1" />
-                  </Link>
+                  </div>
                   <div className="flex-grow text-center md:text-left">
                     <div className="flex items-center justify-center md:justify-start gap-3 text-sm text-neutral-500 dark:text-neutral-400 mb-1">
                       <span>{ep.date}</span>
                       <span className="w-1 h-1 bg-neutral-300 rounded-full" />
                       <span className="flex items-center"><Clock className="w-3 h-3 mr-1" /> {ep.duration}</span>
                     </div>
-                    <Link to={ep.link} className="hover:text-primary-600 transition-colors">
-                      <h3 className="text-lg font-bold text-neutral-900 dark:text-neutral-100 mb-1">{ep.title}</h3>
-                    </Link>
+                    <h3 className="text-lg font-bold text-neutral-900 dark:text-neutral-100 mb-1">{ep.title}</h3>
                     <p className="text-neutral-600 dark:text-neutral-300 text-sm">{ep.desc}</p>
                   </div>
                   <Button variant="ghost" size="sm" className="text-neutral-500 hover:text-primary-600">

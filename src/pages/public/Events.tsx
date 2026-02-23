@@ -1,16 +1,14 @@
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Calendar, MapPin, Users, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody } from '@/components/ui/Card';
 
 const EVENTS = [
-  { id: 1, title: 'Migration Expo 2024', date: 'Nov 12, 2024', location: 'ICC Sydney', type: 'In-Person', attendees: '2000+', link: '/resources/events/migration-expo' },
-  { id: 2, title: 'International Student Fair', date: 'Oct 25, 2024', location: 'Online', type: 'Virtual', attendees: '500+', link: '/resources/events/student-fair' },
-  { id: 3, title: 'Investor Visa Seminar', date: 'Oct 18, 2024', location: 'Federation Square', type: 'In-Person', attendees: '150+', link: '/resources/events/investor-seminar' },
-  { id: 4, title: 'New Migrants Networking Night', date: 'Oct 30, 2024', location: 'Brisbane', type: 'Networking', attendees: '80+', link: '/resources/events/networking-night' },
-  { id: 5, title: 'Online Visa Workshop', date: 'Nov 05, 2024', location: 'Zoom', type: 'Workshop', attendees: '300+', link: '/resources/events/online-workshop' },
+  { id: 1, title: 'Sydney Migration Expo 2024', date: 'Nov 12, 2024', location: 'ICC Sydney', type: 'In-Person', attendees: '2000+' },
+  { id: 2, title: 'Virtual Open Day: Student Visas', date: 'Oct 25, 2024', location: 'Online', type: 'Virtual', attendees: '500+' },
+  { id: 3, title: 'Melbourne Meetup: Skilled Migrants', date: 'Oct 18, 2024', location: 'Federation Square', type: 'In-Person', attendees: '150+' },
+  { id: 4, title: 'Brisbane Partner Visa Workshop', date: 'Oct 30, 2024', location: 'Brisbane Convention Centre', type: 'Workshop', attendees: '80+' },
 ];
 
 export function Events() {
@@ -59,9 +57,7 @@ export function Events() {
                          {event.type}
                        </span>
                     </div>
-                    <Link to={event.link} className="hover:text-primary-600 transition-colors">
-                      <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-2">{event.title}</h3>
-                    </Link>
+                    <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-2">{event.title}</h3>
                     <div className="flex flex-col md:flex-row gap-4 text-sm text-neutral-500 dark:text-neutral-400">
                       <span className="flex items-center justify-center md:justify-start"><MapPin className="w-4 h-4 mr-1" /> {event.location}</span>
                       <span className="hidden md:inline">•</span>
@@ -70,11 +66,9 @@ export function Events() {
                   </div>
 
                   <div className="flex-shrink-0 w-full md:w-auto">
-                    <Link to={event.link} className="w-full md:w-auto block">
-                      <Button className="w-full md:w-auto">
-                        Register Now <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </Link>
+                    <Button className="w-full md:w-auto">
+                      Register Now <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
                   </div>
                 </CardBody>
               </Card>

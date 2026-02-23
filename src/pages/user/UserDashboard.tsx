@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { TrackerTimeline } from '../../components/tracker/TrackerTimeline';
 import { 
   LayoutDashboard, 
   Briefcase, 
@@ -16,11 +15,13 @@ import {
   Gift
 } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { DashboardSkeleton } from '../../components/ui/Skeleton';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 
 export function UserDashboard() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [stats, setStats] = useState({
     savedVisas: 0,
     myVisas: 0,
@@ -28,41 +29,66 @@ export function UserDashboard() {
     upcomingConsultations: 0,
   });
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
-  const [myApplications, setMyApplications] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) {
+    if (user && !authLoading) {
       fetchUserStats();
-      fetchMyApplications();
+    } else if (!authLoading && !user) {
+      setIsLoading(false);
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   const fetchUserStats = async () => {
-    // Get counts
-    const [{ count: saved }, { count: my }, { count: docs }, { count: consultations }] = await Promise.all([
-      supabase.from('saved_visas').select('id', { count: 'exact' }).eq('user_id', user?.id),
-      supabase.from('user_visas').select('id', { count: 'exact' }).eq('user_id', user?.id),
-      supabase.from('user_documents').select('id', { count: 'exact' }).eq('user_id', user?.id),
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('user_id', user?.id).gte('scheduled_at', new Date().toISOString()),
-    ]);
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Get counts with timeout
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      );
+      
+      const fetchPromise = Promise.all([
+        supabase.from('saved_visas').select('id', { count: 'exact', head: true }).eq('user_id', user?.id),
+        supabase.from('user_visa_purchases').select('id', { count: 'exact', head: true }).eq('user_id', user?.id),
+        supabase.from('user_documents').select('id', { count: 'exact', head: true }).eq('user_id', user?.id),
+        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('user_id', user?.id).gte('scheduled_at', new Date().toISOString()),
+      ]);
+      
+      const [saved, my, docs, consultations] = await Promise.race([fetchPromise, timeoutPromise]) as any;
 
-    setStats({
-      savedVisas: saved || 0,
-      myVisas: my || 0,
-      documents: docs || 0,
-      upcomingConsultations: consultations || 0,
-    });
+      setStats({
+        savedVisas: saved?.count || 0,
+        myVisas: my?.count || 0,
+        documents: docs?.count || 0,
+        upcomingConsultations: consultations?.count || 0,
+      });
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+      setError('Failed to load dashboard data. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const fetchMyApplications = async () => {
-    const { data } = await supabase
-      .from('tracker_entries')
-      .select('*, visas(name, subclass)')
-      .eq('submitted_by', user!.id)
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false });
-    setMyApplications(data || []);
-  };
+  if (authLoading || isLoading) {
+    return <DashboardSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
+        <div className="text-center max-w-md p-6">
+          <div className="text-red-500 text-4xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold text-neutral-900 dark:text-white mb-2">Error Loading Dashboard</h2>
+          <p className="text-neutral-600 dark:text-neutral-400 mb-4">{error}</p>
+          <Button onClick={fetchUserStats}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
 
   const quickActions = [
     { to: '/visas', icon: Briefcase, label: 'Find Visas', desc: 'Search 78+ visa options' },
@@ -114,7 +140,7 @@ export function UserDashboard() {
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-neutral-200 dark:border-neutral-700">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-              <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <User className="w-5 h-5 text-blue-600" />
             </div>
             <div>
               <p className="font-medium text-neutral-900 dark:text-white">{user?.email}</p>
@@ -145,45 +171,12 @@ export function UserDashboard() {
         </header>
 
         <div className="p-6">
-          {/* My Applications Tracker */}
-          {myApplications.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">My Application Journey</h2>
-              <div className="grid gap-6">
-                {myApplications.map((app: any) => (
-                  <Card key={app.id}>
-                    <CardBody>
-                      <div className="flex justify-between items-start mb-6">
-                        <div>
-                          <h3 className="font-bold text-lg text-neutral-900 dark:text-white">{app.visas.subclass} - {app.visas.name}</h3>
-                          <p className="text-sm text-neutral-500">Applied on {new Date(app.application_date).toLocaleDateString()}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-neutral-900 dark:text-white">In Progress</p>
-                          <p className="text-xs text-neutral-500">{Math.floor((Date.now() - new Date(app.application_date).getTime()) / (1000 * 60 * 60 * 24))} days elapsed</p>
-                        </div>
-                      </div>
-
-                      <TrackerTimeline
-                        steps={[
-                          { id: '1', label: 'Received', status: 'completed', date: new Date(app.application_date).toLocaleDateString() },
-                          { id: '2', label: 'Processing', status: 'current', description: 'Your application is being assessed by the Department.' },
-                          { id: '3', label: 'Final Decision', status: 'upcoming' }
-                        ]}
-                      />
-                    </CardBody>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Stats Grid */}
           <div className="grid md:grid-cols-4 gap-4 mb-8">
             <Card>
               <CardBody className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                  <Heart className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  <Heart className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.savedVisas}</p>
@@ -195,7 +188,7 @@ export function UserDashboard() {
             <Card>
               <CardBody className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-                  <Briefcase className="w-6 h-6 text-green-600 dark:text-green-400" />
+                  <Briefcase className="w-6 h-6 text-green-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.myVisas}</p>
@@ -207,7 +200,7 @@ export function UserDashboard() {
             <Card>
               <CardBody className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                  <FileText className="w-6 h-6 text-purple-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.documents}</p>
@@ -219,7 +212,7 @@ export function UserDashboard() {
             <Card>
               <CardBody className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+                  <Calendar className="w-6 h-6 text-orange-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.upcomingConsultations}</p>
@@ -244,7 +237,7 @@ export function UserDashboard() {
                       to={action.to}
                       className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-primary-300 dark:hover:border-primary-700 transition-colors"
                     >
-                      <Icon className="w-6 h-6 text-primary-600 dark:text-primary-400 mb-2" />
+                      <Icon className="w-6 h-6 text-primary-600 mb-2" />
                       <h3 className="font-medium text-neutral-900 dark:text-white">{action.label}</h3>
                       <p className="text-sm text-neutral-500">{action.desc}</p>
                     </Link>
@@ -268,7 +261,7 @@ export function UserDashboard() {
                   <div className="space-y-3">
                     {recentActivity.map((activity, i) => (
                       <div key={i} className="flex items-center gap-3 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
-                        <div className="w-2 h-2 bg-primary-500 dark:bg-primary-400 rounded-full" />
+                        <div className="w-2 h-2 bg-primary-500 rounded-full" />
                         <p className="text-sm text-neutral-700 dark:text-neutral-300">{activity.description}</p>
                       </div>
                     ))}
@@ -282,7 +275,7 @@ export function UserDashboard() {
           <Card>
             <CardHeader className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Recommended for You</h2>
-              <Link to="/visas" className="text-primary-600 dark:text-primary-400 hover:underline text-sm flex items-center gap-1">
+              <Link to="/visas" className="text-primary-600 hover:underline text-sm flex items-center gap-1">
                 View All <ChevronRight className="w-4 h-4" />
               </Link>
             </CardHeader>
@@ -291,23 +284,23 @@ export function UserDashboard() {
                 <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
                   <h3 className="font-semibold text-neutral-900 dark:text-white">Skilled Independent (189)</h3>
                   <p className="text-sm text-neutral-500 mt-1">Permanent visa for skilled workers</p>
-                  <Link to="/visas/189" className="mt-3 btn-secondary text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]">
+                  <Button variant="secondary" size="sm" className="mt-3" to="/visas/189">
                     Learn More
-                  </Link>
+                  </Button>
                 </div>
                 <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
                   <h3 className="font-semibold text-neutral-900 dark:text-white">Student Visa (500)</h3>
                   <p className="text-sm text-neutral-500 mt-1">Study at Australian institutions</p>
-                  <Link to="/visas/500" className="mt-3 btn-secondary text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]">
+                  <Button variant="secondary" size="sm" className="mt-3" to="/visas/500">
                     Learn More
-                  </Link>
+                  </Button>
                 </div>
                 <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
                   <h3 className="font-semibold text-neutral-900 dark:text-white">Working Holiday (417)</h3>
                   <p className="text-sm text-neutral-500 mt-1">Work and travel in Australia</p>
-                  <Link to="/visas/417" className="mt-3 btn-secondary text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]">
+                  <Button variant="secondary" size="sm" className="mt-3" to="/visas/417">
                     Learn More
-                  </Link>
+                  </Button>
                 </div>
               </div>
             </CardBody>
