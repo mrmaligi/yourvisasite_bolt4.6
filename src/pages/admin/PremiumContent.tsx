@@ -21,7 +21,7 @@ export function PremiumContent() {
     supabase.from('visas').select('*').eq('is_active', true).order('name')
       .then(({ data }) => setVisas(data || []));
 
-    supabase.from('document_categories').select('*').order('name')
+    supabase.from('document_categories').select('*').order('display_order')
       .then(({ data }) => setDocCategories(data || []));
   }, []);
 

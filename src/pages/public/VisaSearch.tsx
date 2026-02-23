@@ -36,6 +36,18 @@ const SORTS = [
   { value: 'cost_asc', label: 'Cost (Low to High)' },
 ];
 
+const formatCost = (visa: Visa) => {
+  if (visa.base_cost_aud !== null) {
+    if (visa.base_cost_aud === 0) return 'Free';
+    return new Intl.NumberFormat('en-AU', {
+      style: 'currency',
+      currency: 'AUD',
+      maximumFractionDigits: 0,
+    }).format(visa.base_cost_aud);
+  }
+  return visa.cost_aud || 'Free / Varies';
+};
+
 export function VisaSearch() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -370,7 +382,7 @@ export function VisaSearch() {
 
                             <div className="pt-4 border-t border-neutral-100 dark:border-neutral-700 flex items-center justify-between text-sm">
                                 <span className="text-neutral-600 dark:text-neutral-300 font-medium">
-                                    {visa.cost_aud ? visa.cost_aud : 'Free / Varies'}
+                                    {formatCost(visa)}
                                 </span>
                                 {visa.processing_time_range && (
                                     <span className="text-neutral-500 dark:text-neutral-400">
