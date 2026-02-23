@@ -85,18 +85,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // MOCK AUTH FOR TESTING (DEV ONLY)
-    if (import.meta.env.DEV && typeof window !== 'undefined' && window.location.search.includes('mock_auth=lawyer')) {
-        const mockUser = { id: 'mock-lawyer', email: 'lawyer@example.com', app_metadata: {}, user_metadata: {}, aud: 'authenticated', created_at: '' } as User;
-        const mockProfile = { id: 'mock-lawyer', role: 'lawyer' as UserRole, full_name: 'Mock Lawyer', is_active: true, created_at: '', updated_at: '', phone: null, avatar_url: null };
-
-        setUser(mockUser);
-        setProfile(mockProfile);
-        setSession({ user: mockUser, access_token: 'mock', refresh_token: 'mock', expires_in: 3600, token_type: 'bearer' });
-        setIsLoading(false);
-        return; // Skip real auth
-    }
-
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s);
       setUser(s?.user ?? null);
