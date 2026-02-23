@@ -13,6 +13,7 @@ interface AuthContextValue {
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signUpWithEmail: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
+  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   switchRole: (role: UserRole) => void;
@@ -27,6 +28,7 @@ const AuthContext = createContext<AuthContextValue>({
   signInWithGoogle: async () => {},
   signInWithEmail: async () => ({ error: null }),
   signUpWithEmail: async () => ({ error: null }),
+  resetPassword: async () => ({ error: null }),
   signOut: async () => {},
   refreshProfile: async () => {},
   switchRole: () => {},
@@ -45,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Helper to create a fake Supabase User object from a Profile
   const createMockUser = (p: Profile): User => ({
     id: p.id,
-    app_metadata: { provider: 'email', providers: ['email'], role: p.role },
+    app_metadata: { provider: 'email', providers: ['email'] },
     user_metadata: { full_name: p.full_name, avatar_url: p.avatar_url },
     aud: 'authenticated',
     confirmation_sent_at: new Date().toISOString(),
@@ -105,15 +107,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       setUser(s?.user ?? null);
+
       if (s?.user) {
-        (async () => {
-          await fetchProfile(s.user.id);
-        })();
+        if (event === 'SIGNED_IN') {
+          setIsLoading(true);
+          fetchProfile(s.user.id).finally(() => setIsLoading(false));
+        } else {
+          fetchProfile(s.user.id);
+        }
       } else {
         setProfile(null);
+        setIsLoading(false);
       }
     });
 
@@ -144,6 +151,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error };
   };
 
+  const resetPassword = async (email: string) => {
+    if (USE_MOCK) return { error: null };
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/update-password`,
+    });
+    return { error };
+  };
+
   const signOut = async () => {
     if (USE_MOCK) {
         // In mock mode, sign out might just reset to default or do nothing
@@ -160,13 +175,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) await fetchProfile(user.id);
   };
 
-  const role = (user?.app_metadata?.role as UserRole) || profile?.role || null;
+  const role = profile?.role || null;
 
   return (
     <AuthContext.Provider
       value={{
         session, user, profile, role, isLoading,
-        signInWithGoogle, signInWithEmail, signUpWithEmail,
+        signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword,
         signOut, refreshProfile, switchRole
       }}
     >
