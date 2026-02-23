@@ -90,9 +90,9 @@ Deno.serve(async (req) => {
       }
 
       // Verify visa exists
-      const { data: visa, error: visaError } = await supabase
+      const { data: visa, error: visaError } = await supabaseAdmin
         .from('visas')
-        .select('visa_subclass, name')
+        .select('subclass_number, name')
         .eq('id', visa_id)
         .single();
 
@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
         price_data: {
           currency: 'aud',
           product_data: {
-            name: `Premium Guide: ${visa.visa_subclass} - ${visa.name}`,
+            name: `Premium Guide: ${visa.subclass_number} - ${visa.name}`,
           },
           unit_amount: DEFAULT_VISA_PRICE_CENTS,
         },
@@ -120,7 +120,8 @@ Deno.serve(async (req) => {
       }
 
        // Fetch slot details
-       const { data: slot, error: slotError } = await supabase
+       const { data: slot, error: slotError } = await supabaseAdmin
+         .schema('lawyer')
          .from('consultation_slots')
          .select('*')
          .eq('id', slot_id)
@@ -133,7 +134,8 @@ Deno.serve(async (req) => {
        }
 
        // Fetch lawyer details
-       const { data: lawyer, error: lawyerError } = await supabase
+       const { data: lawyer, error: lawyerError } = await supabaseAdmin
+         .schema('lawyer')
          .from('profiles')
          .select('id, hourly_rate_cents, jurisdiction')
          .eq('id', lawyer_id)
@@ -152,7 +154,7 @@ Deno.serve(async (req) => {
        const totalCents = Math.round((rateCents / 60) * durationMinutes);
 
        // Create pending booking record
-       const { data: booking, error: bookingError } = await supabase
+       const { data: booking, error: bookingError } = await supabaseAdmin
          .from('bookings')
          .insert({
            user_id: user.id,
@@ -189,7 +191,7 @@ Deno.serve(async (req) => {
       cancelUrl = `${origin}/lawyers/${lawyer_id}`;
 
       // Reserve the slot
-      await supabase
+      await supabaseAdmin
         .schema('lawyer')
         .from('consultation_slots')
         .update({ is_reserved: true, reserved_until: new Date(Date.now() + 15 * 60 * 1000).toISOString() })
@@ -212,7 +214,7 @@ Deno.serve(async (req) => {
     });
 
     if (type === 'consultation' && metadata.booking_id) {
-        await supabase
+        await supabaseAdmin
           .from('bookings')
           .update({ stripe_checkout_session_id: session.id })
           .eq('id', metadata.booking_id);
