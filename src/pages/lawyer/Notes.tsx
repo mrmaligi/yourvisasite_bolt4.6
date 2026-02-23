@@ -1,61 +1,145 @@
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Plus, Search, Trash2, Save } from 'lucide-react';
+import { Plus, Search, Trash2, Save, Loader2 } from 'lucide-react';
 import { LawyerDashboardLayout } from '../../components/layout/LawyerDashboardLayout';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Textarea, Input } from '../../components/ui/Input';
 import { Skeleton } from '../../components/ui/Skeleton';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../components/ui/Toast';
 
 interface Note {
   id: string;
   title: string;
   content: string;
-  clientName?: string;
-  updatedAt: string;
+  client_id?: string; // UUID
+  created_at: string;
+  updated_at: string;
+  client?: {
+    full_name: string;
+  };
 }
 
-const MOCK_NOTES: Note[] = [
-  { id: '1', title: 'Consultation with Sarah', content: 'Discussed partner visa requirements...', clientName: 'Sarah Johnson', updatedAt: '2024-03-20T10:00:00' },
-  { id: '2', title: 'Document Review', content: 'Missing form 80 for Michael...', clientName: 'Michael Chen', updatedAt: '2024-03-19T14:30:00' },
-  { id: '3', title: 'General Strategy', content: 'Focus on skilled migration leads...', updatedAt: '2024-03-15T09:00:00' },
-];
-
 export function Notes() {
-  const [notes, setNotes] = useState<Note[]>(MOCK_NOTES);
-  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(MOCK_NOTES[0].id);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1000);
-    return () => clearTimeout(timer);
-  }, []);
+    if (user) {
+      fetchNotes();
+    } else {
+        // Mock data for testing if no user (or mock user)
+        // logic handled inside fetchNotes usually, or we rely on interception
+        if (typeof window !== 'undefined' && window.location.search.includes('mock_auth=lawyer')) {
+             fetchNotes();
+        }
+    }
+  }, [user]);
+
+  const fetchNotes = async () => {
+    try {
+      setLoading(true);
+      // If mock auth, we rely on the interceptor returning data for this query
+      const { data, error } = await supabase
+        .from('lawyer_notes')
+        .select('*, client:profiles(full_name)')
+        .eq('lawyer_id', user?.id || 'mock-lawyer')
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+      setNotes(data || []);
+      if (data && data.length > 0 && !selectedNoteId) {
+        setSelectedNoteId(data[0].id);
+      }
+    } catch (error) {
+      console.error('Error fetching notes:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load notes.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const selectedNote = notes.find(n => n.id === selectedNoteId);
 
   const handleUpdateNote = (field: keyof Note, value: string) => {
       if (!selectedNoteId) return;
-      setNotes(notes.map(n => n.id === selectedNoteId ? { ...n, [field]: value, updatedAt: new Date().toISOString() } : n));
+      setNotes(notes.map(n => n.id === selectedNoteId ? { ...n, [field]: value } : n));
   };
 
-  const handleDelete = (id: string) => {
-      setNotes(notes.filter(n => n.id !== id));
-      if (selectedNoteId === id) setSelectedNoteId(null);
+  const handleSave = async () => {
+    if (!selectedNote) return;
+    try {
+        setSaving(true);
+        const { error } = await supabase
+            .from('lawyer_notes')
+            .upsert({
+                id: selectedNote.id,
+                title: selectedNote.title,
+                content: selectedNote.content,
+                lawyer_id: user?.id || 'mock-lawyer',
+                updated_at: new Date().toISOString()
+            });
+
+        if (error) throw error;
+
+        toast({ title: 'Saved', description: 'Note saved successfully.' });
+        fetchNotes(); // Refresh to update sorting/timestamp
+    } catch (error) {
+        console.error('Error saving note:', error);
+        toast({ title: 'Error', description: 'Failed to save note.', variant: 'destructive' });
+    } finally {
+        setSaving(false);
+    }
   };
 
-  const handleNewNote = () => {
-      const newNote: Note = {
-          id: Date.now().toString(),
-          title: 'Untitled Note',
-          content: '',
-          updatedAt: new Date().toISOString()
-      };
-      setNotes([newNote, ...notes]);
-      setSelectedNoteId(newNote.id);
+  const handleDelete = async (id: string) => {
+      if (!confirm('Are you sure you want to delete this note?')) return;
+      try {
+          const { error } = await supabase.from('lawyer_notes').delete().eq('id', id);
+          if (error) throw error;
+
+          setNotes(notes.filter(n => n.id !== id));
+          if (selectedNoteId === id) setSelectedNoteId(null);
+          toast({ title: 'Deleted', description: 'Note deleted.' });
+      } catch (error) {
+          toast({ title: 'Error', description: 'Failed to delete note.', variant: 'destructive' });
+      }
   };
 
-  const filteredNotes = notes.filter(n => n.title.toLowerCase().includes(search.toLowerCase()) || n.clientName?.toLowerCase().includes(search.toLowerCase()));
+  const handleNewNote = async () => {
+      // Create a placeholder note in UI or DB?
+      // Better to create in DB to get ID
+      try {
+          const newNote = {
+              lawyer_id: user?.id || 'mock-lawyer',
+              title: 'Untitled Note',
+              content: '',
+          };
+          const { data, error } = await supabase.from('lawyer_notes').insert([newNote]).select().single();
+          if (error) throw error;
+
+          setNotes([data, ...notes]);
+          setSelectedNoteId(data.id);
+      } catch (error) {
+          toast({ title: 'Error', description: 'Failed to create note.', variant: 'destructive' });
+      }
+  };
+
+  const filteredNotes = notes.filter(n =>
+    n.title.toLowerCase().includes(search.toLowerCase()) ||
+    n.client?.full_name?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <LawyerDashboardLayout>
@@ -85,6 +169,8 @@ export function Notes() {
                     Array.from({ length: 3 }).map((_, i) => (
                         <Skeleton key={i} className="h-24 rounded-xl" />
                     ))
+                ) : filteredNotes.length === 0 ? (
+                    <div className="text-center py-8 text-neutral-500">No notes found.</div>
                 ) : (
                     filteredNotes.map(note => (
                         <div
@@ -99,11 +185,11 @@ export function Notes() {
                             <h3 className={`font-semibold ${selectedNoteId === note.id ? 'text-primary-900 dark:text-primary-100' : 'text-neutral-900 dark:text-white'}`}>
                                 {note.title}
                             </h3>
-                            {note.clientName && (
-                                <p className="text-xs text-neutral-500 mt-1">{note.clientName}</p>
+                            {note.client?.full_name && (
+                                <p className="text-xs text-neutral-500 mt-1">{note.client.full_name}</p>
                             )}
                             <p className="text-xs text-neutral-400 mt-2">
-                                {new Date(note.updatedAt).toLocaleDateString()}
+                                {new Date(note.updated_at || note.created_at).toLocaleDateString()}
                             </p>
                         </div>
                     ))
@@ -127,8 +213,8 @@ export function Notes() {
                                 <Button variant="ghost" className="text-red-500 hover:text-red-600" onClick={() => handleDelete(selectedNote.id)}>
                                     <Trash2 className="w-4 h-4" />
                                 </Button>
-                                <Button variant="secondary">
-                                    <Save className="w-4 h-4 mr-2" />
+                                <Button variant="secondary" onClick={handleSave} disabled={saving}>
+                                    {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                                     Save
                                 </Button>
                              </div>

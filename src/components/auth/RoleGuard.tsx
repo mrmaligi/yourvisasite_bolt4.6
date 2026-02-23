@@ -29,6 +29,11 @@ export function ProtectedRoute({
   }, [user, authLoading]);
 
   const fetchProfile = async () => {
+    if (import.meta.env.DEV && user?.id === 'mock-lawyer') {
+        setProfile({ role: 'lawyer', is_active: true, lawyer_profiles: [{ verification_status: 'approved' }] } as any);
+        setLoading(false);
+        return;
+    }
     try {
       const { data } = await supabase
         .from('profiles')
