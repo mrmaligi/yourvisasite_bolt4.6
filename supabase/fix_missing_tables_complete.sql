@@ -7,12 +7,23 @@
 -- 1. DOCUMENT CATEGORIES
 CREATE TABLE IF NOT EXISTS public.document_categories (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  key text NOT NULL UNIQUE,
   name text NOT NULL,
   description text,
-  sort_order integer NOT NULL DEFAULT 0,
+  tips text,
+  icon text NOT NULL DEFAULT 'file',
+  display_order integer NOT NULL DEFAULT 0,
+  explanation text,
+  examples text[],
   is_active boolean NOT NULL DEFAULT true,
-  created_at timestamptz NOT NULL DEFAULT now()
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
 );
+
+CREATE TRIGGER document_categories_updated_at
+  BEFORE UPDATE ON public.document_categories
+  FOR EACH ROW
+  EXECUTE FUNCTION extensions.moddatetime(updated_at);
 
 -- 2. VISA DOCUMENT REQUIREMENTS
 CREATE TABLE IF NOT EXISTS public.visa_document_requirements (
@@ -153,16 +164,20 @@ CREATE TRIGGER news_updated_at
 -- =====================================================
 
 -- Seed Document Categories
-INSERT INTO public.document_categories (name, description, sort_order) VALUES
-  ('Identity Documents', 'Passport, birth certificate, ID cards', 1),
-  ('Relationship Evidence', 'Marriage certificate, photos, joint documents', 2),
-  ('Financial Documents', 'Bank statements, tax returns, payslips', 3),
-  ('Employment Documents', 'Employment contracts, reference letters', 4),
-  ('Health & Character', 'Medical exams, police clearances', 5),
-  ('Education & Skills', 'Degrees, transcripts, skills assessments', 6),
-  ('Travel Documents', 'Previous visas, travel history', 7),
-  ('Sponsor Documents', 'Sponsor ID, proof of citizenship/residency', 8)
-ON CONFLICT DO NOTHING;
+INSERT INTO public.document_categories (key, name, description, icon, display_order) VALUES
+  ('identity', 'Identity Documents', 'Passport, birth certificate, ID cards', 'user', 1),
+  ('relationship', 'Relationship Evidence', 'Marriage certificate, photos, joint documents', 'users', 2),
+  ('financial', 'Financial Documents', 'Bank statements, tax returns, payslips', 'dollar-sign', 3),
+  ('employment', 'Employment Documents', 'Employment contracts, reference letters', 'briefcase', 4),
+  ('health_character', 'Health & Character', 'Medical exams, police clearances', 'activity', 5),
+  ('education', 'Education & Skills', 'Degrees, transcripts, skills assessments', 'book', 6),
+  ('travel', 'Travel Documents', 'Previous visas, travel history', 'plane', 7),
+  ('sponsor', 'Sponsor Documents', 'Sponsor ID, proof of citizenship/residency', 'user-check', 8)
+ON CONFLICT (key) DO UPDATE SET
+  name = EXCLUDED.name,
+  description = EXCLUDED.description,
+  icon = EXCLUDED.icon,
+  display_order = EXCLUDED.display_order;
 
 -- Seed Forum Categories
 INSERT INTO public.forum_categories (name, description, slug, sort_order) VALUES
