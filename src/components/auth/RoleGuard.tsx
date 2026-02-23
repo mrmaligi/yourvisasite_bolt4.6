@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../lib/supabase';
 import { Loading } from '../ui/Loading';
 
 interface ProtectedRouteProps {
@@ -15,36 +13,10 @@ export function ProtectedRoute({
   allowedRoles = ['user', 'lawyer', 'admin'],
   requireVerification = false 
 }: ProtectedRouteProps) {
-  const { user, isLoading: authLoading } = useAuth();
-  const [profile, setProfile] = useState<{ role: string; is_active: boolean } | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, profile, isLoading } = useAuth();
   const location = useLocation();
 
-  useEffect(() => {
-    if (user) {
-      fetchProfile();
-    } else if (!authLoading) {
-      setLoading(false);
-    }
-  }, [user, authLoading]);
-
-  const fetchProfile = async () => {
-    try {
-      const { data } = await supabase
-        .from('profiles')
-        .select('role, is_active, lawyer_profiles(verification_status)')
-        .eq('id', user?.id)
-        .single();
-
-      setProfile(data);
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (authLoading || loading) {
+  if (isLoading) {
     return <Loading fullScreen />;
   }
 
@@ -53,7 +25,8 @@ export function ProtectedRoute({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // No profile found
+  // Profile not found - likely new user needing registration completion or error
+  // Since AuthContext handles fetching, if isLoading is false and profile is null, it's missing.
   if (!profile) {
     return <Navigate to="/register" replace />;
   }
@@ -122,34 +95,26 @@ export function AdminOnly({ children }: { children: React.ReactNode }) {
 
 // Auto-redirect based on role
 export function RoleRedirect() {
-  const { user } = useAuth();
-  const [redirectPath, setRedirectPath] = useState<string | null>(null);
+  const { user, profile, isLoading } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      getRedirectPath();
-    }
-  }, [user]);
-
-  const getRedirectPath = async () => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user?.id)
-      .single();
-
-    if (data?.role === 'admin') {
-      setRedirectPath('/admin');
-    } else if (data?.role === 'lawyer') {
-      setRedirectPath('/lawyer/dashboard');
-    } else {
-      setRedirectPath('/dashboard');
-    }
-  };
-
-  if (!redirectPath) {
+  if (isLoading) {
     return <Loading fullScreen />;
   }
 
-  return <Navigate to={redirectPath} replace />;
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!profile) {
+    // Should generally not happen for logged in users unless data issue
+    return <Navigate to="/register" replace />;
+  }
+
+  if (profile.role === 'admin') {
+    return <Navigate to="/admin" replace />;
+  } else if (profile.role === 'lawyer') {
+    return <Navigate to="/lawyer/dashboard" replace />;
+  } else {
+    return <Navigate to="/dashboard" replace />;
+  }
 }

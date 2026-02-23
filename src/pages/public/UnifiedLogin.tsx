@@ -22,7 +22,7 @@ export function UnifiedLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const from = (location.state as any)?.from?.pathname || '/';
+  const from = (location.state as any)?.from?.pathname;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,33 +34,26 @@ export function UnifiedLogin() {
       
       if (error) throw error;
 
-      // Get user role
+      // Get user from session to ensure we have the ID
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) throw new Error('No user found');
+
+      // Get user role using ID for RLS compliance
       const { data: profile } = await supabase
         .from('profiles')
         .select('role, is_active, lawyer_profiles(verification_status)')
-        .eq('email', email)
+        .eq('id', user.id)
         .single();
 
-      if (!profile?.is_active) {
-        toast('error', 'Account disabled');
-        return;
-      }
-
-      // Validate role matches selected login type
-      if (loginType === 'admin' && profile.role !== 'admin') {
-        toast('error', 'You do not have admin access');
-        return;
-      }
-
-      if (loginType === 'lawyer' && profile.role !== 'lawyer') {
-        toast('error', 'You do not have lawyer access');
-        return;
-      }
-
-      if (loginType === 'user' && profile.role === 'lawyer') {
-        // Lawyers can also access user features
-        toast('success', 'Welcome back!');
+      if (!profile) {
+        // Fallback if profile missing
         navigate('/dashboard');
+        return;
+      }
+
+      if (!profile.is_active) {
+        toast('error', 'Account disabled');
         return;
       }
 

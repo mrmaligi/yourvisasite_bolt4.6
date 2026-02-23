@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('*, lawyer_profiles(verification_status)')
         .eq('id', currentUser.id)
         .maybeSingle();
 
@@ -98,13 +98,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       setUser(s?.user ?? null);
+
       if (s?.user) {
-        fetchOrCreateProfile(s.user);
+        // For sign in events, we want to ensure loading state is handled
+        if (event === 'SIGNED_IN') {
+          setIsLoading(true);
+          fetchOrCreateProfile(s.user).finally(() => setIsLoading(false));
+        } else {
+          // For other events (like token refresh), update in background
+          // or if profile is missing, fetch it
+          if (!profile) {
+            fetchOrCreateProfile(s.user);
+          }
+        }
       } else {
         setProfile(null);
+        if (event === 'SIGNED_OUT') {
+          setIsLoading(false);
+        }
       }
     });
 
