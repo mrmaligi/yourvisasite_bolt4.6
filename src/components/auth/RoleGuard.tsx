@@ -28,7 +28,7 @@ export function ProtectedRoute({
   // Profile not found - likely new user needing registration completion or error
   // Since AuthContext handles fetching, if isLoading is false and profile is null, it's missing.
   if (!profile) {
-    return <Navigate to="/register" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   // Account disabled

@@ -32,7 +32,13 @@ export function UnifiedLogin() {
       // Attempt sign in
       const { error } = await signIn(email, password);
       
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('Email not confirmed')) {
+          toast('info', 'Please check your email to confirm your account.');
+          return;
+        }
+        throw error;
+      }
 
       // Get user from session to ensure we have the ID
       const { data: { user } } = await supabase.auth.getUser();
@@ -40,14 +46,27 @@ export function UnifiedLogin() {
       if (!user) throw new Error('No user found');
 
       // Get user role using ID for RLS compliance
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role, is_active, lawyer_profiles(verification_status)')
-        .eq('id', user.id)
-        .single();
+      // Retry logic to handle race condition with profile creation trigger
+      let profile = null;
+      let attempts = 0;
+      while (attempts < 3 && !profile) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('role, is_active, lawyer_profiles(verification_status)')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (data) {
+          profile = data;
+        } else {
+          attempts++;
+          if (attempts < 3) await new Promise(r => setTimeout(r, 1000));
+        }
+      }
 
       if (!profile) {
         // Fallback if profile missing
+        console.warn('Profile not found during login redirect');
         navigate('/dashboard');
         return;
       }

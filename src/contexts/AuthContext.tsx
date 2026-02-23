@@ -47,40 +47,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchOrCreateProfile = async (currentUser: User) => {
+  const fetchProfile = async (currentUser: User) => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*, lawyer_profiles(verification_status)')
-        .eq('id', currentUser.id)
-        .maybeSingle();
+      let attempts = 0;
+      const maxAttempts = 3;
 
-      if (error) {
-        console.error('Error fetching profile:', error);
-        return;
-      }
-
-      if (data) {
-        setProfile(data);
-      } else {
-        const { data: createdProfile, error: createError } = await supabase
+      while (attempts < maxAttempts) {
+        const { data, error } = await supabase
           .from('profiles')
-          .insert([{
-            id: currentUser.id,
-            role: 'user' as UserRole,
-            full_name: currentUser.user_metadata?.full_name || '',
-          }])
-          .select()
-          .single();
+          .select('*, lawyer_profiles(verification_status)')
+          .eq('id', currentUser.id)
+          .maybeSingle();
 
-        if (createError) {
-          console.error('Error creating profile:', createError);
-        } else {
-          setProfile(createdProfile);
+        if (error) {
+          console.error('Error fetching profile:', error);
+          return;
+        }
+
+        if (data) {
+          setProfile(data);
+          return;
+        }
+
+        // Wait before retrying (wait for trigger to create profile)
+        attempts++;
+        if (attempts < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
+
+      console.warn('Profile not found after retries. It should be created by trigger.');
+      setProfile(null);
     } catch (err) {
-      console.error('Unexpected error in fetchOrCreateProfile:', err);
+      console.error('Unexpected error in fetchProfile:', err);
     }
   };
 
@@ -89,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
-        fetchOrCreateProfile(s.user).finally(() => setIsLoading(false));
+        fetchProfile(s.user).finally(() => setIsLoading(false));
       } else {
         setIsLoading(false);
       }
@@ -106,12 +105,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // For sign in events, we want to ensure loading state is handled
         if (event === 'SIGNED_IN') {
           setIsLoading(true);
-          fetchOrCreateProfile(s.user).finally(() => setIsLoading(false));
+          fetchProfile(s.user).finally(() => setIsLoading(false));
         } else {
           // For other events (like token refresh), update in background
           // or if profile is missing, fetch it
           if (!profile) {
-            fetchOrCreateProfile(s.user);
+            fetchProfile(s.user);
           }
         }
       } else {
@@ -155,7 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshProfile = async () => {
-    if (user) await fetchOrCreateProfile(user);
+    if (user) await fetchProfile(user);
   };
 
   const role = profile?.role || null;
