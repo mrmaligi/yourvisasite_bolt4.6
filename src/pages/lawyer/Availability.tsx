@@ -55,6 +55,7 @@ export function Availability() {
 
   const fetchSlots = async (lid: string) => {
     const { data } = await supabase
+      .schema('lawyer')
       .from('consultation_slots')
       .select('*')
       .eq('lawyer_id', lid)
@@ -90,6 +91,7 @@ export function Availability() {
 
     setSaving(true);
     const { error } = await supabase
+      .schema('lawyer')
       .from('consultation_slots')
       .insert({ lawyer_id: lawyerId, start_time: startTime, end_time: endTime });
     setSaving(false);
@@ -106,7 +108,7 @@ export function Availability() {
 
   const handleDelete = async (id: string) => {
     if (!lawyerId) return;
-    await supabase.from('consultation_slots').delete().eq('id', id);
+    await supabase.schema('lawyer').from('consultation_slots').delete().eq('id', id);
     toast('success', 'Slot removed');
     fetchSlots(lawyerId);
   };
