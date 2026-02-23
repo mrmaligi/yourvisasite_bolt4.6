@@ -189,11 +189,11 @@ CREATE TABLE IF NOT EXISTS public.eligibility_checks (
 );
 
 -- 9. NEWS ARTICLES (if not exists)
-CREATE TABLE IF NOT EXISTS public.news (
+CREATE TABLE IF NOT EXISTS public.news_articles (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   title text NOT NULL,
   slug text UNIQUE NOT NULL,
-  content text NOT NULL DEFAULT '',
+  body text NOT NULL DEFAULT '',
   excerpt text,
   image_url text,
   author_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
@@ -204,7 +204,7 @@ CREATE TABLE IF NOT EXISTS public.news (
 );
 
 CREATE TRIGGER news_updated_at
-  BEFORE UPDATE ON public.news
+  BEFORE UPDATE ON public.news_articles
   FOR EACH ROW
   EXECUTE FUNCTION extensions.moddatetime(updated_at);
 
@@ -249,7 +249,7 @@ ALTER TABLE public.forum_posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.consultations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.eligibility_checks ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.news ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.news_articles ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS Policies
 CREATE POLICY "Document categories are viewable by everyone" ON public.document_categories FOR SELECT USING (true);
@@ -259,7 +259,7 @@ CREATE POLICY "Forum topics are viewable by everyone" ON public.forum_topics FOR
 CREATE POLICY "Forum posts are viewable by everyone" ON public.forum_posts FOR SELECT USING (true);
 CREATE POLICY "Users can view own payments" ON public.payments FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can view own eligibility checks" ON public.eligibility_checks FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "News is viewable by everyone" ON public.news FOR SELECT USING (is_published = true);
+CREATE POLICY "News is viewable by everyone" ON public.news_articles FOR SELECT USING (is_published = true);
 
 -- =====================================================
 -- VERIFICATION QUERY (Run after to check)
