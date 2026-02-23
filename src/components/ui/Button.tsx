@@ -1,57 +1,65 @@
 import { type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
-import { useRipple, Ripple } from './Ripple';
+import { Link } from 'react-router-dom';
 
-type Variant = 'primary' | 'secondary' | 'danger' | 'ghost';
-type Size = 'sm' | 'md' | 'lg';
+export type ButtonVariant = 'primary' | 'secondary' | 'accent' | 'ghost' | 'danger';
+export type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: Variant;
-  size?: Size;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   loading?: boolean;
+  to?: string;
   children: ReactNode;
 }
 
-const variantClasses: Record<Variant, string> = {
+const variantClasses: Record<ButtonVariant, string> = {
   primary: 'btn-primary',
   secondary: 'btn-secondary',
-  danger: 'btn-danger',
+  accent: 'btn-accent',
   ghost: 'btn-ghost',
+  danger: 'btn-danger',
 };
 
-const sizeClasses: Record<Size, string> = {
-  sm: 'text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]',
-  md: 'text-sm px-5 py-3 min-h-[44px]',
-  lg: 'text-base px-6 py-3 min-h-[48px]',
+const sizeClasses: Record<ButtonSize, string> = {
+  sm: 'text-xs px-4 py-2 min-h-[40px]',
+  md: 'text-sm px-6 py-3 min-h-[48px]',
+  lg: 'text-base px-8 py-4 min-h-[56px]',
 };
 
 export function Button({
   variant = 'primary',
   size = 'md',
   loading = false,
+  to,
   children,
   disabled,
   className = '',
-  onMouseDown,
   ...props
 }: ButtonProps) {
-  const { ripples, addRipple } = useRipple();
+  const commonClasses = `${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
+
+  if (to) {
+    return (
+      <Link
+        to={to}
+        className={`${commonClasses} inline-flex items-center justify-center`}
+        {...(props as any)}
+      >
+        {loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+        {children}
+      </Link>
+    );
+  }
 
   return (
     <button
-      className={`${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={commonClasses}
       disabled={disabled || loading}
-      onMouseDown={(e) => {
-        if (!disabled && !loading) {
-          addRipple(e);
-        }
-        onMouseDown?.(e);
-      }}
       {...props}
     >
-      {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+      {loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
       {children}
-      <Ripple ripples={ripples} />
     </button>
   );
 }

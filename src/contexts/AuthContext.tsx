@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { type Session, type User, type AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import type { Profile, UserRole } from '../types/database';
+import { MOCK_USERS, MOCK_ADMINS, MOCK_LAWYER_USERS, USE_MOCK } from '../lib/mockData';
 
 interface AuthContextValue {
   session: Session | null;
@@ -9,16 +10,12 @@ interface AuthContextValue {
   profile: Profile | null;
   role: UserRole | null;
   isLoading: boolean;
-  isAuthenticated: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
-  signOut: () => Promise<void>;
-  refreshProfile: () => Promise<void>;
-
-  // Aliases/Compat
+  signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signUpWithEmail: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
-  signInWithGoogle: () => Promise<void>;
+  signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
+  switchRole: (role: UserRole) => void;
 }
 
 const AuthContext = createContext<AuthContextValue>({
@@ -27,14 +24,12 @@ const AuthContext = createContext<AuthContextValue>({
   profile: null,
   role: null,
   isLoading: true,
-  isAuthenticated: false,
-  signIn: async () => ({ error: null }),
-  signUp: async () => ({ error: null }),
-  signOut: async () => {},
-  refreshProfile: async () => {},
+  signInWithGoogle: async () => {},
   signInWithEmail: async () => ({ error: null }),
   signUpWithEmail: async () => ({ error: null }),
-  signInWithGoogle: async () => {},
+  signOut: async () => {},
+  refreshProfile: async () => {},
+  switchRole: () => {},
 });
 
 export function useAuth() {
@@ -47,74 +42,76 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchOrCreateProfile = async (currentUser: User) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', currentUser.id)
-        .maybeSingle();
+  // Helper to create a fake Supabase User object from a Profile
+  const createMockUser = (p: Profile): User => ({
+    id: p.id,
+    app_metadata: { provider: 'email', providers: ['email'], role: p.role },
+    user_metadata: { full_name: p.full_name, avatar_url: p.avatar_url },
+    aud: 'authenticated',
+    confirmation_sent_at: new Date().toISOString(),
+    recovery_sent_at: new Date().toISOString(),
+    email: `${p.role}@example.com`,
+    phone: p.phone || '',
+    created_at: p.created_at,
+    confirmed_at: p.created_at,
+    last_sign_in_at: new Date().toISOString(),
+    role: 'authenticated',
+    updated_at: new Date().toISOString(),
+    is_anonymous: false
+  });
 
-      if (error) {
-        console.error('Error fetching profile:', error);
-        return;
-      }
+  const switchRole = (newRole: UserRole) => {
+    let mockProfile: Profile;
+    if (newRole === 'admin') mockProfile = MOCK_ADMINS[0];
+    else if (newRole === 'lawyer') mockProfile = MOCK_LAWYER_USERS[0];
+    else mockProfile = MOCK_USERS[0];
 
-      if (data) {
-        setProfile(data);
-      } else {
-        const { data: createdProfile, error: createError } = await supabase
-          .from('profiles')
-          .insert([{
-            id: currentUser.id,
-            role: 'user' as UserRole,
-            full_name: currentUser.user_metadata?.full_name || '',
-          }])
-          .select()
-          .single();
+    const mockUser = createMockUser(mockProfile);
+    setUser(mockUser);
+    setProfile(mockProfile);
+    setSession({
+        access_token: 'mock-token',
+        token_type: 'bearer',
+        expires_in: 3600,
+        refresh_token: 'mock-refresh',
+        user: mockUser,
+      });
+  };
 
-        if (createError) {
-          console.error('Error creating profile:', createError);
-        } else {
-          setProfile(createdProfile);
-        }
-      }
-    } catch (err) {
-      console.error('Unexpected error in fetchOrCreateProfile:', err);
-    }
+  const fetchProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle();
+    setProfile(data);
   };
 
   useEffect(() => {
-    // MOCK AUTH FOR TESTING (DEV ONLY)
-    if (import.meta.env.DEV && typeof window !== 'undefined' && window.location.search.includes('mock_auth=lawyer')) {
-        const mockUser = { id: 'mock-lawyer', email: 'lawyer@example.com', app_metadata: {}, user_metadata: {}, aud: 'authenticated', created_at: '' } as User;
-        const mockProfile = { id: 'mock-lawyer', role: 'lawyer' as UserRole, full_name: 'Mock Lawyer', is_active: true, created_at: '', updated_at: '', phone: null, avatar_url: null };
-
-        setUser(mockUser);
-        setProfile(mockProfile);
-        setSession({ user: mockUser, access_token: 'mock', refresh_token: 'mock', expires_in: 3600, token_type: 'bearer' });
-        setIsLoading(false);
-        return; // Skip real auth
+    if (USE_MOCK) {
+      // Initialize with default mock user (User role)
+      switchRole('user');
+      setIsLoading(false);
+      return;
     }
 
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
-        fetchOrCreateProfile(s.user).finally(() => setIsLoading(false));
+        fetchProfile(s.user.id).finally(() => setIsLoading(false));
       } else {
         setIsLoading(false);
       }
-    }).catch((err) => {
-      console.error('Error getting session:', err);
-      setIsLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
-        fetchOrCreateProfile(s.user);
+        (async () => {
+          await fetchProfile(s.user.id);
+        })();
       } else {
         setProfile(null);
       }
@@ -123,12 +120,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signInWithGoogle = async () => {
+    if (USE_MOCK) return;
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/login` },
+    });
+  };
+
+  const signInWithEmail = async (email: string, password: string) => {
+    if (USE_MOCK) return { error: null };
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error };
   };
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUpWithEmail = async (email: string, password: string, fullName: string) => {
+    if (USE_MOCK) return { error: null };
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -138,43 +145,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    if (USE_MOCK) {
+        // In mock mode, sign out might just reset to default or do nothing
+        // Let's reset to User role
+        switchRole('user');
+        return;
+    }
     await supabase.auth.signOut();
     setProfile(null);
-    setUser(null);
-    setSession(null);
-  };
-
-  const signInWithGoogle = async () => {
-    const redirectTo = (import.meta.env.VITE_APP_URL || window.location.origin) + '/login';
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo },
-    });
   };
 
   const refreshProfile = async () => {
-    if (user) await fetchOrCreateProfile(user);
+    if (USE_MOCK) return; // No real backend refresh
+    if (user) await fetchProfile(user.id);
   };
 
-  const role = profile?.role || null;
-  const isAuthenticated = !!user;
+  const role = (user?.app_metadata?.role as UserRole) || profile?.role || null;
 
   return (
     <AuthContext.Provider
       value={{
-        session,
-        user,
-        profile,
-        role,
-        isLoading,
-        isAuthenticated,
-        signIn,
-        signUp,
-        signOut,
-        refreshProfile,
-        signInWithEmail: signIn,
-        signUpWithEmail: signUp,
-        signInWithGoogle,
+        session, user, profile, role, isLoading,
+        signInWithGoogle, signInWithEmail, signUpWithEmail,
+        signOut, refreshProfile, switchRole
       }}
     >
       {children}

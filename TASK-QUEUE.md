@@ -21,6 +21,7 @@
 | T26: Mobile Bottom Nav | 13333652296048624704 | 2026-02-19 07:22 | MERGED |
 | T27: Touch UI (44px + Ripple) | 15745391727880445291 | 2026-02-19 07:23 | MERGED |
 | T28: Visa Favorites | 5127850182011259884 | 2026-02-19 07:33 | MERGED |
+| T91: Lawyer Portal Expansion (50 pages) | lawyer-portal-expansion-17209539114095546050 | 2026-02-21 10:00 | MERGED |
 
 ## TASK QUEUE (fire these next, in order)
 Each cron job picks the FIRST task with status=QUEUED, fires it to Jules, and marks it FIRED.

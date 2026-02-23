@@ -38,7 +38,7 @@ export function VirtualizedVisaList({
   className = '',
 }: VirtualizedVisaListProps) {
   return (
-    <div className={`w-full h-full ${className}`}>
+    <div className={`w-full h-full min-h-[500px] flex-1 ${className}`}>
       <AutoSizer renderProp={({ height, width }: { height: number | undefined; width: number | undefined }) => {
           if (width === undefined || height === undefined) return null;
 

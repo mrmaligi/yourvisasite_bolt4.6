@@ -4,7 +4,6 @@ import { ArrowLeft } from 'lucide-react';
 import { ForumTopicList } from '../../components/forum/ForumTopicList';
 import { ForumNewTopic } from '../../components/forum/ForumNewTopic';
 import { Card, CardBody } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Tabs';
 import { supabase } from '../../lib/supabase';
 import type { ForumCategory } from '../../types/database';
@@ -15,18 +14,18 @@ export function ForumCategoryPage() {
   const [activeTab, setActiveTab] = useState('topics');
 
   useEffect(() => {
+    const fetchCategory = async () => {
+      const { data } = await supabase
+        .from('forum_categories')
+        .select('*')
+        .eq('slug', categorySlug)
+        .single();
+
+      setCategory(data);
+    };
+
     fetchCategory();
   }, [categorySlug]);
-
-  const fetchCategory = async () => {
-    const { data } = await supabase
-      .from('forum_categories')
-      .select('*')
-      .eq('slug', categorySlug)
-      .single();
-
-    setCategory(data);
-  };
 
   if (!category) {
     return (

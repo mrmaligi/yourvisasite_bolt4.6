@@ -339,18 +339,25 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const { data: userData, error: userError } = await supabase
-      .from('profiles')
-      .select('email, full_name')
-      .eq('id', userId)
-      .single();
+    const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(userId);
 
-    if (userError || !userData?.email) {
+    if (userError || !user?.email) {
       console.error('User lookup error:', userError);
       return new Response(
         JSON.stringify({ error: 'User not found or no email' }),
         { status: 404, headers: { 'Content-Type': 'application/json' } }
       );
+    }
+
+    // Get full name from metadata or profiles
+    let fullName = user.user_metadata?.full_name;
+    if (!fullName) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', userId)
+            .single();
+        fullName = profile?.full_name;
     }
 
     // Check notification preferences
@@ -388,13 +395,13 @@ Deno.serve(async (req) => {
 
     const emailContent = template({
       ...data,
-      userName: userData.full_name || 'there',
+      userName: fullName || 'there',
       preferencesUrl: `${Deno.env.get('VITE_APP_URL') || 'https://visabuild.com'}/settings/notifications`, // fallback
     });
 
     // Send email
     const result = await sendEmail({
-      to: userData.email,
+      to: user.email,
       ...emailContent,
     });
 

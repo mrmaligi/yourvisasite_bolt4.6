@@ -15,41 +15,45 @@ export function ProtectedRoute({
   allowedRoles = ['user', 'lawyer', 'admin'],
   requireVerification = false 
 }: ProtectedRouteProps) {
-  const { user, isLoading: authLoading } = useAuth();
-  const [profile, setProfile] = useState<{ role: string; is_active: boolean } | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, profile, isLoading: authLoading } = useAuth();
   const location = useLocation();
+  const [lawyerStatus, setLawyerStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
+  const [checkingLawyer, setCheckingLawyer] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      fetchProfile();
-    } else if (!authLoading) {
-      setLoading(false);
-    }
-  }, [user, authLoading]);
+    let mounted = true;
 
-  const fetchProfile = async () => {
-    if (import.meta.env.DEV && user?.id === 'mock-lawyer') {
-        setProfile({ role: 'lawyer', is_active: true, lawyer_profiles: [{ verification_status: 'approved' }] } as any);
-        setLoading(false);
-        return;
-    }
-    try {
-      const { data } = await supabase
-        .from('profiles')
-        .select('role, is_active, lawyer_profiles(verification_status)')
-        .eq('id', user?.id)
-        .single();
+    const checkLawyerStatus = async () => {
+      if (profile?.role === 'lawyer' && requireVerification && user) {
+        setCheckingLawyer(true);
+        try {
+          const { data } = await supabase
+            .from('lawyer_profiles')
+            .select('verification_status')
+            .eq('profile_id', user.id)
+            .single();
 
-      setProfile(data);
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+          if (mounted && data) {
+            setLawyerStatus(data.verification_status as any);
+          }
+        } catch (error) {
+          console.error('Error checking lawyer status:', error);
+        } finally {
+          if (mounted) {
+            setCheckingLawyer(false);
+          }
+        }
+      }
+    };
 
-  if (authLoading || loading) {
+    checkLawyerStatus();
+
+    return () => {
+      mounted = false;
+    };
+  }, [profile, requireVerification, user]);
+
+  if (authLoading || checkingLawyer) {
     return <Loading fullScreen />;
   }
 
@@ -64,7 +68,7 @@ export function ProtectedRoute({
   }
 
   // Account disabled
-  if (!profile.is_active) {
+  if (profile.is_active === false) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
         <div className="text-center p-8">
@@ -91,8 +95,7 @@ export function ProtectedRoute({
 
   // Check lawyer verification
   if (requireVerification && profile.role === 'lawyer') {
-    const lawyerProfile = (profile as any).lawyer_profiles?.[0];
-    if (!lawyerProfile || lawyerProfile.verification_status !== 'approved') {
+    if (!lawyerStatus || lawyerStatus !== 'approved') {
       return <Navigate to="/lawyer/pending" replace />;
     }
   }
@@ -127,32 +130,27 @@ export function AdminOnly({ children }: { children: React.ReactNode }) {
 
 // Auto-redirect based on role
 export function RoleRedirect() {
-  const { user } = useAuth();
+  const { user, profile, isLoading: authLoading } = useAuth();
   const [redirectPath, setRedirectPath] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) {
-      getRedirectPath();
+    if (authLoading) return;
+    
+    if (user && profile) {
+      if (profile.role === 'admin') {
+        setRedirectPath('/admin');
+      } else if (profile.role === 'lawyer') {
+        setRedirectPath('/lawyer/dashboard');
+      } else {
+        setRedirectPath('/dashboard');
+      }
+    } else if (user && !profile) {
+      // User exists but no profile - redirect to register to create profile
+      setRedirectPath('/register');
     }
-  }, [user]);
+  }, [user, profile, authLoading]);
 
-  const getRedirectPath = async () => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user?.id)
-      .single();
-
-    if (data?.role === 'admin') {
-      setRedirectPath('/admin');
-    } else if (data?.role === 'lawyer') {
-      setRedirectPath('/lawyer/dashboard');
-    } else {
-      setRedirectPath('/dashboard');
-    }
-  };
-
-  if (!redirectPath) {
+  if (authLoading || !redirectPath) {
     return <Loading fullScreen />;
   }
 

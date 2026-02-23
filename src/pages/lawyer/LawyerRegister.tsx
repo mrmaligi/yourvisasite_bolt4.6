@@ -36,7 +36,7 @@ export function LawyerRegister() {
       if (verificationFile) {
         const path = `${user.id}/${Date.now()}_${verificationFile.name}`;
         const { error: uploadError } = await supabase.storage
-          .from('lawyer-verification')
+          .from('lawyer-credentials')
           .upload(path, verificationFile, {
             cacheControl: '3600',
             upsert: false

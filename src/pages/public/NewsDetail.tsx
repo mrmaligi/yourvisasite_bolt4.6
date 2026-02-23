@@ -8,6 +8,7 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
+import { Breadcrumbs } from '../../components/ui/Breadcrumbs';
 import type { NewsArticle, NewsComment } from '../../types/database';
 
 interface CommentWithAuthor extends NewsComment {
@@ -167,10 +168,14 @@ export function NewsDetail() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <Link to="/news" className="inline-flex items-center gap-1.5 text-sm text-primary-600 hover:underline mb-8">
-        <ArrowLeft className="w-3.5 h-3.5" />
-        Back to News
-      </Link>
+      <Breadcrumbs
+        className="mb-8"
+        items={[
+          { label: 'Home', to: '/' },
+          { label: 'News', to: '/news' },
+          { label: article.title }
+        ]}
+      />
 
       <div className="grid md:grid-cols-3 gap-8">
         {/* Main Content */}

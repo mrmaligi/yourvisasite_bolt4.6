@@ -1,6 +1,7 @@
+
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { HelmetProvider } from 'react-helmet-async';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
@@ -8,7 +9,6 @@ import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { GlobalSearchProvider } from './contexts/GlobalSearchContext';
 import { GlobalSearch } from './components/GlobalSearch';
 import { PublicLayout } from './components/layout/PublicLayout';
-import { UserDashboardLayout } from './components/layout/UserDashboardLayout';
 import { ProtectedRoute, RoleRedirect } from './components/auth/RoleGuard';
 import { Loading } from './components/ui/Loading';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
@@ -41,17 +41,6 @@ const ForumTopicPage = lazy(() => import('./pages/public/ForumTopicPage').then(m
 const LawyerRegister = lazy(() => import('./pages/lawyer/LawyerRegister').then(m => ({ default: m.LawyerRegister })));
 const LawyerPending = lazy(() => import('./pages/lawyer/LawyerPending').then(m => ({ default: m.LawyerPending })));
 
-const Resources = lazy(() => import('./pages/public/Resources').then(m => ({ default: m.Resources })));
-const Guides = lazy(() => import('./pages/public/Guides').then(m => ({ default: m.Guides })));
-const Checklists = lazy(() => import('./pages/public/Checklists').then(m => ({ default: m.Checklists })));
-const Templates = lazy(() => import('./pages/public/Templates').then(m => ({ default: m.Templates })));
-const Webinars = lazy(() => import('./pages/public/Webinars').then(m => ({ default: m.Webinars })));
-const Podcast = lazy(() => import('./pages/public/Podcast').then(m => ({ default: m.Podcast })));
-const Events = lazy(() => import('./pages/public/Events').then(m => ({ default: m.Events })));
-const Partners = lazy(() => import('./pages/public/Partners').then(m => ({ default: m.Partners })));
-const Press = lazy(() => import('./pages/public/Press').then(m => ({ default: m.Press })));
-const ApiDocs = lazy(() => import('./pages/public/ApiDocs').then(m => ({ default: m.ApiDocs })));
-
 const UserDashboard = lazy(() => import('./pages/user/UserDashboard').then(m => ({ default: m.UserDashboard })));
 const MyVisas = lazy(() => import('./pages/user/MyVisas').then(m => ({ default: m.MyVisas })));
 const MyDocuments = lazy(() => import('./pages/user/MyDocuments').then(m => ({ default: m.MyDocuments })));
@@ -63,17 +52,6 @@ const UserSettings = lazy(() => import('./pages/user/UserSettings').then(m => ({
 const SavedVisas = lazy(() => import('./pages/user/SavedVisas').then(m => ({ default: m.SavedVisas })));
 const Referrals = lazy(() => import('./pages/user/Referrals').then(m => ({ default: m.Referrals })));
 
-const Welcome = lazy(() => import('./pages/user/Welcome').then(m => ({ default: m.Welcome })));
-const Tour = lazy(() => import('./pages/user/Tour').then(m => ({ default: m.Tour })));
-const GettingStarted = lazy(() => import('./pages/user/GettingStarted').then(m => ({ default: m.GettingStarted })));
-const VisaRoadmap = lazy(() => import('./pages/user/VisaRoadmap').then(m => ({ default: m.VisaRoadmap })));
-const DocumentChecklist = lazy(() => import('./pages/user/DocumentChecklist').then(m => ({ default: m.DocumentChecklist })));
-const ApplicationTimeline = lazy(() => import('./pages/user/ApplicationTimeline').then(m => ({ default: m.ApplicationTimeline })));
-const DeadlineAlerts = lazy(() => import('./pages/user/DeadlineAlerts').then(m => ({ default: m.DeadlineAlerts })));
-const UserProfile = lazy(() => import('./pages/user/Profile').then(m => ({ default: m.Profile })));
-const Notifications = lazy(() => import('./pages/user/Notifications').then(m => ({ default: m.Notifications })));
-const Billing = lazy(() => import('./pages/user/Billing').then(m => ({ default: m.Billing })));
-
 const PortalLanding = lazy(() => import('./pages/lawyer/PortalLanding').then(m => ({ default: m.PortalLanding })));
 const LawyerDashboard = lazy(() => import('./pages/lawyer/LawyerDashboard').then(m => ({ default: m.LawyerDashboard })));
 const LawyerClients = lazy(() => import('./pages/lawyer/Clients').then(m => ({ default: m.Clients })));
@@ -84,18 +62,10 @@ const LawyerTracker = lazy(() => import('./pages/lawyer/LawyerTracker').then(m =
 const LawyerNews = lazy(() => import('./pages/lawyer/LawyerNews').then(m => ({ default: m.LawyerNews })));
 const LawyerMarketplace = lazy(() => import('./pages/lawyer/Marketplace').then(m => ({ default: m.Marketplace })));
 const LawyerSettings = lazy(() => import('./pages/lawyer/LawyerSettings').then(m => ({ default: m.LawyerSettings })));
-const LawyerTeam = lazy(() => import('./pages/lawyer/Team').then(m => ({ default: m.Team })));
-const LawyerCases = lazy(() => import('./pages/lawyer/Cases').then(m => ({ default: m.Cases })));
-const LawyerDocuments = lazy(() => import('./pages/lawyer/Documents').then(m => ({ default: m.Documents })));
-const LawyerNotes = lazy(() => import('./pages/lawyer/Notes').then(m => ({ default: m.Notes })));
-const LawyerLeadCapture = lazy(() => import('./pages/lawyer/LeadCapture').then(m => ({ default: m.LeadCapture })));
-const LawyerTestimonials = lazy(() => import('./pages/lawyer/Testimonials').then(m => ({ default: m.Testimonials })));
-const LawyerClientDetail = lazy(() => import('./pages/lawyer/ClientDetail').then(m => ({ default: m.ClientDetail })));
+
+const LawyerRoutes = lazy(() => import('./routes/LawyerRoutes').then(m => ({ default: m.LawyerRoutes })));
 
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
-const AdminContent = lazy(() => import('./pages/admin/Content').then(m => ({ default: m.Content })));
-const AdminPages = lazy(() => import('./pages/admin/Pages').then(m => ({ default: m.Pages })));
-const AdminBlog = lazy(() => import('./pages/admin/Blog').then(m => ({ default: m.Blog })));
 const AdminActivityLog = lazy(() => import('./pages/admin/ActivityLog').then(m => ({ default: m.ActivityLog })));
 const UserManagement = lazy(() => import('./pages/admin/UserManagement').then(m => ({ default: m.UserManagement })));
 const LawyerManagement = lazy(() => import('./pages/admin/LawyerManagement').then(m => ({ default: m.LawyerManagement })));
@@ -108,13 +78,17 @@ const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagement
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings').then(m => ({ default: m.AdminSettings })));
 const YouTubeManagement = lazy(() => import('./pages/admin/YouTubeManagement').then(m => ({ default: m.YouTubeManagement })));
 
+const UserRoutes = lazy(() => import('./routes/UserRoutes').then(m => ({ default: m.UserRoutes })));
+
+const queryClient = new QueryClient();
+
 export default function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <HelmetProvider>
-        <ToastProvider>
-          <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ToastProvider>
+            <ErrorBoundary>
             <PWAInstallPrompt />
             <BrowserRouter>
               <GlobalSearchProvider>
@@ -149,17 +123,6 @@ export default function App() {
                     <Route path="forum" element={<ForumHomePage />} />
                     <Route path="forum/:categorySlug" element={<ForumCategoryPage />} />
                     <Route path="forum/:categorySlug/:topicSlug" element={<ForumTopicPage />} />
-
-                    <Route path="resources" element={<Resources />} />
-                    <Route path="resources/guides" element={<Guides />} />
-                    <Route path="resources/checklists" element={<Checklists />} />
-                    <Route path="resources/templates" element={<Templates />} />
-                    <Route path="resources/webinars" element={<Webinars />} />
-                    <Route path="resources/podcast" element={<Podcast />} />
-                    <Route path="resources/events" element={<Events />} />
-                    <Route path="partners" element={<Partners />} />
-                    <Route path="press" element={<Press />} />
-                    <Route path="api-docs" element={<ApiDocs />} />
                   </Route>
 
                   {/* User Routes - Each has its own layout */}
@@ -174,20 +137,6 @@ export default function App() {
                   <Route path="dashboard/settings" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserSettings /></ProtectedRoute>} />
                   <Route path="dashboard/referrals" element={<ProtectedRoute allowedRoles={['user', 'admin']}><Referrals /></ProtectedRoute>} />
 
-                  {/* New User Pages with Layout */}
-                  <Route element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserDashboardLayout /></ProtectedRoute>}>
-                    <Route path="dashboard/welcome" element={<Welcome />} />
-                    <Route path="dashboard/tour" element={<Tour />} />
-                    <Route path="dashboard/getting-started" element={<GettingStarted />} />
-                    <Route path="dashboard/roadmap" element={<VisaRoadmap />} />
-                    <Route path="dashboard/checklist" element={<DocumentChecklist />} />
-                    <Route path="dashboard/timeline" element={<ApplicationTimeline />} />
-                    <Route path="dashboard/deadlines" element={<DeadlineAlerts />} />
-                    <Route path="dashboard/profile" element={<UserProfile />} />
-                    <Route path="dashboard/notifications" element={<Notifications />} />
-                    <Route path="dashboard/billing" element={<Billing />} />
-                  </Route>
-
                   {/* Lawyer Routes - Each has its own layout */}
                   <Route path="lawyer" element={<PortalLanding />} />
                   <Route path="lawyer/pending" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerPending /></ProtectedRoute>} />
@@ -200,20 +149,13 @@ export default function App() {
                   <Route path="lawyer/news" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerNews /></ProtectedRoute>} />
                   <Route path="lawyer/marketplace" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerMarketplace /></ProtectedRoute>} />
                   <Route path="lawyer/settings" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerSettings /></ProtectedRoute>} />
-                  <Route path="lawyer/team" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerTeam /></ProtectedRoute>} />
-                  <Route path="lawyer/cases" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerCases /></ProtectedRoute>} />
-                  <Route path="lawyer/documents" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerDocuments /></ProtectedRoute>} />
-                  <Route path="lawyer/notes" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerNotes /></ProtectedRoute>} />
-                  <Route path="lawyer/leads" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerLeadCapture /></ProtectedRoute>} />
-                  <Route path="lawyer/testimonials" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerTestimonials /></ProtectedRoute>} />
-                  <Route path="lawyer/clients/:id" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerClientDetail /></ProtectedRoute>} />
+
+                  {/* Lawyer Expansion Routes */}
+                  <Route path="lawyer/*" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerRoutes /></ProtectedRoute>} />
 
                   {/* Admin Routes - Each has its own layout */}
                   <Route path="admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
                     <Route path="activity" element={<AdminActivityLog />} />
-                    <Route path="admin/content" element={<ProtectedRoute allowedRoles={['admin']}><AdminContent /></ProtectedRoute>} />
-                    <Route path="admin/pages" element={<ProtectedRoute allowedRoles={['admin']}><AdminPages /></ProtectedRoute>} />
-                    <Route path="admin/blog" element={<ProtectedRoute allowedRoles={['admin']}><AdminBlog /></ProtectedRoute>} />
                     <Route path="users" element={<UserManagement />} />
                     <Route path="lawyers" element={<LawyerManagement />} />
                     <Route path="visas" element={<VisaManagement />} />
@@ -224,14 +166,17 @@ export default function App() {
                   <Route path="admin/pricing" element={<ProtectedRoute allowedRoles={['admin']}><AdminPricing /></ProtectedRoute>} />
                   <Route path="admin/promos" element={<ProtectedRoute allowedRoles={['admin']}><PromoCodeManagement /></ProtectedRoute>} />
                   <Route path="admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
+
+                  {/* Batch 1: User Experience Foundation Pages */}
+                  <Route path="/*" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserRoutes /></ProtectedRoute>} />
                   </Routes>
                 </Suspense>
               </GlobalSearchProvider>
-            </BrowserRouter>
-          </ErrorBoundary>
-        </ToastProvider>
-        </HelmetProvider>
-      </AuthProvider>
+              </BrowserRouter>
+            </ErrorBoundary>
+          </ToastProvider>
+        </AuthProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }
