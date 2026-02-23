@@ -71,7 +71,7 @@ fetch_replace = """  const fetchUserStats = async () => {
   const fetchMyApplications = async () => {
     const { data } = await supabase
       .from('tracker_entries')
-      .select('*, visas(name, subclass)')
+      .select('*, visas(name, subclass_number)')
       .eq('submitted_by', user!.id)
       .eq('status', 'pending')
       .order('created_at', { ascending: false });
@@ -95,7 +95,7 @@ ui_replace = """          {/* My Applications Tracker */}
                     <CardBody>
                       <div className="flex justify-between items-start mb-6">
                         <div>
-                          <h3 className="font-bold text-lg text-neutral-900 dark:text-white">{app.visas.subclass} - {app.visas.name}</h3>
+                          <h3 className="font-bold text-lg text-neutral-900 dark:text-white">{app.visas.subclass_number} - {app.visas.name}</h3>
                           <p className="text-sm text-neutral-500">Applied on {new Date(app.application_date).toLocaleDateString()}</p>
                         </div>
                         <div className="text-right">

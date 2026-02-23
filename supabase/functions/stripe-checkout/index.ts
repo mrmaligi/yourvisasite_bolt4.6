@@ -120,29 +120,53 @@ Deno.serve(async (req) => {
       }
 
        // Fetch slot details
-       const { data: slot, error: slotError } = await supabaseAdmin
-         .schema('lawyer')
-         .from('consultation_slots')
-         .select('*')
-         .eq('id', slot_id)
-         .eq('lawyer_id', lawyer_id)
-         .eq('is_booked', false)
-         .single();
+       let slot, slotError;
+       try {
+         const result = await supabaseAdmin
+           .schema('lawyer')
+           .from('consultation_slots')
+           .select('*')
+           .eq('id', slot_id)
+           .eq('lawyer_id', lawyer_id)
+           .eq('is_booked', false)
+           .single();
+         slot = result.data;
+         slotError = result.error;
+       } catch (err: any) {
+         console.error('Schema error fetching slots:', err);
+         throw new Error('Database schema error: lawyer.consultation_slots may be missing');
+       }
 
        if (slotError || !slot) {
+         if (slotError?.code === '42P01' || slotError?.code === '3F000') {
+            console.error('Missing schema/table for consultation_slots:', slotError);
+            throw new Error('System configuration error: Lawyer schema missing');
+         }
          throw new Error('Slot not available');
        }
 
        // Fetch lawyer details
-       const { data: lawyer, error: lawyerError } = await supabaseAdmin
-         .schema('lawyer')
-         .from('profiles')
-         .select('id, hourly_rate_cents, jurisdiction')
-         .eq('id', lawyer_id)
-         .eq('role', 'lawyer')
-         .single();
+       let lawyer, lawyerError;
+       try {
+         const result = await supabaseAdmin
+           .schema('lawyer')
+           .from('profiles')
+           .select('id, hourly_rate_cents, jurisdiction')
+           .eq('id', lawyer_id)
+           .eq('role', 'lawyer')
+           .single();
+         lawyer = result.data;
+         lawyerError = result.error;
+       } catch (err: any) {
+         console.error('Schema error fetching lawyer:', err);
+         throw new Error('Database schema error: lawyer.profiles may be missing');
+       }
 
        if (lawyerError || !lawyer) {
+         if (lawyerError?.code === '42P01' || lawyerError?.code === '3F000') {
+            console.error('Missing schema/table for lawyer profiles:', lawyerError);
+            throw new Error('System configuration error: Lawyer schema missing');
+         }
          throw new Error('Lawyer not found');
        }
 
@@ -191,11 +215,19 @@ Deno.serve(async (req) => {
       cancelUrl = `${origin}/lawyers/${lawyer_id}`;
 
       // Reserve the slot
-      await supabaseAdmin
-        .schema('lawyer')
-        .from('consultation_slots')
-        .update({ is_reserved: true, reserved_until: new Date(Date.now() + 15 * 60 * 1000).toISOString() })
-        .eq('id', slot_id);
+      try {
+        const { error: reserveError } = await supabaseAdmin
+          .schema('lawyer')
+          .from('consultation_slots')
+          .update({ is_reserved: true, reserved_until: new Date(Date.now() + 15 * 60 * 1000).toISOString() })
+          .eq('id', slot_id);
+
+        if (reserveError) {
+             console.error('Failed to reserve slot:', reserveError);
+        }
+      } catch (err) {
+        console.error('Schema error reserving slot:', err);
+      }
 
     } else {
         throw new Error('Invalid type');

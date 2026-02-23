@@ -58,7 +58,7 @@ export function usePremiumContent(visaId: string | null) {
           .from('visa_premium_content')
           .select('*')
           .eq('visa_id', visaId)
-          .order('section_number');
+          .order('step_number');
 
         if (contentError) throw contentError;
         setContent(steps || []);
