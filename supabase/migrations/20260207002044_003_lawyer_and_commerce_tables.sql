@@ -21,7 +21,7 @@
     - B-tree on lawyer.profiles(is_verified)
 */
 
--- Ensure schema exists
+-- Ensure lawyer schema exists
 CREATE SCHEMA IF NOT EXISTS lawyer;
 
 -- lawyer.profiles

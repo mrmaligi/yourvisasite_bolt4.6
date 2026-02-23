@@ -47,14 +47,18 @@ export function useLawyers(specialization?: string) {
 
            const { data: fallbackData, error: fallbackError } = await fallbackQuery;
 
-           if (fallbackError) throw fallbackError;
+           if (fallbackError) {
+              // If fallback also fails, throw the original error or the new one
+              console.error('Fallback query also failed:', fallbackError);
+              throw fetchError;
+           }
 
            // Map data to match VerifiedLawyer interface
            // user_id -> profile_id
-           const mappedData = (fallbackData as any[]).map((item) => ({
+           const mappedData = (fallbackData as any[]).map(item => ({
                ...item,
                profile_id: item.user_id, // Map user_id to profile_id
-               profiles: item.profiles, // Joined profile data
+               profiles: item.profiles // Joined profile data
            }));
 
            setLawyers(mappedData as unknown as VerifiedLawyer[]);
