@@ -23,7 +23,7 @@ export function useProfile() {
       const { data, error: updateError } = await supabase
         .from('profiles')
         .update(updates)
-        .eq('user_id', user.id)
+        .eq('id', user.id)
         .select()
         .single();
 
