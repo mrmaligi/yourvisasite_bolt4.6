@@ -14,13 +14,14 @@ import {
   Library,
   Files,
   PenTool,
-  Blocks,
+  LifeBuoy,
+  TrendingUp,
+  Server,
 } from 'lucide-react';
 import { DashboardLayout } from './DashboardLayout';
 
 const sidebarItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/admin/integrations', label: 'Integrations', icon: Blocks },
   { to: '/admin/activity', label: 'Activity Log', icon: Activity },
   { to: '/admin/users', label: 'Users', icon: Users },
   { to: '/admin/lawyers', label: 'Lawyers', icon: Scale },
@@ -34,6 +35,10 @@ const sidebarItems = [
   { to: '/admin/tracker', label: 'Tracker', icon: BarChart3 },
   { to: '/admin/pricing', label: 'Pricing', icon: DollarSign },
   { to: '/admin/promos', label: 'Promo Codes', icon: Tag },
+
+  { to: '/admin/support/tickets', label: 'Support', icon: LifeBuoy },
+  { to: '/admin/analytics/overview', label: 'Analytics', icon: TrendingUp },
+  { to: '/admin/system/settings', label: 'System', icon: Server },
   { to: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
