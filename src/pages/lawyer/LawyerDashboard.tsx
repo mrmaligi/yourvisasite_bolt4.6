@@ -49,23 +49,37 @@ export function LawyerDashboard() {
       setIsLoading(true);
       setError(null);
       
+      if (!user?.id) {
+        setError('User not authenticated');
+        return;
+      }
+      
       // Get lawyer profile from profiles table (has all lawyer fields)
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*, bar_number, jurisdiction, years_experience, is_verified, verification_status, bio, hourly_rate_cents')
-        .eq('id', user?.id)
-        .eq('role', 'lawyer')
-        .single();
+        .eq('id', user.id)
+        .maybeSingle();
       
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Profile fetch error:', profileError);
+        setError('Failed to load lawyer profile. Please try again.');
+        return;
+      }
+      
+      if (!profile) {
+        console.error('No lawyer profile found for user:', user.id);
+        setError('Lawyer profile not found. Please contact support.');
+        return;
+      }
       
       setLawyerProfile(profile);
 
       // Get stats - use user.id since bookings references lawyer user_id directly
       const [{ count: clients }, { count: upcoming }, { count: completed }] = await Promise.all([
-        supabase.from('bookings').select('user_id', { count: 'exact', head: true }).eq('lawyer_id', user?.id),
-        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('lawyer_id', user?.id).eq('status', 'confirmed'),
-        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('lawyer_id', user?.id).eq('status', 'completed'),
+        supabase.from('bookings').select('user_id', { count: 'exact', head: true }).eq('lawyer_id', user.id),
+        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('lawyer_id', user.id).eq('status', 'confirmed'),
+        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('lawyer_id', user.id).eq('status', 'completed'),
       ]);
 
       setStats({
@@ -76,9 +90,9 @@ export function LawyerDashboard() {
         averageRating: 4.8,
         totalEarnings: completed ? completed * 150 : 0,
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching lawyer data:', err);
-      setError('Failed to load dashboard data. Please try again.');
+      setError(err.message || 'Failed to load dashboard data. Please try again.');
     } finally {
       setIsLoading(false);
     }
