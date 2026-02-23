@@ -130,10 +130,12 @@ export function AdminOnly({ children }: { children: React.ReactNode }) {
 
 // Auto-redirect based on role
 export function RoleRedirect() {
-  const { user, profile } = useAuth();
+  const { user, profile, isLoading: authLoading } = useAuth();
   const [redirectPath, setRedirectPath] = useState<string | null>(null);
 
   useEffect(() => {
+    if (authLoading) return;
+    
     if (user && profile) {
       if (profile.role === 'admin') {
         setRedirectPath('/admin');
@@ -142,10 +144,13 @@ export function RoleRedirect() {
       } else {
         setRedirectPath('/dashboard');
       }
+    } else if (user && !profile) {
+      // User exists but no profile - redirect to register to create profile
+      setRedirectPath('/register');
     }
-  }, [user, profile]);
+  }, [user, profile, authLoading]);
 
-  if (!redirectPath) {
+  if (authLoading || !redirectPath) {
     return <Loading fullScreen />;
   }
 

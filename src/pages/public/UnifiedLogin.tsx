@@ -57,13 +57,19 @@ export function UnifiedLogin() {
       if (!user) throw new Error('User not found after login');
 
       // Get user role
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role, is_active, lawyer_profiles(verification_status)')
         .eq('id', user.id)
         .single();
 
-      if (profile?.is_active === false) {
+      if (profileError || !profile) {
+        console.error('Profile fetch error:', profileError);
+        toast('error', 'Profile not found. Please contact support.');
+        return;
+      }
+
+      if (profile.is_active === false) {
         toast('error', 'Account disabled');
         return;
       }
