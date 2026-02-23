@@ -35,18 +35,13 @@ export function TrackerManagement() {
   const handleRefreshAll = async () => {
     setRefreshing(true);
     try {
-      const baseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '');
-      const apiUrl = `${baseUrl}/functions/v1/refresh-tracker`;
-      await fetch(apiUrl, {
+      const { error } = await supabase.functions.invoke('refresh-tracker', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-          'Content-Type': 'application/json',
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-        },
       });
+      if (error) throw error;
       toast('success', 'Tracker stats refreshed');
-    } catch {
+    } catch (err) {
+      console.error('Failed to refresh tracker:', err);
       toast('error', 'Refresh failed');
     }
     setRefreshing(false);

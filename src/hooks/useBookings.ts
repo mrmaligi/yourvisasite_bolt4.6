@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, fetchWithRetry } from '../lib/supabase';
 import { useAuth } from './useAuth';
 import type { Booking } from '../types/database';
 
@@ -36,12 +36,12 @@ export function useBookings() {
 
         if (role === 'lawyer') {
           // Lawyer needs to find their lawyer profile ID first
-          const { data: lawyerProfile, error: lpError } = await supabase
+          const { data: lawyerProfile, error: lpError } = await fetchWithRetry(() => supabase
             .schema('lawyer')
             .from('profiles')
             .select('id')
             .eq('profile_id', user.id)
-            .maybeSingle();
+            .maybeSingle());
 
           if (lpError) throw lpError;
 
@@ -60,7 +60,7 @@ export function useBookings() {
         // Order by created_at desc initially, but we prefer slot start time later
         bookingQuery = bookingQuery.order('created_at', { ascending: false });
 
-        const { data: bookingsData, error: fetchError } = await bookingQuery;
+        const { data: bookingsData, error: fetchError } = await fetchWithRetry(() => bookingQuery);
 
         if (fetchError) throw fetchError;
         if (!bookingsData || bookingsData.length === 0) {
@@ -75,29 +75,29 @@ export function useBookings() {
         const slotIds = [...new Set(bookingsData.map(b => b.slot_id).filter(Boolean))];
 
         // Fetch Slots (for time)
-        const { data: slots } = await supabase
+        const { data: slots } = await fetchWithRetry(() => supabase
           .schema('lawyer')
           .from('consultation_slots')
           .select('id, start_time')
-          .in('id', slotIds);
+          .in('id', slotIds));
 
         const slotMap = new Map(slots?.map(s => [s.id, s.start_time]) || []);
 
         // Fetch Lawyer Profiles (if user)
         let lawyerMap = new Map();
         if (role === 'user' && lawyerIds.length > 0) {
-          const { data: lawyerProfiles } = await supabase
+          const { data: lawyerProfiles } = await fetchWithRetry(() => supabase
             .schema('lawyer')
             .from('profiles')
             .select('id, profile_id, jurisdiction')
-            .in('id', lawyerIds);
+            .in('id', lawyerIds));
 
           if (lawyerProfiles) {
              const profileIds = lawyerProfiles.map(lp => lp.profile_id);
-             const { data: profiles } = await supabase
+             const { data: profiles } = await fetchWithRetry(() => supabase
                .from('profiles')
                .select('id, full_name')
-               .in('id', profileIds);
+               .in('id', profileIds));
 
              const publicProfileMap = new Map(profiles?.map(p => [p.id, p.full_name]) || []);
 
@@ -113,10 +113,10 @@ export function useBookings() {
         // Fetch User Profiles (if lawyer)
         let userMap = new Map();
         if (role === 'lawyer' && userIds.length > 0) {
-           const { data: profiles } = await supabase
+           const { data: profiles } = await fetchWithRetry(() => supabase
              .from('profiles')
              .select('id, full_name, phone')
-             .in('id', userIds);
+             .in('id', userIds));
 
            profiles?.forEach(p => {
              userMap.set(p.id, { name: p.full_name, phone: p.phone });

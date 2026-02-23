@@ -66,22 +66,11 @@ export function Login() {
 
     setBecomingAdmin(true);
     try {
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/seed-admin`;
-      const session = await supabase.auth.getSession();
-
-      const response = await fetch(apiUrl, {
+      const { data, error } = await supabase.functions.invoke('seed-admin', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.data.session?.access_token}`,
-          'Content-Type': 'application/json',
-        },
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to become admin');
-      }
+      if (error) throw new Error(error.error || error.message || 'Failed to become admin');
 
       toast('success', data.message);
       setTimeout(() => {
@@ -89,6 +78,7 @@ export function Login() {
       }, 1500);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to become admin';
+      console.error('Failed to become admin:', error);
       toast('error', message);
     } finally {
       setBecomingAdmin(false);

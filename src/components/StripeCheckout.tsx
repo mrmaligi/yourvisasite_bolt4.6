@@ -60,21 +60,15 @@ export function StripeCheckout({
         body.notes = notes;
       }
 
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${functionName}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
+      const { data, error } = await supabase.functions.invoke(functionName, {
+        body,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create checkout session');
+      if (error) {
+        throw new Error(error.error || error.message || 'Failed to create checkout session');
       }
 
-      const { sessionId, url } = await response.json();
+      const { sessionId, url } = data;
       
       if (onSuccess) {
         onSuccess();
@@ -91,9 +85,9 @@ export function StripeCheckout({
         throw new Error('Stripe failed to load');
       }
 
-      const { error } = await stripe.redirectToCheckout({ sessionId });
-      if (error) {
-        throw error;
+      const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
+      if (stripeError) {
+        throw stripeError;
       }
     } catch (error) {
       console.error('Checkout error:', error);

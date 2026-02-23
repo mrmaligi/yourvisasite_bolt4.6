@@ -67,18 +67,13 @@ export function LawyerManagement() {
     }).eq('id', lawyer.id);
 
     try {
-      const baseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '');
-      const apiUrl = `${baseUrl}/functions/v1/verify-lawyer`;
-      await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-          'Content-Type': 'application/json',
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({ lawyer_profile_id: lawyer.profile_id, action: 'approve' }),
+      const { error } = await supabase.functions.invoke('verify-lawyer', {
+        body: { lawyer_profile_id: lawyer.profile_id, action: 'approve' },
       });
-    } catch {}
+      if (error) throw error;
+    } catch (err) {
+      console.error('Failed to invoke verify-lawyer:', err);
+    }
 
     toast('success', 'Lawyer approved');
     fetchLawyers();

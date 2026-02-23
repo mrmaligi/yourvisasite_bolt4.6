@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, fetchWithRetry } from '../lib/supabase';
 import type { Visa, TrackerStats, VisaRequirement, TrackerEntry } from '../types/database';
 import { PostgrestError } from '@supabase/supabase-js';
 
@@ -77,7 +77,7 @@ export function useVisas(
         const to = from + pageSize - 1;
         query = query.range(from, to).order('name');
 
-        const { data, error: fetchError, count } = await query;
+        const { data, error: fetchError, count } = await fetchWithRetry(() => query);
 
         if (fetchError) {
           setError(fetchError);
@@ -117,11 +117,11 @@ export function useVisa(id: string | undefined) {
     }
     const fetch = async () => {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data, error } = await fetchWithRetry(() => supabase
         .from('visas')
         .select('*, tracker_stats(*), visa_requirements(*)')
         .eq('id', id)
-        .maybeSingle();
+        .maybeSingle());
 
       if (error) {
         console.error('Error fetching visa:', error);
@@ -156,11 +156,11 @@ export function useVisaTrackerEntries(visaId: string | undefined) {
 
     const fetch = async () => {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data, error } = await fetchWithRetry(() => supabase
         .from('tracker_entries')
         .select('*')
         .eq('visa_id', visaId)
-        .order('decision_date', { ascending: false });
+        .order('decision_date', { ascending: false }));
 
       if (error) {
         console.error('Error fetching tracker entries:', error);
@@ -181,11 +181,11 @@ export function useTrackerStats() {
 
   useEffect(() => {
     const fetch = async () => {
-      const { data, error } = await supabase
+      const { data, error } = await fetchWithRetry(() => supabase
         .from('visas')
         .select('*, tracker_stats!inner(*)')
         .eq('is_active', true)
-        .order('name');
+        .order('name'));
         
       if (error) {
         console.error('Error fetching tracker stats:', error);
