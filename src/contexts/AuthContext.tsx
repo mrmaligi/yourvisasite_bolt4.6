@@ -130,6 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) await fetchProfile(user);
   };
 
+  // Role is derived exclusively from profile to ensure single source of truth
   const role = profile?.role || null;
   const isAuthenticated = !!user;
 
