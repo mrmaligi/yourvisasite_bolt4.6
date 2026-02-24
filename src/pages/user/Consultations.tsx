@@ -39,34 +39,6 @@ export function Consultations() {
       // window.open(`/consultation-room/${id}`, '_blank');
   };
 
-  const handleAcceptTakeover = async (id: string) => {
-      const { error } = await supabase
-          .from('bookings')
-          .update({ file_takeover_status: 'accepted' })
-          .eq('id', id);
-
-      if (error) {
-          toast('error', 'Failed to accept access request');
-      } else {
-          toast('success', 'Access granted to lawyer');
-          refetch();
-      }
-  };
-
-  const handleRejectTakeover = async (id: string) => {
-      const { error } = await supabase
-          .from('bookings')
-          .update({ file_takeover_status: 'rejected' })
-          .eq('id', id);
-
-      if (error) {
-          toast('error', 'Failed to reject access request');
-      } else {
-          toast('info', 'Access request rejected');
-          refetch();
-      }
-  };
-
   if (loading) {
     return (
       <div className="space-y-6">
@@ -82,12 +54,12 @@ export function Consultations() {
 
   const now = new Date();
   const upcomingBookings = bookings.filter(b => {
-    const time = b.start_time ? new Date(b.start_time) : new Date(b.created_at);
+    const time = new Date(`${b.booking_date}T${b.start_time}`);
     return time >= now && b.status !== 'cancelled' && b.status !== 'completed';
   });
 
   const pastBookings = bookings.filter(b => {
-    const time = b.start_time ? new Date(b.start_time) : new Date(b.created_at);
+    const time = new Date(`${b.booking_date}T${b.start_time}`);
     return time < now || b.status === 'cancelled' || b.status === 'completed';
   });
 
@@ -149,8 +121,6 @@ export function Consultations() {
               onCancel={booking.status === 'pending' || booking.status === 'confirmed' ? handleCancel : undefined}
               onReschedule={booking.status === 'pending' || booking.status === 'confirmed' ? handleReschedule : undefined}
               onJoin={booking.status === 'confirmed' ? handleJoin : undefined}
-              onAcceptTakeover={handleAcceptTakeover}
-              onRejectTakeover={handleRejectTakeover}
             />
           ))}
         </div>

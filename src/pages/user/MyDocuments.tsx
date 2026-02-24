@@ -118,6 +118,14 @@ export function MyDocuments() {
     }
   }, [searchParams, categories]);
 
+  const getCategoryId = async (key: string) => {
+    const cat = categories.find(c => c.key === key);
+    if (cat) return cat.id;
+    // Fetch if needed
+    const { data } = await supabase.from('document_categories').select('id').eq('key', key).single();
+    return data?.id;
+  }
+
   const handleModalUpload = async () => {
     if (!user || !uploadFileState || !modalCategoryKey) return;
 
@@ -127,6 +135,9 @@ export function MyDocuments() {
         setUploadProgress(0);
 
         const path = `${user.id}/${Date.now()}_${uploadFileState.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        const catId = await getCategoryId(modalCategoryKey);
+
+        if (!catId) throw new Error('Invalid category');
 
         await uploadFile({
           bucket: BUCKETS.DOCUMENTS,
@@ -140,9 +151,9 @@ export function MyDocuments() {
           .insert([
             {
               user_id: user.id,
-              document_category: modalCategoryKey,
+              document_category_id: catId,
               file_name: uploadFileState.name,
-              storage_path: path,
+              file_path: path,
               status: 'pending',
             },
           ]);
@@ -173,6 +184,9 @@ export function MyDocuments() {
         setUploadProgress(0);
 
         const path = `${user.id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        const catId = await getCategoryId(categoryKey);
+
+        if (!catId) throw new Error('Invalid category');
 
         await uploadFile({
           bucket: BUCKETS.DOCUMENTS,
@@ -186,9 +200,9 @@ export function MyDocuments() {
           .insert([
             {
               user_id: user.id,
-              document_category: categoryKey,
+              document_category_id: catId,
               file_name: file.name,
-              storage_path: path,
+              file_path: path,
               status: 'pending',
             },
           ]);
@@ -220,13 +234,16 @@ export function MyDocuments() {
   };
 
   const handleDownload = async (doc: UserDocument) => {
-    const url = await getDocumentUrl(doc.storage_path);
+    const url = await getDocumentUrl(doc.file_path);
     if (url) window.open(url, '_blank');
     else toast('error', 'Failed to get download URL');
   };
 
-  const getDocsByCategory = (categoryKey: string) =>
-    docs.filter((d) => d.document_category === categoryKey);
+  const getDocsByCategory = (categoryKey: string) => {
+      const cat = categories.find(c => c.key === categoryKey);
+      if (!cat) return [];
+      return docs.filter((d) => d.document_category_id === cat.id);
+  }
 
   // Filtered categories to display
   // If filterCategory is set, only show that category. Otherwise show all.

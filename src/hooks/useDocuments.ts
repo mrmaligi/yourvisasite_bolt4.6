@@ -65,6 +65,25 @@ export function useDocuments() {
   const uploadDocument = async (file: File, categoryKey: string, visaId: string | null = null) => {
     if (!user) return { data: null, error: new Error('Not authenticated') };
 
+    // Find category ID from key
+    // Note: If categories are not loaded, we might need to fetch them or rely on caller passing ID.
+    // But since this hook manages categories, we assume they are loaded or we can find them.
+    // If not found, we could try to fetch single category by key, but for now rely on loaded list.
+    const category = categories.find(c => c.key === categoryKey);
+    if (!category) {
+        // Fallback: fetch category by key if not in list (e.g. strict mode or list incomplete)
+        const { data: cat } = await supabase
+            .from('document_categories')
+            .select('id')
+            .eq('key', categoryKey)
+            .single();
+
+        if (!cat) return { data: null, error: new Error(`Invalid category: ${categoryKey}`) };
+        categoryKey = cat.id; // Use ID
+    } else {
+        categoryKey = category.id; // Use ID
+    }
+
     setLoading(true);
     try {
       // Path: documents/{userId}/{filename}
@@ -87,9 +106,9 @@ export function useDocuments() {
           {
             user_id: user.id,
             visa_id: visaId,
-            document_category: categoryKey,
+            document_category_id: categoryKey, // Now using ID
             file_name: file.name,
-            storage_path: storagePath,
+            file_path: storagePath, // Changed from storage_path
             status: 'pending',
           },
         ])
@@ -119,10 +138,10 @@ export function useDocuments() {
     setLoading(true);
     try {
       // 1. Remove from Storage
-      if (doc.storage_path) {
+      if (doc.file_path) { // Changed from storage_path
         const { error: storageError } = await supabase.storage
           .from('documents')
-          .remove([doc.storage_path]);
+          .remove([doc.file_path]);
 
         if (storageError) {
           console.warn('Error removing from storage (might be already gone):', storageError);

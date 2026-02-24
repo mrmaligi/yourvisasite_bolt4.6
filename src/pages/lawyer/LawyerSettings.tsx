@@ -24,7 +24,7 @@ export function LawyerSettings() {
     jurisdiction: '',
     bar_number: '',
     years_experience: '',
-    practice_areas: '',
+    specializations: '',
     bio: '',
     hourly_rate_cents: '',
   });
@@ -56,7 +56,7 @@ export function LawyerSettings() {
         jurisdiction: data.jurisdiction || '',
         bar_number: data.bar_number || '',
         years_experience: data.years_experience?.toString() || '',
-        practice_areas: Array.isArray(data.practice_areas) ? data.practice_areas.join(', ') : '',
+        specializations: Array.isArray(data.specializations) ? data.specializations.join(', ') : '',
         bio: data.bio || '',
         hourly_rate_cents: data.hourly_rate_cents ? (data.hourly_rate_cents / 100).toString() : '',
       });
@@ -92,7 +92,7 @@ export function LawyerSettings() {
     if (!profile) return;
     setSaving(true);
 
-    const practice_areas = lawyerData.practice_areas
+    const specializations = lawyerData.specializations
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
@@ -104,7 +104,7 @@ export function LawyerSettings() {
         jurisdiction: lawyerData.jurisdiction,
         bar_number: lawyerData.bar_number,
         years_experience: lawyerData.years_experience ? parseInt(lawyerData.years_experience) : null,
-        practice_areas,
+        specializations,
         bio: lawyerData.bio,
         hourly_rate_cents: lawyerData.hourly_rate_cents
           ? Math.round(parseFloat(lawyerData.hourly_rate_cents) * 100)
@@ -225,8 +225,8 @@ export function LawyerSettings() {
             </label>
             <input
               type="text"
-              value={lawyerData.practice_areas}
-              onChange={(e) => setLawyerData({ ...lawyerData, practice_areas: e.target.value })}
+              value={lawyerData.specializations}
+              onChange={(e) => setLawyerData({ ...lawyerData, specializations: e.target.value })}
               placeholder="e.g., Family Immigration, Business Visas, Student Visas"
               className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
             />

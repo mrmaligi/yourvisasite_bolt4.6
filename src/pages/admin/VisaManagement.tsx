@@ -23,7 +23,7 @@ const CATEGORY_OPTIONS = [
 
 const EMPTY_VISA = {
   subclass: '', name: '', country: 'Australia', category: 'work' as string,
-  official_link: '', summary: '', processing_fee_description: '',
+  official_url: '', summary: '', processing_fee_description: '',
 };
 
 const REQUIREMENTS_TEMPLATE = JSON.stringify({
@@ -105,7 +105,7 @@ export function VisaManagement() {
     setEditing(v);
     setForm({
       subclass: v.subclass, name: v.name, country: v.country,
-      category: v.category, official_link: v.official_link || '',
+      category: v.category, official_url: v.official_url || '',
       summary: v.summary || '', processing_fee_description: v.processing_fee_description || '',
     });
     setActiveTab('details');
@@ -209,8 +209,8 @@ export function VisaManagement() {
     { key: 'name', header: 'Name', render: (r) => (
       <div>
         <span className="font-medium text-neutral-900">{r.name}</span>
-        {r.official_link && (
-          <a href={r.official_link} target="_blank" rel="noopener noreferrer" className="ml-2 text-primary-500 hover:text-primary-700">
+        {r.official_url && (
+          <a href={r.official_url} target="_blank" rel="noopener noreferrer" className="ml-2 text-primary-500 hover:text-primary-700">
             <ExternalLink className="w-3 h-3 inline" />
           </a>
         )}
@@ -296,7 +296,7 @@ export function VisaManagement() {
               <Input label="Country" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} placeholder="Australia" />
               <Select label="Category" value={form.category} options={CATEGORY_OPTIONS} onChange={(e) => setForm({ ...form, category: (e.target as HTMLSelectElement).value as VisaCategory })} />
             </div>
-            <Input label="Official URL" value={form.official_link} onChange={(e) => setForm({ ...form, official_link: e.target.value })} placeholder="https://immi.homeaffairs.gov.au/..." />
+            <Input label="Official URL" value={form.official_url} onChange={(e) => setForm({ ...form, official_url: e.target.value })} placeholder="https://immi.homeaffairs.gov.au/..." />
             <Textarea label="Summary (shown on free tier)" value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} rows={4} />
             <Input label="Processing Fee Description" value={form.processing_fee_description} onChange={(e) => setForm({ ...form, processing_fee_description: e.target.value })} placeholder="e.g. AUD $4,640 (principal applicant)" />
           </div>

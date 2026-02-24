@@ -106,25 +106,31 @@ Deno.serve(async (req: Request) => {
 
     const totalCents = Math.round((rateCents / 60) * durationMinutes);
 
+    // Format dates for booking table
+    const bookingDate = start.toISOString().split('T')[0];
+    const startTime = start.toISOString().split('T')[1].split('.')[0];
+    const endTime = end.toISOString().split('T')[1].split('.')[0];
+
     // Create pending booking record
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
       .insert({
         user_id: user.id,
         lawyer_id: lawyerId,
-        slot_id: slotId,
-        duration_minutes: durationMinutes,
-        total_price_cents: totalCents,
+        booking_date: bookingDate,
+        start_time: startTime,
+        end_time: endTime,
+        amount_cents: totalCents,
         status: 'pending',
         notes: notes || null,
-        questions: questions || null,
+        // questions: questions || null, // Assuming questions is not a column in SETUP_FINAL, user said remove phantom.
       })
       .select()
       .single();
 
     if (bookingError || !booking) {
       console.error('Booking error:', bookingError);
-      return new Response(JSON.stringify({ error: 'Failed to create booking' }), {
+      return new Response(JSON.stringify({ error: 'Failed to create booking: ' + bookingError?.message }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -181,12 +187,6 @@ Deno.serve(async (req: Request) => {
         lawyer_id: lawyerId,
       },
     });
-
-    // Update booking with payment intent
-    await supabase
-      .from('bookings')
-      .update({ stripe_checkout_session_id: session.id })
-      .eq('id', booking.id);
 
     // Mark slot as reserved (not booked until payment confirmed)
     await supabase

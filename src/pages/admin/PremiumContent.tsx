@@ -6,23 +6,19 @@ import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Select, Input, Textarea } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { useToast } from '../../components/ui/Toast';
-import type { Visa, VisaPremiumContent, DocumentCategory } from '../../types/database';
+import type { Visa, VisaPremiumContent } from '../../types/database';
 
 export function PremiumContent() {
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [visas, setVisas] = useState<Visa[]>([]);
-  const [docCategories, setDocCategories] = useState<DocumentCategory[]>([]);
   const [selectedVisaId, setSelectedVisaId] = useState(searchParams.get('visa_id') || '');
-  const [steps, setSteps] = useState<VisaPremiumContent[]>([]);
+  const [sections, setSections] = useState<VisaPremiumContent[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     supabase.from('visas').select('*').eq('is_active', true).order('name')
       .then(({ data }) => setVisas(data || []));
-
-    supabase.from('document_categories').select('*').order('display_order')
-      .then(({ data }) => setDocCategories(data || []));
   }, []);
 
   // Sync URL to state (handle back/forward navigation)
@@ -34,60 +30,45 @@ export function PremiumContent() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (!selectedVisaId) { setSteps([]); return; }
+    if (!selectedVisaId) { setSections([]); return; }
     setLoading(true);
-    supabase.from('visa_premium_content').select('*').eq('visa_id', selectedVisaId).order('step_number')
-      .then(({ data }) => { setSteps(data || []); setLoading(false); });
+    supabase.from('visa_premium_content').select('*').eq('visa_id', selectedVisaId).order('section_number')
+      .then(({ data }) => { setSections(data || []); setLoading(false); });
   }, [selectedVisaId]);
 
-  const addStep = () => {
-    const next = steps.length > 0 ? Math.max(...steps.map((s) => s.step_number || 0)) + 1 : 1;
-    setSteps([...steps, {
+  const addSection = () => {
+    const next = sections.length > 0 ? Math.max(...sections.map((s) => s.section_number || 0)) + 1 : 1;
+    setSections([...sections, {
       id: `new-${Date.now()}`,
       visa_id: selectedVisaId,
-      step_number: next,
-      title: '',
-      body: '',
-      document_category: null,
-      document_explanation: null,
-      document_example_url: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
       section_number: next,
       section_title: '',
       content: '',
       tips: null,
-      common_mistakes: null,
-      examples: null,
-      estimated_minutes: null,
-      required_documents: null,
-      application_example_json: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     } as VisaPremiumContent]);
   };
 
-  const updateStep = (idx: number, field: keyof VisaPremiumContent, value: any) => {
-    setSteps(steps.map((s, i) => i === idx ? { ...s, [field]: value } : s));
+  const updateSection = (idx: number, field: keyof VisaPremiumContent, value: any) => {
+    setSections(sections.map((s, i) => i === idx ? { ...s, [field]: value } : s));
   };
 
-  const removeStep = (idx: number) => setSteps(steps.filter((_, i) => i !== idx));
+  const removeSection = (idx: number) => setSections(sections.filter((_, i) => i !== idx));
 
   const saveAll = async () => {
     if (!selectedVisaId) return;
     setLoading(true);
 
     // Delete existing content for this visa first (to handle reordering/deletions easily)
-    // In a production app with user progress tracking, you might want to be more careful with IDs,
-    // but here users just read the content.
     await supabase.from('visa_premium_content').delete().eq('visa_id', selectedVisaId);
 
-    const rows = steps.map((s, i) => ({
+    const rows = sections.map((s, i) => ({
       visa_id: selectedVisaId,
-      step_number: i + 1,
-      title: s.title,
-      body: s.body,
-      document_category: s.document_category,
-      document_explanation: s.document_explanation,
-      document_example_url: s.document_example_url
+      section_number: i + 1,
+      section_title: s.section_title,
+      content: s.content,
+      tips: s.tips
     }));
 
     if (rows.length > 0) {
@@ -101,8 +82,8 @@ export function PremiumContent() {
 
     toast('success', 'Premium content saved');
     // Refresh to get new IDs
-    const { data } = await supabase.from('visa_premium_content').select('*').eq('visa_id', selectedVisaId).order('step_number');
-    setSteps(data || []);
+    const { data } = await supabase.from('visa_premium_content').select('*').eq('visa_id', selectedVisaId).order('section_number');
+    setSections(data || []);
     setLoading(false);
   };
 
@@ -124,66 +105,50 @@ export function PremiumContent() {
       {selectedVisaId && (
         <>
           <div className="space-y-4">
-            {steps.map((step, idx) => (
-              <Card key={step.id}>
+            {sections.map((section, idx) => (
+              <Card key={section.id}>
                 <CardHeader className="flex items-center justify-between bg-neutral-50/50">
                   <div className="flex items-center gap-2">
                     <GripVertical className="w-4 h-4 text-neutral-400" />
                     <span className="text-sm font-medium text-neutral-600">Section {idx + 1}</span>
                   </div>
-                  <button onClick={() => removeStep(idx)} className="p-1.5 rounded hover:bg-red-50 text-red-500 transition-colors">
+                  <button onClick={() => removeSection(idx)} className="p-1.5 rounded hover:bg-red-50 text-red-500 transition-colors">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </CardHeader>
                 <CardBody className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input
-                      label="Section Title"
-                      value={step.title || ''}
-                      onChange={(e) => updateStep(idx, 'title', e.target.value)}
-                      placeholder="e.g. Personal Details"
-                    />
-                     <Select
-                        label="Document Category"
-                        value={step.document_category || ''}
-                        onChange={(e) => updateStep(idx, 'document_category', (e.target as HTMLSelectElement).value || null)}
-                        options={[{ value: '', label: 'None' }, ...docCategories.map(c => ({ value: c.key, label: c.name }))]}
-                      />
-                  </div>
+                  <Input
+                    label="Section Title"
+                    value={section.section_title || ''}
+                    onChange={(e) => updateSection(idx, 'section_title', e.target.value)}
+                    placeholder="e.g. Introduction"
+                  />
 
                   <Textarea
                     label="Content (Markdown)"
-                    value={step.body || ''}
-                    onChange={(e) => updateStep(idx, 'body', e.target.value)}
+                    value={section.content || ''}
+                    onChange={(e) => updateSection(idx, 'content', e.target.value)}
                     rows={6}
                     placeholder="# Heading&#10;Content goes here..."
                   />
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Textarea
-                      label="Document Explanation"
-                      value={step.document_explanation || ''}
-                      onChange={(e) => updateStep(idx, 'document_explanation', e.target.value)}
-                      rows={3}
-                      placeholder="Explain the document requirements..."
-                    />
-                    <Input
-                      label="Document Example URL"
-                      value={step.document_example_url || ''}
-                      onChange={(e) => updateStep(idx, 'document_example_url', e.target.value)}
-                      placeholder="https://..."
-                    />
-                  </div>
+                  <Textarea
+                    label="Tips (Optional)"
+                    value={section.tips || ''}
+                    onChange={(e) => updateSection(idx, 'tips', e.target.value)}
+                    rows={3}
+                    placeholder="Helpful tips for this section..."
+                  />
                 </CardBody>
               </Card>
             ))}
           </div>
 
           <div className="flex items-center justify-between pt-4">
-            <Button variant="secondary" onClick={addStep}>
+            <Button variant="secondary" onClick={addSection}>
               <Plus className="w-4 h-4" /> Add Section
             </Button>
-            <Button loading={loading} onClick={saveAll} disabled={steps.length === 0}>
+            <Button loading={loading} onClick={saveAll} disabled={sections.length === 0}>
               Save All Sections
             </Button>
           </div>

@@ -80,7 +80,7 @@ export function VisaDetail() {
         .from('visa_premium_content')
         .select('*')
         .eq('visa_id', id)
-        .order('step_number');
+        .order('section_number');
       setPremiumContent(contentData || []);
 
       // 5. Fetch Recent Entries
@@ -162,9 +162,7 @@ export function VisaDetail() {
             <div>
                 <p className="text-sm text-neutral-500 mb-1">Cost</p>
                 <p className="font-semibold text-neutral-900">
-                  {visa.base_cost_aud !== null
-                    ? (visa.base_cost_aud === 0 ? 'Free' : new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 }).format(visa.base_cost_aud))
-                    : 'Varies'}
+                  {visa.cost_aud || 'Varies'}
                 </p>
             </div>
             <div>
@@ -177,10 +175,10 @@ export function VisaDetail() {
             </div>
             <div className="no-print">
                  <a
-                    href={visa.official_link || '#'}
+                    href={visa.official_url || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`inline-flex items-center justify-center w-full h-full text-sm font-medium rounded-lg transition-colors ${visa.official_link ? 'text-primary-600 bg-white border border-primary-200 hover:bg-primary-50' : 'text-neutral-400 bg-neutral-100 cursor-not-allowed'}`}
+                    className={`inline-flex items-center justify-center w-full h-full text-sm font-medium rounded-lg transition-colors ${visa.official_url ? 'text-primary-600 bg-white border border-primary-200 hover:bg-primary-50' : 'text-neutral-400 bg-neutral-100 cursor-not-allowed'}`}
                  >
                     Official Site <ExternalLink className="w-4 h-4 ml-2" />
                  </a>
@@ -227,23 +225,19 @@ export function VisaDetail() {
                             <CardHeader className="bg-primary-50/50 border-b border-primary-100">
                                 <h3 className="font-semibold text-primary-900 flex items-center">
                                     <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary-100 text-primary-700 text-xs font-bold mr-3">
-                                        {currentStep.step_number}
+                                        {currentStep.section_number}
                                     </span>
-                                    {currentStep.title}
+                                    {currentStep.section_title}
                                 </h3>
                             </CardHeader>
                             <CardBody>
                                 <div className="prose prose-sm max-w-none text-neutral-600 whitespace-pre-wrap">
-                                    {currentStep.body}
+                                    {currentStep.content}
                                 </div>
 
-                                {currentStep.document_category && (
-                                    <div className="mt-4 p-3 bg-neutral-50 rounded-lg border border-neutral-100 text-sm">
-                                        <span className="font-medium text-neutral-700">Required Document: </span>
-                                        <Badge variant="info" className="ml-2">{currentStep.document_category}</Badge>
-                                        {currentStep.document_explanation && (
-                                            <p className="mt-2 text-neutral-600">{currentStep.document_explanation}</p>
-                                        )}
+                                {currentStep.tips && (
+                                    <div className="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-100 text-sm text-amber-800">
+                                        <strong>Tips:</strong> {currentStep.tips}
                                     </div>
                                 )}
 
