@@ -5,15 +5,19 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#2563eb",
+  "theme_color": "#1E3A5F",
   "orientation": "portrait-primary",
   "categories": ["business", "productivity", "utilities"],
   "icons": [
     {
-      "src": "/icon.svg",
-      "sizes": "192x192 512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ],
   "shortcuts": [
@@ -22,14 +26,14 @@
       "short_name": "Status",
       "description": "Check your visa application status",
       "url": "/dashboard/visas",
-      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "Find Lawyer",
       "short_name": "Lawyers",
       "description": "Find an immigration lawyer",
       "url": "/lawyers",
-      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }
