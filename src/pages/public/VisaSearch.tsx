@@ -36,16 +36,15 @@ const SORTS = [
   { value: 'cost_asc', label: 'Cost (Low to High)' },
 ];
 
+const parseCost = (costStr: string | null): number => {
+  if (!costStr) return 0;
+  if (costStr.toLowerCase().includes('free')) return 0;
+  const num = parseInt(costStr.replace(/[^0-9]/g, ''));
+  return isNaN(num) ? 0 : num;
+};
+
 const formatCost = (visa: Visa) => {
-  if (visa.base_cost_aud !== null) {
-    if (visa.base_cost_aud === 0) return 'Free';
-    return new Intl.NumberFormat('en-AU', {
-      style: 'currency',
-      currency: 'AUD',
-      maximumFractionDigits: 0,
-    }).format(visa.base_cost_aud);
-  }
-  return 'Free / Varies';
+  return visa.cost_aud || 'Free / Varies';
 };
 
 export function VisaSearch() {
@@ -91,8 +90,10 @@ export function VisaSearch() {
     return Array.from(ranges).sort();
   }, [visas]);
 
-  const checkCost = (cost: number | null, range: string) => {
-    if (cost === null) return false;
+  const checkCost = (costStr: string | null, range: string) => {
+    const cost = parseCost(costStr);
+    if (!costStr) return false;
+
     switch (range) {
       case 'free': return cost === 0;
       case 'low': return cost > 0 && cost < 500;
@@ -114,7 +115,7 @@ export function VisaSearch() {
 
       const matchesCost =
         selectedCostRanges.length === 0 ||
-        selectedCostRanges.some((range) => checkCost(visa.base_cost_aud, range));
+        selectedCostRanges.some((range) => checkCost(visa.cost_aud, range));
 
       const matchesTime =
         selectedTimeRanges.length === 0 ||
@@ -130,8 +131,8 @@ export function VisaSearch() {
         return a.subclass.localeCompare(b.subclass);
       }
       if (sortBy === 'cost_asc') {
-        const costA = a.base_cost_aud || 0;
-        const costB = b.base_cost_aud || 0;
+        const costA = parseCost(a.cost_aud);
+        const costB = parseCost(b.cost_aud);
         return costA - costB;
       }
       return 0;
@@ -221,7 +222,6 @@ export function VisaSearch() {
           </div>
         </div>
 
-        {/* Collapsible Filters Panel */}
         {showFilters && (
             <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6 shadow-sm animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="flex justify-between items-center mb-6">
@@ -232,7 +232,6 @@ export function VisaSearch() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {/* Categories */}
                     <div>
                         <h4 className="text-sm font-medium text-neutral-900 dark:text-white mb-3">Category</h4>
                         <div className="space-y-2">
@@ -247,7 +246,6 @@ export function VisaSearch() {
                         </div>
                     </div>
 
-                    {/* Cost Range */}
                     <div>
                         <h4 className="text-sm font-medium text-neutral-900 dark:text-white mb-3">Cost</h4>
                         <div className="space-y-2">
@@ -262,7 +260,6 @@ export function VisaSearch() {
                         </div>
                     </div>
 
-                    {/* Processing Time */}
                     <div>
                         <h4 className="text-sm font-medium text-neutral-900 dark:text-white mb-3">Processing Time</h4>
                         <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
@@ -282,7 +279,6 @@ export function VisaSearch() {
             </div>
         )}
 
-        {/* Active Filters Chips */}
         {hasActiveFilters && (
             <div className="flex flex-wrap gap-2">
                 {selectedCategories.map(cat => (
@@ -395,7 +391,6 @@ export function VisaSearch() {
         </>
       )}
 
-      {/* Comparison Floating Bar */}
       {selectedVisas.length > 0 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 z-50 animate-in slide-in-from-bottom-4 duration-300">
             <div className="bg-white dark:bg-neutral-800 rounded-2xl shadow-xl border border-neutral-200 dark:border-neutral-700 p-4 flex items-center justify-between">

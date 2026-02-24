@@ -3,7 +3,7 @@ import { Calendar, Clock, Scale, User, Video, CheckCircle, MessageSquare } from 
 import { Card, CardBody } from './ui/Card';
 import { Badge } from './ui/Badge';
 import { Button } from './ui/Button';
-import { BookingWithDetails } from '../hooks/useBookings';
+import { BookingWithDetails } from '../lib/services/booking.service';
 import { ChatInterface } from './chat/ChatInterface';
 import { useUnreadCount } from '../hooks/useChat';
 
@@ -17,8 +17,6 @@ interface BookingCardProps {
   onReschedule?: (id: string) => void;
   onReview?: (id: string) => void;
   hasReview?: boolean;
-  onAcceptTakeover?: (id: string) => Promise<void>;
-  onRejectTakeover?: (id: string) => Promise<void>;
 }
 
 const statusVariant = {
@@ -37,28 +35,30 @@ export function BookingCard({
   onJoin,
   onReschedule,
   onReview,
-  hasReview,
-  onAcceptTakeover,
-  onRejectTakeover
+  hasReview
 }: BookingCardProps) {
-  const isPast = booking.start_time ? new Date(booking.start_time) < new Date() : false;
+  const bookingDateTime = new Date(`${booking.booking_date}T${booking.start_time}`);
+  const isPast = bookingDateTime < new Date();
   const showJoin = booking.status === 'confirmed' && !isPast; // Simplified logic for join button
 
   const [showChat, setShowChat] = useState(false);
   const unreadCount = useUnreadCount(booking.id);
 
   // Format date and time
-  const startTime = booking.start_time ? new Date(booking.start_time) : new Date(booking.created_at); // Fallback
-  const endTime = new Date(startTime.getTime() + booking.duration_minutes * 60000);
-
-  const dateStr = startTime.toLocaleDateString(undefined, {
+  const dateStr = new Date(booking.booking_date).toLocaleDateString(undefined, {
     weekday: 'short',
     year: 'numeric',
     month: 'short',
     day: 'numeric'
   });
 
-  const timeStr = `${startTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} - ${endTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+  // Helper to format time string "HH:MM:SS" to "10:00 AM"
+  const formatTime = (timeStr: string) => {
+    const date = new Date(`1970-01-01T${timeStr}`);
+    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  };
+
+  const timeStr = `${formatTime(booking.start_time)} - ${formatTime(booking.end_time)}`;
 
   return (
     <Card className={`transition-all duration-200 ${showChat ? 'ring-2 ring-primary-100' : 'hover:border-primary-200'}`}>
@@ -80,7 +80,7 @@ export function BookingCard({
           <div className="flex items-center gap-3 self-start sm:self-auto">
              <Badge variant={statusVariant[booking.status]}>{booking.status}</Badge>
              <span className="text-sm font-semibold text-neutral-900">
-               ${(booking.total_price_cents / 100).toFixed(0)}
+               ${(booking.amount_cents / 100).toFixed(0)}
              </span>
           </div>
         </div>
@@ -163,18 +163,6 @@ export function BookingCard({
                   <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => onCancel(booking.id)}>
                     Cancel
                   </Button>
-                )}
-                {/* File Takeover Actions */}
-                {booking.file_takeover_status === 'requested' && onAcceptTakeover && onRejectTakeover && (
-                  <>
-                    <Button size="sm" onClick={() => onAcceptTakeover(booking.id)}>
-                      <CheckCircle className="w-4 h-4 mr-1.5" />
-                      Accept Takeover
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => onRejectTakeover(booking.id)}>
-                      Reject
-                    </Button>
-                  </>
                 )}
               </>
             )}

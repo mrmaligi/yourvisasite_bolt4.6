@@ -16,7 +16,7 @@ interface LawyerData {
   id: string;
   profile_id: string;
   jurisdiction: string;
-  practice_areas: string[];
+  specializations: string[];
   years_experience: number;
   bio: string | null;
   hourly_rate_cents: number | null;
@@ -61,7 +61,7 @@ export function LawyerProfile() {
       const { data: lawyerRow } = await supabase
         .schema('lawyer')
         .from('profiles')
-        .select('id, profile_id, jurisdiction, practice_areas, years_experience, bio, hourly_rate_cents, bar_number')
+        .select('id, profile_id, jurisdiction, specializations, years_experience, bio, hourly_rate_cents, bar_number')
         .eq('id', id)
         .eq('is_verified', true)
         .maybeSingle();
@@ -242,7 +242,7 @@ export function LawyerProfile() {
         <CardBody>
           <h2 className="text-sm font-semibold text-neutral-900 mb-3">Practice Areas</h2>
           <div className="flex flex-wrap gap-2">
-            {lawyer.practice_areas.map((area) => (
+            {lawyer.specializations?.map((area) => (
               <Badge key={area} variant="primary">{area}</Badge>
             ))}
           </div>

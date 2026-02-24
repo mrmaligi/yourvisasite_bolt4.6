@@ -1,13 +1,12 @@
 import { BookingRepository } from '../repositories/booking.repository';
 import { errorHandler } from '../errors/handler';
-import type { Booking, UserRole, LawyerProfile, Profile, ConsultationSlot } from '../../types/database';
+import type { Booking, UserRole, LawyerProfile, Profile } from '../../types/database';
 
 export interface BookingWithDetails extends Booking {
   lawyer_name?: string | null;
   lawyer_jurisdiction?: string;
   user_name?: string | null;
   user_phone?: string | null;
-  start_time?: string;
 }
 
 export class BookingService {
@@ -44,32 +43,26 @@ export class BookingService {
   }
 
   private async enrichBookings(bookings: Booking[], role: UserRole): Promise<BookingWithDetails[]> {
-    const slotIds = [...new Set(bookings.map(b => b.slot_id).filter(Boolean))];
     const lawyerIds = [...new Set(bookings.map(b => b.lawyer_id))];
     const userIds = [...new Set(bookings.map(b => b.user_id))];
 
     // Parallel fetching
-    const [slotsResult, lawyerProfilesResult, userProfilesResult] = await Promise.all([
-        this.repository.findSlots(slotIds),
+    const [lawyerProfilesResult, userProfilesResult] = await Promise.all([
         role === 'user' ? this.repository.findLawyerProfiles(lawyerIds) : Promise.resolve({ data: [] as LawyerProfile[], error: null }),
         role === 'lawyer' ? this.repository.findProfiles(userIds) : Promise.resolve({ data: [] as Profile[], error: null })
     ]);
 
-    if (slotsResult.error) throw slotsResult.error;
     if (lawyerProfilesResult.error) throw lawyerProfilesResult.error;
     if (userProfilesResult.error) throw userProfilesResult.error;
 
-    const slotsData = slotsResult.data || [];
     const lawyerProfilesData = lawyerProfilesResult.data || [];
     const userProfilesData = userProfilesResult.data || [];
-
-    const slotMap = new Map(slotsData.map(s => [s.id, s.start_time]));
 
     // For lawyers, we need public profile names to display to users
     let publicProfileMap = new Map<string, string | null>();
     if (role === 'user' && lawyerProfilesData.length > 0) {
-        const profileIds = lawyerProfilesData.map(lp => lp.profile_id);
-        const { data: profiles, error } = await this.repository.findProfiles(profileIds);
+        const userIds = lawyerProfilesData.map(lp => lp.user_id);
+        const { data: profiles, error } = await this.repository.findProfiles(userIds);
         if (error) throw error;
         if (profiles) {
             profiles.forEach(p => publicProfileMap.set(p.id, p.full_name));
@@ -80,7 +73,7 @@ export class BookingService {
     const lawyerInfoMap = new Map();
     lawyerProfilesData.forEach(lp => {
         lawyerInfoMap.set(lp.id, {
-            name: publicProfileMap.get(lp.profile_id),
+            name: publicProfileMap.get(lp.user_id),
             jurisdiction: lp.jurisdiction
         });
     });
@@ -93,7 +86,6 @@ export class BookingService {
 
       return {
         ...b,
-        start_time: slotMap.get(b.slot_id),
         lawyer_name: lawyerInfo?.name,
         lawyer_jurisdiction: lawyerInfo?.jurisdiction,
         user_name: userInfo?.name,
@@ -102,8 +94,8 @@ export class BookingService {
     });
 
     return enriched.sort((a, b) => {
-       const dateA = a.start_time ? new Date(a.start_time).getTime() : new Date(a.created_at).getTime();
-       const dateB = b.start_time ? new Date(b.start_time).getTime() : new Date(b.created_at).getTime();
+       const dateA = new Date(`${a.booking_date}T${a.start_time}`).getTime();
+       const dateB = new Date(`${b.booking_date}T${b.start_time}`).getTime();
        return dateB - dateA;
     });
   }

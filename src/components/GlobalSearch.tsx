@@ -77,7 +77,7 @@ export function GlobalSearch() {
         .select('id, profile_id, jurisdiction')
         .eq('verification_status', 'approved');
 
-      let lawyersWithNames: (Pick<LawyerProfile, 'id' | 'profile_id' | 'jurisdiction'> & { full_name?: string | null })[] = [];
+      let lawyersWithNames: (Pick<LawyerProfile, 'id' | 'user_id' | 'jurisdiction'> & { full_name?: string | null })[] = [];
       if (lawyerProfiles && lawyerProfiles.length > 0) {
         const profileIds = lawyerProfiles.map(l => l.profile_id);
         const { data: publicProfiles } = await supabase
@@ -87,7 +87,9 @@ export function GlobalSearch() {
 
         const profileMap = new Map(publicProfiles?.map(p => [p.id, p]) || []);
         lawyersWithNames = lawyerProfiles.map(l => ({
-          ...l,
+          id: l.id,
+          jurisdiction: l.jurisdiction,
+          user_id: l.profile_id, // Map profile_id to user_id
           full_name: profileMap.get(l.profile_id)?.full_name
         }));
       }

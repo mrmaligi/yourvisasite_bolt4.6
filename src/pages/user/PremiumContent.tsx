@@ -2,19 +2,13 @@ import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   BookOpen,
-  Lock,
-  CheckCircle,
-  Calendar,
   ArrowLeft,
   Printer,
   ChevronRight,
   ChevronLeft,
-  FileText,
+  CheckCircle,
   CheckSquare,
-  Square,
-  Info,
-  ChevronDown,
-  ChevronUp
+  Square
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -44,8 +38,6 @@ function PremiumContentList() {
   const fetchContent = async () => {
     if (!user) return;
 
-    // Fetch all visas that have premium content (indicated by premium_guide_url or implied)
-    // We'll use the same criteria as before: premium_guide_url is not null
     const { data: allVisas } = await supabase
       .from('visas')
       .select('id, name, description, premium_guide_url, country')
@@ -127,21 +119,13 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
-  const [showExample, setShowExample] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
-
-  // Reset example view on step change
-  useEffect(() => {
-    setShowExample(false);
-  }, [currentStepIndex]);
 
   // Check for session_id to verify purchase
   useEffect(() => {
     const sessionId = searchParams.get('session_id');
     if (sessionId) {
-      // Refresh to check if purchase is recorded
       refresh();
-      // Clean URL
       window.history.replaceState({}, '', window.location.pathname + `?visa_id=${visaId}`);
     }
   }, [searchParams, refresh, visaId]);
@@ -177,7 +161,6 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
   const currentStep = content[currentStepIndex];
   const progress = content.length > 0 ? Math.round((completedSteps.size / content.length) * 100) : 0;
 
-
   if (loading) {
      return (
         <div className="space-y-6">
@@ -201,8 +184,6 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
     );
   }
 
-
-  // Unlocked View
   return (
     <>
       <div className="flex flex-col h-[calc(100vh-100px)] no-print">
@@ -257,11 +238,11 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                                         ? 'bg-primary-100 text-primary-700'
                                         : 'bg-neutral-100 text-neutral-500'
                                 }`}>
-                                    {isCompleted ? <CheckCircle className="w-4 h-4" /> : step.step_number}
+                                    {isCompleted ? <CheckCircle className="w-4 h-4" /> : step.section_number}
                                 </div>
                                 <div>
                                     <p className={`text-sm font-medium ${isActive ? 'text-primary-900' : 'text-neutral-700'}`}>
-                                        {step.title}
+                                        {step.section_title}
                                     </p>
                                 </div>
                             </button>
@@ -280,9 +261,9 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                         <div className="flex items-center justify-between mb-6 pb-6 border-b border-neutral-100">
                              <div>
                                 <span className="text-xs font-bold tracking-wider text-primary-600 uppercase mb-1 block">
-                                    Step {currentStep.step_number}
+                                    Section {currentStep.section_number}
                                 </span>
-                                <h2 className="text-2xl font-bold text-neutral-900">{currentStep.title}</h2>
+                                <h2 className="text-2xl font-bold text-neutral-900">{currentStep.section_title}</h2>
                              </div>
                              <button
                                 onClick={() => toggleStep(currentStep.id)}
@@ -306,78 +287,20 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                              </button>
                         </div>
 
-                        {/* Document Requirement */}
-                        {currentStep.document_category && (
-                            <div className="mb-8 p-4 bg-amber-50 rounded-lg border border-amber-100 flex gap-4">
-                                <FileText className="w-6 h-6 text-amber-600 flex-shrink-0 mt-1" />
-                                <div>
-                                    <h3 className="font-semibold text-amber-900 mb-1">
-                                        Required Documents
-                                    </h3>
-                                    <Badge variant="warning">{currentStep.document_category}</Badge>
-                                    {currentStep.document_explanation && (
-                                        <p className="text-sm text-amber-800 mt-2">{currentStep.document_explanation}</p>
-                                    )}
-                                     {currentStep.document_example_url && (
-                                        <a href={currentStep.document_example_url} target="_blank" rel="noopener noreferrer" className="text-sm text-amber-900 underline mt-2 block hover:text-amber-700">
-                                            View Example
-                                        </a>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
                         {/* Content Body */}
                         <div
                             className="prose prose-neutral max-w-none mb-12"
-                            dangerouslySetInnerHTML={{ __html: currentStep.body || '' }}
+                            dangerouslySetInnerHTML={{ __html: currentStep.content || '' }}
                         />
 
-                        {/* Example Application */}
-                        {currentStep.application_example_json && currentStep.application_example_json.length > 0 && (
-                            <div className="mb-12 border border-neutral-200 rounded-xl overflow-hidden shadow-sm">
-                                <button
-                                    onClick={() => setShowExample(!showExample)}
-                                    className="w-full flex items-center justify-between p-6 bg-neutral-50 hover:bg-neutral-100 transition-colors"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                                            <FileText className="w-5 h-5" />
-                                        </div>
-                                        <div className="text-left">
-                                            <h3 className="font-bold text-neutral-900">Example Application Form</h3>
-                                            <p className="text-sm text-neutral-500">See how to fill out this section with mock data</p>
-                                        </div>
-                                    </div>
-                                    {showExample ? <ChevronUp className="w-5 h-5 text-neutral-400" /> : <ChevronDown className="w-5 h-5 text-neutral-400" />}
-                                </button>
-
-                                {showExample && (
-                                    <div className="p-6 bg-white border-t border-neutral-200 space-y-4">
-                                        {currentStep.application_example_json.map((field, i) => (
-                                            <div key={i} className="p-4 rounded-lg border border-neutral-100 bg-neutral-50 hover:border-neutral-200 transition-colors">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <label className="font-semibold text-sm text-neutral-800">{field.field_name}</label>
-                                                    {field.tip && (
-                                                        <div className="group relative ml-2">
-                                                            <Info className="w-4 h-4 text-blue-500 cursor-help" />
-                                                            <div className="absolute right-0 bottom-full mb-2 w-64 p-3 bg-neutral-900 text-white text-xs rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
-                                                                <div className="absolute bottom-[-6px] right-1 w-3 h-3 bg-neutral-900 transform rotate-45"></div>
-                                                                <span className="relative z-10 font-medium">{field.tip}</span>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="font-mono text-sm text-neutral-600 bg-white border border-neutral-200 rounded px-3 py-2 mb-2 shadow-sm">
-                                                    {field.example_value}
-                                                </div>
-                                                <p className="text-xs text-neutral-500">{field.field_description}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+                        {/* Tips */}
+                        {currentStep.tips && (
+                          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8">
+                            <h3 className="font-semibold text-amber-900 mb-2">Tips</h3>
+                            <p className="text-amber-800 text-sm whitespace-pre-line">{currentStep.tips}</p>
+                          </div>
                         )}
+
                         {/* Footer Navigation */}
                         <div className="flex items-center justify-between pt-8 border-t border-neutral-100">
                             <Button
@@ -389,7 +312,7 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                                 }}
                             >
                                 <ChevronLeft className="w-4 h-4 mr-2" />
-                                Previous Step
+                                Previous Section
                             </Button>
 
                             <Button
@@ -400,14 +323,14 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                                     contentRef.current?.scrollTo(0,0);
                                 }}
                             >
-                                Next Step
+                                Next Section
                                 <ChevronRight className="w-4 h-4 ml-2" />
                             </Button>
                         </div>
                     </div>
                  ) : (
                      <div className="text-center py-12 text-neutral-500">
-                         Select a step to begin.
+                         Select a section to begin.
                      </div>
                  )}
              </div>
@@ -423,36 +346,15 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                 <div key={step.id} className="break-inside-avoid">
                     <h2 className="text-2xl font-bold text-neutral-900 mb-4 flex items-center">
                         <span className="w-8 h-8 rounded-full bg-neutral-900 text-white flex items-center justify-center text-sm mr-3">
-                            {step.step_number}
+                            {step.section_number}
                         </span>
-                        {step.title}
+                        {step.section_title}
                     </h2>
-
-                    {step.document_category && (
-                        <div className="mb-6 p-4 border border-neutral-300 rounded-lg">
-                             <p className="font-bold mb-1">Required Document: {step.document_category}</p>
-                             {step.document_explanation && <p className="text-sm">{step.document_explanation}</p>}
-                        </div>
-                    )}
 
                     <div
                         className="prose prose-neutral max-w-none"
-                        dangerouslySetInnerHTML={{ __html: step.body || '' }}
+                        dangerouslySetInnerHTML={{ __html: step.content || '' }}
                     />
-
-                    {step.application_example_json && step.application_example_json.length > 0 && (
-                        <div className="mt-6 border border-neutral-200 rounded-lg p-4 bg-neutral-50">
-                            <h3 className="font-bold mb-3">Example Application Data</h3>
-                            <div className="grid grid-cols-2 gap-4">
-                                {step.application_example_json.map((field, i) => (
-                                    <div key={i} className="text-sm">
-                                        <p className="font-semibold">{field.field_name}</p>
-                                        <p className="font-mono bg-white border px-2 py-1 mt-1">{field.example_value}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
             ))}
         </div>
