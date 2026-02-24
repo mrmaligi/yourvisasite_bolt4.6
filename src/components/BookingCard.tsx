@@ -38,27 +38,25 @@ export function BookingCard({
   onReschedule,
   onReview,
   hasReview,
-  onAcceptTakeover,
-  onRejectTakeover
 }: BookingCardProps) {
-  const isPast = booking.start_time ? new Date(booking.start_time) < new Date() : false;
-  const showJoin = booking.status === 'confirmed' && !isPast; // Simplified logic for join button
+  // Construct Date object using booking_date and start_time
+  const startDateTime = new Date(`${booking.booking_date}T${booking.start_time}`);
+  const endDateTime = new Date(`${booking.booking_date}T${booking.end_time}`);
+
+  const isPast = endDateTime < new Date();
+  const showJoin = booking.status === 'confirmed' && !isPast;
 
   const [showChat, setShowChat] = useState(false);
   const unreadCount = useUnreadCount(booking.id);
 
-  // Format date and time
-  const startTime = booking.start_time ? new Date(booking.start_time) : new Date(booking.created_at); // Fallback
-  const endTime = new Date(startTime.getTime() + booking.duration_minutes * 60000);
-
-  const dateStr = startTime.toLocaleDateString(undefined, {
+  const dateStr = startDateTime.toLocaleDateString(undefined, {
     weekday: 'short',
     year: 'numeric',
     month: 'short',
     day: 'numeric'
   });
 
-  const timeStr = `${startTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} - ${endTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+  const timeStr = `${startDateTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} - ${endDateTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
 
   return (
     <Card className={`transition-all duration-200 ${showChat ? 'ring-2 ring-primary-100' : 'hover:border-primary-200'}`}>
@@ -80,7 +78,7 @@ export function BookingCard({
           <div className="flex items-center gap-3 self-start sm:self-auto">
              <Badge variant={statusVariant[booking.status]}>{booking.status}</Badge>
              <span className="text-sm font-semibold text-neutral-900">
-               ${(booking.total_price_cents / 100).toFixed(0)}
+               ${(booking.amount_cents / 100).toFixed(0)}
              </span>
           </div>
         </div>
@@ -163,18 +161,6 @@ export function BookingCard({
                   <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => onCancel(booking.id)}>
                     Cancel
                   </Button>
-                )}
-                {/* File Takeover Actions */}
-                {booking.file_takeover_status === 'requested' && onAcceptTakeover && onRejectTakeover && (
-                  <>
-                    <Button size="sm" onClick={() => onAcceptTakeover(booking.id)}>
-                      <CheckCircle className="w-4 h-4 mr-1.5" />
-                      Accept Takeover
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => onRejectTakeover(booking.id)}>
-                      Reject
-                    </Button>
-                  </>
                 )}
               </>
             )}

@@ -89,7 +89,7 @@ export function useDocuments() {
             visa_id: visaId,
             document_category: categoryKey,
             file_name: file.name,
-            storage_path: storagePath,
+            file_path: storagePath,
             status: 'pending',
           },
         ])
@@ -119,10 +119,10 @@ export function useDocuments() {
     setLoading(true);
     try {
       // 1. Remove from Storage
-      if (doc.storage_path) {
+      if (doc.file_path) {
         const { error: storageError } = await supabase.storage
           .from('documents')
-          .remove([doc.storage_path]);
+          .remove([doc.file_path]);
 
         if (storageError) {
           console.warn('Error removing from storage (might be already gone):', storageError);

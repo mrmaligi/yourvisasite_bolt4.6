@@ -1,5 +1,5 @@
 import { supabase, fetchWithRetry } from '../supabase';
-import type { Booking, ConsultationSlot, LawyerProfile, Profile } from '../../types/database';
+import type { Booking, LawyerProfile, Profile } from '../../types/database';
 import { PostgrestError } from '@supabase/supabase-js';
 
 export class BookingRepository {
@@ -21,32 +21,19 @@ export class BookingRepository {
     return { data: (data || []) as Booking[], error };
   }
 
-  async findLawyerByProfileId(profileId: string): Promise<{ data: LawyerProfile | null; error: PostgrestError | null }> {
+  async findLawyerByProfileId(userId: string): Promise<{ data: LawyerProfile | null; error: PostgrestError | null }> {
     const { data, error } = await fetchWithRetry(() => supabase
-      .schema('lawyer')
-      .from('profiles')
-      .select('*') // select all to be safe, or specify needed columns
-      .eq('profile_id', profileId)
+      .from('lawyer_profiles')
+      .select('*')
+      .eq('user_id', userId)
       .maybeSingle());
     return { data: data as LawyerProfile | null, error };
-  }
-
-  // Batch fetching methods
-  async findSlots(slotIds: string[]): Promise<{ data: ConsultationSlot[]; error: PostgrestError | null }> {
-    if (slotIds.length === 0) return { data: [], error: null };
-    const { data, error } = await fetchWithRetry(() => supabase
-      .schema('lawyer')
-      .from('consultation_slots')
-      .select('*')
-      .in('id', slotIds));
-    return { data: (data || []) as ConsultationSlot[], error };
   }
 
   async findLawyerProfiles(lawyerIds: string[]): Promise<{ data: LawyerProfile[]; error: PostgrestError | null }> {
     if (lawyerIds.length === 0) return { data: [], error: null };
     const { data, error } = await fetchWithRetry(() => supabase
-      .schema('lawyer')
-      .from('profiles')
+      .from('lawyer_profiles')
       .select('*')
       .in('id', lawyerIds));
     return { data: (data || []) as LawyerProfile[], error };

@@ -16,14 +16,9 @@ export function useLawyers(specialization?: string) {
       setLoading(true);
       setError(null);
       try {
-        // Query lawyer.profiles
-        // Assuming 'lawyer' schema based on prompt notation
-        // If it fails, fallback to 'lawyer_profiles' table in public schema or handle error
-
         let query = supabase
-          .schema('lawyer')
-          .from('profiles')
-          .select('*, profiles!inner(*)') // !inner to ensure we get profile data
+          .from('lawyer_profiles')
+          .select('*, profiles:user_id(*)')
           .eq('is_verified', true);
 
         if (specialization) {
@@ -33,9 +28,7 @@ export function useLawyers(specialization?: string) {
         const { data, error: fetchError } = await query;
 
         if (fetchError) {
-           // Fallback attempt: maybe table is 'lawyer_profiles' in public schema?
-           // Or maybe just 'profiles' in 'lawyer' schema without join working?
-           console.warn('Error fetching lawyers from lawyer schema, trying fallback might be needed:', fetchError);
+           console.warn('Error fetching lawyers:', fetchError);
            throw fetchError;
         }
 

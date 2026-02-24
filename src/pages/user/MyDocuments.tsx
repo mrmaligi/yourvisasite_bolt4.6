@@ -142,7 +142,7 @@ export function MyDocuments() {
               user_id: user.id,
               document_category: modalCategoryKey,
               file_name: uploadFileState.name,
-              storage_path: path,
+              file_path: path,
               status: 'pending',
             },
           ]);
@@ -188,7 +188,7 @@ export function MyDocuments() {
               user_id: user.id,
               document_category: categoryKey,
               file_name: file.name,
-              storage_path: path,
+              file_path: path,
               status: 'pending',
             },
           ]);
@@ -220,7 +220,7 @@ export function MyDocuments() {
   };
 
   const handleDownload = async (doc: UserDocument) => {
-    const url = await getDocumentUrl(doc.storage_path);
+    const url = await getDocumentUrl(doc.file_path);
     if (url) window.open(url, '_blank');
     else toast('error', 'Failed to get download URL');
   };

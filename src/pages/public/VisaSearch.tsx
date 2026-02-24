@@ -37,15 +37,14 @@ const SORTS = [
 ];
 
 const formatCost = (visa: Visa) => {
-  if (visa.base_cost_aud !== null) {
-    if (visa.base_cost_aud === 0) return 'Free';
-    return new Intl.NumberFormat('en-AU', {
-      style: 'currency',
-      currency: 'AUD',
-      maximumFractionDigits: 0,
-    }).format(visa.base_cost_aud);
-  }
-  return 'Free / Varies';
+  return visa.cost_aud || 'Free / Varies';
+};
+
+const parseCost = (costStr: string | null): number => {
+  if (!costStr) return 0;
+  if (costStr.toLowerCase().includes('free')) return 0;
+  const num = parseFloat(costStr.replace(/[^0-9.]/g, ''));
+  return isNaN(num) ? 0 : num;
 };
 
 export function VisaSearch() {
@@ -91,8 +90,8 @@ export function VisaSearch() {
     return Array.from(ranges).sort();
   }, [visas]);
 
-  const checkCost = (cost: number | null, range: string) => {
-    if (cost === null) return false;
+  const checkCost = (costStr: string | null, range: string) => {
+    const cost = parseCost(costStr);
     switch (range) {
       case 'free': return cost === 0;
       case 'low': return cost > 0 && cost < 500;
@@ -114,7 +113,7 @@ export function VisaSearch() {
 
       const matchesCost =
         selectedCostRanges.length === 0 ||
-        selectedCostRanges.some((range) => checkCost(visa.base_cost_aud, range));
+        selectedCostRanges.some((range) => checkCost(visa.cost_aud, range));
 
       const matchesTime =
         selectedTimeRanges.length === 0 ||
@@ -130,8 +129,8 @@ export function VisaSearch() {
         return a.subclass.localeCompare(b.subclass);
       }
       if (sortBy === 'cost_asc') {
-        const costA = a.base_cost_aud || 0;
-        const costB = b.base_cost_aud || 0;
+        const costA = parseCost(a.cost_aud);
+        const costB = parseCost(b.cost_aud);
         return costA - costB;
       }
       return 0;

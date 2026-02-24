@@ -72,23 +72,22 @@ export function GlobalSearch() {
 
       // 2. Fetch Lawyers (only approved)
       const { data: lawyerProfiles } = await supabase
-        .schema('lawyer')
-        .from('profiles')
-        .select('id, profile_id, jurisdiction')
+        .from('lawyer_profiles')
+        .select('id, user_id, jurisdiction')
         .eq('verification_status', 'approved');
 
-      let lawyersWithNames: (Pick<LawyerProfile, 'id' | 'profile_id' | 'jurisdiction'> & { full_name?: string | null })[] = [];
+      let lawyersWithNames: (Pick<LawyerProfile, 'id' | 'user_id' | 'jurisdiction'> & { full_name?: string | null })[] = [];
       if (lawyerProfiles && lawyerProfiles.length > 0) {
-        const profileIds = lawyerProfiles.map(l => l.profile_id);
+        const userIds = lawyerProfiles.map(l => l.user_id);
         const { data: publicProfiles } = await supabase
           .from('profiles')
           .select('id, full_name')
-          .in('id', profileIds);
+          .in('id', userIds);
 
         const profileMap = new Map(publicProfiles?.map(p => [p.id, p]) || []);
         lawyersWithNames = lawyerProfiles.map(l => ({
           ...l,
-          full_name: profileMap.get(l.profile_id)?.full_name
+          full_name: profileMap.get(l.user_id)?.full_name
         }));
       }
 

@@ -16,7 +16,10 @@ const statusVariant = {
   rejected: 'danger' as const,
 };
 
-type LawyerWithProfile = LawyerProfile & { full_name?: string };
+type LawyerWithProfile = LawyerProfile & {
+  full_name?: string;
+  hourly_rate_cents?: number | null;
+};
 
 export function LawyerManagement() {
   const { user } = useAuth();
@@ -28,8 +31,7 @@ export function LawyerManagement() {
 
   const fetchLawyers = async () => {
     const { data: lawyerData } = await supabase
-      .schema('lawyer')
-      .from('profiles')
+      .from('lawyer_profiles')
       .select('*')
       .order('created_at', { ascending: false });
 
@@ -39,18 +41,22 @@ export function LawyerManagement() {
       return;
     }
 
-    const profileIds = lawyerData.map((l) => l.profile_id);
+    const userIds = lawyerData.map((l) => l.user_id);
     const { data: userData } = await supabase
       .from('profiles')
-      .select('id, full_name')
-      .in('id', profileIds);
+      .select('id, full_name, hourly_rate_cents')
+      .in('id', userIds);
 
     const userMap = new Map(userData?.map((u) => [u.id, u]) || []);
 
-    const merged = lawyerData.map((l) => ({
-      ...l,
-      full_name: userMap.get(l.profile_id)?.full_name || 'Unknown',
-    }));
+    const merged = lawyerData.map((l) => {
+      const user = userMap.get(l.user_id);
+      return {
+        ...l,
+        full_name: user?.full_name || 'Unknown',
+        hourly_rate_cents: user?.hourly_rate_cents,
+      };
+    });
 
     setLawyers(merged);
     setLoading(false);
@@ -59,7 +65,7 @@ export function LawyerManagement() {
   useEffect(() => { fetchLawyers(); }, []);
 
   const handleApprove = async (lawyer: LawyerWithProfile) => {
-    await supabase.schema('lawyer').from('profiles').update({
+    await supabase.from('lawyer_profiles').update({
       is_verified: true,
       verification_status: 'approved',
       verified_at: new Date().toISOString(),
@@ -68,7 +74,7 @@ export function LawyerManagement() {
 
     try {
       const { error } = await supabase.functions.invoke('verify-lawyer', {
-        body: { lawyer_profile_id: lawyer.profile_id, action: 'approve' },
+        body: { lawyer_profile_id: lawyer.id, action: 'approve' },
       });
       if (error) throw error;
     } catch (err) {
@@ -81,7 +87,7 @@ export function LawyerManagement() {
 
   const handleReject = async () => {
     if (!rejectTarget) return;
-    await supabase.schema('lawyer').from('profiles').update({
+    await supabase.from('lawyer_profiles').update({
       verification_status: 'rejected',
       rejection_reason: rejectReason,
     }).eq('id', rejectTarget.id);

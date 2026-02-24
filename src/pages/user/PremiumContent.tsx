@@ -12,7 +12,6 @@ import {
   FileText,
   CheckSquare,
   Square,
-  Info,
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
@@ -127,13 +126,7 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
-  const [showExample, setShowExample] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
-
-  // Reset example view on step change
-  useEffect(() => {
-    setShowExample(false);
-  }, [currentStepIndex]);
 
   // Check for session_id to verify purchase
   useEffect(() => {
@@ -333,51 +326,6 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                             dangerouslySetInnerHTML={{ __html: currentStep.body || '' }}
                         />
 
-                        {/* Example Application */}
-                        {currentStep.application_example_json && currentStep.application_example_json.length > 0 && (
-                            <div className="mb-12 border border-neutral-200 rounded-xl overflow-hidden shadow-sm">
-                                <button
-                                    onClick={() => setShowExample(!showExample)}
-                                    className="w-full flex items-center justify-between p-6 bg-neutral-50 hover:bg-neutral-100 transition-colors"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                                            <FileText className="w-5 h-5" />
-                                        </div>
-                                        <div className="text-left">
-                                            <h3 className="font-bold text-neutral-900">Example Application Form</h3>
-                                            <p className="text-sm text-neutral-500">See how to fill out this section with mock data</p>
-                                        </div>
-                                    </div>
-                                    {showExample ? <ChevronUp className="w-5 h-5 text-neutral-400" /> : <ChevronDown className="w-5 h-5 text-neutral-400" />}
-                                </button>
-
-                                {showExample && (
-                                    <div className="p-6 bg-white border-t border-neutral-200 space-y-4">
-                                        {currentStep.application_example_json.map((field, i) => (
-                                            <div key={i} className="p-4 rounded-lg border border-neutral-100 bg-neutral-50 hover:border-neutral-200 transition-colors">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <label className="font-semibold text-sm text-neutral-800">{field.field_name}</label>
-                                                    {field.tip && (
-                                                        <div className="group relative ml-2">
-                                                            <Info className="w-4 h-4 text-blue-500 cursor-help" />
-                                                            <div className="absolute right-0 bottom-full mb-2 w-64 p-3 bg-neutral-900 text-white text-xs rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
-                                                                <div className="absolute bottom-[-6px] right-1 w-3 h-3 bg-neutral-900 transform rotate-45"></div>
-                                                                <span className="relative z-10 font-medium">{field.tip}</span>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="font-mono text-sm text-neutral-600 bg-white border border-neutral-200 rounded px-3 py-2 mb-2 shadow-sm">
-                                                    {field.example_value}
-                                                </div>
-                                                <p className="text-xs text-neutral-500">{field.field_description}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        )}
                         {/* Footer Navigation */}
                         <div className="flex items-center justify-between pt-8 border-t border-neutral-100">
                             <Button
@@ -440,19 +388,6 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                         dangerouslySetInnerHTML={{ __html: step.body || '' }}
                     />
 
-                    {step.application_example_json && step.application_example_json.length > 0 && (
-                        <div className="mt-6 border border-neutral-200 rounded-lg p-4 bg-neutral-50">
-                            <h3 className="font-bold mb-3">Example Application Data</h3>
-                            <div className="grid grid-cols-2 gap-4">
-                                {step.application_example_json.map((field, i) => (
-                                    <div key={i} className="text-sm">
-                                        <p className="font-semibold">{field.field_name}</p>
-                                        <p className="font-mono bg-white border px-2 py-1 mt-1">{field.example_value}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
             ))}
         </div>

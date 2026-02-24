@@ -162,9 +162,7 @@ export function VisaDetail() {
             <div>
                 <p className="text-sm text-neutral-500 mb-1">Cost</p>
                 <p className="font-semibold text-neutral-900">
-                  {visa.base_cost_aud !== null
-                    ? (visa.base_cost_aud === 0 ? 'Free' : new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 }).format(visa.base_cost_aud))
-                    : 'Varies'}
+                  {visa.cost_aud || 'Varies'}
                 </p>
             </div>
             <div>
@@ -177,10 +175,10 @@ export function VisaDetail() {
             </div>
             <div className="no-print">
                  <a
-                    href={visa.official_link || '#'}
+                    href={visa.official_url || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`inline-flex items-center justify-center w-full h-full text-sm font-medium rounded-lg transition-colors ${visa.official_link ? 'text-primary-600 bg-white border border-primary-200 hover:bg-primary-50' : 'text-neutral-400 bg-neutral-100 cursor-not-allowed'}`}
+                    className={`inline-flex items-center justify-center w-full h-full text-sm font-medium rounded-lg transition-colors ${visa.official_url ? 'text-primary-600 bg-white border border-primary-200 hover:bg-primary-50' : 'text-neutral-400 bg-neutral-100 cursor-not-allowed'}`}
                  >
                     Official Site <ExternalLink className="w-4 h-4 ml-2" />
                  </a>

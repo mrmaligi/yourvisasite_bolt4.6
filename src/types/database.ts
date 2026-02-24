@@ -12,6 +12,8 @@ export interface Profile {
   full_name: string | null;
   avatar_url: string | null;
   phone: string | null;
+  bio: string | null;
+  hourly_rate_cents: number | null;
   is_active: boolean;
   is_featured?: boolean;
   created_at: string;
@@ -34,10 +36,10 @@ export interface Visa {
   name: string;
   country: string;
   category: string;
-  official_link: string | null;
+  official_url: string | null;
   summary: string | null;
   description: string | null;
-  base_cost_aud: number | null;
+  cost_aud: string | null;
   processing_time_range: string | null;
   duration: string | null;
   key_requirements: string | null;
@@ -73,16 +75,6 @@ export interface ApplicationExampleField {
 export interface VisaPremiumContent {
   id: string;
   visa_id: string;
-  section_number: number;
-  section_title: string;
-  content: string;
-  tips: string | null;
-  common_mistakes: string | null;
-  examples: Record<string, any> | null;
-  estimated_minutes: number | null;
-  required_documents: string[] | null;
-  application_example_json: ApplicationExampleField[] | null;
-  // New fields for document guidance
   step_number: number | null;
   title: string | null;
   body: string | null;
@@ -90,7 +82,6 @@ export interface VisaPremiumContent {
   document_explanation: string | null;
   document_example_url: string | null;
   created_at: string;
-  updated_at: string;
 }
 
 export interface VisaRequirement {
@@ -164,13 +155,10 @@ export interface Product {
 export interface LawyerProfile {
   id: string;
   user_id: string;
-  profile_id: string;
   bar_number: string;
   jurisdiction: string;
   practice_areas: string[];
   years_experience: number;
-  bio: string | null;
-  hourly_rate_cents: number | null;
   is_verified: boolean;
   verification_status: VerificationStatus;
   verification_document_url: string | null;
@@ -196,15 +184,12 @@ export interface Booking {
   id: string;
   user_id: string;
   lawyer_id: string;
-  slot_id: string;
-  duration_minutes: number;
-  total_price_cents: number;
+  booking_date: string;
+  start_time: string;
+  end_time: string;
+  amount_cents: number;
   status: BookingStatus;
   payment_status: PaymentStatus;
-  payment_intent_id: string | null;
-  stripe_checkout_session_id: string | null;
-  file_takeover_status: 'requested' | 'accepted' | 'rejected' | null;
-  confirmed_at: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -226,7 +211,7 @@ export interface UserDocument {
   visa_id: string | null;
   document_category: string; // matches DocumentCategory.key
   file_name: string;
-  storage_path: string;
+  file_path: string;
   status: DocumentStatus;
   uploaded_at: string;
 }
