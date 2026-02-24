@@ -18,7 +18,7 @@ export function TrackerWizard({ onSuccess, preselectedVisaId, initialEntry }: Pr
   const { user, role } = useAuth();
   const { toast } = useToast();
   const [step, setStep] = useState(1);
-  const [visas, setVisas] = useState<Pick<Visa, 'id' | 'name' | 'subclass_number'>[]>([]);
+  const [visas, setVisas] = useState<Pick<Visa, 'id' | 'name' | 'subclass'>[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Form State
@@ -31,7 +31,7 @@ export function TrackerWizard({ onSuccess, preselectedVisaId, initialEntry }: Pr
   useEffect(() => {
     supabase
       .from('visas')
-      .select('id, name, subclass_number')
+      .select('id, name, subclass')
       .eq('is_active', true)
       .order('name')
       .then(({ data }) => setVisas(data || []));
@@ -127,7 +127,7 @@ export function TrackerWizard({ onSuccess, preselectedVisaId, initialEntry }: Pr
                   }`}
                 >
                   <div>
-                    <span className="font-bold text-neutral-900 block">{v.subclass_number}</span>
+                    <span className="font-bold text-neutral-900 block">{v.subclass}</span>
                     <span className="text-sm text-neutral-500">{v.name}</span>
                   </div>
                   {visaId === v.id && <Check className="w-5 h-5 text-primary-600" />}
@@ -200,7 +200,7 @@ export function TrackerWizard({ onSuccess, preselectedVisaId, initialEntry }: Pr
             <div className="bg-neutral-50 rounded-xl p-6 space-y-4">
               <div className="flex justify-between border-b border-neutral-200 pb-3">
                 <span className="text-neutral-500">Visa</span>
-                <span className="font-medium">{selectedVisa?.subclass_number} - {selectedVisa?.name}</span>
+                <span className="font-medium">{selectedVisa?.subclass} - {selectedVisa?.name}</span>
               </div>
               <div className="flex justify-between border-b border-neutral-200 pb-3">
                 <span className="text-neutral-500">Applied</span>

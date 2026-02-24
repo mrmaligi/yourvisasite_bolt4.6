@@ -8,9 +8,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
-import { Modal } from '../../components/ui/Modal';
-import { Textarea } from '../../components/ui/Input';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../components/ui/Toast';
 import { Breadcrumbs } from '../../components/ui/Breadcrumbs';
@@ -56,13 +53,6 @@ export function LawyerProfile() {
   const [slots, setSlots] = useState<SlotData[]>([]);
   const [reviews, setReviews] = useState<LawyerReview[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Review Modal State
-  const [showReviewModal, setShowReviewModal] = useState(false);
-  const [rating, setRating] = useState(5);
-  const [reviewText, setReviewText] = useState('');
-  const [submittingReview, setSubmittingReview] = useState(false);
-  const [bookingIdToReview, setBookingIdToReview] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -148,82 +138,6 @@ export function LawyerProfile() {
     return groups;
   };
 
-  const handleOpenReviewModal = async () => {
-    if (!user || !lawyer) return;
-
-    // Check for eligible bookings
-    const { data: bookings } = await supabase
-      .from('bookings')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('lawyer_id', lawyer.id)
-      .in('status', ['completed', 'confirmed'])
-      .order('created_at', { ascending: false });
-
-    if (!bookings || bookings.length === 0) {
-      toast('error', 'You need a completed consultation to leave a review.');
-      return;
-    }
-
-    // Check which bookings are already reviewed
-    const { data: existingReviews } = await supabase
-      .from('lawyer_reviews')
-      .select('booking_id')
-      .eq('user_id', user.id)
-      .eq('lawyer_id', lawyer.id);
-
-    const reviewedBookingIds = new Set(existingReviews?.map(r => r.booking_id) || []);
-    const eligibleBooking = bookings.find(b => !reviewedBookingIds.has(b.id));
-
-    if (!eligibleBooking) {
-      toast('error', 'You have already reviewed all your consultations.');
-      return;
-    }
-
-    setBookingIdToReview(eligibleBooking.id);
-    setShowReviewModal(true);
-  };
-
-  const handleReviewSubmit = async () => {
-    if (!user || !lawyer || !bookingIdToReview) return;
-    setSubmittingReview(true);
-
-    try {
-      const { error } = await supabase.from('lawyer_reviews').insert({
-        lawyer_id: lawyer.id,
-        user_id: user.id,
-        booking_id: bookingIdToReview,
-        rating,
-        review_text: reviewText,
-      });
-
-      if (error) throw error;
-
-      toast('success', 'Review submitted successfully');
-      setShowReviewModal(false);
-      setReviewText('');
-      setRating(5);
-
-      // Add to state optimistically
-      const newReview: LawyerReview = {
-        id: 'temp-' + Date.now(),
-        user_id: user.id,
-        rating,
-        review_text: reviewText,
-        reply_text: null,
-        replied_at: null,
-        created_at: new Date().toISOString(),
-        user_full_name: 'You'
-      };
-      setReviews([newReview, ...reviews]);
-
-    } catch (err: any) {
-      toast('error', err.message || 'Failed to submit review');
-    } finally {
-      setSubmittingReview(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
@@ -265,7 +179,7 @@ export function LawyerProfile() {
         className="mb-8"
       />
 
-      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8 text-center sm:text-left">
+      <div className="flex flex-col sm:flex-row items-start gap-6 mb-8">
         {lawyer.avatar_url ? (
           <img
             src={lawyer.avatar_url}
@@ -277,8 +191,8 @@ export function LawyerProfile() {
             <Scale className="w-8 h-8 text-white" />
           </div>
         )}
-        <div className="flex-1 w-full">
-          <div className="flex items-center justify-center sm:justify-start gap-3 flex-wrap mb-1">
+        <div className="flex-1">
+          <div className="flex items-center gap-3 flex-wrap mb-1">
             <h1 className="text-2xl font-bold text-neutral-900">
               {lawyer.full_name || 'Immigration Lawyer'}
             </h1>
@@ -287,7 +201,7 @@ export function LawyerProfile() {
               Verified
             </Badge>
           </div>
-          <div className="flex items-center justify-center sm:justify-start gap-4 text-sm text-neutral-500 mt-1.5 flex-wrap">
+          <div className="flex items-center gap-4 text-sm text-neutral-500 mt-1.5 flex-wrap">
             {reviews.length > 0 && (
               <span className="flex items-center gap-1.5 text-yellow-600 font-medium">
                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
@@ -390,23 +304,16 @@ export function LawyerProfile() {
         <div className="md:col-span-1">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-neutral-900 flex items-center gap-2">
-                  <Star className="w-5 h-5 text-yellow-500" />
-                  Reviews
-                </h2>
-                {user && (
-                  <Button size="sm" variant="secondary" onClick={handleOpenReviewModal}>
-                    Write a Review
-                  </Button>
-                )}
-              </div>
+              <h2 className="text-lg font-semibold text-neutral-900 flex items-center gap-2">
+                <Star className="w-5 h-5 text-yellow-500" />
+                Reviews
+              </h2>
             </CardHeader>
             <CardBody>
               {reviews.length === 0 ? (
                 <div className="text-center py-8">
                   <MessageSquare className="w-8 h-8 text-neutral-300 mx-auto mb-3" />
-                  <p className="text-sm text-neutral-500">No reviews yet. Be the first to leave one!</p>
+                  <p className="text-sm text-neutral-500">No reviews yet.</p>
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -447,45 +354,6 @@ export function LawyerProfile() {
           </Card>
         </div>
       </div>
-
-      <Modal
-        isOpen={showReviewModal}
-        onClose={() => setShowReviewModal(false)}
-        title="Write a Review"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setShowReviewModal(false)}>Cancel</Button>
-            <Button onClick={handleReviewSubmit} loading={submittingReview} disabled={!reviewText.trim()}>Submit Review</Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-            <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1">Rating</label>
-                <div className="flex gap-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                            key={star}
-                            onClick={() => setRating(star)}
-                            className="focus:outline-none transition-transform hover:scale-110"
-                            type="button"
-                        >
-                            <Star
-                                className={`w-8 h-8 ${star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-neutral-200'}`}
-                            />
-                        </button>
-                    ))}
-                </div>
-            </div>
-            <Textarea
-                label="Your Review"
-                value={reviewText}
-                onChange={(e) => setReviewText(e.target.value)}
-                placeholder="Share your experience with this lawyer..."
-                rows={4}
-            />
-        </div>
-      </Modal>
     </div>
   );
 }

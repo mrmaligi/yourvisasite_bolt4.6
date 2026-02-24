@@ -15,7 +15,7 @@ import { TRACKER_THRESHOLDS } from '../../lib/constants';
 import type { TrackerStats, VisaCategory, TrackerEntry } from '../../types/database';
 
 interface VisaInfo {
-  subclass_number: string;
+  subclass: string;
   name: string;
   category: VisaCategory;
 }
@@ -25,7 +25,7 @@ interface TrackerData extends TrackerStats {
 }
 
 interface PendingEntry extends TrackerEntry {
-  visas: Pick<VisaInfo, 'subclass_number' | 'name'>;
+  visas: Pick<VisaInfo, 'subclass' | 'name'>;
 }
 
 function getSpeedBadge(days: number) {
@@ -64,7 +64,7 @@ export function Tracker() {
     setLoading(true);
     const { data, error } = await supabase
       .from('tracker_stats')
-      .select('*, visas!inner(subclass_number, name, category)');
+      .select('*, visas!inner(subclass, name, category)');
 
     if (error) {
       console.error('Error fetching tracker stats:', error);
@@ -77,7 +77,7 @@ export function Tracker() {
   const fetchPendingEntries = async () => {
     const { data, error } = await supabase
       .from('tracker_entries')
-      .select('*, visas(subclass_number, name)')
+      .select('*, visas(subclass, name)')
       .eq('submitted_by', user!.id)
       .eq('status', 'pending')
       .order('created_at', { ascending: false });
@@ -93,7 +93,7 @@ export function Tracker() {
     .filter((s) => {
       const matchesSearch =
         s.visas.name.toLowerCase().includes(search.toLowerCase()) ||
-        s.visas.subclass_number.toLowerCase().includes(search.toLowerCase());
+        s.visas.subclass.toLowerCase().includes(search.toLowerCase());
       const matchesCategory = category ? s.visas.category === category : true;
       return matchesSearch && matchesCategory;
     })
@@ -136,7 +136,7 @@ export function Tracker() {
               <Card key={entry.id} className="border-l-4 border-l-primary-500 overflow-hidden">
                 <CardBody>
                   <div className="flex justify-between items-start mb-2">
-                    <Badge variant="default">{entry.visas.subclass_number}</Badge>
+                    <Badge variant="default">{entry.visas.subclass}</Badge>
                     <TrackerStatusBadge status={entry.outcome || 'pending'} />
                   </div>
                   <h3 className="font-bold text-neutral-900 mb-4 truncate" title={entry.visas.name}>{entry.visas.name}</h3>
@@ -221,7 +221,7 @@ export function Tracker() {
                 <CardBody className="flex flex-col h-full">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <Badge variant="default" className="mb-2">{stat.visas.subclass_number}</Badge>
+                      <Badge variant="default" className="mb-2">{stat.visas.subclass}</Badge>
                       <h3 className="font-bold text-neutral-900 leading-tight">{stat.visas.name}</h3>
                       <p className="text-sm text-neutral-500 mt-1 capitalize">{stat.visas.category}</p>
                     </div>

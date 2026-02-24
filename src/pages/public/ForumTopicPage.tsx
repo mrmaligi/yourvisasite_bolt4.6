@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Eye, MessageSquare, Share2, Bell } from 'lucide-react';
 import { ForumReplyComponent } from '../../components/forum/ForumReply';
@@ -30,7 +30,12 @@ export function ForumTopicPage() {
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [isSubscribed, setIsSubscribed] = useState(false);
 
-  const fetchTopicData = useCallback(async () => {
+  useEffect(() => {
+    fetchTopicData();
+    if (user) checkSubscription();
+  }, [topicSlug, user]);
+
+  const fetchTopicData = async () => {
     try {
       // Get topic with author
       const { data: topicData } = await supabase
@@ -78,28 +83,20 @@ export function ForumTopicPage() {
     } finally {
       setLoading(false);
     }
-  }, [topicSlug]);
+  };
 
-  useEffect(() => {
-    fetchTopicData();
-  }, [fetchTopicData]);
+  const checkSubscription = async () => {
+    if (!user || !topic) return;
+    
+    const { data } = await supabase
+      .from('forum_subscriptions')
+      .select('*')
+      .eq('topic_id', topic.id)
+      .eq('user_id', user.id)
+      .single();
 
-  useEffect(() => {
-    const checkSubscription = async () => {
-      if (!user || !topic) return;
-
-      const { data } = await supabase
-        .from('forum_subscriptions')
-        .select('*')
-        .eq('topic_id', topic.id)
-        .eq('user_id', user.id)
-        .single();
-
-      setIsSubscribed(!!data);
-    };
-
-    checkSubscription();
-  }, [user, topic]);
+    setIsSubscribed(!!data);
+  };
 
   const handleReply = async () => {
     if (!user) {

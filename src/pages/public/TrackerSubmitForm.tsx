@@ -15,7 +15,7 @@ interface Props {
 export function TrackerSubmitForm({ onSuccess, preselectedVisaId, initialEntry }: Props) {
   const { user, role } = useAuth();
   const { toast } = useToast();
-  const [visas, setVisas] = useState<Pick<Visa, 'id' | 'name' | 'subclass_number'>[]>([]);
+  const [visas, setVisas] = useState<Pick<Visa, 'id' | 'name' | 'subclass'>[]>([]);
   const [visaId, setVisaId] = useState(initialEntry?.visa_id || preselectedVisaId || '');
   const [applicationDate, setApplicationDate] = useState(initialEntry?.application_date || '');
   const [decisionDate, setDecisionDate] = useState(initialEntry?.decision_date || '');
@@ -26,7 +26,7 @@ export function TrackerSubmitForm({ onSuccess, preselectedVisaId, initialEntry }
   useEffect(() => {
     supabase
       .from('visas')
-      .select('id, name, subclass_number')
+      .select('id, name, subclass')
       .eq('is_active', true)
       .order('name')
       .then(({ data }) => setVisas(data || []));
@@ -60,6 +60,8 @@ export function TrackerSubmitForm({ onSuccess, preselectedVisaId, initialEntry }
       application_date: applicationDate,
       decision_date: isPending ? null : decisionDate,
       outcome: isPending ? 'pending' as TrackerOutcome : outcome,
+      status: isPending ? 'pending' : 'completed',
+      notes: notes || null,
     };
 
     let error;
@@ -116,7 +118,7 @@ export function TrackerSubmitForm({ onSuccess, preselectedVisaId, initialEntry }
             <option value="">Select a visa...</option>
             {visas.map((v) => (
               <option key={v.id} value={v.id}>
-                {v.subclass_number} - {v.name}
+                {v.subclass} - {v.name}
               </option>
             ))}
           </select>
@@ -202,9 +204,6 @@ export function TrackerSubmitForm({ onSuccess, preselectedVisaId, initialEntry }
             className="input-field w-full py-2"
             placeholder="Any details about your case (e.g., complexity, requests for info)..."
           />
-          <p className="text-xs text-neutral-400 mt-1">
-            (Note: Currently notes are not stored in the database but may be used for future analysis)
-          </p>
         </div>
       </div>
 

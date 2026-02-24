@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Search, MapPin, Briefcase, Clock, Scale, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
-import { Skeleton } from '../../components/ui/Skeleton';
-import { EmptyState } from '../../components/ui/EmptyState';
-import { MOCK_LAWYER_DIRECTORY_ITEMS, USE_MOCK } from '../../lib/mockData';
+import { LawyerCardSkeleton } from '../../components/ui/Skeleton';
+import { Button } from '../../components/ui/Button';
 
 interface LawyerListItem {
   id: string;
@@ -22,67 +21,82 @@ interface LawyerListItem {
 }
 
 export function LawyerDirectory() {
+  const [searchParams] = useSearchParams();
   const [lawyers, setLawyers] = useState<LawyerListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [jurisdictionFilter, setJurisdictionFilter] = useState('');
+  const filter = searchParams.get('filter');
 
   useEffect(() => {
     async function fetchLawyers() {
-      if (USE_MOCK) {
-        // Force cast to avoid minor type mismatches if any
-        setLawyers(MOCK_LAWYER_DIRECTORY_ITEMS as unknown as LawyerListItem[]);
+      try {
+        const { data: lawyerRows, error: lawyerError } = await supabase
+          .schema('lawyer')
+          .from('profiles')
+          .select('id, profile_id, jurisdiction, practice_areas, years_experience, bio, hourly_rate_cents')
+          .eq('is_verified', true)
+          .eq('verification_status', 'approved');
+
+        if (lawyerError) {
+          console.error('Error fetching lawyers:', lawyerError);
+          setLoading(false);
+          return;
+        }
+
+        if (!lawyerRows || lawyerRows.length === 0) {
+          setLawyers([]);
+          setLoading(false);
+          return;
+        }
+
+        const profileIds = lawyerRows.map((l) => l.profile_id);
+        const { data: profileRows, error: profileError } = await supabase
+          .from('profiles')
+          .select('id, full_name, avatar_url')
+          .in('id', profileIds);
+
+        if (profileError) {
+          console.error('Error fetching profiles:', profileError);
+        }
+
+        const lawyerIds = lawyerRows.map((l) => l.id);
+        const now = new Date().toISOString();
+        const { data: slotRows, error: slotError } = await supabase
+          .schema('lawyer')
+          .from('consultation_slots')
+          .select('lawyer_id')
+          .in('lawyer_id', lawyerIds)
+          .eq('is_booked', false)
+          .gte('start_time', now);
+
+        if (slotError) {
+           console.error('Error fetching slots:', slotError);
+        }
+
+        const slotCounts: Record<string, number> = {};
+        slotRows?.forEach((s) => {
+          slotCounts[s.lawyer_id] = (slotCounts[s.lawyer_id] || 0) + 1;
+        });
+
+        const profileMap = new Map(profileRows?.map((p) => [p.id, p]) || []);
+
+        const merged: LawyerListItem[] = lawyerRows.map((l) => {
+          const p = profileMap.get(l.profile_id);
+          return {
+            ...l,
+            full_name: p?.full_name || null,
+            avatar_url: p?.avatar_url || null,
+            slot_count: slotCounts[l.id] || 0,
+          };
+        });
+
+        setLawyers(merged);
+      } catch (err) {
+        console.error('Unexpected error:', err);
+      } finally {
         setLoading(false);
-        return;
       }
-
-      const { data: lawyerRows } = await supabase
-        .schema('lawyer')
-        .from('profiles')
-        .select('id, profile_id, jurisdiction, practice_areas, years_experience, bio, hourly_rate_cents')
-        .eq('is_verified', true)
-        .eq('verification_status', 'approved');
-
-      if (!lawyerRows || lawyerRows.length === 0) {
-        setLoading(false);
-        return;
-      }
-
-      const profileIds = lawyerRows.map((l) => l.profile_id);
-      const { data: profileRows } = await supabase
-        .from('profiles')
-        .select('id, full_name, avatar_url')
-        .in('id', profileIds);
-
-      const lawyerIds = lawyerRows.map((l) => l.id);
-      const now = new Date().toISOString();
-      const { data: slotRows } = await supabase
-        .schema('lawyer')
-        .from('consultation_slots')
-        .select('lawyer_id')
-        .in('lawyer_id', lawyerIds)
-        .eq('is_booked', false)
-        .gte('start_time', now);
-
-      const slotCounts: Record<string, number> = {};
-      slotRows?.forEach((s) => {
-        slotCounts[s.lawyer_id] = (slotCounts[s.lawyer_id] || 0) + 1;
-      });
-
-      const profileMap = new Map(profileRows?.map((p) => [p.id, p]) || []);
-
-      const merged: LawyerListItem[] = lawyerRows.map((l) => {
-        const p = profileMap.get(l.profile_id);
-        return {
-          ...l,
-          full_name: p?.full_name || null,
-          avatar_url: p?.avatar_url || null,
-          slot_count: slotCounts[l.id] || 0,
-        };
-      });
-
-      setLawyers(merged);
-      setLoading(false);
     }
 
     fetchLawyers();
@@ -93,11 +107,12 @@ export function LawyerDirectory() {
   const filtered = lawyers.filter((l) => {
     const matchSearch =
       !search ||
-      l.full_name?.toLowerCase().includes(search.toLowerCase()) ||
-      l.practice_areas.some((a) => a.toLowerCase().includes(search.toLowerCase())) ||
+      (l.full_name?.toLowerCase() || '').includes(search.toLowerCase()) ||
+      (l.practice_areas || []).some((a) => a.toLowerCase().includes(search.toLowerCase())) ||
       l.jurisdiction.toLowerCase().includes(search.toLowerCase());
     const matchJurisdiction = !jurisdictionFilter || l.jurisdiction === jurisdictionFilter;
-    return matchSearch && matchJurisdiction;
+    const matchAvailability = filter === 'available' ? l.slot_count > 0 : true;
+    return matchSearch && matchJurisdiction && matchAvailability;
   });
 
   return (
@@ -107,10 +122,17 @@ export function LawyerDirectory() {
           <Scale className="w-3.5 h-3.5" />
           Verified Professionals
         </div>
-        <h1 className="text-3xl font-bold text-neutral-900 mb-2">Find an Immigration Lawyer</h1>
+        <h1 className="text-3xl font-bold text-neutral-900 mb-2">Immigration Lawyers</h1>
         <p className="text-neutral-500 max-w-2xl">
-          Browse verified immigration lawyers ready to assist with your visa application. Every lawyer on VisaBuild has been credential-checked.
+          Find top-rated immigration lawyers to help with your visa application. Browse by specialization, reviews, and availability.
         </p>
+        {filter === 'available' && (
+          <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-md text-sm border border-emerald-100">
+            <Clock className="w-4 h-4" />
+            Showing lawyers available for immediate consultation
+            <Link to="/lawyers" className="ml-2 hover:text-emerald-900 font-medium">Clear filter</Link>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-8">
@@ -124,7 +146,7 @@ export function LawyerDirectory() {
             className="input-field pl-10"
           />
         </div>
-        {jurisdictions.length > 1 && (
+        {jurisdictions.length > 0 && (
           <select
             value={jurisdictionFilter}
             onChange={(e) => setJurisdictionFilter(e.target.value)}
@@ -141,30 +163,26 @@ export function LawyerDirectory() {
       {loading ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="card p-6 space-y-4">
-              <div className="flex items-center gap-4">
-                <Skeleton className="w-14 h-14 rounded-full" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-5 w-2/3" />
-                  <Skeleton className="h-3 w-1/2" />
-                </div>
-              </div>
-              <Skeleton className="h-16 w-full" />
-              <div className="flex gap-2">
-                <Skeleton className="h-6 w-16 rounded-full" />
-                <Skeleton className="h-6 w-20 rounded-full" />
-              </div>
-            </div>
+            <LawyerCardSkeleton key={i} />
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <EmptyState
-          icon={Users}
-          title="No lawyers found"
-          description={lawyers.length === 0
-            ? 'No verified lawyers are currently available. Check back soon.'
-            : 'No lawyers match your search. Try adjusting your filters.'}
-        />
+        <div className="text-center py-16 px-4">
+          <div className="w-16 h-16 rounded-2xl bg-neutral-100 flex items-center justify-center mx-auto mb-5">
+            <Users className="w-8 h-8 text-neutral-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-neutral-900 mb-2">No lawyers available yet</h3>
+          <p className="text-sm text-neutral-500 max-w-sm mx-auto mb-6">
+            {lawyers.length === 0
+              ? 'Are you an immigration lawyer? Join our directory to connect with clients.'
+              : 'No lawyers match your search. Try adjusting your filters.'}
+          </p>
+          {lawyers.length === 0 && (
+            <Link to="/register/lawyer">
+              <Button>Register as a Lawyer</Button>
+            </Link>
+          )}
+        </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((lawyer) => (

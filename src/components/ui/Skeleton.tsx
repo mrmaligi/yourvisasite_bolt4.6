@@ -259,20 +259,3 @@ export function VisaDetailSkeleton() {
       </div>
     );
 }
-
-export function NewsSkeleton() {
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
-      <div className="max-w-6xl mx-auto px-4 py-16">
-        <div className="animate-pulse space-y-8">
-          <div className="h-96 bg-neutral-200 dark:bg-neutral-800 rounded-2xl" />
-          <div className="grid md:grid-cols-2 gap-6">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-48 bg-neutral-200 dark:bg-neutral-800 rounded-xl" />
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}

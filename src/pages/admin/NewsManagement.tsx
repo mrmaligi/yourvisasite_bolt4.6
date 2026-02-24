@@ -14,7 +14,7 @@ export function NewsManagement() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [articles, setArticles] = useState<NewsArticle[]>([]);
-  const [visas, setVisas] = useState<{ id: string; name: string; subclass_number: string }[]>([]);
+  const [visas, setVisas] = useState<{ id: string; name: string; subclass: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<NewsArticle | null>(null);
@@ -38,9 +38,9 @@ export function NewsManagement() {
   const fetchVisas = async () => {
     const { data } = await supabase
       .from('visas')
-      .select('id, name, subclass_number')
+      .select('id, name, subclass')
       .eq('is_active', true)
-      .order('subclass_number');
+      .order('subclass');
     setVisas(data || []);
   };
 
@@ -156,7 +156,7 @@ export function NewsManagement() {
                     }}
                     className="rounded border-neutral-300"
                   />
-                  <Badge variant="secondary" className="w-16 justify-center">{v.subclass_number}</Badge>
+                  <Badge variant="secondary" className="w-16 justify-center">{v.subclass}</Badge>
                   <span className="text-neutral-600 truncate">{v.name}</span>
                 </label>
               ))}

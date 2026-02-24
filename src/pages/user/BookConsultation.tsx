@@ -186,13 +186,8 @@ export function BookConsultation() {
         }
       }
 
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/consultation-checkout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('consultation-checkout', {
+        body: {
           slotId: selectedSlot.id,
           lawyerId: lawyer.id,
           notes,
@@ -200,14 +195,10 @@ export function BookConsultation() {
           visaId: selectedVisaId || null,
           successUrl: `${window.location.origin}/success?type=consultation`,
           cancelUrl: `${window.location.origin}/lawyers/${lawyer.id}`,
-        }),
+        },
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to initiate checkout');
-      }
+      if (error) throw new Error(error.error || error.message || 'Failed to initiate checkout');
 
       if (data.url) {
         window.location.href = data.url;

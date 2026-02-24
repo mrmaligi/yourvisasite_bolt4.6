@@ -22,41 +22,41 @@ export function ForumTopicList() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTopics = async () => {
-      try {
-        // Get category
-        const { data: cat } = await supabase
-          .from('forum_categories')
-          .select('*')
-          .eq('slug', categorySlug)
-          .single();
-
-        if (!cat) return;
-
-        // Get topics with authors
-        const { data: topicsData } = await supabase
-          .from('forum_topics')
-          .select(`
-            *,
-            author:profiles(full_name, avatar_url),
-            last_reply_by_user:last_reply_by(full_name)
-          `)
-          .eq('category_id', cat.id)
-          .order('is_pinned', { ascending: false })
-          .order('last_reply_at', { ascending: false });
-
-        setTopics(topicsData || []);
-      } catch (error) {
-        console.error('Error fetching topics:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (categorySlug) {
       fetchTopics();
     }
   }, [categorySlug]);
+
+  const fetchTopics = async () => {
+    try {
+      // Get category
+      const { data: cat } = await supabase
+        .from('forum_categories')
+        .select('*')
+        .eq('slug', categorySlug)
+        .single();
+
+      if (!cat) return;
+
+      // Get topics with authors
+      const { data: topicsData } = await supabase
+        .from('forum_topics')
+        .select(`
+          *,
+          author:profiles(full_name, avatar_url),
+          last_reply_by_user:last_reply_by(full_name)
+        `)
+        .eq('category_id', cat.id)
+        .order('is_pinned', { ascending: false })
+        .order('last_reply_at', { ascending: false });
+
+      setTopics(topicsData || []);
+    } catch (error) {
+      console.error('Error fetching topics:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (

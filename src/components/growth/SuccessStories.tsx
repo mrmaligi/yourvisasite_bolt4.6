@@ -44,7 +44,7 @@ export function SuccessStoriesList({ visaId, featured = false, limit }: SuccessS
         .from('success_stories')
         .select(`
           *,
-          visa:visas(id, name, subclass_number),
+          visa:visas(id, name, subclass),
           user:profiles(full_name, avatar_url)
         `)
         .eq('is_published', true)
@@ -137,7 +137,7 @@ function SuccessStoryCard({ story }: { story: SuccessStory }) {
               </p>
               {story.visa && (
                 <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                  {story.visa.subclass_number} - {story.visa.name}
+                  {story.visa.subclass} - {story.visa.name}
                 </p>
               )}
             </div>
@@ -218,7 +218,7 @@ export function SubmitSuccessStory() {
   const fetchUserVisas = async () => {
     const { data } = await supabase
       .from('user_visas')
-      .select('visa:visas(id, name, subclass_number)')
+      .select('visa:visas(id, name, subclass)')
       .eq('user_id', user?.id)
       .eq('status', 'active');
 
@@ -279,7 +279,7 @@ export function SubmitSuccessStory() {
             onChange={(e) => setFormData({ ...formData, visa_id: e.target.value })}
             options={[
               { value: '', label: 'Select a visa' },
-              ...visas.map((v) => ({ value: v.id, label: `${v.subclass_number} - ${v.name}` })),
+              ...visas.map((v) => ({ value: v.id, label: `${v.subclass} - ${v.name}` })),
             ]}
             required
           />

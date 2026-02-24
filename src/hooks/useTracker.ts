@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, fetchWithRetry } from '../lib/supabase';
 import type { TrackerStats, Visa } from '../types/database';
 
 export interface TrackerStatWithVisa extends TrackerStats {
@@ -16,10 +16,10 @@ export function useTracker() {
       setLoading(true);
       setError(null);
       try {
-        const { data, error: fetchError } = await supabase
+        const { data, error: fetchError } = await fetchWithRetry(() => supabase
           .from('tracker_stats')
           .select('*, visas(*)')
-          .order('total_entries', { ascending: false });
+          .order('total_entries', { ascending: false }));
 
         if (fetchError) throw fetchError;
 

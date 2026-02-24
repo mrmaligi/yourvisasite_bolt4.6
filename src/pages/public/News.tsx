@@ -5,8 +5,6 @@ import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
-import { NewsSkeleton } from '../../components/ui/Skeleton';
 
 interface NewsItem {
   id: string;
@@ -77,17 +75,25 @@ export function News() {
 
   if (loading) {
     return (
-      <ErrorBoundary>
-        <NewsSkeleton />
-      </ErrorBoundary>
+      <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
+        <div className="max-w-6xl mx-auto px-4 py-16">
+          <div className="animate-pulse space-y-8">
+            <div className="h-96 bg-neutral-200 rounded-2xl" />
+            <div className="grid md:grid-cols-2 gap-6">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-48 bg-neutral-200 rounded-xl" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <ErrorBoundary>
-      <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
-        <div className="max-w-6xl mx-auto px-4 py-16">
-          <div className="text-center mb-12">
+    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
+      <div className="max-w-6xl mx-auto px-4 py-16">
+        <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-100 mb-6">
             <Newspaper className="w-8 h-8 text-primary-600" />
           </div>
@@ -198,6 +204,5 @@ export function News() {
         )}
       </div>
     </div>
-    </ErrorBoundary>
   );
 }

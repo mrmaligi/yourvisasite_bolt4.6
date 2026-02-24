@@ -107,16 +107,15 @@ Deno.serve(async (req: Request) => {
       .eq("visa_id", visa_id)
       .maybeSingle();
 
-    // Verified schema: subclass_number
     const { data: visa } = await serviceClient
       .from("visas")
-      .select("name, subclass_number")
+      .select("name, subclass")
       .eq("id", visa_id)
       .single();
 
     const origin = req.headers.get("origin") || "https://visabuild.com";
     const priceCents = product?.price_cents || DEFAULT_PRICE_CENTS;
-    const visaName = visa ? `${visa.subclass_number ? visa.subclass_number + ' - ' : ''}${visa.name}` : 'Visa Premium Guide';
+    const visaName = visa ? `${visa.subclass ? visa.subclass + ' - ' : ''}${visa.name}` : 'Visa Premium Guide';
 
     // Prepare line item
     const lineItem: any = { quantity: 1 };

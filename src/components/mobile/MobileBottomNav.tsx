@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Home, Search, FileText, User, Bell } from 'lucide-react';
 import { cn } from '../../lib/utils';

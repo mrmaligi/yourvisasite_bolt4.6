@@ -14,18 +14,18 @@ export function ForumCategoryPage() {
   const [activeTab, setActiveTab] = useState('topics');
 
   useEffect(() => {
-    const fetchCategory = async () => {
-      const { data } = await supabase
-        .from('forum_categories')
-        .select('*')
-        .eq('slug', categorySlug)
-        .single();
-
-      setCategory(data);
-    };
-
     fetchCategory();
   }, [categorySlug]);
+
+  const fetchCategory = async () => {
+    const { data } = await supabase
+      .from('forum_categories')
+      .select('*')
+      .eq('slug', categorySlug)
+      .single();
+
+    setCategory(data);
+  };
 
   if (!category) {
     return (

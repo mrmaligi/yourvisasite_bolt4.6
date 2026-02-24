@@ -21,7 +21,7 @@ export function PremiumContent() {
     supabase.from('visas').select('*').eq('is_active', true).order('name')
       .then(({ data }) => setVisas(data || []));
 
-    supabase.from('document_categories').select('*').order('name')
+    supabase.from('document_categories').select('*').order('display_order')
       .then(({ data }) => setDocCategories(data || []));
   }, []);
 
@@ -118,7 +118,7 @@ export function PremiumContent() {
           setSelectedVisaId(val);
           setSearchParams(val ? { visa_id: val } : {});
         }}
-        options={[{ value: '', label: 'Choose a visa...' }, ...visas.map((v) => ({ value: v.id, label: `${v.subclass_number} - ${v.name}` }))]}
+        options={[{ value: '', label: 'Choose a visa...' }, ...visas.map((v) => ({ value: v.id, label: `${v.subclass} - ${v.name}` }))]}
       />
 
       {selectedVisaId && (

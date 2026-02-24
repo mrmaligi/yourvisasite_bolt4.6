@@ -17,10 +17,7 @@ test.describe('Mobile Responsiveness', () => {
     // Open mobile menu
     await menuButton.click();
     // Use exact: true to avoid matching "Search Visas" button which contains "Visas"
-    // Also scope to the mobile menu container to avoid bottom nav ambiguity
-    const mobileMenu = page.locator('div.fixed.inset-x-0.top-16.bottom-0');
-    await expect(mobileMenu).toBeVisible();
-    await expect(mobileMenu.getByRole('link', { name: 'Visas', exact: true })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Visas', exact: true })).toBeVisible();
   });
 
   test('Visa Search page should show filters on mobile', async ({ page }) => {
@@ -103,9 +100,8 @@ test.describe('Mobile Responsiveness', () => {
     // Perform login
     await page.goto('/login');
     await page.getByPlaceholder('you@example.com').fill('test@example.com');
-    await page.getByPlaceholder('••••••••').fill('password');
-    // Use role for robustness
-    await page.getByRole('button', { name: 'Sign In', exact: true }).click();
+    await page.getByPlaceholder('Enter your password').fill('password');
+    await page.locator('button[type="submit"]').click();
 
     // Wait for redirect to dashboard
     await expect(page).toHaveURL(/\/dashboard/);

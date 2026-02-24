@@ -15,51 +15,51 @@ export function ForumCategoryList() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        // Get categories
-        const { data: cats } = await supabase
-          .from('forum_categories')
-          .select('*')
-          .eq('is_active', true)
-          .order('display_order');
-
-        if (!cats) return;
-
-        // Get stats for each category
-        const categoriesWithStats = await Promise.all(
-          cats.map(async (cat) => {
-            const { count } = await supabase
-              .from('forum_topics')
-              .select('id', { count: 'exact' })
-              .eq('category_id', cat.id);
-
-            const { data: lastTopic } = await supabase
-              .from('forum_topics')
-              .select('title, slug, last_reply_at, author:profiles(full_name)')
-              .eq('category_id', cat.id)
-              .order('last_reply_at', { ascending: false })
-              .limit(1)
-              .single();
-
-            return {
-              ...cat,
-              topic_count: count || 0,
-              last_topic: lastTopic || undefined,
-            };
-          })
-        );
-
-        setCategories(categoriesWithStats);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchCategories();
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+      // Get categories
+      const { data: cats } = await supabase
+        .from('forum_categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order');
+
+      if (!cats) return;
+
+      // Get stats for each category
+      const categoriesWithStats = await Promise.all(
+        cats.map(async (cat) => {
+          const { count } = await supabase
+            .from('forum_topics')
+            .select('id', { count: 'exact' })
+            .eq('category_id', cat.id);
+
+          const { data: lastTopic } = await supabase
+            .from('forum_topics')
+            .select('title, slug, last_reply_at, author:profiles(full_name)')
+            .eq('category_id', cat.id)
+            .order('last_reply_at', { ascending: false })
+            .limit(1)
+            .single();
+
+          return {
+            ...cat,
+            topic_count: count || 0,
+            last_topic: lastTopic || undefined,
+          };
+        })
+      );
+
+      setCategories(categoriesWithStats);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getIcon = (iconName: string) => {
     const icons: Record<string, React.ElementType> = {

@@ -9,7 +9,7 @@ import { useToast } from '../../components/ui/Toast';
 
 export default function MobileLogin() {
   const navigate = useNavigate();
-  const { signInWithEmail: signIn } = useAuth();
+  const { signIn } = useAuth();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

@@ -38,7 +38,7 @@ export function VirtualizedVisaList({
   className = '',
 }: VirtualizedVisaListProps) {
   return (
-    <div className={`w-full h-full min-h-[500px] flex-1 ${className}`}>
+    <div className={`w-full h-full ${className}`}>
       <AutoSizer renderProp={({ height, width }: { height: number | undefined; width: number | undefined }) => {
           if (width === undefined || height === undefined) return null;
 
@@ -84,7 +84,7 @@ export function VirtualizedVisaList({
                             <CardBody className="space-y-4 h-full flex flex-col">
                             <div className="flex items-start justify-between">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                <Badge>{visa.subclass_number}</Badge>
+                                <Badge>{visa.subclass}</Badge>
                                 <Badge variant="primary">{visa.category}</Badge>
                                 </div>
                                 <ArrowUpRight className="w-4 h-4 text-neutral-400 group-hover:text-primary-600 transition-colors flex-shrink-0" />
@@ -101,7 +101,9 @@ export function VirtualizedVisaList({
 
                             <div className="pt-4 border-t border-neutral-100 dark:border-neutral-700 flex items-center justify-between text-sm mt-auto">
                                 <span className="text-neutral-600 dark:text-neutral-300 font-medium">
-                                    {visa.cost_aud ? visa.cost_aud : 'Free / Varies'}
+                                    {visa.base_cost_aud !== null
+                                      ? (visa.base_cost_aud === 0 ? 'Free' : new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 }).format(visa.base_cost_aud))
+                                      : 'Free / Varies'}
                                 </span>
                                 {visa.processing_time_range && (
                                     <span className="text-neutral-500 dark:text-neutral-400 truncate max-w-[50%] text-right">

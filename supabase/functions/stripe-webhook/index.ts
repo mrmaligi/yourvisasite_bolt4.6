@@ -77,7 +77,7 @@ async function sendNotification(userId: string, type: string, data: any) {
 }
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
-  const { metadata, id: sessionId, payment_intent, amount_total, payment_status } = session;
+  const { metadata, id: sessionId, payment_intent, amount_total, currency, payment_status } = session;
 
   if (payment_status !== 'paid') {
     console.log('Payment not paid:', payment_status);
@@ -94,13 +94,14 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
     if (userId && visaId) {
        // Upsert into user_visa_purchases
-       // Align with public.user_visa_purchases schema:
-       // id, user_id, visa_id, purchased_at, amount_paid_cents, stripe_session_id
        const purchaseData = {
          user_id: userId,
          visa_id: visaId,
-         stripe_session_id: sessionId,
-         amount_paid_cents: amount_total,
+         stripe_payment_intent_id: typeof payment_intent === 'string' ? payment_intent : payment_intent?.id,
+         stripe_checkout_session_id: sessionId,
+         amount_cents: amount_total,
+         currency: currency,
+         status: 'active',
          purchased_at: new Date().toISOString()
        };
 
@@ -109,15 +110,15 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
          .upsert(purchaseData, { onConflict: 'user_id, visa_id' });
 
        if (error) {
-         console.error('Failed to upsert user_visa_purchase:', error);
+         console.error('Error upserting user_visa_purchase:', error);
        } else {
          console.log('Successfully recorded premium purchase for user', userId);
 
          // Fetch Visa Name
          let visaName = 'Premium Guide';
          if (visaId) {
-             const { data: visa } = await supabase.from('visas').select('name, subclass_number').eq('id', visaId).single();
-             if (visa?.name) visaName = `${visa.subclass_number ? visa.subclass_number + ' - ' : ''}${visa.name}`;
+             const { data: visa } = await supabase.from('visas').select('name').eq('id', visaId).single();
+             if (visa?.name) visaName = visa.name;
          }
 
          // Send Email
@@ -147,24 +148,20 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
         .eq('id', bookingId);
 
       if (error) {
-        console.error('Failed to update booking status:', error);
+        console.error('Error updating booking status:', error);
       } else {
         console.log('Successfully confirmed booking', bookingId);
 
         // Mark slot as booked
         if (slotId) {
-          try {
-            const { error: slotError } = await supabase
-              .schema('lawyer')
-              .from('consultation_slots')
-              .update({ is_booked: true, is_reserved: false, reserved_until: null })
-              .eq('id', slotId);
+          const { error: slotError } = await supabase
+            .schema('lawyer')
+            .from('consultation_slots')
+            .update({ is_booked: true, is_reserved: false, reserved_until: null })
+            .eq('id', slotId);
 
-            if (slotError) {
-              console.error('Error updating consultation slot:', slotError);
-            }
-          } catch (err) {
-             console.error('Schema error updating consultation slot:', err);
+          if (slotError) {
+            console.error('Error updating consultation slot:', slotError);
           }
         }
 
@@ -179,28 +176,19 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
                  let duration = '30 mins';
 
                  // Fetch Slot
-                 try {
-                   const { data: slot } = await supabase.schema('lawyer').from('consultation_slots').select('*').eq('id', booking.slot_id).single();
-                   if (slot) {
-                       const startDate = new Date(slot.start_time);
-                       date = startDate.toISOString().split('T')[0]; // YYYY-MM-DD
-                       time = startDate.toISOString().split('T')[1].substring(0, 5) + ' UTC'; // HH:MM UTC
-                   }
-                 } catch (err) {
-                   console.error('Schema error fetching slot for email:', err);
+                 const { data: slot } = await supabase.schema('lawyer').from('consultation_slots').select('*').eq('id', booking.slot_id).single();
+                 if (slot) {
+                     const startDate = new Date(slot.start_time);
+                     date = startDate.toISOString().split('T')[0]; // YYYY-MM-DD
+                     time = startDate.toISOString().split('T')[1].substring(0, 5) + ' UTC'; // HH:MM UTC
                  }
-
                  if (booking.duration_minutes) duration = `${booking.duration_minutes} minutes`;
 
                  // Fetch Lawyer Profile
-                 try {
-                   const { data: lawyerProfile } = await supabase.schema('lawyer').from('profiles').select('profile_id').eq('id', booking.lawyer_id).single();
-                   if (lawyerProfile) {
-                       const { data: publicProfile } = await supabase.from('profiles').select('full_name').eq('id', lawyerProfile.profile_id).single();
-                       if (publicProfile?.full_name) lawyerName = publicProfile.full_name;
-                   }
-                 } catch (err) {
-                   console.error('Schema error fetching lawyer for email:', err);
+                 const { data: lawyerProfile } = await supabase.schema('lawyer').from('profiles').select('profile_id').eq('id', booking.lawyer_id).single();
+                 if (lawyerProfile) {
+                     const { data: publicProfile } = await supabase.from('profiles').select('full_name').eq('id', lawyerProfile.profile_id).single();
+                     if (publicProfile?.full_name) lawyerName = publicProfile.full_name;
                  }
 
                  await sendNotification(booking.user_id, 'booking_confirmation', {
@@ -239,15 +227,11 @@ async function handleCheckoutSessionExpired(session: Stripe.Checkout.Session) {
     }
 
     if (slotId) {
-       try {
-         await supabase
-           .schema('lawyer')
-           .from('consultation_slots')
-           .update({ is_reserved: false, reserved_until: null })
-           .eq('id', slotId);
-       } catch (err) {
-         console.error('Schema error releasing slot reservation:', err);
-       }
+       await supabase
+         .schema('lawyer')
+         .from('consultation_slots')
+         .update({ is_reserved: false, reserved_until: null })
+         .eq('id', slotId);
     }
   }
 }
@@ -267,15 +251,11 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
         }
 
         if (slotId) {
-            try {
-              await supabase
-               .schema('lawyer')
-               .from('consultation_slots')
-               .update({ is_reserved: false, reserved_until: null })
-               .eq('id', slotId);
-            } catch (err) {
-               console.error('Schema error releasing slot reservation on failure:', err);
-            }
+            await supabase
+             .schema('lawyer')
+             .from('consultation_slots')
+             .update({ is_reserved: false, reserved_until: null })
+             .eq('id', slotId);
         }
     } else if (type === 'premium') {
         // Just log it, user can try again

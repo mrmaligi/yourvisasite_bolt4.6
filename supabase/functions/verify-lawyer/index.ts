@@ -89,12 +89,7 @@ Deno.serve(async (req: Request) => {
 
       await serviceClient
         .from("profiles")
-        .update({
-            role: "lawyer",
-            is_verified: true,
-            verification_status: 'approved',
-            verified_at: new Date().toISOString()
-        })
+        .update({ role: "lawyer" })
         .eq("id", lawyer_profile_id);
 
       // Update lawyer schema profile
@@ -113,14 +108,6 @@ Deno.serve(async (req: Request) => {
       });
 
     } else if (action === "reject") {
-      await serviceClient
-        .from("profiles")
-        .update({
-            is_verified: false,
-            verification_status: 'rejected'
-        })
-        .eq("id", lawyer_profile_id);
-
       // Update lawyer schema profile
       await serviceClient
         .schema('lawyer')

@@ -30,7 +30,7 @@ export interface YouTubeFeed {
 
 export interface Visa {
   id: string;
-  subclass_number: string;
+  subclass: string;
   name: string;
   country: string;
   category: string;
@@ -38,7 +38,6 @@ export interface Visa {
   summary: string | null;
   description: string | null;
   base_cost_aud: number | null;
-  cost_aud: number | null;
   processing_time_range: string | null;
   duration: string | null;
   key_requirements: string | null;
@@ -74,6 +73,9 @@ export interface ApplicationExampleField {
 export interface VisaPremiumContent {
   id: string;
   visa_id: string;
+  section_number: number;
+  section_title: string;
+  content: string;
   tips: string | null;
   common_mistakes: string | null;
   examples: Record<string, any> | null;
@@ -109,6 +111,7 @@ export interface TrackerEntry {
   outcome: TrackerOutcome;
   weight: number;
   status: 'pending' | 'completed';
+  notes?: string | null;
   created_at: string;
 }
 
@@ -160,6 +163,7 @@ export interface Product {
 
 export interface LawyerProfile {
   id: string;
+  user_id: string;
   profile_id: string;
   bar_number: string;
   jurisdiction: string;
@@ -202,7 +206,6 @@ export interface Booking {
   file_takeover_status: 'requested' | 'accepted' | 'rejected' | null;
   confirmed_at: string | null;
   notes: string | null;
-  questions: string | null;
   created_at: string;
   updated_at: string;
 }

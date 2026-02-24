@@ -1,4 +1,3 @@
-import React from 'react';
 import { MobileLayout } from '../../components/mobile/MobileLayout';
 import { MobileCard } from '../../components/mobile/MobileCard';
 import { MobileButton } from '../../components/mobile/MobileButton';

@@ -21,9 +21,6 @@
     - B-tree on lawyer.profiles(is_verified)
 */
 
--- Ensure lawyer schema exists
-CREATE SCHEMA IF NOT EXISTS lawyer;
-
 -- lawyer.profiles
 CREATE TABLE IF NOT EXISTS lawyer.profiles (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

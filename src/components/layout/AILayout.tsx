@@ -11,7 +11,6 @@ import {
   History,
   Settings,
   Scan,
-  Search,
   FileCheck,
   Languages,
   FilePen,
@@ -35,7 +34,6 @@ import {
 } from 'lucide-react';
 import { AISidebar } from './AISidebar';
 import { UserMenu } from '../layout/UserMenu'; // Fix path if needed, UserMenu is in components/layout/UserMenu.tsx
-import { MobileNav } from '../layout/MobileNav'; // components/layout/MobileNav.tsx
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { Logo } from '../ui/Logo';
 import { SearchTrigger } from '../ui/SearchTrigger';

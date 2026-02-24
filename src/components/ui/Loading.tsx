@@ -12,9 +12,8 @@ const sizeClasses = {
 
 export function Loading({ className = '', size = 'md', fullScreen = false }: LoadingProps) {
   const spinner = (
-    <div role="status" className={`relative flex items-center justify-center ${className}`}>
+    <div className={`relative flex items-center justify-center ${className}`}>
       <div className={`${sizeClasses[size]} border-primary-200 border-t-primary-600 rounded-full animate-spin dark:border-primary-800 dark:border-t-primary-500`} />
-      <span className="sr-only">Loading...</span>
     </div>
   );
 

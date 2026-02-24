@@ -8,11 +8,7 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-
-// Use anon key for auth validation, service key for database operations
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -34,12 +30,11 @@ Deno.serve(async (req) => {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
     if (authError || !user) {
-      console.error('Auth error:', authError);
       return new Response(
-        JSON.stringify({ error: 'Unauthorized', details: authError?.message }),
+        JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -48,7 +43,7 @@ Deno.serve(async (req) => {
     const origin = req.headers.get('origin') || 'http://localhost:5173';
 
     // Get or create Stripe customer
-    const { data: customerData } = await supabaseAdmin
+    const { data: customerData } = await supabase
       .from('stripe_customers')
       .select('customer_id')
       .eq('user_id', user.id)
@@ -64,7 +59,7 @@ Deno.serve(async (req) => {
         },
       });
       customerId = newCustomer.id;
-      await supabaseAdmin.from('stripe_customers').insert({
+      await supabase.from('stripe_customers').insert({
         user_id: user.id,
         customer_id: customerId,
       });
@@ -90,9 +85,9 @@ Deno.serve(async (req) => {
       }
 
       // Verify visa exists
-      const { data: visa, error: visaError } = await supabaseAdmin
+      const { data: visa, error: visaError } = await supabase
         .from('visas')
-        .select('subclass_number, name')
+        .select('visa_subclass, name')
         .eq('id', visa_id)
         .single();
 
@@ -104,7 +99,7 @@ Deno.serve(async (req) => {
         price_data: {
           currency: 'aud',
           product_data: {
-            name: `Premium Guide: ${visa.subclass_number} - ${visa.name}`,
+            name: `Premium Guide: ${visa.visa_subclass} - ${visa.name}`,
           },
           unit_amount: DEFAULT_VISA_PRICE_CENTS,
         },
@@ -120,53 +115,29 @@ Deno.serve(async (req) => {
       }
 
        // Fetch slot details
-       let slot, slotError;
-       try {
-         const result = await supabaseAdmin
-           .schema('lawyer')
-           .from('consultation_slots')
-           .select('*')
-           .eq('id', slot_id)
-           .eq('lawyer_id', lawyer_id)
-           .eq('is_booked', false)
-           .single();
-         slot = result.data;
-         slotError = result.error;
-       } catch (err: any) {
-         console.error('Schema error fetching slots:', err);
-         throw new Error('Database schema error: lawyer.consultation_slots may be missing');
-       }
+       const { data: slot, error: slotError } = await supabase
+         .schema('lawyer')
+         .from('consultation_slots')
+         .select('*')
+         .eq('id', slot_id)
+         .eq('lawyer_id', lawyer_id)
+         .eq('is_booked', false)
+         .single();
 
        if (slotError || !slot) {
-         if (slotError?.code === '42P01' || slotError?.code === '3F000') {
-            console.error('Missing schema/table for consultation_slots:', slotError);
-            throw new Error('System configuration error: Lawyer schema missing');
-         }
          throw new Error('Slot not available');
        }
 
        // Fetch lawyer details
-       let lawyer, lawyerError;
-       try {
-         const result = await supabaseAdmin
-           .schema('lawyer')
-           .from('profiles')
-           .select('id, hourly_rate_cents, jurisdiction')
-           .eq('id', lawyer_id)
-           .eq('role', 'lawyer')
-           .single();
-         lawyer = result.data;
-         lawyerError = result.error;
-       } catch (err: any) {
-         console.error('Schema error fetching lawyer:', err);
-         throw new Error('Database schema error: lawyer.profiles may be missing');
-       }
+       const { data: lawyer, error: lawyerError } = await supabase
+         .schema('lawyer')
+         .from('profiles')
+         .select('id, profile_id, hourly_rate_cents, jurisdiction')
+         .eq('id', lawyer_id)
+         .eq('is_verified', true)
+         .single();
 
        if (lawyerError || !lawyer) {
-         if (lawyerError?.code === '42P01' || lawyerError?.code === '3F000') {
-            console.error('Missing schema/table for lawyer profiles:', lawyerError);
-            throw new Error('System configuration error: Lawyer schema missing');
-         }
          throw new Error('Lawyer not found');
        }
 
@@ -178,7 +149,7 @@ Deno.serve(async (req) => {
        const totalCents = Math.round((rateCents / 60) * durationMinutes);
 
        // Create pending booking record
-       const { data: booking, error: bookingError } = await supabaseAdmin
+       const { data: booking, error: bookingError } = await supabase
          .from('bookings')
          .insert({
            user_id: user.id,
@@ -215,19 +186,11 @@ Deno.serve(async (req) => {
       cancelUrl = `${origin}/lawyers/${lawyer_id}`;
 
       // Reserve the slot
-      try {
-        const { error: reserveError } = await supabaseAdmin
-          .schema('lawyer')
-          .from('consultation_slots')
-          .update({ is_reserved: true, reserved_until: new Date(Date.now() + 15 * 60 * 1000).toISOString() })
-          .eq('id', slot_id);
-
-        if (reserveError) {
-             console.error('Failed to reserve slot:', reserveError);
-        }
-      } catch (err) {
-        console.error('Schema error reserving slot:', err);
-      }
+      await supabase
+        .schema('lawyer')
+        .from('consultation_slots')
+        .update({ is_reserved: true, reserved_until: new Date(Date.now() + 15 * 60 * 1000).toISOString() })
+        .eq('id', slot_id);
 
     } else {
         throw new Error('Invalid type');
@@ -246,7 +209,7 @@ Deno.serve(async (req) => {
     });
 
     if (type === 'consultation' && metadata.booking_id) {
-        await supabaseAdmin
+        await supabase
           .from('bookings')
           .update({ stripe_checkout_session_id: session.id })
           .eq('id', metadata.booking_id);

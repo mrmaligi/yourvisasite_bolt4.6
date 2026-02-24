@@ -23,37 +23,37 @@ export function ForumHomePage() {
   const [recentTopics, setRecentTopics] = useState<RecentTopic[]>([]);
 
   useEffect(() => {
-    const fetchStats = async () => {
-      const [{ count: topics }, { count: replies }, { count: users }] = await Promise.all([
-        supabase.from('forum_topics').select('id', { count: 'exact' }),
-        supabase.from('forum_replies').select('id', { count: 'exact' }),
-        supabase.from('profiles').select('id', { count: 'exact' }),
-      ]);
-
-      setStats({
-        topics: topics || 0,
-        replies: replies || 0,
-        users: users || 0,
-      });
-    };
-
-    const fetchRecentTopics = async () => {
-      const { data } = await supabase
-        .from('forum_topics')
-        .select(`
-          *,
-          category:forum_categories(name, slug),
-          author:profiles(full_name)
-        `)
-        .order('last_reply_at', { ascending: false })
-        .limit(5);
-
-      setRecentTopics(data || []);
-    };
-
     fetchStats();
     fetchRecentTopics();
   }, []);
+
+  const fetchStats = async () => {
+    const [{ count: topics }, { count: replies }, { count: users }] = await Promise.all([
+      supabase.from('forum_topics').select('id', { count: 'exact' }),
+      supabase.from('forum_replies').select('id', { count: 'exact' }),
+      supabase.from('profiles').select('id', { count: 'exact' }),
+    ]);
+
+    setStats({
+      topics: topics || 0,
+      replies: replies || 0,
+      users: users || 0,
+    });
+  };
+
+  const fetchRecentTopics = async () => {
+    const { data } = await supabase
+      .from('forum_topics')
+      .select(`
+        *,
+        category:forum_categories(name, slug),
+        author:profiles(full_name)
+      `)
+      .order('last_reply_at', { ascending: false })
+      .limit(5);
+
+    setRecentTopics(data || []);
+  };
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 py-8 px-4">

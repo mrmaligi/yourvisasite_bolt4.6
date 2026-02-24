@@ -33,6 +33,8 @@ import {
   X
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
+import { BUCKETS, uploadFile, validateFile } from '../../lib/storage';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -40,8 +42,6 @@ import { Modal } from '../../components/ui/Modal';
 import { FileUpload } from '../../components/ui/FileUpload';
 import { useToast } from '../../components/ui/Toast';
 import { useDocuments } from '../../hooks/useDocuments';
-import { EmptyState } from '../../components/ui/EmptyState';
-import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import type { UserDocument } from '../../types/database';
 
 // Map icon strings from DB to Lucide components
@@ -84,19 +84,19 @@ export function MyDocuments() {
   const {
     documents: docs,
     categories,
-    uploadDocument,
     deleteDocument,
     getDocumentUrl,
-    loading: docsLoading
+    loading: docsLoading,
+    refresh
   } = useDocuments();
 
   const [modalCategoryKey, setModalCategoryKey] = useState<string | null>(null);
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadFileState, setUploadFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [inlineUploadCategory, setInlineUploadCategory] = useState<string | null>(null);
   const [expandedHelp, setExpandedHelp] = useState<Record<string, boolean>>({});
   const [highlightedCategory, setHighlightedCategory] = useState<string | null>(null);
-  const [documentToDelete, setDocumentToDelete] = useState<UserDocument | null>(null);
 
   // Filters
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
@@ -119,55 +119,104 @@ export function MyDocuments() {
   }, [searchParams, categories]);
 
   const handleModalUpload = async () => {
-    if (!user || !uploadFile || !modalCategoryKey) return;
-    setUploading(true);
+    if (!user || !uploadFileState || !modalCategoryKey) return;
 
     try {
-      const { error } = await uploadDocument(uploadFile, modalCategoryKey);
-      if (error) throw error;
+      if (validateFile(uploadFileState)) {
+        setUploading(true);
+        setUploadProgress(0);
 
-      toast('success', 'Document uploaded successfully');
-      setModalCategoryKey(null);
-      setUploadFile(null);
+        const path = `${user.id}/${Date.now()}_${uploadFileState.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+
+        await uploadFile({
+          bucket: BUCKETS.DOCUMENTS,
+          path,
+          file: uploadFileState,
+          onProgress: setUploadProgress,
+        });
+
+        const { error: insertError } = await supabase
+          .from('user_documents')
+          .insert([
+            {
+              user_id: user.id,
+              document_category: modalCategoryKey,
+              file_name: uploadFileState.name,
+              storage_path: path,
+              status: 'pending',
+            },
+          ]);
+
+        if (insertError) throw insertError;
+
+        await refresh();
+        toast('success', 'Document uploaded successfully');
+        setModalCategoryKey(null);
+        setUploadFile(null);
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Upload failed';
       toast('error', message);
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   };
 
   const handleInlineUpload = async (file: File, categoryKey: string) => {
     if (!user) return;
-    setInlineUploadCategory(categoryKey);
-    setUploading(true);
 
     try {
-      const { error } = await uploadDocument(file, categoryKey);
-      if (error) throw error;
-      toast('success', 'Document uploaded successfully');
+      if (validateFile(file)) {
+        setInlineUploadCategory(categoryKey);
+        setUploading(true);
+        setUploadProgress(0);
+
+        const path = `${user.id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+
+        await uploadFile({
+          bucket: BUCKETS.DOCUMENTS,
+          path,
+          file,
+          onProgress: setUploadProgress,
+        });
+
+        const { error: insertError } = await supabase
+          .from('user_documents')
+          .insert([
+            {
+              user_id: user.id,
+              document_category: categoryKey,
+              file_name: file.name,
+              storage_path: path,
+              status: 'pending',
+            },
+          ]);
+
+        if (insertError) throw insertError;
+
+        await refresh();
+        toast('success', 'Document uploaded successfully');
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Upload failed';
       toast('error', message);
     } finally {
       setUploading(false);
       setInlineUploadCategory(null);
+      setUploadProgress(0);
     }
   };
 
-  const handleDelete = (doc: UserDocument) => {
-    setDocumentToDelete(doc);
-  };
-
-  const confirmDelete = async () => {
-    if (!documentToDelete) return;
-    const { error } = await deleteDocument(documentToDelete);
-    if (error) {
-      toast('error', 'Failed to delete document');
-    } else {
-      toast('success', 'Document deleted');
+  const handleDelete = async (doc: UserDocument) => {
+    if (window.confirm('Are you sure you want to delete this document?')) {
+      const { error } = await deleteDocument(doc);
+      if (error) {
+        toast('error', 'Failed to delete document');
+      } else {
+        toast('success', 'Document deleted');
+      }
     }
-    setDocumentToDelete(null);
   };
 
   const handleDownload = async (doc: UserDocument) => {
@@ -283,9 +332,7 @@ export function MyDocuments() {
                     <button
                       onClick={() => setExpandedHelp(prev => ({ ...prev, [category.key]: !prev[category.key] }))}
                       className={`p-1 rounded hover:bg-neutral-100 transition-colors ${expandedHelp[category.key] ? 'text-primary-600 bg-primary-50' : 'text-neutral-400 hover:text-neutral-600'}`}
-                      title="Click for explanation and examples"
-                      aria-label="Show document explanation"
-                      aria-expanded={expandedHelp[category.key]}
+                      title="View details and examples"
                     >
                       <HelpCircle className="w-4 h-4" />
                     </button>
@@ -317,12 +364,8 @@ export function MyDocuments() {
                 <CardBody className="pt-3 border-t border-neutral-100 flex-1 flex flex-col">
                   <div className="space-y-2 flex-1">
                     {categoryDocs.length === 0 ? (
-                      <div className="flex-1 flex flex-col items-center justify-center py-4">
-                         <EmptyState
-                            icon={FolderOpen}
-                            title="No documents"
-                            description=""
-                         />
+                      <div className="text-center py-3 flex-1 flex flex-col items-center justify-center">
+                        <p className="text-xs text-neutral-400">No documents</p>
                       </div>
                     ) : (
                       <div className="space-y-1.5">
@@ -382,6 +425,7 @@ export function MyDocuments() {
                       compact
                       onFileSelect={(file) => handleInlineUpload(file, category.key)}
                       uploading={uploading && inlineUploadCategory === category.key}
+                      progress={uploading && inlineUploadCategory === category.key ? uploadProgress : 0}
                       className="mt-2"
                     />
                   </div>
@@ -406,7 +450,7 @@ export function MyDocuments() {
             </Button>
             <Button
               loading={uploading}
-              disabled={!uploadFile}
+              disabled={!uploadFileState}
               onClick={handleModalUpload}
             >
               Upload
@@ -437,27 +481,19 @@ export function MyDocuments() {
             <FileUpload
                 key={modalCategoryKey || 'new'}
                 onFileSelect={setUploadFile}
+                uploading={uploading && !!modalCategoryKey}
+                progress={uploadProgress}
             />
           </div>
 
-          {uploadFile && (
+          {uploadFileState && (
             <div className="flex items-center gap-2 p-3 bg-neutral-50 rounded-lg border border-neutral-100">
               <FileText className="w-4 h-4 text-neutral-500" />
-              <span className="text-sm text-neutral-700 truncate">{uploadFile.name}</span>
+              <span className="text-sm text-neutral-700 truncate">{uploadFileState.name}</span>
             </div>
           )}
         </div>
       </Modal>
-
-      <ConfirmDialog
-        isOpen={!!documentToDelete}
-        onClose={() => setDocumentToDelete(null)}
-        onConfirm={confirmDelete}
-        title="Delete Document"
-        description={`Are you sure you want to delete "${documentToDelete?.file_name}"? This action cannot be undone.`}
-        confirmText="Delete"
-        variant="danger"
-      />
 
     </div>
   );

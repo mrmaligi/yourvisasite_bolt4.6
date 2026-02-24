@@ -49,8 +49,20 @@ export function Availability() {
 
   useEffect(() => {
     if (!profile) return;
-    setLawyerId(profile.id);
-    fetchSlots(profile.id);
+    supabase
+      .schema('lawyer')
+      .from('profiles')
+      .select('id')
+      .eq('profile_id', profile.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          setLawyerId(data.id);
+          fetchSlots(data.id);
+        } else {
+          setLoading(false);
+        }
+      });
   }, [profile]);
 
   const fetchSlots = async (lid: string) => {

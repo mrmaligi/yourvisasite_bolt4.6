@@ -183,14 +183,10 @@ Deno.serve(async (req: Request) => {
     });
 
     // Update booking with payment intent
-    const { error: sessionUpdateError } = await supabase
+    await supabase
       .from('bookings')
       .update({ stripe_checkout_session_id: session.id })
       .eq('id', booking.id);
-
-    if (sessionUpdateError) {
-      console.error('Failed to update booking with session ID:', sessionUpdateError);
-    }
 
     // Mark slot as reserved (not booked until payment confirmed)
     await supabase

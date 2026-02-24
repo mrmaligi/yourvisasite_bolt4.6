@@ -102,7 +102,7 @@ import { TRACKER_THRESHOLDS } from '../../lib/constants';
 import type { TrackerStats, VisaCategory, TrackerEntry } from '../../types/database';
 
 interface VisaInfo {
-  subclass_number: string;
+  subclass: string;
   name: string;
   category: VisaCategory;
 }
@@ -112,7 +112,7 @@ interface TrackerData extends TrackerStats {
 }
 
 interface PendingEntry extends TrackerEntry {
-  visas: Pick<VisaInfo, 'subclass_number' | 'name'>;
+  visas: Pick<VisaInfo, 'subclass' | 'name'>;
 }
 
 function getSpeedBadge(days: number) {
@@ -155,7 +155,7 @@ replace_2 = """            {pendingEntries.map((entry) => (
               <Card key={entry.id} className="border-l-4 border-l-primary-500 overflow-hidden">
                 <CardBody>
                   <div className="flex justify-between items-start mb-2">
-                    <Badge variant="default">{entry.visas.subclass_number}</Badge>
+                    <Badge variant="default">{entry.visas.subclass}</Badge>
                     <TrackerStatusBadge status={entry.outcome || 'pending'} />
                   </div>
                   <h3 className="font-bold text-neutral-900 mb-4 truncate" title={entry.visas.name}>{entry.visas.name}</h3>

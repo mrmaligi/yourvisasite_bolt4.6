@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Briefcase, User, Shield, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Briefcase, User, Shield, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { useToast } from '../../components/ui/Toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Logo } from '../../components/ui/Logo';
 
 type LoginType = 'user' | 'lawyer' | 'admin';
 
@@ -15,69 +14,69 @@ export function UnifiedLogin() {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { signInWithEmail: signIn, signInWithGoogle, resetPassword } = useAuth();
+  const { signIn } = useAuth();
   
   const [loginType, setLoginType] = useState<LoginType>('user');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isResetMode, setIsResetMode] = useState(false);
 
-  const from = (location.state as any)?.from?.pathname || '/dashboard';
+  const from = (location.state as any)?.from?.pathname;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    if (isResetMode) {
-      try {
-        const { error } = await resetPassword(email);
-        if (error) throw error;
-        toast('success', 'Password reset email sent. Please check your inbox.');
-        setIsResetMode(false);
-      } catch (error: any) {
-        toast('error', error.message || 'Failed to send reset email');
-      } finally {
-        setLoading(false);
-      }
-      return;
-    }
-
     try {
+      // Attempt sign in
       const { error } = await signIn(email, password);
-      if (error) throw error;
+      
+      if (error) {
+        if (error.message.includes('Email not confirmed')) {
+          toast('info', 'Please check your email to confirm your account.');
+          return;
+        }
+        throw error;
+      }
 
+      // Get user from session to ensure we have the ID
       const { data: { user } } = await supabase.auth.getUser();
 
-      if (!user) throw new Error('User not found after login');
+      if (!user) throw new Error('No user found');
 
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('role, is_active, lawyer_profiles(verification_status)')
-        .eq('id', user.id)
-        .single();
+      // Get user role using ID for RLS compliance
+      // Retry logic to handle race condition with profile creation trigger
+      let profile = null;
+      let attempts = 0;
+      while (attempts < 3 && !profile) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('role, is_active, lawyer_profiles(verification_status)')
+          .eq('id', user.id)
+          .maybeSingle();
 
-      if (profileError || !profile) {
-        toast('error', 'Profile not found. Please contact support.');
+        if (data) {
+          profile = data;
+        } else {
+          attempts++;
+          if (attempts < 3) await new Promise(r => setTimeout(r, 1000));
+        }
+      }
+
+      if (!profile) {
+        // Fallback if profile missing
+        console.warn('Profile not found during login redirect');
+        navigate('/dashboard');
         return;
       }
 
-      if (profile.is_active === false) {
+      if (!profile.is_active) {
         toast('error', 'Account disabled');
         return;
       }
 
-      if (loginType === 'admin' && profile.role !== 'admin') {
-        toast('error', 'You do not have admin access');
-        return;
-      }
-
-      if (loginType === 'lawyer' && profile.role !== 'lawyer') {
-        toast('error', 'You do not have lawyer access');
-        return;
-      }
-
+      // Redirect based on role
       toast('success', 'Welcome back!');
       
       switch (profile.role) {
@@ -94,7 +93,7 @@ export function UnifiedLogin() {
           break;
         }
         default:
-          navigate(from);
+          navigate(from || '/dashboard');
       }
     } catch (error: any) {
       toast('error', error.message || 'Invalid credentials');
@@ -110,180 +109,154 @@ export function UnifiedLogin() {
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      {/* Header */}
-      <header className="bg-navy-600 border-b border-navy-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center">
-          <Link to="/">
-            <Logo variant="light" size="sm" />
-          </Link>
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 dark:from-neutral-900 dark:to-neutral-800 flex items-center justify-center p-4">
+      <div className="w-full max-w-4xl">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">
+            Welcome Back
+          </h1>
+          <p className="text-neutral-600 dark:text-neutral-300">
+            Sign in to your VisaBuild account
+          </p>
         </div>
-      </header>
 
-      <div className="flex items-center justify-center p-4 py-12">
-        <div className="w-full max-w-md">
-          {/* Title */}
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-heading font-bold text-navy-700 mb-2">
-              {isResetMode ? 'Reset Password' : 'Sign In'}
-            </h1>
-            <p className="text-neutral-600">
-              {isResetMode ? 'Enter your email to receive a reset link' : 'Access your VisaBuild account'}
-            </p>
-          </div>
-
-          {/* Login Type Selection */}
-          {!isResetMode && (
-            <div className="grid grid-cols-3 gap-2 mb-6">
-              {loginOptions.map((option) => {
-                const Icon = option.icon;
-                const isSelected = loginType === option.type;
-
-                return (
-                  <button
-                    key={option.type}
-                    onClick={() => setLoginType(option.type)}
-                    className={`p-3 border text-center transition-all ${
-                      isSelected
-                        ? 'border-navy-600 bg-navy-50'
-                        : 'border-neutral-200 bg-white hover:border-navy-300'
-                    }`}
-                  >
-                    <Icon className={`w-5 h-5 mx-auto mb-1 ${isSelected ? 'text-navy-600' : 'text-neutral-400'}`} />
-                    <p className={`text-xs font-semibold ${isSelected ? 'text-navy-700' : 'text-neutral-600'}`}>
-                      {option.label}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Login Form */}
-          <Card>
-            <CardHeader className="bg-navy-50 border-b border-neutral-200">
-              <div className="flex items-center gap-2">
-                {isResetMode && (
-                  <button 
-                    onClick={() => setIsResetMode(false)} 
-                    className="text-neutral-500 hover:text-navy-700"
-                  >
-                    <ArrowLeft className="w-5 h-5" />
-                  </button>
-                )}
-                <h2 className="text-lg font-semibold text-navy-700">
-                  {isResetMode ? 'Forgot Password' : `${loginOptions.find(o => o.type === loginType)?.label} Login`}
-                </h2>
-              </div>
-            </CardHeader>
+        {/* Login Type Selection */}
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          {loginOptions.map((option) => {
+            const Icon = option.icon;
+            const isSelected = loginType === option.type;
             
-            <CardBody className="space-y-4">
-              {/* Google Sign In */}
-              {!isResetMode && (
-                <>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={signInWithGoogle}
-                    className="w-full"
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24">
-                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                    </svg>
-                    Sign in with Google
-                  </Button>
+            return (
+              <button
+                key={option.type}
+                onClick={() => setLoginType(option.type)}
+                className={`p-4 rounded-xl border-2 text-center transition-all ${
+                  isSelected
+                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                    : 'border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:border-primary-300'
+                }`}
+              >
+                <Icon className={`w-8 h-8 mx-auto mb-2 ${isSelected ? 'text-primary-600' : 'text-neutral-400'}`} />
+                <h3 className={`font-semibold ${isSelected ? 'text-primary-700' : 'text-neutral-700 dark:text-neutral-300'}`}>
+                  {option.label}
+                </h3>
+                <p className="text-xs text-neutral-500 mt-1">{option.desc}</p>
+              </button>
+            );
+          })}
+        </div>
 
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-neutral-200" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-white px-2 text-neutral-500">Or continue with email</span>
-                    </div>
-                  </div>
-                </>
-              )}
+        {/* Login Form */}
+        <Card className="max-w-md mx-auto">
+          <CardHeader>
+            <h2 className="text-xl font-semibold text-neutral-900 dark:text-white">
+              {loginType === 'user' && 'Applicant Login'}
+              {loginType === 'lawyer' && 'Lawyer Login'}
+              {loginType === 'admin' && 'Admin Login'}
+            </h2>
+          </CardHeader>
+          <CardBody>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Input
+                label="Email Address"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="relative">
                 <Input
-                  label="Email Address"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  label="Password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-8 text-neutral-400 hover:text-neutral-600"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
 
-                {!isResetMode && (
-                  <div className="relative">
-                    <Input
-                      label="Password"
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-8 text-neutral-400 hover:text-neutral-600"
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </div>
+              <div className="flex items-center justify-between text-sm">
+                <Link to="/forgot-password" className="text-primary-600 hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
+
+              <Button type="submit" disabled={loading} className="w-full">
+                {loading ? 'Signing in...' : (
+                  <>
+                    Sign In
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </>
                 )}
+              </Button>
+            </form>
 
-                {!isResetMode && (
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => setIsResetMode(true)}
-                      className="text-sm text-navy-600 hover:text-navy-700"
-                    >
-                      Forgot password?
-                    </button>
-                  </div>
-                )}
+            {loginType === 'user' && (
+              <p className="text-center text-sm text-neutral-600 dark:text-neutral-400 mt-4">
+                Don't have an account?{' '}
+                <Link to="/register" className="text-primary-600 hover:underline">
+                  Sign up
+                </Link>
+              </p>
+            )}
 
-                <Button type="submit" disabled={loading} className="w-full">
-                  {loading ? (
-                    isResetMode ? 'Sending...' : 'Signing in...'
-                  ) : (
-                    isResetMode ? 'Send Reset Link' : 'Sign In'
-                  )}
-                </Button>
-              </form>
+            {loginType === 'lawyer' && (
+              <p className="text-center text-sm text-neutral-600 dark:text-neutral-400 mt-4">
+                Want to join as a lawyer?{' '}
+                <Link to="/register/lawyer" className="text-primary-600 hover:underline">
+                  Apply here
+                </Link>
+              </p>
+            )}
 
-              {!isResetMode && loginType === 'user' && (
-                <p className="text-center text-sm text-neutral-600">
-                  Don\'t have an account?{' '}
-                  <Link to="/register" className="text-navy-600 hover:text-navy-700 font-semibold">
-                    Register
-                  </Link>
-                </p>
-              )}
+            <div className="mt-6 pt-4 border-t border-neutral-200 dark:border-neutral-700">
+              <p className="text-xs text-neutral-500 text-center">
+                Test Account: admin@visabuild.local / admin123
+              </p>
+            </div>
+          </CardBody>
+        </Card>
 
-              {!isResetMode && loginType === 'lawyer' && (
-                <p className="text-center text-sm text-neutral-600">
-                  Want to join as a lawyer?{' '}
-                  <Link to="/register/lawyer" className="text-navy-600 hover:text-navy-700 font-semibold">
-                    Apply here
-                  </Link>
-                </p>
-              )}
+        {/* Role Info Cards */}
+        <div className="grid md:grid-cols-3 gap-4 mt-8">
+          <Card className="bg-white/50 dark:bg-neutral-800/50">
+            <CardBody className="text-center">
+              <User className="w-6 h-6 text-blue-500 mx-auto mb-2" />
+              <h4 className="font-medium text-neutral-900 dark:text-white">Applicants</h4>
+              <p className="text-xs text-neutral-500 mt-1">
+                Search visas, track applications, book consultations
+              </p>
             </CardBody>
           </Card>
 
-          {/* Security Note */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-neutral-500">
-              🔒 Your connection is secure. We never store your password in plain text.
-            </p>
-          </div>
+          <Card className="bg-white/50 dark:bg-neutral-800/50">
+            <CardBody className="text-center">
+              <Briefcase className="w-6 h-6 text-green-500 mx-auto mb-2" />
+              <h4 className="font-medium text-neutral-900 dark:text-white">Lawyers</h4>
+              <p className="text-xs text-neutral-500 mt-1">
+                Manage clients, set availability, offer services
+              </p>
+            </CardBody>
+          </Card>
+
+          <Card className="bg-white/50 dark:bg-neutral-800/50">
+            <CardBody className="text-center">
+              <Shield className="w-6 h-6 text-purple-500 mx-auto mb-2" />
+              <h4 className="font-medium text-neutral-900 dark:text-white">Admins</h4>
+              <p className="text-xs text-neutral-500 mt-1">
+                Platform management, user verification, analytics
+              </p>
+            </CardBody>
+          </Card>
         </div>
       </div>
     </div>

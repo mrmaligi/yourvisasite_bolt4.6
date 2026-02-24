@@ -1,13 +1,16 @@
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Video, Play } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody } from '@/components/ui/Card';
 
 const WEBINARS = [
-  { id: 1, title: 'State Nomination Updates 2024', speaker: 'John Doe, Immigration Lawyer', date: 'Oct 15, 2024', duration: '45 min' },
-  { id: 2, title: 'Navigating Partner Visas', speaker: 'Jane Smith, Senior Agent', date: 'Sep 28, 2024', duration: '60 min' },
-  { id: 3, title: 'Student to PR Pathways', speaker: 'Mike Brown, Migration Expert', date: 'Sep 10, 2024', duration: '50 min' },
+  { id: 1, title: 'Skilled Migration Updates Webinar', speaker: 'John Doe, Immigration Lawyer', date: 'Oct 15, 2024', duration: '45 min', link: '/resources/webinars/skilled-migration' },
+  { id: 2, title: 'Partner Visa Masterclass', speaker: 'Jane Smith, Senior Agent', date: 'Sep 28, 2024', duration: '60 min', link: '/resources/webinars/partner-visa' },
+  { id: 3, title: 'Student to PR Pathways', speaker: 'Mike Brown, Migration Expert', date: 'Sep 10, 2024', duration: '50 min', link: '/resources/webinars/student-pathways' },
+  { id: 4, title: 'Business Innovation and Investment', speaker: 'Alice Green, Business Specialist', date: 'Aug 22, 2024', duration: '55 min', link: '/resources/webinars/business-visa' },
+  { id: 5, title: 'Road to Citizenship', speaker: 'Tom White, Legal Advisor', date: 'Aug 05, 2024', duration: '40 min', link: '/resources/webinars/citizenship' },
 ];
 
 export function Webinars() {
@@ -53,27 +56,29 @@ export function Webinars() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className="h-full hover:shadow-lg transition-shadow duration-300 dark:bg-neutral-800 dark:border-neutral-700 group cursor-pointer">
-                <CardBody className="p-0">
-                  <div className="aspect-video bg-neutral-200 dark:bg-neutral-700 relative">
-                     <div className="absolute inset-0 flex items-center justify-center">
-                        <Video className="w-10 h-10 text-neutral-400 dark:text-neutral-500" />
-                     </div>
-                     <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                       {webinar.duration}
-                     </div>
-                  </div>
-                  <div className="p-6">
-                    <div className="text-sm text-primary-600 dark:text-primary-400 mb-2 font-medium">{webinar.date}</div>
-                    <h3 className="text-lg font-bold text-neutral-900 dark:text-neutral-100 mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                      {webinar.title}
-                    </h3>
-                    <p className="text-neutral-500 dark:text-neutral-400 text-sm">
-                      with {webinar.speaker}
-                    </p>
-                  </div>
-                </CardBody>
-              </Card>
+              <Link to={webinar.link}>
+                <Card className="h-full hover:shadow-lg transition-shadow duration-300 dark:bg-neutral-800 dark:border-neutral-700 group cursor-pointer">
+                  <CardBody className="p-0">
+                    <div className="aspect-video bg-neutral-200 dark:bg-neutral-700 relative">
+                       <div className="absolute inset-0 flex items-center justify-center">
+                          <Video className="w-10 h-10 text-neutral-400 dark:text-neutral-500" />
+                       </div>
+                       <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                         {webinar.duration}
+                       </div>
+                    </div>
+                    <div className="p-6">
+                      <div className="text-sm text-primary-600 dark:text-primary-400 mb-2 font-medium">{webinar.date}</div>
+                      <h3 className="text-lg font-bold text-neutral-900 dark:text-neutral-100 mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                        {webinar.title}
+                      </h3>
+                      <p className="text-neutral-500 dark:text-neutral-400 text-sm">
+                        with {webinar.speaker}
+                      </p>
+                    </div>
+                  </CardBody>
+                </Card>
+              </Link>
             </motion.div>
           ))}
         </div>

@@ -1,14 +1,16 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabase';
+import { useAuth } from './useAuth';
+import { premiumService } from '../lib/services/premium.service';
+import { errorHandler } from '../lib/errors/handler';
 import type { Visa, VisaPremiumContent } from '../types/database';
+import type { ApiError } from '../lib/errors/api.error';
 
 export interface UsePremiumContentResult {
   visa: Visa | null;
   content: VisaPremiumContent[];
   isPurchased: boolean;
   loading: boolean;
-  error: Error | null;
+  error: ApiError | null;
   refresh: () => Promise<void>;
 }
 
@@ -18,7 +20,7 @@ export function usePremiumContent(visaId: string | null) {
   const [content, setContent] = useState<VisaPremiumContent[]>([]);
   const [isPurchased, setIsPurchased] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
 
   const fetchData = useCallback(async () => {
     if (!visaId) {
@@ -29,46 +31,16 @@ export function usePremiumContent(visaId: string | null) {
     setLoading(true);
 
     try {
-      const { data: visaData, error: visaError } = await supabase
-        .from('visas')
-        .select('*')
-        .eq('id', visaId)
-        .single();
+      // Check purchase status first (or in parallel)
+      const purchased = await premiumService.isPurchased(user?.id, visaId);
+      setIsPurchased(purchased);
 
-      if (visaError) throw visaError;
+      const { content: contentData, visa: visaData } = await premiumService.getPremiumContent(visaId);
+      setContent(contentData);
       setVisa(visaData);
-
-      let isOwned = false;
-
-      if (user) {
-        const { data: purchase } = await supabase
-          .from('user_visa_purchases')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('visa_id', visaId)
-          .maybeSingle();
-
-        isOwned = !!purchase;
-      }
-
-      setIsPurchased(isOwned);
-
-      if (isOwned) {
-        const { data: steps, error: contentError } = await supabase
-          .from('visa_premium_content')
-          .select('*')
-          .eq('visa_id', visaId)
-          .order('step_number');
-
-        if (contentError) throw contentError;
-        setContent(steps || []);
-      } else {
-        setContent([]);
-      }
-
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching content:', err);
-      setError(err instanceof Error ? err : new Error('Unknown error'));
+      setError(errorHandler(err));
     } finally {
       setLoading(false);
     }

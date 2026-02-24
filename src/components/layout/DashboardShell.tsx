@@ -35,7 +35,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
   const location = useLocation();
   const [profile, setProfile] = useState<any>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState(0);
+  const [notifications] = useState(0);
 
   useEffect(() => {
     if (user) {

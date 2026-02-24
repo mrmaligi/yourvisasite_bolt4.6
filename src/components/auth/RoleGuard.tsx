@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../lib/supabase';
 import { Loading } from '../ui/Loading';
 
 interface ProtectedRouteProps {
@@ -15,45 +13,10 @@ export function ProtectedRoute({
   allowedRoles = ['user', 'lawyer', 'admin'],
   requireVerification = false 
 }: ProtectedRouteProps) {
-  const { user, profile, isLoading: authLoading } = useAuth();
+  const { user, profile, isLoading } = useAuth();
   const location = useLocation();
-  const [lawyerStatus, setLawyerStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
-  const [checkingLawyer, setCheckingLawyer] = useState(false);
 
-  useEffect(() => {
-    let mounted = true;
-
-    const checkLawyerStatus = async () => {
-      if (profile?.role === 'lawyer' && requireVerification && user) {
-        setCheckingLawyer(true);
-        try {
-          const { data } = await supabase
-            .from('lawyer_profiles')
-            .select('verification_status')
-            .eq('profile_id', user.id)
-            .single();
-
-          if (mounted && data) {
-            setLawyerStatus(data.verification_status as any);
-          }
-        } catch (error) {
-          console.error('Error checking lawyer status:', error);
-        } finally {
-          if (mounted) {
-            setCheckingLawyer(false);
-          }
-        }
-      }
-    };
-
-    checkLawyerStatus();
-
-    return () => {
-      mounted = false;
-    };
-  }, [profile, requireVerification, user]);
-
-  if (authLoading || checkingLawyer) {
+  if (isLoading) {
     return <Loading fullScreen />;
   }
 
@@ -62,13 +25,14 @@ export function ProtectedRoute({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // No profile found
+  // Profile not found - likely new user needing registration completion or error
+  // Since AuthContext handles fetching, if isLoading is false and profile is null, it's missing.
   if (!profile) {
-    return <Navigate to="/register" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   // Account disabled
-  if (profile.is_active === false) {
+  if (!profile.is_active) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
         <div className="text-center p-8">
@@ -95,7 +59,8 @@ export function ProtectedRoute({
 
   // Check lawyer verification
   if (requireVerification && profile.role === 'lawyer') {
-    if (!lawyerStatus || lawyerStatus !== 'approved') {
+    const lawyerProfile = (profile as any).lawyer_profiles?.[0];
+    if (!lawyerProfile || lawyerProfile.verification_status !== 'approved') {
       return <Navigate to="/lawyer/pending" replace />;
     }
   }
@@ -130,29 +95,26 @@ export function AdminOnly({ children }: { children: React.ReactNode }) {
 
 // Auto-redirect based on role
 export function RoleRedirect() {
-  const { user, profile, isLoading: authLoading } = useAuth();
-  const [redirectPath, setRedirectPath] = useState<string | null>(null);
+  const { user, profile, isLoading } = useAuth();
 
-  useEffect(() => {
-    if (authLoading) return;
-    
-    if (user && profile) {
-      if (profile.role === 'admin') {
-        setRedirectPath('/admin');
-      } else if (profile.role === 'lawyer') {
-        setRedirectPath('/lawyer/dashboard');
-      } else {
-        setRedirectPath('/dashboard');
-      }
-    } else if (user && !profile) {
-      // User exists but no profile - redirect to register to create profile
-      setRedirectPath('/register');
-    }
-  }, [user, profile, authLoading]);
-
-  if (authLoading || !redirectPath) {
+  if (isLoading) {
     return <Loading fullScreen />;
   }
 
-  return <Navigate to={redirectPath} replace />;
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!profile) {
+    // Should generally not happen for logged in users unless data issue
+    return <Navigate to="/register" replace />;
+  }
+
+  if (profile.role === 'admin') {
+    return <Navigate to="/admin" replace />;
+  } else if (profile.role === 'lawyer') {
+    return <Navigate to="/lawyer/dashboard" replace />;
+  } else {
+    return <Navigate to="/dashboard" replace />;
+  }
 }
