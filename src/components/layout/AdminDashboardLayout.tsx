@@ -15,6 +15,7 @@ import {
   Files,
   PenTool,
   Gauge,
+  TrendingUp,
 } from 'lucide-react';
 import { DashboardLayout } from './DashboardLayout';
 
@@ -32,6 +33,7 @@ const sidebarItems = [
   { to: '/admin/news', label: 'News', icon: Newspaper },
   { to: '/admin/youtube', label: 'YouTube Feed', icon: Youtube },
   { to: '/admin/tracker', label: 'Tracker', icon: BarChart3 },
+  { to: '/admin/analytics/overview', label: 'Analytics', icon: TrendingUp },
   { to: '/admin/pricing', label: 'Pricing', icon: DollarSign },
   { to: '/admin/promos', label: 'Promo Codes', icon: Tag },
   { to: '/admin/settings', label: 'Settings', icon: Settings },

@@ -9,6 +9,8 @@ import { GlobalSearchProvider } from './contexts/GlobalSearchContext';
 import { GlobalSearch } from './components/GlobalSearch';
 import { PublicLayout } from './components/layout/PublicLayout';
 import { UserDashboardLayout } from './components/layout/UserDashboardLayout';
+import { LawyerDashboardLayout } from './components/layout/LawyerDashboardLayout';
+import { AdminDashboardLayout } from './components/layout/AdminDashboardLayout';
 import { ProtectedRoute, RoleRedirect } from './components/auth/RoleGuard';
 import { Loading } from './components/ui/Loading';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
@@ -214,20 +216,20 @@ export default function App() {
                     <Route path="api-docs" element={<ApiDocs />} />
                   </Route>
 
-                  {/* User Routes - Each has its own layout */}
-                  <Route path="dashboard" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserDashboard /></ProtectedRoute>} />
-                  <Route path="dashboard/visas" element={<ProtectedRoute allowedRoles={['user', 'admin']}><MyVisas /></ProtectedRoute>} />
-                  <Route path="dashboard/saved" element={<ProtectedRoute allowedRoles={['user', 'admin']}><SavedVisas /></ProtectedRoute>} />
-                  <Route path="dashboard/documents" element={<ProtectedRoute allowedRoles={['user', 'admin']}><MyDocuments /></ProtectedRoute>} />
-                  <Route path="dashboard/consultations" element={<ProtectedRoute allowedRoles={['user', 'admin']}><Consultations /></ProtectedRoute>} />
-                  <Route path="dashboard/book-consultation/:lawyerId" element={<ProtectedRoute allowedRoles={['user', 'admin']}><BookConsultation /></ProtectedRoute>} />
-                  <Route path="dashboard/premium" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserPremiumContent /></ProtectedRoute>} />
-                  <Route path="dashboard/marketplace" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserMarketplacePurchases /></ProtectedRoute>} />
-                  <Route path="dashboard/settings" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserSettings /></ProtectedRoute>} />
-                  <Route path="dashboard/referrals" element={<ProtectedRoute allowedRoles={['user', 'admin']}><Referrals /></ProtectedRoute>} />
-
-                  {/* New User Pages with Layout */}
+                  {/* User Routes */}
                   <Route element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserDashboardLayout /></ProtectedRoute>}>
+                    <Route path="dashboard" element={<UserDashboard />} />
+                    <Route path="dashboard/visas" element={<MyVisas />} />
+                    <Route path="dashboard/saved" element={<SavedVisas />} />
+                    <Route path="dashboard/documents" element={<MyDocuments />} />
+                    <Route path="dashboard/consultations" element={<Consultations />} />
+                    <Route path="dashboard/book-consultation/:lawyerId" element={<BookConsultation />} />
+                    <Route path="dashboard/premium" element={<UserPremiumContent />} />
+                    <Route path="dashboard/marketplace" element={<UserMarketplacePurchases />} />
+                    <Route path="dashboard/settings" element={<UserSettings />} />
+                    <Route path="dashboard/referrals" element={<Referrals />} />
+
+                    {/* New User Pages */}
                     <Route path="dashboard/welcome" element={<Welcome />} />
                     <Route path="dashboard/tour" element={<Tour />} />
                     <Route path="dashboard/getting-started" element={<GettingStarted />} />
@@ -240,43 +242,50 @@ export default function App() {
                     <Route path="dashboard/billing" element={<Billing />} />
                   </Route>
 
-                  {/* Lawyer Routes - Each has its own layout */}
+                  {/* Lawyer Routes */}
                   <Route path="lawyer" element={<PortalLanding />} />
                   <Route path="lawyer/pending" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerPending /></ProtectedRoute>} />
-                  <Route path="lawyer/dashboard" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerDashboard /></ProtectedRoute>} />
-                  <Route path="lawyer/clients" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerClients /></ProtectedRoute>} />
-                  <Route path="lawyer/consultations" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerConsultations /></ProtectedRoute>} />
-                  <Route path="lawyer/availability" element={<ProtectedRoute allowedRoles={['lawyer']}><Availability /></ProtectedRoute>} />
-                  <Route path="lawyer/marketing" element={<ProtectedRoute allowedRoles={['lawyer']}><Marketing /></ProtectedRoute>} />
-                  <Route path="lawyer/tracker" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerTracker /></ProtectedRoute>} />
-                  <Route path="lawyer/news" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerNews /></ProtectedRoute>} />
-                  <Route path="lawyer/marketplace" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerMarketplace /></ProtectedRoute>} />
-                  <Route path="lawyer/settings" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerSettings /></ProtectedRoute>} />
-                  <Route path="lawyer/team" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerTeam /></ProtectedRoute>} />
-                  <Route path="lawyer/cases" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerCases /></ProtectedRoute>} />
-                  <Route path="lawyer/documents" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerDocuments /></ProtectedRoute>} />
-                  <Route path="lawyer/notes" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerNotes /></ProtectedRoute>} />
-                  <Route path="lawyer/leads" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerLeadCapture /></ProtectedRoute>} />
-                  <Route path="lawyer/testimonials" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerTestimonials /></ProtectedRoute>} />
-                  <Route path="lawyer/clients/:id" element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerClientDetail /></ProtectedRoute>} />
 
-                  {/* Admin Routes - Each has its own layout */}
-                  <Route path="admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+                  <Route element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerDashboardLayout /></ProtectedRoute>}>
+                    <Route path="lawyer/dashboard" element={<LawyerDashboard />} />
+                    <Route path="lawyer/clients" element={<LawyerClients />} />
+                    <Route path="lawyer/consultations" element={<LawyerConsultations />} />
+                    <Route path="lawyer/availability" element={<Availability />} />
+                    <Route path="lawyer/marketing" element={<Marketing />} />
+                    <Route path="lawyer/tracker" element={<LawyerTracker />} />
+                    <Route path="lawyer/news" element={<LawyerNews />} />
+                    <Route path="lawyer/marketplace" element={<LawyerMarketplace />} />
+                    <Route path="lawyer/settings" element={<LawyerSettings />} />
+                    <Route path="lawyer/team" element={<LawyerTeam />} />
+                    <Route path="lawyer/cases" element={<LawyerCases />} />
+                    <Route path="lawyer/documents" element={<LawyerDocuments />} />
+                    <Route path="lawyer/notes" element={<LawyerNotes />} />
+                    <Route path="lawyer/leads" element={<LawyerLeadCapture />} />
+                    <Route path="lawyer/testimonials" element={<LawyerTestimonials />} />
+                    <Route path="lawyer/clients/:id" element={<LawyerClientDetail />} />
+                  </Route>
+
+                  {/* Admin Routes - Wrapped in Layout */}
+                  <Route element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboardLayout /></ProtectedRoute>}>
+                    <Route path="admin" element={<AdminDashboard />} />
+                    <Route path="admin/activity" element={<AdminActivityLog />} />
+                    <Route path="admin/users" element={<UserManagement />} />
+                    <Route path="admin/lawyers" element={<LawyerManagement />} />
+                    <Route path="admin/visas" element={<VisaManagement />} />
+                    <Route path="admin/premium" element={<PremiumContent />} />
+                    <Route path="admin/news" element={<NewsManagement />} />
+                    <Route path="admin/youtube" element={<YouTubeManagement />} />
+                    <Route path="admin/tracker" element={<TrackerManagement />} />
+                    <Route path="admin/pricing" element={<AdminPricing />} />
+                    <Route path="admin/promos" element={<PromoCodeManagement />} />
+                    <Route path="admin/settings" element={<AdminSettings />} />
+                  </Route>
+
+                  {/* Admin Routes - Internal Layout */}
                   <Route path="admin/performance/*" element={<ProtectedRoute allowedRoles={['admin']}><PerformanceRouter /></ProtectedRoute>} />
-                    <Route path="admin/activity" element={<ProtectedRoute allowedRoles={['admin']}><AdminActivityLog /></ProtectedRoute>} />
-                    <Route path="admin/content" element={<ProtectedRoute allowedRoles={['admin']}><AdminContent /></ProtectedRoute>} />
-                    <Route path="admin/pages" element={<ProtectedRoute allowedRoles={['admin']}><AdminPages /></ProtectedRoute>} />
-                    <Route path="admin/blog" element={<ProtectedRoute allowedRoles={['admin']}><AdminBlog /></ProtectedRoute>} />
-                    <Route path="admin/users" element={<ProtectedRoute allowedRoles={['admin']}><UserManagement /></ProtectedRoute>} />
-                    <Route path="admin/lawyers" element={<ProtectedRoute allowedRoles={['admin']}><LawyerManagement /></ProtectedRoute>} />
-                    <Route path="admin/visas" element={<ProtectedRoute allowedRoles={['admin']}><VisaManagement /></ProtectedRoute>} />
-                    <Route path="admin/premium" element={<ProtectedRoute allowedRoles={['admin']}><PremiumContent /></ProtectedRoute>} />
-                    <Route path="admin/news" element={<ProtectedRoute allowedRoles={['admin']}><NewsManagement /></ProtectedRoute>} />
-                  <Route path="admin/youtube" element={<ProtectedRoute allowedRoles={['admin']}><YouTubeManagement /></ProtectedRoute>} />
-                  <Route path="admin/tracker" element={<ProtectedRoute allowedRoles={['admin']}><TrackerManagement /></ProtectedRoute>} />
-                  <Route path="admin/pricing" element={<ProtectedRoute allowedRoles={['admin']}><AdminPricing /></ProtectedRoute>} />
-                  <Route path="admin/promos" element={<ProtectedRoute allowedRoles={['admin']}><PromoCodeManagement /></ProtectedRoute>} />
-                  <Route path="admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
+                  <Route path="admin/content" element={<ProtectedRoute allowedRoles={['admin']}><AdminContent /></ProtectedRoute>} />
+                  <Route path="admin/pages" element={<ProtectedRoute allowedRoles={['admin']}><AdminPages /></ProtectedRoute>} />
+                  <Route path="admin/blog" element={<ProtectedRoute allowedRoles={['admin']}><AdminBlog /></ProtectedRoute>} />
                   <Route path="admin/content/articles" element={<ProtectedRoute allowedRoles={['admin']}><AdminContentArticles /></ProtectedRoute>} />
                   <Route path="admin/content/create-article" element={<ProtectedRoute allowedRoles={['admin']}><AdminContentCreateArticle /></ProtectedRoute>} />
                   <Route path="admin/content/edit-article" element={<ProtectedRoute allowedRoles={['admin']}><AdminContentEditArticle /></ProtectedRoute>} />
