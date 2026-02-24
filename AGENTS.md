@@ -8,9 +8,12 @@ A comprehensive visa management platform connecting applicants with immigration 
 ## Current Status (Feb 2026)
 - **Overall Completion:** ~72%
 - **Total Visas:** 17 seeded (11 AU + 3 CA + 2 UK + 1 NZ)
-- **Pages Built:** 120+ (70 original + 50 new)
+- **Pages Built:** 120+ (keeping it simple)
 - **Database Migrations:** 022 completed
 - **Known Issues:** 22 frontend-backend alignment issues documented (Jules-ready)
+- **Philosophy:** Keep It Simple - No feature bloat
+
+> **Note:** We intentionally keep the app simple. Only fixing bugs and adding essential security features. No AI, gamification, or unnecessary complexity.
 
 ## Tech Stack
 - **Frontend:** React 18 + TypeScript + Vite + Tailwind CSS
