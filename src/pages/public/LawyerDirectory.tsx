@@ -32,8 +32,7 @@ export function LawyerDirectory() {
     async function fetchLawyers() {
       try {
         const { data: lawyerRows, error: lawyerError } = await supabase
-          .schema('lawyer')
-          .from('profiles')
+          .from('lawyer_profiles')
           .select('id, profile_id, jurisdiction, practice_areas, years_experience, bio, hourly_rate_cents')
           .eq('is_verified', true)
           .eq('verification_status', 'approved');
@@ -60,24 +59,7 @@ export function LawyerDirectory() {
           console.error('Error fetching profiles:', profileError);
         }
 
-        const lawyerIds = lawyerRows.map((l) => l.id);
-        const now = new Date().toISOString();
-        const { data: slotRows, error: slotError } = await supabase
-          .schema('lawyer')
-          .from('consultation_slots')
-          .select('lawyer_id')
-          .in('lawyer_id', lawyerIds)
-          .eq('is_booked', false)
-          .gte('start_time', now);
-
-        if (slotError) {
-           console.error('Error fetching slots:', slotError);
-        }
-
-        const slotCounts: Record<string, number> = {};
-        slotRows?.forEach((s) => {
-          slotCounts[s.lawyer_id] = (slotCounts[s.lawyer_id] || 0) + 1;
-        });
+        // consultation_slots removed, slots count is 0
 
         const profileMap = new Map(profileRows?.map((p) => [p.id, p]) || []);
 
@@ -87,7 +69,7 @@ export function LawyerDirectory() {
             ...l,
             full_name: p?.full_name || null,
             avatar_url: p?.avatar_url || null,
-            slot_count: slotCounts[l.id] || 0,
+            slot_count: 0,
           };
         });
 

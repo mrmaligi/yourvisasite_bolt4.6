@@ -23,8 +23,7 @@ export class BookingRepository {
 
   async findLawyerByProfileId(profileId: string): Promise<{ data: LawyerProfile | null; error: PostgrestError | null }> {
     const { data, error } = await fetchWithRetry(() => supabase
-      .schema('lawyer')
-      .from('profiles')
+      .from('lawyer_profiles')
       .select('*') // select all to be safe, or specify needed columns
       .eq('profile_id', profileId)
       .maybeSingle());
@@ -32,21 +31,15 @@ export class BookingRepository {
   }
 
   // Batch fetching methods
-  async findSlots(slotIds: string[]): Promise<{ data: ConsultationSlot[]; error: PostgrestError | null }> {
-    if (slotIds.length === 0) return { data: [], error: null };
-    const { data, error } = await fetchWithRetry(() => supabase
-      .schema('lawyer')
-      .from('consultation_slots')
-      .select('*')
-      .in('id', slotIds));
-    return { data: (data || []) as ConsultationSlot[], error };
+  async findSlots(_slotIds: string[]): Promise<{ data: ConsultationSlot[]; error: PostgrestError | null }> {
+    // consultation_slots table does not exist anymore
+    return { data: [], error: null };
   }
 
   async findLawyerProfiles(lawyerIds: string[]): Promise<{ data: LawyerProfile[]; error: PostgrestError | null }> {
     if (lawyerIds.length === 0) return { data: [], error: null };
     const { data, error } = await fetchWithRetry(() => supabase
-      .schema('lawyer')
-      .from('profiles')
+      .from('lawyer_profiles')
       .select('*')
       .in('id', lawyerIds));
     return { data: (data || []) as LawyerProfile[], error };

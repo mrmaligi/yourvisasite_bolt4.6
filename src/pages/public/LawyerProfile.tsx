@@ -59,8 +59,7 @@ export function LawyerProfile() {
 
     async function fetchLawyer() {
       const { data: lawyerRow } = await supabase
-        .schema('lawyer')
-        .from('profiles')
+        .from('lawyer_profiles')
         .select('id, profile_id, jurisdiction, practice_areas, years_experience, bio, hourly_rate_cents, bar_number')
         .eq('id', id)
         .eq('is_verified', true)
@@ -83,18 +82,8 @@ export function LawyerProfile() {
         avatar_url: profileRow?.avatar_url || null,
       });
 
-      const now = new Date().toISOString();
-      const { data: slotRows } = await supabase
-        .schema('lawyer')
-        .from('consultation_slots')
-        .select('*')
-        .eq('lawyer_id', lawyerRow.id)
-        .eq('is_booked', false)
-        .or(`is_reserved.eq.false,reserved_until.lt.${now}`)
-        .gte('start_time', now)
-        .order('start_time');
-
-      setSlots(slotRows || []);
+      // consultation_slots removed
+      setSlots([]);
 
       // Fetch reviews
       const { data: reviewRows } = await supabase

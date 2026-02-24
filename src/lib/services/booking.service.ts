@@ -1,6 +1,6 @@
 import { BookingRepository } from '../repositories/booking.repository';
 import { errorHandler } from '../errors/handler';
-import type { Booking, UserRole, LawyerProfile, Profile, ConsultationSlot } from '../../types/database';
+import type { Booking, UserRole, LawyerProfile, Profile } from '../../types/database';
 
 export interface BookingWithDetails extends Booking {
   lawyer_name?: string | null;

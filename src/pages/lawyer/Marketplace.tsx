@@ -58,8 +58,7 @@ export function Marketplace() {
     if (!profile) return;
 
     const { data: lawyerProfile } = await supabase
-      .schema('lawyer')
-      .from('profiles')
+      .from('lawyer_profiles')
       .select('id')
       .eq('profile_id', profile.id)
       .maybeSingle();
@@ -71,7 +70,6 @@ export function Marketplace() {
 
     const [listingsRes, categoriesRes] = await Promise.all([
       supabase
-        .schema('lawyer')
         .from('marketplace_listings')
         .select('id, title, short_description, price_cents, listing_type, is_active, category_id, created_at')
         .eq('lawyer_id', lawyerProfile.id)
@@ -107,8 +105,7 @@ export function Marketplace() {
     }
 
     const { data: lawyerProfile } = await supabase
-      .schema('lawyer')
-      .from('profiles')
+      .from('lawyer_profiles')
       .select('id')
       .eq('profile_id', profile.id)
       .maybeSingle();
@@ -136,7 +133,6 @@ export function Marketplace() {
 
     if (editingId) {
       const { error } = await supabase
-        .schema('lawyer')
         .from('marketplace_listings')
         .update(payload)
         .eq('id', editingId);
@@ -148,7 +144,7 @@ export function Marketplace() {
 
       toast('success', 'Listing updated successfully');
     } else {
-      const { error } = await supabase.schema('lawyer').from('marketplace_listings').insert(payload);
+      const { error } = await supabase.from('marketplace_listings').insert(payload);
 
       if (error) {
         toast('error', 'Failed to create listing');
@@ -165,7 +161,6 @@ export function Marketplace() {
 
   const handleEdit = async (id: string) => {
     const { data } = await supabase
-      .schema('lawyer')
       .from('marketplace_listings')
       .select('*')
       .eq('id', id)
@@ -192,7 +187,7 @@ export function Marketplace() {
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this listing?')) return;
 
-    const { error } = await supabase.schema('lawyer').from('marketplace_listings').delete().eq('id', id);
+    const { error } = await supabase.from('marketplace_listings').delete().eq('id', id);
 
     if (error) {
       toast('error', 'Failed to delete listing');
@@ -205,7 +200,6 @@ export function Marketplace() {
 
   const toggleActive = async (id: string, currentStatus: boolean) => {
     const { error } = await supabase
-      .schema('lawyer')
       .from('marketplace_listings')
       .update({ is_active: !currentStatus })
       .eq('id', id);

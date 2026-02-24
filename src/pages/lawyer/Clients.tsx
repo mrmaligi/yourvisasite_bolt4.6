@@ -64,8 +64,7 @@ export function Clients() {
 
     const fetchLawyerProfile = async () => {
       const { data } = await supabase
-        .schema('lawyer')
-        .from('profiles')
+        .from('lawyer_profiles')
         .select('id')
         .eq('profile_id', profile.id)
         .maybeSingle();
