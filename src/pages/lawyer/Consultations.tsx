@@ -46,13 +46,15 @@ export function LawyerConsultations() {
 
   const now = new Date();
   const upcomingBookings = bookings.filter(b => {
-    const time = b.start_time ? new Date(b.start_time) : new Date(b.created_at);
-    return time >= now && b.status !== 'cancelled' && b.status !== 'completed';
+    const time = new Date(b.scheduled_at);
+    const endTime = new Date(time.getTime() + (b.duration_minutes || 60) * 60000);
+    return endTime >= now && b.status !== 'cancelled' && b.status !== 'completed';
   });
 
   const pastBookings = bookings.filter(b => {
-    const time = b.start_time ? new Date(b.start_time) : new Date(b.created_at);
-    return time < now || b.status === 'cancelled' || b.status === 'completed';
+    const time = new Date(b.scheduled_at);
+    const endTime = new Date(time.getTime() + (b.duration_minutes || 60) * 60000);
+    return endTime < now || b.status === 'cancelled' || b.status === 'completed';
   });
 
   const displayBookings = activeTab === 'upcoming' ? upcomingBookings : pastBookings;

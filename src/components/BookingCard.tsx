@@ -37,28 +37,23 @@ export function BookingCard({
   onReview,
   hasReview
 }: BookingCardProps) {
-  const bookingDateTime = new Date(`${booking.booking_date}T${booking.start_time}`);
-  const isPast = bookingDateTime < new Date();
-  const showJoin = booking.status === 'confirmed' && !isPast; // Simplified logic for join button
+  const bookingDateTime = new Date(booking.scheduled_at);
+  const endTime = new Date(bookingDateTime.getTime() + (booking.duration_minutes || 60) * 60000);
+  const isPast = endTime < new Date();
+  const showJoin = booking.status === 'confirmed' && !isPast;
 
   const [showChat, setShowChat] = useState(false);
   const unreadCount = useUnreadCount(booking.id);
 
   // Format date and time
-  const dateStr = new Date(booking.booking_date).toLocaleDateString(undefined, {
+  const dateStr = bookingDateTime.toLocaleDateString(undefined, {
     weekday: 'short',
     year: 'numeric',
     month: 'short',
     day: 'numeric'
   });
 
-  // Helper to format time string "HH:MM:SS" to "10:00 AM"
-  const formatTime = (timeStr: string) => {
-    const date = new Date(`1970-01-01T${timeStr}`);
-    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-  };
-
-  const timeStr = `${formatTime(booking.start_time)} - ${formatTime(booking.end_time)}`;
+  const timeStr = `${bookingDateTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} - ${endTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
 
   return (
     <Card className={`transition-all duration-200 ${showChat ? 'ring-2 ring-primary-100' : 'hover:border-primary-200'}`}>

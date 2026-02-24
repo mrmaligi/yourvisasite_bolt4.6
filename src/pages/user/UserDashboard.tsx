@@ -36,30 +36,47 @@ export function UserDashboard() {
   }, [user]);
 
   const fetchUserStats = async () => {
-    // Get counts
-    const [{ count: saved }, { count: my }, { count: docs }, { count: consultations }] = await Promise.all([
-      supabase.from('saved_visas').select('id', { count: 'exact' }).eq('user_id', user?.id),
-      supabase.from('user_visas').select('id', { count: 'exact' }).eq('user_id', user?.id),
-      supabase.from('user_documents').select('id', { count: 'exact' }).eq('user_id', user?.id),
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('user_id', user?.id).gte('scheduled_at', new Date().toISOString()),
-    ]);
+    if (!user?.id) return; // Add null check
+    
+    try {
+      // Get counts
+      const [{ count: saved }, { count: my }, { count: docs }, { data: bookingsData }] = await Promise.all([
+        supabase.from('saved_visas').select('id', { count: 'exact' }).eq('user_id', user.id),
+        supabase.from('user_visas').select('id', { count: 'exact' }).eq('user_id', user.id),
+        supabase.from('user_documents').select('id', { count: 'exact' }).eq('user_id', user.id),
+        supabase.from('bookings')
+          .select('id')
+          .eq('user_id', user.id)
+          .gte('scheduled_at', new Date().toISOString())
+          .in('status', ['pending', 'confirmed']),
+      ]);
 
-    setStats({
-      savedVisas: saved || 0,
-      myVisas: my || 0,
-      documents: docs || 0,
-      upcomingConsultations: consultations || 0,
-    });
+      setStats({
+        savedVisas: saved || 0,
+        myVisas: my || 0,
+        documents: docs || 0,
+        upcomingConsultations: bookingsData?.length || 0,
+      });
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+    }
   };
 
   const fetchMyApplications = async () => {
-    const { data } = await supabase
-      .from('tracker_entries')
-      .select('*, visas(name, subclass)')
-      .eq('submitted_by', user!.id)
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false });
-    setMyApplications(data || []);
+    if (!user?.id) return;
+    
+    try {
+      const { data } = await supabase
+        .from('tracker_entries')
+        .select('*, visas(name, subclass)')
+        .eq('submitted_by', user.id)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+      setMyApplications(data || []);
+    } catch (err) {
+      console.error('Error fetching applications:', err);
+      setMyApplications([]);
+    }
   };
 
   const quickActions = [

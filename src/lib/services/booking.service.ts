@@ -94,8 +94,8 @@ export class BookingService {
     });
 
     return enriched.sort((a, b) => {
-       const dateA = new Date(`${a.booking_date}T${a.start_time}`).getTime();
-       const dateB = new Date(`${b.booking_date}T${b.start_time}`).getTime();
+       const dateA = new Date(a.scheduled_at).getTime();
+       const dateB = new Date(b.scheduled_at).getTime();
        return dateB - dateA;
     });
   }
