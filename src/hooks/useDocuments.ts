@@ -1,30 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './useAuth';
-import type { UserDocument, DocumentCategory } from '../types/database';
+import type { UserDocument } from '../types/database';
 
 export function useDocuments() {
   const { user } = useAuth();
   const [documents, setDocuments] = useState<UserDocument[]>([]);
-  const [categories, setCategories] = useState<DocumentCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-
-  const fetchCategories = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('document_categories')
-        .select('*')
-        .eq('is_active', true)
-        .order('display_order');
-
-      if (error) throw error;
-      setCategories(data || []);
-    } catch (err: any) {
-      console.error('Error fetching categories:', err);
-      // We don't block the document loading if categories fail, but logging it is important
-    }
-  }, []);
 
   const fetchDocuments = useCallback(async () => {
     if (!user) {
@@ -53,16 +36,15 @@ export function useDocuments() {
   }, [user]);
 
   useEffect(() => {
-    fetchCategories();
     if (user) {
       fetchDocuments();
     } else {
       setDocuments([]);
       setLoading(false);
     }
-  }, [user, fetchCategories, fetchDocuments]);
+  }, [user, fetchDocuments]);
 
-  const uploadDocument = async (file: File, categoryKey: string, visaId: string | null = null) => {
+  const uploadDocument = async (file: File) => {
     if (!user) return { data: null, error: new Error('Not authenticated') };
 
     setLoading(true);
@@ -70,13 +52,13 @@ export function useDocuments() {
       // Path: documents/{userId}/{filename}
       const timestamp = Date.now();
       const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-      const storagePath = `${user.id}/${timestamp}_${sanitizedName}`;
+      const filePath = `${user.id}/${timestamp}_${sanitizedName}`;
 
       // 1. Upload to Storage
       // Using 'documents' bucket as per prompt "Supabase DB has: ... storage bucket documents"
       const { error: uploadError } = await supabase.storage
         .from('documents')
-        .upload(storagePath, file);
+        .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
@@ -86,11 +68,8 @@ export function useDocuments() {
         .insert([
           {
             user_id: user.id,
-            visa_id: visaId,
-            document_category: categoryKey,
             file_name: file.name,
-            storage_path: storagePath,
-            status: 'pending',
+            file_path: filePath,
           },
         ])
         .select()
@@ -98,7 +77,7 @@ export function useDocuments() {
 
       if (insertError) {
         // Cleanup storage if DB insert fails
-        await supabase.storage.from('documents').remove([storagePath]);
+        await supabase.storage.from('documents').remove([filePath]);
         throw insertError;
       }
 
@@ -119,10 +98,10 @@ export function useDocuments() {
     setLoading(true);
     try {
       // 1. Remove from Storage
-      if (doc.storage_path) {
+      if (doc.file_path) {
         const { error: storageError } = await supabase.storage
           .from('documents')
-          .remove([doc.storage_path]);
+          .remove([doc.file_path]);
 
         if (storageError) {
           console.warn('Error removing from storage (might be already gone):', storageError);
@@ -158,7 +137,6 @@ export function useDocuments() {
 
   return {
     documents,
-    categories,
     uploadDocument,
     deleteDocument,
     getDocumentUrl,

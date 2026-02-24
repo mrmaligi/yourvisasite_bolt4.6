@@ -49,10 +49,10 @@ export function useRealtime<T extends { id: string }>(
       .on(
         'postgres_changes',
         {
-          event,
+          event: event as any,
           schema,
           table: tableName,
-          filter,
+          filter: filter || undefined,
         },
         (payload: RealtimePostgresChangesPayload<any>) => {
           handleRealtimeEvent(payload);

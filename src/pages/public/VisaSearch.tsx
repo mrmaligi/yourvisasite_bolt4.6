@@ -37,13 +37,13 @@ const SORTS = [
 ];
 
 const formatCost = (visa: Visa) => {
-  if (visa.base_cost_aud !== null) {
-    if (visa.base_cost_aud === 0) return 'Free';
+  if (visa.cost_aud !== null) {
+    if (visa.cost_aud === 0) return 'Free';
     return new Intl.NumberFormat('en-AU', {
       style: 'currency',
       currency: 'AUD',
       maximumFractionDigits: 0,
-    }).format(visa.base_cost_aud);
+    }).format(visa.cost_aud);
   }
   return 'Free / Varies';
 };
@@ -114,7 +114,7 @@ export function VisaSearch() {
 
       const matchesCost =
         selectedCostRanges.length === 0 ||
-        selectedCostRanges.some((range) => checkCost(visa.base_cost_aud, range));
+        selectedCostRanges.some((range) => checkCost(visa.cost_aud, range));
 
       const matchesTime =
         selectedTimeRanges.length === 0 ||
@@ -130,8 +130,8 @@ export function VisaSearch() {
         return a.subclass.localeCompare(b.subclass);
       }
       if (sortBy === 'cost_asc') {
-        const costA = a.base_cost_aud || 0;
-        const costB = b.base_cost_aud || 0;
+        const costA = a.cost_aud || 0;
+        const costB = b.cost_aud || 0;
         return costA - costB;
       }
       return 0;

@@ -36,18 +36,17 @@ export function PremiumContent() {
   useEffect(() => {
     if (!selectedVisaId) { setSteps([]); return; }
     setLoading(true);
-    supabase.from('visa_premium_content').select('*').eq('visa_id', selectedVisaId).order('step_number')
+    supabase.from('visa_premium_content').select('*').eq('visa_id', selectedVisaId).order('created_at')
       .then(({ data }) => { setSteps(data || []); setLoading(false); });
   }, [selectedVisaId]);
 
   const addStep = () => {
-    const next = steps.length > 0 ? Math.max(...steps.map((s) => s.step_number || 0)) + 1 : 1;
+    const next = steps.length + 1;
     setSteps([...steps, {
       id: `new-${Date.now()}`,
       visa_id: selectedVisaId,
-      step_number: next,
       title: '',
-      body: '',
+      description: '',
       document_category: null,
       document_explanation: null,
       document_example_url: null,
@@ -82,9 +81,8 @@ export function PremiumContent() {
 
     const rows = steps.map((s, i) => ({
       visa_id: selectedVisaId,
-      step_number: i + 1,
       title: s.title,
-      body: s.body,
+      description: s.description,
       document_category: s.document_category,
       document_explanation: s.document_explanation,
       document_example_url: s.document_example_url
@@ -101,7 +99,7 @@ export function PremiumContent() {
 
     toast('success', 'Premium content saved');
     // Refresh to get new IDs
-    const { data } = await supabase.from('visa_premium_content').select('*').eq('visa_id', selectedVisaId).order('step_number');
+    const { data } = await supabase.from('visa_premium_content').select('*').eq('visa_id', selectedVisaId).order('created_at');
     setSteps(data || []);
     setLoading(false);
   };
@@ -153,8 +151,8 @@ export function PremiumContent() {
 
                   <Textarea
                     label="Content (Markdown)"
-                    value={step.body || ''}
-                    onChange={(e) => updateStep(idx, 'body', e.target.value)}
+                    value={step.description || ''}
+                    onChange={(e) => updateStep(idx, 'description', e.target.value)}
                     rows={6}
                     placeholder="# Heading&#10;Content goes here..."
                   />

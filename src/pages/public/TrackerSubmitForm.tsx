@@ -20,7 +20,6 @@ export function TrackerSubmitForm({ onSuccess, preselectedVisaId, initialEntry }
   const [applicationDate, setApplicationDate] = useState(initialEntry?.application_date || '');
   const [decisionDate, setDecisionDate] = useState(initialEntry?.decision_date || '');
   const [outcome, setOutcome] = useState<TrackerOutcome>(initialEntry?.outcome || 'approved');
-  const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -56,12 +55,9 @@ export function TrackerSubmitForm({ onSuccess, preselectedVisaId, initialEntry }
     const payload = {
       visa_id: visaId,
       submitted_by: initialEntry?.submitted_by || user?.id || null,
-      submitter_role: role || null,
       application_date: applicationDate,
       decision_date: isPending ? null : decisionDate,
       outcome: isPending ? 'pending' as TrackerOutcome : outcome,
-      status: isPending ? 'pending' : 'completed',
-      notes: notes || null,
     };
 
     let error;
@@ -193,17 +189,6 @@ export function TrackerSubmitForm({ onSuccess, preselectedVisaId, initialEntry }
                <span className="text-sm text-neutral-700">Withdrawn</span>
              </label>
            </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1.5">Notes (Optional)</label>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            rows={3}
-            className="input-field w-full py-2"
-            placeholder="Any details about your case (e.g., complexity, requests for info)..."
-          />
         </div>
       </div>
 

@@ -50,9 +50,8 @@ export function Clients() {
     user_id: string;
     full_name: string | null;
     status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
-    notes: string | null;
     created_at: string;
-    total_price_cents: number;
+    amount_cents: number;
   }[]>([]);
   const [loading, setLoading] = useState(true);
   const [lawyerProfileId, setLawyerProfileId] = useState<string | null>(null);
@@ -67,7 +66,7 @@ export function Clients() {
         .schema('lawyer')
         .from('profiles')
         .select('id')
-        .eq('profile_id', profile.id)
+        .eq('user_id', profile.id)
         .maybeSingle();
 
       if (data) {
@@ -84,7 +83,7 @@ export function Clients() {
     const fetchClients = async () => {
       const { data: bookings } = await supabase
         .from('bookings')
-        .select('id, user_id, total_price_cents, status, created_at')
+        .select('id, user_id, amount_cents, status, created_at')
         .eq('lawyer_id', lawyerProfileId);
 
       if (!bookings || bookings.length === 0) {
@@ -161,7 +160,7 @@ export function Clients() {
 
         if (existing) {
           existing.total_bookings += 1;
-          existing.total_spent_cents += b.total_price_cents;
+          existing.total_spent_cents += b.amount_cents;
           if (b.created_at > existing.last_booking_date) {
             existing.last_booking_date = b.created_at;
           }
@@ -173,7 +172,7 @@ export function Clients() {
             phone: prof?.phone || null,
             total_bookings: 1,
             last_booking_date: b.created_at,
-            total_spent_cents: b.total_price_cents,
+            total_spent_cents: b.amount_cents,
             visa_types: Array.from(visaMap.get(b.user_id) || []),
             shared_documents: docMap.get(b.user_id) || [],
             bookings: [bookingInfo]
@@ -192,7 +191,7 @@ export function Clients() {
 
       const { data: recent } = await supabase
         .from('bookings')
-        .select('id, user_id, status, notes, created_at, total_price_cents')
+        .select('id, user_id, status, created_at, amount_cents')
         .eq('lawyer_id', lawyerProfileId)
         .order('created_at', { ascending: false })
         .limit(5);
@@ -389,15 +388,10 @@ export function Clients() {
                         {booking.status}
                       </Badge>
                     </div>
-                    {booking.notes && (
-                      <p className="text-xs text-neutral-500 line-clamp-2 mb-2">
-                        {booking.notes}
-                      </p>
-                    )}
                     <div className="flex items-center justify-between text-xs text-neutral-400 mt-2">
                       <div className="flex gap-4">
                           <span>{new Date(booking.created_at).toLocaleDateString()}</span>
-                          <span>${(booking.total_price_cents / 100).toFixed(0)}</span>
+                          <span>${(booking.amount_cents / 100).toFixed(0)}</span>
                       </div>
                       <Button
                         size="sm"

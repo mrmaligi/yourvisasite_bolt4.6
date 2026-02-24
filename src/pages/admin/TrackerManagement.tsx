@@ -47,12 +47,9 @@ export function TrackerManagement() {
     setRefreshing(false);
   };
 
-  const roleVariant = { user: 'primary' as const, lawyer: 'info' as const, admin: 'danger' as const };
-
   const columns: Column<TrackerEntry>[] = [
     { key: 'days', header: 'Days', render: (r) => <span className="font-mono font-medium">{r.processing_days}</span>, sortable: true },
     { key: 'outcome', header: 'Outcome', render: (r) => <TrackerStatusBadge status={r.outcome || 'pending'} /> },
-    { key: 'role', header: 'Source', render: (r) => r.submitter_role ? <Badge variant={roleVariant[r.submitter_role]}>{r.submitter_role}</Badge> : <Badge>Anonymous</Badge> },
     { key: 'weight', header: 'Weight', render: (r) => r.weight.toString() },
     { key: 'date', header: 'Submitted', render: (r) => new Date(r.created_at).toLocaleDateString(), sortable: true },
     { key: 'actions', header: '', render: (r) => (

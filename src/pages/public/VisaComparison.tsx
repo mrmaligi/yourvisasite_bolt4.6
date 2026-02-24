@@ -121,8 +121,8 @@ export function VisaComparison() {
               {enhancedVisas.map((visa) => (
                 <td key={visa.id} className="p-6 text-neutral-600 dark:text-neutral-300 align-top">
                   <div className="font-semibold text-neutral-900 dark:text-white mb-1">
-                    {visa.base_cost_aud !== null
-                      ? (visa.base_cost_aud === 0 ? 'Free' : new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 }).format(visa.base_cost_aud))
+                    {visa.cost_aud !== null
+                      ? (visa.cost_aud === 0 ? 'Free' : new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 }).format(visa.cost_aud))
                       : 'Free / Varies'}
                   </div>
                   <p className="text-xs text-neutral-500 dark:text-neutral-400">

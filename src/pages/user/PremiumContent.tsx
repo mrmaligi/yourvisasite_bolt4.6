@@ -257,7 +257,7 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                                         ? 'bg-primary-100 text-primary-700'
                                         : 'bg-neutral-100 text-neutral-500'
                                 }`}>
-                                    {isCompleted ? <CheckCircle className="w-4 h-4" /> : step.step_number}
+                                    {isCompleted ? <CheckCircle className="w-4 h-4" /> : index + 1}
                                 </div>
                                 <div>
                                     <p className={`text-sm font-medium ${isActive ? 'text-primary-900' : 'text-neutral-700'}`}>
@@ -280,7 +280,7 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                         <div className="flex items-center justify-between mb-6 pb-6 border-b border-neutral-100">
                              <div>
                                 <span className="text-xs font-bold tracking-wider text-primary-600 uppercase mb-1 block">
-                                    Step {currentStep.step_number}
+                                    Step {currentStepIndex + 1}
                                 </span>
                                 <h2 className="text-2xl font-bold text-neutral-900">{currentStep.title}</h2>
                              </div>
@@ -330,7 +330,7 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                         {/* Content Body */}
                         <div
                             className="prose prose-neutral max-w-none mb-12"
-                            dangerouslySetInnerHTML={{ __html: currentStep.body || '' }}
+                            dangerouslySetInnerHTML={{ __html: currentStep.description || '' }}
                         />
 
                         {/* Example Application */}
@@ -423,7 +423,7 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
                 <div key={step.id} className="break-inside-avoid">
                     <h2 className="text-2xl font-bold text-neutral-900 mb-4 flex items-center">
                         <span className="w-8 h-8 rounded-full bg-neutral-900 text-white flex items-center justify-center text-sm mr-3">
-                            {step.step_number}
+                            {content.indexOf(step) + 1}
                         </span>
                         {step.title}
                     </h2>
@@ -437,7 +437,7 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
 
                     <div
                         className="prose prose-neutral max-w-none"
-                        dangerouslySetInnerHTML={{ __html: step.body || '' }}
+                        dangerouslySetInnerHTML={{ __html: step.description || '' }}
                     />
 
                     {step.application_example_json && step.application_example_json.length > 0 && (

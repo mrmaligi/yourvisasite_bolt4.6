@@ -39,17 +39,17 @@ export function LawyerManagement() {
       return;
     }
 
-    const profileIds = lawyerData.map((l) => l.profile_id);
+    const userIds = lawyerData.map((l) => l.user_id);
     const { data: userData } = await supabase
       .from('profiles')
       .select('id, full_name')
-      .in('id', profileIds);
+      .in('id', userIds);
 
     const userMap = new Map(userData?.map((u) => [u.id, u]) || []);
 
     const merged = lawyerData.map((l) => ({
       ...l,
-      full_name: userMap.get(l.profile_id)?.full_name || 'Unknown',
+      full_name: userMap.get(l.user_id)?.full_name || 'Unknown',
     }));
 
     setLawyers(merged);
@@ -68,7 +68,7 @@ export function LawyerManagement() {
 
     try {
       const { error } = await supabase.functions.invoke('verify-lawyer', {
-        body: { lawyer_profile_id: lawyer.profile_id, action: 'approve' },
+        body: { lawyer_profile_id: lawyer.user_id, action: 'approve' },
       });
       if (error) throw error;
     } catch (err) {

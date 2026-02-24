@@ -97,15 +97,15 @@ export function AdminDashboard() {
       supabase.from('lawyer_profiles').select('id', { count: 'exact' }).eq('verification_status', 'approved'),
       supabase.from('lawyer_profiles').select('*, profiles:user_id(full_name, email)').eq('verification_status', 'pending'),
       supabase.from('visas').select('id', { count: 'exact' }),
-      supabase.from('tracker_entries').select('id', { count: 'exact' }).eq('status', 'pending'),
+      supabase.from('tracker_entries').select('id', { count: 'exact' }).eq('outcome', 'pending'),
       supabase.from('profiles').select('created_at').eq('role', 'user').order('created_at', { ascending: true }),
       supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(5),
-      supabase.from('bookings').select('total_price_cents').eq('status', 'completed'),
+      supabase.from('bookings').select('amount_cents').eq('status', 'completed'),
       supabase.from('user_visa_purchases').select('amount_cents')
     ]);
 
     // Process Stats
-    const bookingRevenue = bookingsRes.data?.reduce((acc, curr) => acc + (curr.total_price_cents || 0), 0) || 0;
+    const bookingRevenue = bookingsRes.data?.reduce((acc, curr) => acc + (curr.amount_cents || 0), 0) || 0;
     const purchaseRevenue = purchasesRes.data?.reduce((acc, curr) => acc + (curr.amount_cents || 0), 0) || 0;
     const totalRevenue = (bookingRevenue + purchaseRevenue) / 100;
 

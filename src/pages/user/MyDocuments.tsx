@@ -1,39 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
 import {
-  FolderOpen,
+  FileText,
   Trash2,
   Download,
-  HelpCircle,
   Upload,
-  FileText,
-  CheckCircle,
-  AlertCircle,
   Clock,
-  User,
-  DollarSign,
-  Briefcase,
-  Users,
-  Heart,
-  Shield,
-  GraduationCap,
-  FilePlus,
-  Home,
-  MapPin,
-  Mail,
-  Plane,
-  Flag,
-  Building,
-  Languages,
-  Wallet,
-  Award,
-  CreditCard,
-  Activity,
   Filter,
   X
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../lib/supabase';
 import { BUCKETS, uploadFile, validateFile } from '../../lib/storage';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
@@ -44,114 +19,44 @@ import { useToast } from '../../components/ui/Toast';
 import { useDocuments } from '../../hooks/useDocuments';
 import type { UserDocument } from '../../types/database';
 
-// Map icon strings from DB to Lucide components
-const ICON_MAP: Record<string, any> = {
-  'id-card': CreditCard,
-  'shield-check': Shield,
-  'heart-pulse': Activity,
-  'languages': Languages,
-  'wallet': Wallet,
-  'briefcase': Briefcase,
-  'graduation-cap': GraduationCap,
-  'certificate': Award,
-  'heart': Heart,
-  'home': Home,
-  'user-check': Users,
-  'map-pin': MapPin,
-  'file-text': FileText,
-  'users': Users,
-  'mail': Mail,
-  'plane': Plane,
-  'flag': Flag,
-  'building': Building,
-  'file-plus': FilePlus,
-  // Fallbacks
-  'user': User,
-  'dollar-sign': DollarSign,
-  'shield': Shield,
-};
-
-const statusConfig = {
-  pending: { variant: 'warning' as const, icon: Clock, label: 'Pending Review' },
-  verified: { variant: 'success' as const, icon: CheckCircle, label: 'Verified' },
-  rejected: { variant: 'danger' as const, icon: AlertCircle, label: 'Action Required' },
-};
-
 export function MyDocuments() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [searchParams] = useSearchParams();
   const {
     documents: docs,
-    categories,
     deleteDocument,
     getDocumentUrl,
     loading: docsLoading,
-    refresh
+    refresh,
+    uploadDocument
   } = useDocuments();
 
-  const [modalCategoryKey, setModalCategoryKey] = useState<string | null>(null);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [uploadFileState, setUploadFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [inlineUploadCategory, setInlineUploadCategory] = useState<string | null>(null);
-  const [expandedHelp, setExpandedHelp] = useState<Record<string, boolean>>({});
-  const [highlightedCategory, setHighlightedCategory] = useState<string | null>(null);
-
-  // Filters
-  const [filterCategory, setFilterCategory] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<string | null>(null);
-
-  useEffect(() => {
-    const categoryKey = searchParams.get('category');
-    if (categoryKey && categories.length > 0) {
-      const el = document.getElementById(`category-${categoryKey}`);
-      if (el) {
-        setTimeout(() => {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          setExpandedHelp(prev => ({ ...prev, [categoryKey]: true }));
-          setHighlightedCategory(categoryKey);
-          // Remove highlight after 2 seconds
-          setTimeout(() => setHighlightedCategory(null), 2000);
-        }, 500); // Delay slightly to ensure render
-      }
-    }
-  }, [searchParams, categories]);
 
   const handleModalUpload = async () => {
-    if (!user || !uploadFileState || !modalCategoryKey) return;
+    if (!user || !uploadFileState) return;
 
     try {
       if (validateFile(uploadFileState)) {
         setUploading(true);
         setUploadProgress(0);
 
-        const path = `${user.id}/${Date.now()}_${uploadFileState.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        // Use the hook's uploadDocument function which handles storage + DB
+        // But hook's uploadDocument uses supabase.storage directly.
+        // Wait, the hook uses `uploadDocument(file)`.
+        // The previous code used `uploadFile` utility + manual DB insert.
+        // The hook now encapsulates both (in my update).
+        // Let's use the hook function.
 
-        await uploadFile({
-          bucket: BUCKETS.DOCUMENTS,
-          path,
-          file: uploadFileState,
-          onProgress: setUploadProgress,
-        });
+        const { error } = await uploadDocument(uploadFileState);
 
-        const { error: insertError } = await supabase
-          .from('user_documents')
-          .insert([
-            {
-              user_id: user.id,
-              document_category: modalCategoryKey,
-              file_name: uploadFileState.name,
-              storage_path: path,
-              status: 'pending',
-            },
-          ]);
+        if (error) throw error;
 
-        if (insertError) throw insertError;
-
-        await refresh();
         toast('success', 'Document uploaded successfully');
-        setModalCategoryKey(null);
+        setIsUploadModalOpen(false);
         setUploadFile(null);
       }
     } catch (error) {
@@ -159,51 +64,6 @@ export function MyDocuments() {
       toast('error', message);
     } finally {
       setUploading(false);
-      setUploadProgress(0);
-    }
-  };
-
-  const handleInlineUpload = async (file: File, categoryKey: string) => {
-    if (!user) return;
-
-    try {
-      if (validateFile(file)) {
-        setInlineUploadCategory(categoryKey);
-        setUploading(true);
-        setUploadProgress(0);
-
-        const path = `${user.id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-
-        await uploadFile({
-          bucket: BUCKETS.DOCUMENTS,
-          path,
-          file,
-          onProgress: setUploadProgress,
-        });
-
-        const { error: insertError } = await supabase
-          .from('user_documents')
-          .insert([
-            {
-              user_id: user.id,
-              document_category: categoryKey,
-              file_name: file.name,
-              storage_path: path,
-              status: 'pending',
-            },
-          ]);
-
-        if (insertError) throw insertError;
-
-        await refresh();
-        toast('success', 'Document uploaded successfully');
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Upload failed';
-      toast('error', message);
-    } finally {
-      setUploading(false);
-      setInlineUploadCategory(null);
       setUploadProgress(0);
     }
   };
@@ -220,19 +80,10 @@ export function MyDocuments() {
   };
 
   const handleDownload = async (doc: UserDocument) => {
-    const url = await getDocumentUrl(doc.storage_path);
+    const url = await getDocumentUrl(doc.file_path);
     if (url) window.open(url, '_blank');
     else toast('error', 'Failed to get download URL');
   };
-
-  const getDocsByCategory = (categoryKey: string) =>
-    docs.filter((d) => d.document_category === categoryKey);
-
-  // Filtered categories to display
-  // If filterCategory is set, only show that category. Otherwise show all.
-  const displayedCategories = filterCategory
-    ? categories.filter(c => c.key === filterCategory)
-    : categories;
 
   return (
     <div className="space-y-6">
@@ -245,207 +96,89 @@ export function MyDocuments() {
         </div>
         <div className="flex items-center gap-2">
            <Badge variant="info">{docs.length} documents</Badge>
-           <Button onClick={() => setModalCategoryKey(categories[0]?.key || '')}>
+           <Button onClick={() => setIsUploadModalOpen(true)}>
              <Upload className="w-4 h-4 mr-2" />
              Upload
            </Button>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-xl border border-neutral-200 shadow-sm">
-        <div className="flex items-center gap-2 text-sm text-neutral-500 mr-2">
-          <Filter className="w-4 h-4" />
-          <span>Filters:</span>
-        </div>
-
-        <select
-          className="text-sm bg-neutral-50 border-neutral-200 rounded-lg px-3 py-1.5 focus:ring-primary-500 focus:border-primary-500"
-          value={filterCategory || ''}
-          onChange={(e) => setFilterCategory(e.target.value || null)}
-        >
-          <option value="">All Categories</option>
-          {categories.map(c => (
-            <option key={c.key} value={c.key}>{c.name}</option>
-          ))}
-        </select>
-
-        <select
-          className="text-sm bg-neutral-50 border-neutral-200 rounded-lg px-3 py-1.5 focus:ring-primary-500 focus:border-primary-500"
-          value={filterStatus || ''}
-          onChange={(e) => setFilterStatus(e.target.value || null)}
-        >
-          <option value="">All Statuses</option>
-          <option value="pending">Pending</option>
-          <option value="verified">Verified</option>
-          <option value="rejected">Rejected</option>
-        </select>
-
-        {(filterCategory || filterStatus) && (
-          <button
-            onClick={() => { setFilterCategory(null); setFilterStatus(null); }}
-            className="text-xs text-neutral-400 hover:text-neutral-600 flex items-center gap-1 ml-auto"
-          >
-            <X className="w-3 h-3" />
-            Clear filters
-          </button>
-        )}
-      </div>
-
-      {docsLoading && categories.length === 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-40 bg-neutral-100 rounded-xl animate-pulse" />
+      {docsLoading ? (
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-16 bg-neutral-100 rounded-xl animate-pulse" />
           ))}
         </div>
+      ) : docs.length === 0 ? (
+        <Card>
+          <CardBody className="py-12 flex flex-col items-center text-center">
+            <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
+              <FileText className="w-8 h-8 text-neutral-400" />
+            </div>
+            <h3 className="text-lg font-medium text-neutral-900">No documents yet</h3>
+            <p className="text-neutral-500 mt-1 max-w-sm">
+              Upload your passport, birth certificate, and other documents to keep them safe and ready for your application.
+            </p>
+            <Button onClick={() => setIsUploadModalOpen(true)} className="mt-4">
+              Upload Document
+            </Button>
+          </CardBody>
+        </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {displayedCategories.map((category) => {
-            let categoryDocs = getDocsByCategory(category.key);
-
-            // Apply status filter locally if needed
-            if (filterStatus) {
-              categoryDocs = categoryDocs.filter(d => d.status === filterStatus);
-            }
-
-            const verified = categoryDocs.filter((d) => d.status === 'verified').length;
-            const pending = categoryDocs.filter((d) => d.status === 'pending').length;
-            const rejected = categoryDocs.filter((d) => d.status === 'rejected').length;
-
-            const IconComponent = ICON_MAP[category.icon] || FolderOpen;
-
-            return (
-              <Card
-                key={category.key}
-                className={`hover:shadow-md transition-shadow group h-full flex flex-col ${highlightedCategory === category.key ? 'ring-2 ring-primary-500 ring-offset-2' : ''}`}
-              >
-                <CardHeader className="pb-3 flex-none">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="p-1.5 bg-neutral-100 rounded-lg text-neutral-500">
-                            <IconComponent className="w-4 h-4" />
-                        </div>
-                        <h3 className="font-semibold text-neutral-900 text-sm">
-                        {category.name}
-                        </h3>
+        <Card>
+          <CardHeader>
+            <h2 className="text-lg font-semibold text-neutral-900">Your Documents</h2>
+          </CardHeader>
+          <CardBody className="p-0">
+            <div className="divide-y divide-neutral-100">
+              {docs.map((doc) => (
+                <div key={doc.id} className="p-4 flex items-center justify-between hover:bg-neutral-50 transition-colors">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <FileText className="w-5 h-5 text-primary-600" />
                     </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-neutral-900 truncate" title={doc.file_name}>
+                        {doc.file_name}
+                      </p>
+                      <p className="text-xs text-neutral-500">
+                        Uploaded {new Date(doc.uploaded_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <button
-                      onClick={() => setExpandedHelp(prev => ({ ...prev, [category.key]: !prev[category.key] }))}
-                      className={`p-1 rounded hover:bg-neutral-100 transition-colors ${expandedHelp[category.key] ? 'text-primary-600 bg-primary-50' : 'text-neutral-400 hover:text-neutral-600'}`}
-                      title="View details and examples"
+                      onClick={() => handleDownload(doc)}
+                      className="p-2 text-neutral-500 hover:text-primary-600 hover:bg-white rounded-lg transition-colors"
+                      title="Download"
                     >
-                      <HelpCircle className="w-4 h-4" />
+                      <Download className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(doc)}
+                      className="p-2 text-neutral-500 hover:text-red-600 hover:bg-white rounded-lg transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
-
-                  {expandedHelp[category.key] ? (
-                    <div className="mt-3 p-3 bg-neutral-50 rounded-lg text-sm border border-neutral-100 animate-in fade-in slide-in-from-top-1">
-                      <p className="text-neutral-700 mb-2 text-xs">{category.explanation || category.description}</p>
-                      {category.examples && category.examples.length > 0 && (
-                        <div className="mb-2">
-                          <p className="font-semibold text-neutral-900 text-[10px] uppercase tracking-wider mb-1">Examples</p>
-                          <ul className="list-disc pl-4 space-y-0.5 text-neutral-600 text-xs">
-                            {category.examples.map((ex, i) => (
-                              <li key={i}>{ex}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      {category.tips && (
-                        <div className="mt-2 pt-2 border-t border-neutral-200">
-                          <p className="text-[10px] text-neutral-500 italic">💡 {category.tips}</p>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-neutral-500 mt-2 line-clamp-2 min-h-[2.5em]">{category.description}</p>
-                  )}
-                </CardHeader>
-                <CardBody className="pt-3 border-t border-neutral-100 flex-1 flex flex-col">
-                  <div className="space-y-2 flex-1">
-                    {categoryDocs.length === 0 ? (
-                      <div className="text-center py-3 flex-1 flex flex-col items-center justify-center">
-                        <p className="text-xs text-neutral-400">No documents</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-1.5">
-                        {categoryDocs.slice(0, 3).map((doc) => {
-                          const statusInfo = statusConfig[doc.status];
-                          const StatusIcon = statusInfo.icon;
-                          return (
-                            <div
-                              key={doc.id}
-                              className="flex items-center gap-2 p-2 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition-colors group/doc"
-                            >
-                              <StatusIcon className={`w-3.5 h-3.5 flex-shrink-0 ${
-                                doc.status === 'verified' ? 'text-green-600' :
-                                doc.status === 'rejected' ? 'text-red-600' :
-                                'text-amber-600'
-                              }`} />
-                              <p className="text-xs text-neutral-700 truncate flex-1" title={doc.file_name}>
-                                {doc.file_name}
-                              </p>
-                              <div className="flex opacity-0 group-hover/doc:opacity-100 transition-opacity">
-                                <button
-                                    onClick={() => handleDownload(doc)}
-                                    className="p-1 rounded hover:bg-white text-neutral-500 hover:text-primary-600"
-                                    title="Download"
-                                >
-                                    <Download className="w-3 h-3" />
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(doc)}
-                                    className="p-1 rounded hover:bg-white text-neutral-500 hover:text-red-600"
-                                    title="Delete"
-                                >
-                                    <Trash2 className="w-3 h-3" />
-                                </button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                        {categoryDocs.length > 3 && (
-                          <p className="text-xs text-neutral-400 text-center pt-1">
-                            +{categoryDocs.length - 3} more
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="mt-3 pt-2 border-t border-neutral-50">
-                    <div className="flex items-center gap-2 mb-2 min-h-[20px]">
-                      {verified > 0 && <Badge variant="success" className="text-[10px] py-0">{verified} verified</Badge>}
-                      {pending > 0 && <Badge variant="warning" className="text-[10px] py-0">{pending} pending</Badge>}
-                      {rejected > 0 && <Badge variant="danger" className="text-[10px] py-0">{rejected} rejected</Badge>}
-                    </div>
-
-                    <FileUpload
-                      key={`${category.key}-${docs.length}`} // Force reset after upload or doc change
-                      compact
-                      onFileSelect={(file) => handleInlineUpload(file, category.key)}
-                      uploading={uploading && inlineUploadCategory === category.key}
-                      progress={uploading && inlineUploadCategory === category.key ? uploadProgress : 0}
-                      className="mt-2"
-                    />
-                  </div>
-                </CardBody>
-              </Card>
-            );
-          })}
-        </div>
+                </div>
+              ))}
+            </div>
+          </CardBody>
+        </Card>
       )}
 
       <Modal
-        isOpen={!!modalCategoryKey}
+        isOpen={isUploadModalOpen}
         onClose={() => {
-          setModalCategoryKey(null);
+          setIsUploadModalOpen(false);
           setUploadFile(null);
         }}
         title="Upload Document"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setModalCategoryKey(null)}>
+            <Button variant="secondary" onClick={() => setIsUploadModalOpen(false)}>
               Cancel
             </Button>
             <Button
@@ -460,28 +193,12 @@ export function MyDocuments() {
       >
         <div className="space-y-4">
           <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">
-                  Document Category
-              </label>
-              <select
-                className="w-full rounded-lg border-neutral-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                value={modalCategoryKey || ''}
-                onChange={(e) => setModalCategoryKey(e.target.value)}
-              >
-                  {categories.map(c => (
-                      <option key={c.key} value={c.key}>{c.name}</option>
-                  ))}
-              </select>
-          </div>
-
-          <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1">
                 File
             </label>
             <FileUpload
-                key={modalCategoryKey || 'new'}
                 onFileSelect={setUploadFile}
-                uploading={uploading && !!modalCategoryKey}
+                uploading={uploading}
                 progress={uploadProgress}
             />
           </div>

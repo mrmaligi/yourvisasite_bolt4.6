@@ -68,7 +68,7 @@ export class BookingService {
     // For lawyers, we need public profile names to display to users
     let publicProfileMap = new Map<string, string | null>();
     if (role === 'user' && lawyerProfilesData.length > 0) {
-        const profileIds = lawyerProfilesData.map(lp => lp.profile_id);
+        const profileIds = lawyerProfilesData.map(lp => lp.user_id);
         const { data: profiles, error } = await this.repository.findProfiles(profileIds);
         if (error) throw error;
         if (profiles) {
@@ -80,7 +80,7 @@ export class BookingService {
     const lawyerInfoMap = new Map();
     lawyerProfilesData.forEach(lp => {
         lawyerInfoMap.set(lp.id, {
-            name: publicProfileMap.get(lp.profile_id),
+            name: publicProfileMap.get(lp.user_id),
             jurisdiction: lp.jurisdiction
         });
     });

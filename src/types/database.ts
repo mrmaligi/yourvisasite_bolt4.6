@@ -34,10 +34,10 @@ export interface Visa {
   name: string;
   country: string;
   category: string;
-  official_link: string | null;
+  official_url: string | null;
   summary: string | null;
   description: string | null;
-  base_cost_aud: number | null;
+  cost_aud: number | null;
   processing_time_range: string | null;
   duration: string | null;
   key_requirements: string | null;
@@ -83,9 +83,8 @@ export interface VisaPremiumContent {
   required_documents: string[] | null;
   application_example_json: ApplicationExampleField[] | null;
   // New fields for document guidance
-  step_number: number | null;
   title: string | null;
-  body: string | null;
+  description: string | null;
   document_category: string | null;
   document_explanation: string | null;
   document_example_url: string | null;
@@ -104,14 +103,11 @@ export interface TrackerEntry {
   id: string;
   visa_id: string;
   submitted_by: string | null;
-  submitter_role: UserRole | null;
   application_date: string;
   decision_date: string | null;
   processing_days: number | null;
   outcome: TrackerOutcome;
   weight: number;
-  status: 'pending' | 'completed';
-  notes?: string | null;
   created_at: string;
 }
 
@@ -164,7 +160,6 @@ export interface Product {
 export interface LawyerProfile {
   id: string;
   user_id: string;
-  profile_id: string;
   bar_number: string;
   jurisdiction: string;
   practice_areas: string[];
@@ -198,14 +193,13 @@ export interface Booking {
   lawyer_id: string;
   slot_id: string;
   duration_minutes: number;
-  total_price_cents: number;
+  amount_cents: number;
   status: BookingStatus;
   payment_status: PaymentStatus;
   payment_intent_id: string | null;
   stripe_checkout_session_id: string | null;
-  file_takeover_status: 'requested' | 'accepted' | 'rejected' | null;
   confirmed_at: string | null;
-  notes: string | null;
+  booking_date: string;
   created_at: string;
   updated_at: string;
 }
@@ -223,11 +217,8 @@ export interface UserVisaPurchase {
 export interface UserDocument {
   id: string;
   user_id: string;
-  visa_id: string | null;
-  document_category: string; // matches DocumentCategory.key
   file_name: string;
-  storage_path: string;
-  status: DocumentStatus;
+  file_path: string;
   uploaded_at: string;
 }
 

@@ -80,7 +80,7 @@ export function VisaDetail() {
         .from('visa_premium_content')
         .select('*')
         .eq('visa_id', id)
-        .order('step_number');
+        .order('created_at');
       setPremiumContent(contentData || []);
 
       // 5. Fetch Recent Entries
@@ -162,8 +162,8 @@ export function VisaDetail() {
             <div>
                 <p className="text-sm text-neutral-500 mb-1">Cost</p>
                 <p className="font-semibold text-neutral-900">
-                  {visa.base_cost_aud !== null
-                    ? (visa.base_cost_aud === 0 ? 'Free' : new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 }).format(visa.base_cost_aud))
+                  {visa.cost_aud !== null
+                    ? (visa.cost_aud === 0 ? 'Free' : new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 }).format(visa.cost_aud))
                     : 'Varies'}
                 </p>
             </div>
@@ -177,10 +177,10 @@ export function VisaDetail() {
             </div>
             <div className="no-print">
                  <a
-                    href={visa.official_link || '#'}
+                    href={visa.official_url || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`inline-flex items-center justify-center w-full h-full text-sm font-medium rounded-lg transition-colors ${visa.official_link ? 'text-primary-600 bg-white border border-primary-200 hover:bg-primary-50' : 'text-neutral-400 bg-neutral-100 cursor-not-allowed'}`}
+                    className={`inline-flex items-center justify-center w-full h-full text-sm font-medium rounded-lg transition-colors ${visa.official_url ? 'text-primary-600 bg-white border border-primary-200 hover:bg-primary-50' : 'text-neutral-400 bg-neutral-100 cursor-not-allowed'}`}
                  >
                     Official Site <ExternalLink className="w-4 h-4 ml-2" />
                  </a>
@@ -227,14 +227,14 @@ export function VisaDetail() {
                             <CardHeader className="bg-primary-50/50 border-b border-primary-100">
                                 <h3 className="font-semibold text-primary-900 flex items-center">
                                     <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary-100 text-primary-700 text-xs font-bold mr-3">
-                                        {currentStep.step_number}
+                                        {currentStepIndex + 1}
                                     </span>
                                     {currentStep.title}
                                 </h3>
                             </CardHeader>
                             <CardBody>
                                 <div className="prose prose-sm max-w-none text-neutral-600 whitespace-pre-wrap">
-                                    {currentStep.body}
+                                    {currentStep.description}
                                 </div>
 
                                 {currentStep.document_category && (
@@ -364,12 +364,6 @@ export function VisaDetail() {
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-neutral-900 capitalize">{entry.outcome}</span>
-                            {entry.submitter_role === 'lawyer' && (
-                              <Badge variant="primary" className="flex items-center gap-1">
-                                <CheckCircle className="w-3 h-3" />
-                                Verified Lawyer
-                              </Badge>
-                            )}
                           </div>
                           <p className="text-sm text-neutral-500 mt-0.5">
                             {entry.processing_days} days processing

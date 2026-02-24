@@ -43,7 +43,7 @@ export function UserDashboard() {
       supabase.from('saved_visas').select('id', { count: 'exact' }).eq('user_id', user?.id),
       supabase.from('user_visas').select('id', { count: 'exact' }).eq('user_id', user?.id),
       supabase.from('user_documents').select('id', { count: 'exact' }).eq('user_id', user?.id),
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('user_id', user?.id).gte('scheduled_at', new Date().toISOString()),
+      supabase.from('bookings').select('id', { count: 'exact' }).eq('user_id', user?.id).gte('booking_date', new Date().toISOString()),
     ]);
 
     setStats({
@@ -59,7 +59,7 @@ export function UserDashboard() {
       .from('tracker_entries')
       .select('*, visas(name, subclass)')
       .eq('submitted_by', user!.id)
-      .eq('status', 'pending')
+      .eq('outcome', 'pending')
       .order('created_at', { ascending: false });
     setMyApplications(data || []);
   };
