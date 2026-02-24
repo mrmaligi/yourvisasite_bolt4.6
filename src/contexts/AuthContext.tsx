@@ -1,12 +1,14 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { type Session, type User, type AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { authService } from '../lib/services/auth.service';
 import type { Profile, UserRole } from '../types/database';
+import type { ProfileWithLawyer } from '../lib/repositories/profile.repository';
 
 interface AuthContextValue {
   session: Session | null;
   user: User | null;
-  profile: Profile | null;
+  profile: ProfileWithLawyer | null;
   role: UserRole | null;
   isLoading: boolean;
   isAuthenticated: boolean;
@@ -44,40 +46,17 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<ProfileWithLawyer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchProfile = async (currentUser: User) => {
     try {
-      let attempts = 0;
-      const maxAttempts = 3;
-
-      while (attempts < maxAttempts) {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*, lawyer_profiles(verification_status)')
-          .eq('id', currentUser.id)
-          .maybeSingle();
-
-        if (error) {
-          console.error('Error fetching profile:', error);
-          return;
-        }
-
-        if (data) {
-          setProfile(data);
-          return;
-        }
-
-        // Wait before retrying (wait for trigger to create profile)
-        attempts++;
-        if (attempts < maxAttempts) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
+      const data = await authService.fetchProfile(currentUser.id);
+      if (data) {
+        setProfile(data);
+      } else {
+        setProfile(null);
       }
-
-      console.warn('Profile not found after retries. It should be created by trigger.');
-      setProfile(null);
     } catch (err) {
       console.error('Unexpected error in fetchProfile:', err);
     }
@@ -125,21 +104,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error };
+    return authService.signIn(email, password);
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: fullName } },
-    });
-    return { error };
+    return authService.signUp(email, password, fullName);
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await authService.signOut();
     setProfile(null);
     setUser(null);
     setSession(null);
