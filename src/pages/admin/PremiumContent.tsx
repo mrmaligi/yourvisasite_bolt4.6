@@ -75,12 +75,17 @@ export function PremiumContent() {
     if (!selectedVisaId) return;
     setLoading(true);
 
-    // Delete existing content for this visa first (to handle reordering/deletions easily)
-    // In a production app with user progress tracking, you might want to be more careful with IDs,
-    // but here users just read the content.
-    await supabase.from('visa_premium_content').delete().eq('visa_id', selectedVisaId);
+    // Handle deletions: remove steps that are no longer in the list
+    const currentIds = steps.map(s => s.id).filter(id => !id.startsWith('new-'));
+    if (currentIds.length > 0) {
+      await supabase.from('visa_premium_content').delete().eq('visa_id', selectedVisaId).not('id', 'in', `(${currentIds.join(',')})`);
+    } else {
+      // If no existing IDs remain, delete all content for this visa (all steps removed or replaced by new ones)
+      await supabase.from('visa_premium_content').delete().eq('visa_id', selectedVisaId);
+    }
 
     const rows = steps.map((s, i) => ({
+      id: s.id.startsWith('new-') ? undefined : s.id,
       visa_id: selectedVisaId,
       step_number: i + 1,
       title: s.title,
@@ -91,7 +96,7 @@ export function PremiumContent() {
     }));
 
     if (rows.length > 0) {
-      const { error } = await supabase.from('visa_premium_content').insert(rows);
+      const { error } = await supabase.from('visa_premium_content').upsert(rows);
       if (error) {
         toast('error', error.message);
         setLoading(false);

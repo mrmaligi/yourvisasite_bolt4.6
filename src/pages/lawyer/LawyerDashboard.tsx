@@ -62,8 +62,9 @@ export function LawyerDashboard() {
   const { user } = useAuth();
   const [lawyerProfile, setLawyerProfile] = useState<any>(null);
   const [earningsView, setEarningsView] = useState<'weekly' | 'monthly'>('weekly');
-  const [isAvailable, setIsAvailable] = useState(true);
+  const [isAvailable, setIsAvailable] = useState(user?.user_metadata?.is_available ?? true);
   const [initialBookings, setInitialBookings] = useState<any[]>([]);
+  const [weeklyEarningsData, setWeeklyEarningsData] = useState<any[]>(WEEKLY_EARNINGS);
   const [stats, setStats] = useState({
     totalClients: 0,
     upcomingConsultations: 0,
@@ -100,12 +101,42 @@ export function LawyerDashboard() {
 
       setInitialBookings(bookings || []);
 
-      // Get stats
-      const [{ count: clients }, { count: upcoming }, { count: completed }] = await Promise.all([
+      // Get stats and earnings
+      const [
+        { count: clients },
+        { count: upcoming },
+        { count: completed },
+        { data: earningsData }
+      ] = await Promise.all([
         supabase.from('bookings').select('user_id', { count: 'exact', head: true }).eq('lawyer_id', profile.id),
-        supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile.id).eq('status', 'confirmed').gte('scheduled_at', new Date().toISOString()),
+        supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile.id).eq('status', 'confirmed').gte('start_time', new Date().toISOString()),
         supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile.id).eq('status', 'completed'),
+        supabase.from('bookings').select('total_price_cents, start_time').eq('lawyer_id', profile.id).eq('status', 'completed')
       ]);
+
+      const realTotalEarnings = earningsData?.reduce((acc, curr) => acc + (curr.total_price_cents || 0), 0) || 0;
+
+      // Process weekly earnings
+      if (earningsData) {
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const weekly = days.map(day => ({ name: day, amount: 0 }));
+
+        earningsData.forEach(booking => {
+          if (booking.start_time) {
+            const date = new Date(booking.start_time);
+            // Check if within last 7 days? For now just aggregating by day of week for simplicity as per mock data style
+            const dayIndex = date.getDay();
+            weekly[dayIndex].amount += (booking.total_price_cents || 0) / 100;
+          }
+        });
+
+        // Reorder to start from Mon
+        const orderedWeekly = [
+            ...weekly.slice(1),
+            weekly[0]
+        ];
+        setWeeklyEarningsData(orderedWeekly);
+      }
 
       setStats({
         totalClients: clients || 0,
@@ -113,9 +144,17 @@ export function LawyerDashboard() {
         completedConsultations: completed || 0,
         pendingReviews: 2,
         averageRating: 4.9,
-        totalEarnings: completed ? completed * 150 : 0,
+        totalEarnings: realTotalEarnings / 100,
       });
     }
+  };
+
+  const toggleAvailability = async () => {
+      const newState = !isAvailable;
+      setIsAvailable(newState);
+      await supabase.auth.updateUser({
+          data: { is_available: newState }
+      });
   };
 
   const bookings = useRealtime('bookings', initialBookings, {
@@ -251,7 +290,7 @@ export function LawyerDashboard() {
                   {isAvailable ? 'Available' : 'Unavailable'}
                 </span>
                 <button
-                  onClick={() => setIsAvailable(!isAvailable)}
+                  onClick={toggleAvailability}
                   className="ml-2 text-xs text-primary-600 hover:text-primary-700 font-medium"
                 >
                   Change
@@ -386,7 +425,7 @@ export function LawyerDashboard() {
                 <CardBody>
                   <div className="h-[300px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={earningsView === 'weekly' ? WEEKLY_EARNINGS : MONTHLY_EARNINGS}>
+                      <BarChart data={earningsView === 'weekly' ? weeklyEarningsData : MONTHLY_EARNINGS}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E5E5" />
                         <XAxis
                           dataKey="name"
@@ -455,7 +494,7 @@ export function LawyerDashboard() {
                   <Button
                     variant={isAvailable ? "secondary" : "primary"}
                     className="w-full"
-                    onClick={() => setIsAvailable(!isAvailable)}
+                    onClick={toggleAvailability}
                   >
                     {isAvailable ? 'Set as Away' : 'Set as Available'}
                   </Button>

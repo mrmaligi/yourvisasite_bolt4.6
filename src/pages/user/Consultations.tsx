@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Calendar, History } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { EmptyState } from '../../components/ui/EmptyState';
@@ -7,6 +8,7 @@ import { useBookings } from '../../hooks/useBookings';
 import { BookingCard } from '../../components/BookingCard';
 
 export function Consultations() {
+  const navigate = useNavigate();
   const { bookings, loading, refetch } = useBookings();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
@@ -27,16 +29,17 @@ export function Consultations() {
     }
   };
 
-  const handleReschedule = () => {
-    // For now, just show a message. Ideally this would open a reschedule flow.
-    toast('info', 'Please contact the lawyer directly to reschedule.');
+  const handleReschedule = (id: string) => {
+    const booking = bookings.find(b => b.id === id);
+    if (booking) {
+      navigate(`/dashboard/book-consultation/${booking.lawyer_id}?reschedule=${id}`);
+    } else {
+      toast('error', 'Booking not found');
+    }
   };
 
-  const handleJoin = () => {
-      // Logic to join call (e.g. open video link if available)
-      // Since video link isn't in schema yet, we'll just show a toast or placeholder
-      toast('info', 'Joining consultation room...');
-      // window.open(`/consultation-room/${id}`, '_blank');
+  const handleJoin = (id: string) => {
+      navigate(`/consultation-room/${id}`);
   };
 
   const handleAcceptTakeover = async (id: string) => {
@@ -135,7 +138,7 @@ export function Consultations() {
           action={
              activeTab === 'upcoming' ? {
                  label: "Find a Lawyer",
-                 onClick: () => window.location.href = '/lawyers' // Or use navigate
+                 onClick: () => navigate('/lawyers')
              } : undefined
           }
         />

@@ -27,13 +27,16 @@ export function UserDashboard() {
     documents: 0,
     upcomingConsultations: 0,
   });
-  const [recentActivity] = useState<any[]>([]);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [myApplications, setMyApplications] = useState<any[]>([]);
+  const [visaIds, setVisaIds] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (user) {
       fetchUserStats();
       fetchMyApplications();
+      fetchRecentActivity();
+      fetchVisaIds();
     }
   }, [user]);
 
@@ -52,6 +55,36 @@ export function UserDashboard() {
       documents: docs || 0,
       upcomingConsultations: consultations || 0,
     });
+  };
+
+  const fetchRecentActivity = async () => {
+    if (!user) return;
+    const [
+        { data: entries },
+        { data: bookings },
+        { data: saved }
+    ] = await Promise.all([
+        supabase.from('tracker_entries').select('created_at, visas(name)').eq('submitted_by', user.id).order('created_at', { ascending: false }).limit(3),
+        supabase.from('bookings').select('created_at, status, lawyer_profiles(profiles(full_name))').eq('user_id', user.id).order('created_at', { ascending: false }).limit(3),
+        supabase.from('saved_visas').select('created_at, visas(name)').eq('user_id', user.id).order('created_at', { ascending: false }).limit(3)
+    ]);
+
+    const activity = [
+        ...(entries?.map(e => ({ type: 'tracker', date: new Date(e.created_at), description: `Updated application for ${e.visas?.name}` })) || []),
+        ...(bookings?.map(b => ({ type: 'booking', date: new Date(b.created_at), description: `Booked consultation` })) || []),
+        ...(saved?.map(s => ({ type: 'saved', date: new Date(s.created_at), description: `Saved ${s.visas?.name}` })) || [])
+    ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 5);
+
+    setRecentActivity(activity);
+  };
+
+  const fetchVisaIds = async () => {
+    const { data } = await supabase.from('visas').select('id, subclass').in('subclass', ['189', '500', '417']);
+    if (data) {
+        const ids: Record<string, string> = {};
+        data.forEach(v => ids[v.subclass] = v.id);
+        setVisaIds(ids);
+    }
   };
 
   const fetchMyApplications = async () => {
@@ -291,21 +324,21 @@ export function UserDashboard() {
                 <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
                   <h3 className="font-semibold text-neutral-900 dark:text-white">Skilled Independent (189)</h3>
                   <p className="text-sm text-neutral-500 mt-1">Permanent visa for skilled workers</p>
-                  <Link to="/visas/189" className="mt-3 btn-secondary text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]">
+                  <Link to={visaIds['189'] ? `/visas/${visaIds['189']}` : '/visas'} className="mt-3 btn-secondary text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]">
                     Learn More
                   </Link>
                 </div>
                 <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
                   <h3 className="font-semibold text-neutral-900 dark:text-white">Student Visa (500)</h3>
                   <p className="text-sm text-neutral-500 mt-1">Study at Australian institutions</p>
-                  <Link to="/visas/500" className="mt-3 btn-secondary text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]">
+                  <Link to={visaIds['500'] ? `/visas/${visaIds['500']}` : '/visas'} className="mt-3 btn-secondary text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]">
                     Learn More
                   </Link>
                 </div>
                 <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
                   <h3 className="font-semibold text-neutral-900 dark:text-white">Working Holiday (417)</h3>
                   <p className="text-sm text-neutral-500 mt-1">Work and travel in Australia</p>
-                  <Link to="/visas/417" className="mt-3 btn-secondary text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]">
+                  <Link to={visaIds['417'] ? `/visas/${visaIds['417']}` : '/visas'} className="mt-3 btn-secondary text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]">
                     Learn More
                   </Link>
                 </div>

@@ -33,6 +33,7 @@ interface Guide {
 
 function PremiumContentList() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [guides, setGuides] = useState<Guide[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -102,7 +103,7 @@ function PremiumContentList() {
                   variant="primary"
                   size="sm"
                   className="w-full"
-                  onClick={() => (window.location.href = `/dashboard/premium?visa_id=${guide.id}`)}
+                  onClick={() => navigate(`/dashboard/premium?visa_id=${guide.id}`)}
                 >
                   View Guide
                 </Button>

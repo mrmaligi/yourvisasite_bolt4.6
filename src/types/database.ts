@@ -171,6 +171,7 @@ export interface LawyerProfile {
   years_experience: number;
   bio: string | null;
   hourly_rate_cents: number | null;
+  is_available?: boolean;
   is_verified: boolean;
   verification_status: VerificationStatus;
   verification_document_url: string | null;

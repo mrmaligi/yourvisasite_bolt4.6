@@ -105,6 +105,7 @@ export function AdminDashboard() {
     ]);
 
     // Process Stats
+    // Calculate total revenue from bookings and purchases (in cents then converted to dollars)
     const bookingRevenue = bookingsRes.data?.reduce((acc, curr) => acc + (curr.total_price_cents || 0), 0) || 0;
     const purchaseRevenue = purchasesRes.data?.reduce((acc, curr) => acc + (curr.amount_cents || 0), 0) || 0;
     const totalRevenue = (bookingRevenue + purchaseRevenue) / 100;

@@ -57,6 +57,7 @@ const MyVisas = lazy(() => import('./pages/user/MyVisas').then(m => ({ default: 
 const MyDocuments = lazy(() => import('./pages/user/MyDocuments').then(m => ({ default: m.MyDocuments })));
 const Consultations = lazy(() => import('./pages/user/Consultations').then(m => ({ default: m.Consultations })));
 const BookConsultation = lazy(() => import('./pages/user/BookConsultation').then(m => ({ default: m.BookConsultation })));
+const ConsultationRoom = lazy(() => import('./pages/user/ConsultationRoom').then(m => ({ default: m.ConsultationRoom })));
 const UserPremiumContent = lazy(() => import('./pages/user/PremiumContent').then(m => ({ default: m.PremiumContent })));
 const UserMarketplacePurchases = lazy(() => import('./pages/user/MarketplacePurchases').then(m => ({ default: m.MarketplacePurchases })));
 const UserSettings = lazy(() => import('./pages/user/UserSettings').then(m => ({ default: m.UserSettings })));
@@ -221,6 +222,7 @@ export default function App() {
                   <Route path="dashboard/documents" element={<ProtectedRoute allowedRoles={['user', 'admin']}><MyDocuments /></ProtectedRoute>} />
                   <Route path="dashboard/consultations" element={<ProtectedRoute allowedRoles={['user', 'admin']}><Consultations /></ProtectedRoute>} />
                   <Route path="dashboard/book-consultation/:lawyerId" element={<ProtectedRoute allowedRoles={['user', 'admin']}><BookConsultation /></ProtectedRoute>} />
+                  <Route path="consultation-room/:id" element={<ProtectedRoute allowedRoles={['user', 'lawyer', 'admin']}><ConsultationRoom /></ProtectedRoute>} />
                   <Route path="dashboard/premium" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserPremiumContent /></ProtectedRoute>} />
                   <Route path="dashboard/marketplace" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserMarketplacePurchases /></ProtectedRoute>} />
                   <Route path="dashboard/settings" element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserSettings /></ProtectedRoute>} />
