@@ -2,16 +2,28 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import Stripe from "npm:stripe@17.7.0";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+const ALLOWED_ORIGINS = [
+  "https://visabuild.com",
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://localhost:4173",
+];
+
+const getCorsHeaders = (origin: string | null) => ({
+  "Access-Control-Allow-Origin": origin && ALLOWED_ORIGINS.includes(origin)
+    ? origin
+    : "https://visabuild.com",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers":
     "Content-Type, Authorization, X-Client-Info, Apikey",
-};
+});
 
 const DEFAULT_PRICE_CENTS = 4900;
 
 Deno.serve(async (req: Request) => {
+  const requestOrigin = req.headers.get("origin");
+  const corsHeaders = getCorsHeaders(requestOrigin);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
@@ -109,13 +121,15 @@ Deno.serve(async (req: Request) => {
 
     const { data: visa } = await serviceClient
       .from("visas")
-      .select("name, subclass")
+      .select("name, subclass_number")
       .eq("id", visa_id)
       .single();
 
-    const origin = req.headers.get("origin") || "https://visabuild.com";
+    const origin = requestOrigin || "https://visabuild.com";
     const priceCents = product?.price_cents || DEFAULT_PRICE_CENTS;
-    const visaName = visa ? `${visa.subclass ? visa.subclass + ' - ' : ''}${visa.name}` : 'Visa Premium Guide';
+    const visaName = visa
+      ? `${visa.subclass_number ? visa.subclass_number + " - " : ""}${visa.name}`
+      : "Visa Premium Guide";
 
     // Prepare line item
     const lineItem: any = { quantity: 1 };
