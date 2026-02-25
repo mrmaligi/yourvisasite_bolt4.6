@@ -5,3 +5,7 @@
 ## 2026-02-22 - Toast Accessibility
 **Learning:** Toast notifications were completely inaccessible to screen readers. Adding `role`, `aria-live`, and `aria-atomic` is crucial for feedback.
 **Action:** Ensure all notification components in the future use `role="alert"` (errors) or `role="status"` (info) and proper live region attributes.
+
+## 2026-02-23 - Loading State Accessibility
+**Learning:** Loading spinners used across the app (especially in Suspense fallbacks) were purely visual, leaving screen reader users unaware of content loading.
+**Action:** Always include `role="status"` and a visually hidden text label (e.g., "Loading...") in loading components to ensure status is announced.
