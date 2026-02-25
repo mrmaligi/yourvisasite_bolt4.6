@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Newspaper, ArrowRight, Calendar, MessageSquare } from 'lucide-react';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { Newspaper, ArrowRight, Calendar, MessageSquare, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { Card, CardBody } from '../../components/ui/Card';
@@ -17,23 +17,35 @@ interface NewsItem {
   news_comments: { count: number }[];
 }
 
+const PAGE_SIZE = 9;
+
 export function News() {
   const navigate = useNavigate();
   const [news, setNews] = useState<NewsItem[]>([]);
   const [featuredNews, setFeaturedNews] = useState<NewsItem | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [filter, setFilter] = useState<'all' | 'policy' | 'processing' | 'regulation'>('all');
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+
+  // Ref to track the latest filter to prevent race conditions
+  const filterRef = useRef(filter);
 
   useEffect(() => {
-    fetchNews();
+    filterRef.current = filter;
   }, [filter]);
 
-  const fetchNews = async () => {
+  const fetchNews = useCallback(async (pageNumber: number) => {
+    const from = pageNumber * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+
     let query = supabase
       .from('news_articles')
       .select('id, title, slug, excerpt, body, category, published_at, news_comments(count)')
       .eq('is_published', true)
-      .order('published_at', { ascending: false });
+      .order('published_at', { ascending: false })
+      .range(from, to);
 
     if (filter !== 'all') {
       query = query.eq('category', filter);
@@ -41,21 +53,57 @@ export function News() {
 
     const { data, error } = await query;
 
-    if (error) {
-      console.error('Error fetching news:', error);
-      setLoading(false);
+    // Check if filter changed while fetching
+    if (filter !== filterRef.current) {
       return;
     }
 
-    if (data && data.length > 0) {
-      setFeaturedNews(data[0]);
-      setNews(data.slice(1));
+    if (error) {
+      console.error('Error fetching news:', error);
+      setLoading(false);
+      setLoadingMore(false);
+      return;
+    }
+
+    if (data) {
+      if (pageNumber === 0) {
+        if (data.length > 0) {
+          setFeaturedNews(data[0]);
+          setNews(data.slice(1));
+        } else {
+          setFeaturedNews(null);
+          setNews([]);
+        }
+      } else {
+        setNews((prev) => [...prev, ...data]);
+      }
+
+      if (data.length < PAGE_SIZE) {
+        setHasMore(false);
+      }
     } else {
-      setFeaturedNews(null);
-      setNews([]);
+      setHasMore(false);
     }
 
     setLoading(false);
+    setLoadingMore(false);
+  }, [filter]);
+
+  useEffect(() => {
+    // Reset state when filter changes
+    setPage(0);
+    setHasMore(true);
+    setNews([]);
+    setFeaturedNews(null);
+    setLoading(true);
+    fetchNews(0);
+  }, [fetchNews]);
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    setLoadingMore(true);
+    fetchNews(nextPage);
   };
 
   const categories = [
@@ -73,7 +121,7 @@ export function News() {
     return '';
   };
 
-  if (loading) {
+  if (loading && page === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
         <div className="max-w-6xl mx-auto px-4 py-16">
@@ -159,7 +207,7 @@ export function News() {
           </Card>
         )}
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-6 mb-12">
           {news.map((item) => (
             <Card
               key={item.id}
@@ -195,7 +243,28 @@ export function News() {
           ))}
         </div>
 
-        {news.length === 0 && !featuredNews && (
+        {hasMore && news.length > 0 && (
+          <div className="flex justify-center mb-12">
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+              className="min-w-[200px]"
+            >
+              {loadingMore ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'Load More News'
+              )}
+            </Button>
+          </div>
+        )}
+
+        {news.length === 0 && !featuredNews && !loading && (
           <div className="text-center py-16">
             <Newspaper className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-neutral-700 mb-2">Stay tuned for immigration news and updates</h3>
