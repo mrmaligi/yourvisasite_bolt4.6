@@ -12,8 +12,8 @@ export interface BookingWithDetails extends Booking {
 export class BookingService {
   private repository: BookingRepository;
 
-  constructor() {
-    this.repository = new BookingRepository();
+  constructor(repository?: BookingRepository) {
+    this.repository = repository || new BookingRepository();
   }
 
   async getBookings(userId: string, role: UserRole): Promise<BookingWithDetails[]> {
