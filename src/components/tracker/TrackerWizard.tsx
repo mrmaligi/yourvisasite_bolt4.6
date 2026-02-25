@@ -26,7 +26,6 @@ export function TrackerWizard({ onSuccess, preselectedVisaId, initialEntry }: Pr
   const [applicationDate, setApplicationDate] = useState(initialEntry?.application_date || '');
   const [decisionDate, setDecisionDate] = useState(initialEntry?.decision_date || '');
   const [outcome, setOutcome] = useState<TrackerOutcome>(initialEntry?.outcome || 'approved');
-  const [notes, setNotes] = useState(''); // Not stored currently
 
   useEffect(() => {
     supabase
@@ -58,11 +57,9 @@ export function TrackerWizard({ onSuccess, preselectedVisaId, initialEntry }: Pr
     const payload = {
       visa_id: visaId,
       submitted_by: initialEntry?.submitted_by || user?.id || null,
-      submitter_role: role || null,
       application_date: applicationDate,
       decision_date: isPending ? null : decisionDate,
       outcome: isPending ? 'pending' as TrackerOutcome : outcome,
-      status: isPending ? 'pending' : 'completed',
     };
 
     let error;
@@ -182,15 +179,6 @@ export function TrackerWizard({ onSuccess, preselectedVisaId, initialEntry }: Pr
               ))}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">Notes (Optional)</label>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="input-field w-full h-24 py-2"
-                placeholder="Share any details about your experience..."
-              />
-            </div>
           </div>
         )}
 
@@ -207,7 +195,7 @@ export function TrackerWizard({ onSuccess, preselectedVisaId, initialEntry }: Pr
                 <span className="font-medium">{new Date(applicationDate).toLocaleDateString()}</span>
               </div>
               <div className="flex justify-between border-b border-neutral-200 pb-3">
-                <span className="text-neutral-500">Status</span>
+                <span className="text-neutral-500">Outcome</span>
                 <span className="font-medium capitalize">{outcome}</span>
               </div>
               {decisionDate && (

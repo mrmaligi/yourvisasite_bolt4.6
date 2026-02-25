@@ -15,7 +15,6 @@ interface LawyerProfileData {
 interface BookingWithDetails {
   id: string;
   status: string;
-  notes: string | null;
   created_at: string;
   start_time: string;
   user_name: string | null;
@@ -33,7 +32,7 @@ export function LawyerDashboard() {
       .schema('lawyer')
       .from('profiles')
       .select('id, is_verified, verification_status')
-      .eq('profile_id', profile.id)
+      .eq('user_id', profile.id)
       .maybeSingle()
       .then(({ data }) => {
         if (data) {
@@ -46,7 +45,7 @@ export function LawyerDashboard() {
   const fetchStats = async (lawyerProfileId: string) => {
     const { data: bookings } = await supabase
       .from('bookings')
-      .select('id, user_id, slot_id, status, total_price_cents, created_at, notes')
+      .select('id, user_id, slot_id, status, amount_cents, created_at')
       .eq('lawyer_id', lawyerProfileId);
 
     if (bookings && bookings.length > 0) {
@@ -54,7 +53,7 @@ export function LawyerDashboard() {
 
       const totalEarnings = bookings
         .filter(b => b.status === 'completed')
-        .reduce((sum, b) => sum + b.total_price_cents, 0);
+        .reduce((sum, b) => sum + b.amount_cents, 0);
 
       // Fetch slot details (start_time)
       const slotIds = bookings.map(b => b.slot_id);
@@ -103,7 +102,6 @@ export function LawyerDashboard() {
           .map(b => ({
             id: b.id,
             status: b.status,
-            notes: b.notes,
             created_at: b.created_at,
             start_time: b.start_time,
             user_name: b.user_name
@@ -186,7 +184,7 @@ export function LawyerDashboard() {
                     </div>
                     <div className="flex items-center justify-between mt-1">
                        <p className="text-sm text-neutral-500 truncate pr-2">
-                        {booking.notes || 'Consultation session'}
+                        Consultation session
                       </p>
                        <Badge variant={booking.status === 'confirmed' ? 'info' : 'warning'} className="text-[10px] px-1.5 py-0.5 h-auto">
                         {booking.status}

@@ -17,11 +17,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
  * @param delay Initial delay in milliseconds for exponential backoff (default: 1000).
  * @returns The result of the query.
  */
-export async function fetchWithRetry<T>(
-  queryFn: () => Promise<{ data: T | null; error: any }>,
+export async function fetchWithRetry<T extends { error: any }>(
+  queryFn: () => PromiseLike<T>,
   retries = 3,
   delay = 1000
-): Promise<{ data: T | null; error: any }> {
+): Promise<T> {
   for (let i = 0; i < retries; i++) {
     try {
       const result = await queryFn();
