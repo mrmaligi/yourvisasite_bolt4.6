@@ -119,6 +119,7 @@ Deno.serve(async (req: Request) => {
       .eq("visa_id", visa_id)
       .maybeSingle();
 
+    // Verified schema: subclass_number
     const { data: visa } = await serviceClient
       .from("visas")
       .select("name, subclass_number")
