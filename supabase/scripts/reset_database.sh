@@ -2,8 +2,38 @@
 # Supabase Database Reset Script
 # Usage: ./reset_database.sh
 
-SUPABASE_URL="https://usiorucxradthxhetqaq.supabase.co"
-SUPABASE_SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaW9ydWN4cmFkdGh4aGV0cWFxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDQ4NzgwOSwiZXhwIjoyMDg2MDYzODA5fQ.Hg0_WVJYfLDJU-Qa4beXfECGSKL6A-fivN3Ubxe5cWI"
+set -e
+
+# Load environment variables from .env file if it exists
+if [ -f .env ]; then
+    export $(grep -v '^#' .env | xargs)
+fi
+
+# Determine SUPABASE_URL
+if [ -z "$SUPABASE_URL" ]; then
+    if [ -n "$VITE_SUPABASE_URL" ]; then
+        SUPABASE_URL="$VITE_SUPABASE_URL"
+    fi
+fi
+
+# Determine SUPABASE_SERVICE_KEY
+if [ -z "$SUPABASE_SERVICE_KEY" ]; then
+    if [ -n "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+        SUPABASE_SERVICE_KEY="$SUPABASE_SERVICE_ROLE_KEY"
+    fi
+fi
+
+# Check for required environment variables
+if [ -z "$SUPABASE_URL" ]; then
+    echo "Error: SUPABASE_URL (or VITE_SUPABASE_URL) is not set."
+    exit 1
+fi
+
+if [ -z "$SUPABASE_SERVICE_KEY" ]; then
+    echo "Error: SUPABASE_SERVICE_KEY (or SUPABASE_SERVICE_ROLE_KEY) is not set."
+    echo "Please set the SUPABASE_SERVICE_ROLE_KEY environment variable with your Supabase Service Role Key."
+    exit 1
+fi
 
 # Colors for output
 RED='\033[0;31m'
