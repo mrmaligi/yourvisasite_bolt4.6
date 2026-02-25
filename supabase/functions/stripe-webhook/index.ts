@@ -119,8 +119,8 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
          // Fetch Visa Name
          let visaName = 'Premium Guide';
          if (visaId) {
-             const { data: visa } = await supabase.from('visas').select('name').eq('id', visaId).single();
-             if (visa?.name) visaName = visa.name;
+             const { data: visa } = await supabase.from('visas').select('name, subclass_number').eq('id', visaId).single();
+             if (visa?.name) visaName = `${visa.subclass_number ? visa.subclass_number + ' - ' : ''}${visa.name}`;
          }
 
          // Send Email
