@@ -50,15 +50,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchProfile = async (currentUser: User) => {
+    console.log('[AuthContext] Fetching profile for user:', currentUser.id);
     try {
       const data = await authService.fetchProfile(currentUser.id);
+      console.log('[AuthContext] Profile fetch result:', data ? 'found' : 'not found');
       if (data) {
         setProfile(data);
       } else {
         setProfile(null);
       }
     } catch (err) {
-      console.error('Unexpected error in fetchProfile:', err);
+      console.error('[AuthContext] Unexpected error in fetchProfile:', err);
     }
   };
 

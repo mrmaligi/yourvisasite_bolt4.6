@@ -33,15 +33,18 @@ export class AuthService {
   }
 
   async fetchProfile(userId: string): Promise<ProfileWithLawyer | null> {
+    console.log('[AuthService] fetchProfile called for userId:', userId);
     try {
       let attempts = 0;
       const maxAttempts = 3;
 
       while (attempts < maxAttempts) {
+        console.log('[AuthService] Profile fetch attempt', attempts + 1);
         const { data, error } = await this.repository.findById(userId);
+        console.log('[AuthService] Profile fetch result:', { data: !!data, error: error?.message || 'none' });
 
         if (error) {
-          console.error('Error fetching profile:', error);
+          console.error('[AuthService] Error fetching profile:', error);
           // If error is not found, retry?
           // Usually not found means user exists but profile not yet created.
           // But maybeSingle returns null data, not error if not found.
@@ -57,11 +60,12 @@ export class AuthService {
         // Wait before retrying (wait for trigger to create profile)
         attempts++;
         if (attempts < maxAttempts) {
+          console.log('[AuthService] Waiting 1s before retry...');
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
 
-      console.warn('Profile not found after retries. It should be created by trigger.');
+      console.warn('[AuthService] Profile not found after retries. It should be created by trigger.');
       return null;
     } catch (err) {
       // Don't throw here to avoid crashing auth flow, just log

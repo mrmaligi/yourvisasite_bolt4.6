@@ -16,19 +16,23 @@ export function ProtectedRoute({
   const { user, profile, isLoading } = useAuth();
   const location = useLocation();
 
+  console.log('[ProtectedRoute] isLoading:', isLoading, 'user:', !!user, 'profile:', !!profile);
+
   if (isLoading) {
     return <Loading fullScreen />;
   }
 
   // Not logged in
   if (!user) {
+    console.log('[ProtectedRoute] No user, redirecting to login');
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Profile not found - likely new user needing registration completion or error
-  // Since AuthContext handles fetching, if isLoading is false and profile is null, it's missing.
+  // User exists but no profile - could be a new user or DB issue
+  // Don't redirect to login (causes loop), wait longer or redirect to register
   if (!profile) {
-    return <Navigate to="/login" replace />;
+    console.log('[ProtectedRoute] User exists but no profile, redirecting to register');
+    return <Navigate to="/register" replace />;
   }
 
   // Account disabled
