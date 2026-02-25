@@ -56,15 +56,16 @@ export function Navbar() {
              <button
               className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-neutral-700 dark:text-neutral-200"
               onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label="Toggle menu"
             >
-              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
       </div>
 
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-x-0 top-16 bottom-0 z-30 border-t border-neutral-200/60 dark:border-neutral-700/60 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl px-4 py-4 space-y-1 animate-fade-in overflow-y-auto">
+        <div className="lg:hidden fixed inset-x-0 top-16 bottom-0 z-50 border-t border-neutral-200/60 dark:border-neutral-700/60 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl px-4 py-4 space-y-1 animate-fade-in overflow-y-auto">
           {publicLinks.map((link) => (
             <Link
               key={link.to}
