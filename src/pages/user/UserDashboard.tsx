@@ -42,7 +42,7 @@ export function UserDashboard() {
       // Get counts
       const [{ count: saved }, { count: my }, { count: docs }, { data: bookingsData }] = await Promise.all([
         supabase.from('saved_visas').select('id', { count: 'exact' }).eq('user_id', user.id),
-        supabase.from('user_visas').select('id', { count: 'exact' }).eq('user_id', user.id),
+        supabase.from('user_visa_purchases').select('id', { count: 'exact' }).eq('user_id', user.id),
         supabase.from('user_documents').select('id', { count: 'exact' }).eq('user_id', user.id),
         supabase.from('bookings')
           .select('id')
