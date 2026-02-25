@@ -17,25 +17,46 @@ export function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  if (!isLoading && user) {
+  if (isLoading) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-neutral-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (user) {
     return <Navigate to="/dashboard" replace />;
   }
 
   const handleRegister = async (e: FormEvent) => {
     e.preventDefault();
-    if (!fullName || !email || !password) return;
+    if (!fullName || !email || !password) {
+      toast('error', 'Please fill in all fields');
+      return;
+    }
     if (password.length < 6) {
       toast('error', 'Password must be at least 6 characters.');
       return;
     }
     setSubmitting(true);
-    const { error } = await signUpWithEmail(email, password, fullName);
-    if (error) {
-      toast('error', error.message);
+    try {
+      const { error } = await signUpWithEmail(email, password, fullName);
+      if (error) {
+        toast('error', error.message);
+      } else {
+        toast('success', 'Account created successfully! Please check your email to confirm your account.');
+        // Wait a moment for auth state to update before navigating
+        setTimeout(() => navigate('/dashboard'), 1000);
+      }
+    } catch (err) {
+      toast('error', 'An unexpected error occurred. Please try again.');
+      console.error('Registration error:', err);
+    } finally {
       setSubmitting(false);
-    } else {
-      toast('success', 'Account created successfully!');
-      navigate('/dashboard');
     }
   };
 
