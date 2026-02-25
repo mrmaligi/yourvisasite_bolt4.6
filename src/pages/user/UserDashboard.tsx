@@ -17,9 +17,16 @@ import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 
+interface UserDashboardStats {
+  savedVisas: number;
+  myVisas: number;
+  documents: number;
+  upcomingConsultations: number;
+}
+
 export function UserDashboard() {
   const { user } = useAuth();
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<UserDashboardStats>({
     savedVisas: 0,
     myVisas: 0,
     documents: 0,
@@ -39,24 +46,20 @@ export function UserDashboard() {
     if (!user?.id) return; // Add null check
     
     try {
-      // Get counts
-      const [{ count: saved }, { count: my }, { count: docs }, { data: bookingsData }] = await Promise.all([
-        supabase.from('saved_visas').select('id', { count: 'exact' }).eq('user_id', user.id),
-        supabase.from('user_visas').select('id', { count: 'exact' }).eq('user_id', user.id),
-        supabase.from('user_documents').select('id', { count: 'exact' }).eq('user_id', user.id),
-        supabase.from('bookings')
-          .select('id')
-          .eq('user_id', user.id)
-          .gte('scheduled_at', new Date().toISOString())
-          .in('status', ['pending', 'confirmed']),
-      ]);
+      // Get counts via RPC for performance
+      const { data, error } = await supabase.rpc('get_user_dashboard_stats');
 
-      setStats({
-        savedVisas: saved || 0,
-        myVisas: my || 0,
-        documents: docs || 0,
-        upcomingConsultations: bookingsData?.length || 0,
-      });
+      if (error) throw error;
+
+      if (data) {
+        const statsData = data as UserDashboardStats;
+        setStats({
+          savedVisas: statsData.savedVisas || 0,
+          myVisas: statsData.myVisas || 0,
+          documents: statsData.documents || 0,
+          upcomingConsultations: statsData.upcomingConsultations || 0,
+        });
+      }
     } catch (err) {
       console.error('Error fetching stats:', err);
     }
