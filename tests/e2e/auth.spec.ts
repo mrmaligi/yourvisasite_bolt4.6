@@ -5,7 +5,8 @@ test.describe('Authentication Flows', () => {
     await page.goto('/login');
     await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
     await expect(page.getByPlaceholder('you@example.com')).toBeVisible();
-    await expect(page.getByPlaceholder('Enter your password')).toBeVisible();
+    // Corrected placeholder from 'Enter your password' to '••••••••' based on source code
+    await expect(page.getByPlaceholder('••••••••')).toBeVisible();
   });
 
   test('Login handles error', async ({ page }) => {
@@ -19,7 +20,8 @@ test.describe('Authentication Flows', () => {
 
     await page.goto('/login');
     await page.getByPlaceholder('you@example.com').fill('test@example.com');
-    await page.getByPlaceholder('Enter your password').fill('wrongpassword');
+    // Corrected placeholder
+    await page.getByPlaceholder('••••••••').fill('wrongpassword');
     // Using locator for submit button inside form
     await page.locator('button[type="submit"]').click();
 
