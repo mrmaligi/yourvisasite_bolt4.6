@@ -61,6 +61,7 @@ export default {
         'slide-in-right': 'slideInRight 0.4s ease-out forwards',
         'scale-in': 'scaleIn 0.3s ease-out forwards',
         'count-up': 'countUp 0.8s ease-out forwards',
+        shimmer: 'shimmer 2s infinite',
       },
       keyframes: {
         fadeIn: {
@@ -82,6 +83,11 @@ export default {
         countUp: {
           '0%': { opacity: '0', transform: 'translateY(8px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        shimmer: {
+          '100%': {
+            transform: 'translateX(100%)',
+          },
         },
       },
     },

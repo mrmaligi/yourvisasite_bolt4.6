@@ -8,6 +8,7 @@ import { Badge } from '../../components/ui/Badge';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { CardSkeleton } from '../../components/ui/Skeleton';
 import { FavoriteButton } from '../../components/FavoriteButton';
+import { FadeIn } from '../../components/animations/FadeIn';
 import type { Visa } from '../../types/database';
 
 interface SavedVisaWithDetails {
@@ -102,10 +103,11 @@ export function SavedVisas() {
           }}
         />
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {savedVisas.map((sv) => (
-            <Card key={sv.id} hover className="group flex flex-col h-full relative">
-               <div className="absolute top-4 right-4 z-10">
+        <FadeIn>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {savedVisas.map((sv) => (
+              <Card key={sv.id} hover className="group flex flex-col h-full relative">
+                <div className="absolute top-4 right-4 z-10">
                   <FavoriteButton
                     isSaved={true}
                     onToggle={() => handleRemove(sv.id, sv.visa_id)}
@@ -143,8 +145,9 @@ export function SavedVisas() {
                 </CardBody>
               </Link>
             </Card>
-          ))}
-        </div>
+            ))}
+          </div>
+        </FadeIn>
       )}
     </div>
   );

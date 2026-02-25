@@ -8,6 +8,7 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { CardSkeleton } from '../../components/ui/Skeleton';
+import { FadeIn } from '../../components/animations/FadeIn';
 import type { Visa } from '../../types/database';
 
 interface PurchaseWithVisa {
@@ -69,10 +70,11 @@ export function MyVisas() {
           action={{ label: 'Browse Visas', onClick: () => window.location.href = '/visas' }}
         />
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {purchases.map((p) => (
-            <Card key={p.id} hover className="flex flex-col h-full">
-              <CardBody className="flex-1 space-y-4">
+        <FadeIn>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {purchases.map((p) => (
+              <Card key={p.id} hover className="flex flex-col h-full">
+                <CardBody className="flex-1 space-y-4">
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
                     <Badge variant="premium">Premium Guide</Badge>
@@ -109,8 +111,9 @@ export function MyVisas() {
                 </Link>
               </CardFooter>
             </Card>
-          ))}
-        </div>
+            ))}
+          </div>
+        </FadeIn>
       )}
     </div>
   );
