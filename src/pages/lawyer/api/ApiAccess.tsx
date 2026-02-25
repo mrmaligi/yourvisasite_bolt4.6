@@ -12,7 +12,9 @@ export const ApiAccess = () => {
   const { addToast } = useToast();
   const [showKey, setShowKey] = useState(false);
 
-  const apiKey = "sk_test_51Mz...";
+  // TODO: Replace with real API key fetching from backend. This is a mock placeholder.
+  const MOCK_API_KEY = "sk_test_mock_key_placeholder";
+  const apiKey = MOCK_API_KEY;
 
   const copyKey = () => {
     navigator.clipboard.writeText(apiKey);
@@ -48,7 +50,7 @@ export const ApiAccess = () => {
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <Input
-                  value={showKey ? "sk_test_51Mz928374923847923847" : "sk_test_..................."}
+                  value={showKey ? apiKey : "sk_test_..................."}
                   readOnly
                   className="font-mono bg-neutral-50 dark:bg-neutral-800"
                 />
