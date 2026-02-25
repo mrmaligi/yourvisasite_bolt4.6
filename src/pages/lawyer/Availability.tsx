@@ -50,8 +50,7 @@ export function Availability() {
   useEffect(() => {
     if (!profile) return;
     supabase
-      .schema('lawyer')
-      .from('profiles')
+      .from('lawyer_profiles')
       .select('id')
       .eq('profile_id', profile.id)
       .maybeSingle()
@@ -65,14 +64,9 @@ export function Availability() {
       });
   }, [profile]);
 
-  const fetchSlots = async (lid: string) => {
-    const { data } = await supabase
-      .schema('lawyer')
-      .from('consultation_slots')
-      .select('*')
-      .eq('lawyer_id', lid)
-      .order('start_time');
-    setSlots(data || []);
+  const fetchSlots = async (_lid: string) => {
+    // consultation_slots removed
+    setSlots([]);
     setLoading(false);
   };
 
@@ -102,14 +96,13 @@ export function Availability() {
     }
 
     setSaving(true);
-    const { error } = await supabase
-      .schema('lawyer')
-      .from('consultation_slots')
-      .insert({ lawyer_id: lawyerId, start_time: startTime, end_time: endTime });
+    // consultation_slots removed
+    const error = { message: 'Feature disabled' };
     setSaving(false);
     if (error) {
       toast('error', error.message);
     } else {
+      // Unreachable
       toast('success', 'Slot added');
       setShowAdd(false);
       setStartTime('');
@@ -118,11 +111,11 @@ export function Availability() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (_id: string) => {
     if (!lawyerId) return;
-    await supabase.schema('lawyer').from('consultation_slots').delete().eq('id', id);
-    toast('success', 'Slot removed');
-    fetchSlots(lawyerId);
+    // consultation_slots removed
+    toast('error', 'Feature disabled');
+    // fetchSlots(lawyerId);
   };
 
   return (

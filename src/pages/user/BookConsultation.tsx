@@ -64,8 +64,7 @@ export function BookConsultation() {
       try {
         // Fetch Lawyer Profile
         const { data: lawyerRow, error: lawyerError } = await supabase
-          .schema('lawyer')
-          .from('profiles')
+          .from('lawyer_profiles')
           .select('id, profile_id, jurisdiction, practice_areas, years_experience, hourly_rate_cents, bar_number')
           .eq('id', lawyerId)
           .single();
@@ -84,19 +83,8 @@ export function BookConsultation() {
           avatar_url: profileRow?.avatar_url || null,
         });
 
-        // Fetch Available Slots
-        const now = new Date().toISOString();
-        const { data: slotRows } = await supabase
-          .schema('lawyer')
-          .from('consultation_slots')
-          .select('*')
-          .eq('lawyer_id', lawyerId)
-          .eq('is_booked', false)
-          .or(`is_reserved.eq.false,reserved_until.lt.${now}`)
-          .gte('start_time', now)
-          .order('start_time');
-
-        setSlots(slotRows || []);
+        // Fetch Available Slots (consultation_slots table removed)
+        setSlots([]);
 
         // Fetch Visas
         const { data: visaList } = await supabase
@@ -118,7 +106,6 @@ export function BookConsultation() {
 
         // Fetch Lawyer Visa Prices
         const { data: prices } = await supabase
-            .schema('lawyer')
             .from('visa_prices')
             .select('visa_id, hourly_rate_cents')
             .eq('lawyer_id', lawyerId);

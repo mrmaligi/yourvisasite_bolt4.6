@@ -28,8 +28,7 @@ export function LawyerManagement() {
 
   const fetchLawyers = async () => {
     const { data: lawyerData } = await supabase
-      .schema('lawyer')
-      .from('profiles')
+      .from('lawyer_profiles')
       .select('*')
       .order('created_at', { ascending: false });
 
@@ -59,7 +58,7 @@ export function LawyerManagement() {
   useEffect(() => { fetchLawyers(); }, []);
 
   const handleApprove = async (lawyer: LawyerWithProfile) => {
-    await supabase.schema('lawyer').from('profiles').update({
+    await supabase.from('lawyer_profiles').update({
       is_verified: true,
       verification_status: 'approved',
       verified_at: new Date().toISOString(), // Note: verified_at is not in LawyerProfile interface anymore, might cause TS error if I update type but not code? Wait, LawyerProfile didn't have verified_at in my update?
@@ -111,7 +110,7 @@ export function LawyerManagement() {
 
   const handleReject = async () => {
     if (!rejectTarget) return;
-    await supabase.schema('lawyer').from('profiles').update({
+    await supabase.from('lawyer_profiles').update({
       verification_status: 'rejected',
       // rejection_reason: rejectReason, // Removed
     }).eq('id', rejectTarget.id);

@@ -56,7 +56,6 @@ export function Marketplace() {
 
   const fetchData = async () => {
     let query = supabase
-      .schema('lawyer')
       .from('marketplace_listings')
       .select('id, lawyer_id, title, description, short_description, category_id, price_cents, listing_type, duration_minutes, delivery_days, features')
       .eq('is_active', true)
@@ -79,8 +78,7 @@ export function Marketplace() {
 
       const [lawyersRes, categoriesRes, reviewsRes] = await Promise.all([
         supabase
-          .schema('lawyer')
-          .from('profiles')
+          .from('lawyer_profiles')
           .select('id, profile_id')
           .in('id', lawyerIds),
         categoryIds.length > 0
@@ -104,8 +102,7 @@ export function Marketplace() {
         const lawyerProfileMap = new Map(lawyersRes.data.map((l) => [l.id, profileMap.get(l.profile_id) || 'Unknown']));
 
         const { data: lawyerDetailsData } = await supabase
-          .schema('lawyer')
-          .from('profiles')
+          .from('lawyer_profiles')
           .select('id, jurisdiction')
           .in('id', lawyerIds);
 
