@@ -76,42 +76,69 @@ export function LawyerDashboard() {
   }, [user]);
 
   const fetchLawyerData = async () => {
-    // Get lawyer profile
-    const { data: profile } = await supabase
+    if (!user?.id) return;
+
+    // Parallelize all fetches using user.id
+    const profilePromise = supabase
       .from('lawyer_profiles')
       .select('*')
-      .eq('user_id', user?.id)
+      .eq('user_id', user.id)
       .single();
-    
-    setLawyerProfile(profile);
+
+    // Filter by related table lawyer_profiles.user_id
+    const bookingsPromise = supabase
+      .from('bookings')
+      .select('*, user:user_id(full_name, email), lawyer_profiles!inner(user_id)')
+      .eq('lawyer_profiles.user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    const clientsCountPromise = supabase
+      .from('bookings')
+      .select('user_id, lawyer_profiles!inner(user_id)', { count: 'exact', head: true })
+      .eq('lawyer_profiles.user_id', user.id);
+
+    const upcomingCountPromise = supabase
+      .from('bookings')
+      .select('id, lawyer_profiles!inner(user_id)', { count: 'exact' })
+      .eq('lawyer_profiles.user_id', user.id)
+      .eq('status', 'confirmed')
+      .gte('scheduled_at', new Date().toISOString());
+
+    const completedCountPromise = supabase
+      .from('bookings')
+      .select('id, lawyer_profiles!inner(user_id)', { count: 'exact' })
+      .eq('lawyer_profiles.user_id', user.id)
+      .eq('status', 'completed');
+
+    const [
+      { data: profile },
+      { data: fetchedBookings },
+      { count: clients },
+      { count: upcoming },
+      { count: completed }
+    ] = await Promise.all([
+      profilePromise,
+      bookingsPromise,
+      clientsCountPromise,
+      upcomingCountPromise,
+      completedCountPromise
+    ]);
 
     if (profile) {
-      // Get initial bookings for the table
-      const { data: bookings } = await supabase
-        .from('bookings')
-        .select('*, user:user_id(full_name, email)')
-        .eq('lawyer_id', profile.id)
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      setInitialBookings(bookings || []);
-
-      // Get stats
-      const [{ count: clients }, { count: upcoming }, { count: completed }] = await Promise.all([
-        supabase.from('bookings').select('user_id', { count: 'exact', head: true }).eq('lawyer_id', profile.id),
-        supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile.id).eq('status', 'confirmed').gte('scheduled_at', new Date().toISOString()),
-        supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile.id).eq('status', 'completed'),
-      ]);
-
-      setStats({
-        totalClients: clients || 0,
-        upcomingConsultations: upcoming || 0,
-        completedConsultations: completed || 0,
-        pendingReviews: 2,
-        averageRating: 4.9,
-        totalEarnings: completed ? completed * 150 : 0,
-      });
+      setLawyerProfile(profile);
     }
+
+    setInitialBookings(fetchedBookings || []);
+
+    setStats({
+      totalClients: clients || 0,
+      upcomingConsultations: upcoming || 0,
+      completedConsultations: completed || 0,
+      pendingReviews: 2,
+      averageRating: 4.9,
+      totalEarnings: completed ? completed * 150 : 0,
+    });
   };
 
   const bookings = useRealtime('bookings', initialBookings, {
