@@ -2,8 +2,32 @@
 # Supabase Database Reset Script
 # Usage: ./reset_database.sh
 
-SUPABASE_URL="https://usiorucxradthxhetqaq.supabase.co"
-SUPABASE_SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaW9ydWN4cmFkdGh4aGV0cWFxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDQ4NzgwOSwiZXhwIjoyMDg2MDYzODA5fQ.Hg0_WVJYfLDJU-Qa4beXfECGSKL6A-fivN3Ubxe5cWI"
+# Load environment variables
+if [ -f "../../.env" ]; then
+    # shellcheck source=../../.env
+    source "../../.env"
+elif [ -f ".env" ]; then
+    # shellcheck source=.env
+    source ".env"
+fi
+
+# Use provided variables or fall back to defaults/prompts
+SUPABASE_URL="${SUPABASE_URL:-$VITE_SUPABASE_URL}"
+SUPABASE_SERVICE_KEY="${SUPABASE_SERVICE_KEY:-$SUPABASE_SERVICE_ROLE_KEY}"
+
+if [ -z "$SUPABASE_URL" ]; then
+    read -p "Enter Supabase URL: " SUPABASE_URL
+fi
+
+if [ -z "$SUPABASE_SERVICE_KEY" ]; then
+    read -s -p "Enter Supabase Service Key: " SUPABASE_SERVICE_KEY
+    echo ""
+fi
+
+if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_KEY" ]; then
+    echo "Error: SUPABASE_URL and SUPABASE_SERVICE_KEY are required."
+    exit 1
+fi
 
 # Colors for output
 RED='\033[0;31m'
