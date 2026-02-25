@@ -21,12 +21,24 @@ export function UnifiedLogin() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const from = (location.state as any)?.from?.pathname;
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    if (errorMsg) setErrorMsg(null);
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    if (errorMsg) setErrorMsg(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMsg(null);
 
     try {
       // Attempt sign in
@@ -34,7 +46,9 @@ export function UnifiedLogin() {
       
       if (error) {
         if (error.message.includes('Email not confirmed')) {
-          toast('info', 'Please check your email to confirm your account.');
+          const msg = 'Please check your email to confirm your account.';
+          toast('info', msg);
+          setErrorMsg(msg);
           return;
         }
         throw error;
@@ -72,7 +86,9 @@ export function UnifiedLogin() {
       }
 
       if (!profile.is_active) {
-        toast('error', 'Account disabled');
+        const msg = 'Account disabled';
+        toast('error', msg);
+        setErrorMsg(msg);
         return;
       }
 
@@ -96,7 +112,9 @@ export function UnifiedLogin() {
           navigate(from || '/dashboard');
       }
     } catch (error: any) {
-      toast('error', error.message || 'Invalid credentials');
+      const msg = error.message || 'Invalid credentials';
+      toast('error', msg);
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
@@ -157,13 +175,20 @@ export function UnifiedLogin() {
           </CardHeader>
           <CardBody>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {errorMsg && (
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg border border-red-200 dark:border-red-800">
+                  {errorMsg}
+                </div>
+              )}
+
               <Input
                 label="Email Address"
                 type="email"
                 placeholder="you@example.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
                 required
+                disabled={loading}
               />
 
               <div className="relative">
@@ -172,8 +197,9 @@ export function UnifiedLogin() {
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={handlePasswordChange}
                   required
+                  disabled={loading}
                 />
                 <button
                   type="button"
