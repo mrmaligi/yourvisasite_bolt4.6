@@ -31,9 +31,10 @@ Deno.serve(async (req) => {
 
     try {
       event = await stripe.webhooks.constructEventAsync(body, signature, stripeWebhookSecret);
-    } catch (error: any) {
-      console.error(`Webhook signature verification failed: ${error.message}`);
-      return new Response(`Webhook signature verification failed: ${error.message}`, { status: 400 });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`Webhook signature verification failed: ${message}`);
+      return new Response(`Webhook signature verification failed: ${message}`, { status: 400 });
     }
 
     console.log(`Received event type: ${event.type}`);
@@ -50,9 +51,10 @@ Deno.serve(async (req) => {
     }
 
     return Response.json({ received: true });
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error processing webhook:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    return Response.json({ error: message }, { status: 500 });
   }
 });
 

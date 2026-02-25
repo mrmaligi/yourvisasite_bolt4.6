@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Clock, Mail, Scale } from 'lucide-react';
-import { Button } from '../../components/ui/Button';
-import { Card, CardBody } from '../../components/ui/Card';
+import { Button } from '../../components/ui/button';
+import { Card, CardContent } from '../../components/ui/card';
 
 export function LawyerPending() {
   const navigate = useNavigate();
@@ -9,7 +9,7 @@ export function LawyerPending() {
   return (
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-4">
       <Card className="max-w-md w-full">
-        <CardBody className="text-center py-8">
+        <CardContent className="text-center py-8">
           <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Clock className="w-8 h-8 text-amber-600" />
           </div>
@@ -67,7 +67,7 @@ export function LawyerPending() {
               Check Status
             </Button>
           </div>
-        </CardBody>
+        </CardContent>
       </Card>
     </div>
   );

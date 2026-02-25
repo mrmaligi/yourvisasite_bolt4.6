@@ -4,9 +4,9 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { DataTable, type Column } from '../../components/ui/DataTable';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../components/ui/button';
 import { Modal } from '../../components/ui/Modal';
-import { Input, Textarea } from '../../components/ui/Input';
+import { Input, Textarea } from '../../components/ui/input';
 import { useToast } from '../../components/ui/Toast';
 import type { NewsArticle } from '../../types/database';
 

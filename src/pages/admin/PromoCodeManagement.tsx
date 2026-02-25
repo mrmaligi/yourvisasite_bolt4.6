@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Plus, Trash2, Tag, ToggleLeft, ToggleRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
 import { Modal } from '../../components/ui/Modal';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { useToast } from '../../components/ui/Toast';
@@ -96,7 +96,7 @@ export function PromoCodeManagement() {
             const expired = isExpired(code.expires_at);
             return (
               <Card key={code.id}>
-                <CardBody className="flex items-center justify-between">
+                <CardContent className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-accent-50 flex items-center justify-center">
                       <Tag className="w-5 h-5 text-accent-600" />
@@ -146,7 +146,7 @@ export function PromoCodeManagement() {
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
-                </CardBody>
+                </CardContent>
               </Card>
             );
           })}

@@ -3,7 +3,7 @@ import { RefreshCw, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { DataTable, type Column } from '../../components/ui/DataTable';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../components/ui/button';
 import { useToast } from '../../components/ui/Toast';
 import { TrackerStatusBadge } from '../../components/tracker/TrackerStatusBadge';
 import type { TrackerEntry } from '../../types/database';

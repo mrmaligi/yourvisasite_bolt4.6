@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { Newspaper, ArrowRight, Calendar, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../components/ui/button';
 
 interface NewsItem {
   id: string;
@@ -107,7 +107,7 @@ export function News() {
           {categories.map((cat) => (
             <Button
               key={cat.value}
-              variant={filter === cat.value ? 'primary' : 'secondary'}
+              variant={filter === cat.value ? 'default' : 'secondary'}
               size="sm"
               onClick={() => setFilter(cat.value as typeof filter)}
             >
@@ -121,11 +121,11 @@ export function News() {
             className="mb-12 overflow-hidden hover:shadow-2xl transition-all cursor-pointer border-2 border-primary-100"
             onClick={() => navigate(`/news/${featuredNews.slug}`)}
           >
-            <CardBody className="p-0">
+            <CardContent className="p-0">
               <div className="bg-gradient-to-r from-primary-500 to-primary-600 h-2" />
               <div className="p-8">
                 <div className="flex items-center gap-3 mb-4">
-                  <Badge variant="primary" className="text-xs font-semibold">
+                  <Badge variant="default" className="text-xs font-semibold">
                     Featured
                   </Badge>
                   <Badge variant="default" className="capitalize">
@@ -155,7 +155,7 @@ export function News() {
                   </Button>
                 </div>
               </div>
-            </CardBody>
+            </CardContent>
           </Card>
         )}
 
@@ -166,7 +166,7 @@ export function News() {
               className="hover:shadow-xl transition-all cursor-pointer"
               onClick={() => navigate(`/news/${item.slug}`)}
             >
-              <CardBody>
+              <CardContent>
                 <div className="flex items-center gap-2 mb-3">
                   <Badge variant="default" className="capitalize text-xs">
                     {item.category}
@@ -190,7 +190,7 @@ export function News() {
                     <ArrowRight className="w-4 h-4" />
                   </span>
                 </div>
-              </CardBody>
+              </CardContent>
             </Card>
           ))}
         </div>

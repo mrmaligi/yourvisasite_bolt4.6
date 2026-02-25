@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ShoppingBag, Package, Calendar, User, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardBody } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/Badge';
 import { EmptyState } from '../../components/ui/EmptyState';
 
@@ -134,7 +134,7 @@ export function MarketplacePurchases() {
 
             return (
               <Card key={purchase.id}>
-                <CardBody>
+                <CardContent>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center">
@@ -184,7 +184,7 @@ export function MarketplacePurchases() {
                       <p className="text-sm text-neutral-600">{purchase.notes}</p>
                     </div>
                   )}
-                </CardBody>
+                </CardContent>
               </Card>
             );
           })}

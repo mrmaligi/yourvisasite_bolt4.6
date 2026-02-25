@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+<<<<<<< HEAD
 import { Menu } from 'lucide-react';
+=======
+import { Menu, X, ChevronDown, LogOut, LayoutDashboard, User } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { Button } from '../ui/button';
+>>>>>>> origin/fix-errors-update-ui-1984263249479659504
 import { Logo } from '../ui/Logo';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { UserMenu } from './UserMenu';
