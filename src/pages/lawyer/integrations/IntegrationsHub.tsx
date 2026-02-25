@@ -1,8 +1,7 @@
-import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Link2, Check, ExternalLink } from 'lucide-react';
-import { Card, CardBody, CardHeader } from '../../../components/ui/Card';
+import { Check } from 'lucide-react';
+import { Card, CardBody } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Skeleton } from '../../../components/ui/Skeleton';
 
