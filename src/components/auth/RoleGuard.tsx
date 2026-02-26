@@ -1,5 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
+import { RefreshCcw } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { Button } from '../ui/button';
 import { Loading } from '../ui/Loading';
 
 interface ProtectedRouteProps {
@@ -13,7 +15,7 @@ export function ProtectedRoute({
   allowedRoles = ['user', 'lawyer', 'admin'],
   requireVerification = false 
 }: ProtectedRouteProps) {
-  const { user, profile, isLoading } = useAuth();
+  const { user, profile, isLoading, refreshProfile } = useAuth();
   const location = useLocation();
 
   console.log('[ProtectedRoute] isLoading:', isLoading, 'user:', !!user, 'profile:', !!profile);
@@ -31,8 +33,30 @@ export function ProtectedRoute({
   // User exists but no profile - could be a new user or DB issue
   // Don't redirect to login (causes loop), wait longer or redirect to register
   if (!profile) {
-    console.log('[ProtectedRoute] User exists but no profile, redirecting to register');
-    return <Navigate to="/register" replace />;
+    console.log('[ProtectedRoute] User exists but no profile, showing setup screen');
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900 p-4">
+        <div className="max-w-md w-full bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-700 p-8 text-center">
+          <div className="flex justify-center mb-6">
+            <Loading size="lg" />
+          </div>
+          <h2 className="text-xl font-bold text-neutral-900 dark:text-white mb-2">
+            Setting Up Your Account
+          </h2>
+          <p className="text-neutral-600 dark:text-neutral-400 mb-8">
+            Please wait while we prepare your profile. This should only take a moment.
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => refreshProfile()}
+            className="w-full gap-2"
+          >
+            <RefreshCcw className="w-4 h-4" />
+            Check Again
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   // Account disabled
@@ -111,7 +135,8 @@ export function RoleRedirect() {
 
   if (!profile) {
     // Should generally not happen for logged in users unless data issue
-    return <Navigate to="/register" replace />;
+    // Redirect to dashboard where ProtectedRoute will show the setup screen
+    return <Navigate to="/dashboard" replace />;
   }
 
   if (profile.role === 'admin') {
