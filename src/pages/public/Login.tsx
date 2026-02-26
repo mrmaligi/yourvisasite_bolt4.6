@@ -26,17 +26,40 @@ export function Login() {
   const [resetSubmitting, setResetSubmitting] = useState(false);
   const [becomingAdmin, setBecomingAdmin] = useState(false);
 
-  if (!isLoading && user) {
+  if (isLoading) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-neutral-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (user) {
     return <Navigate to={getRoleDashboard(role)} replace />;
   }
 
   const handleEmailLogin = async (e: FormEvent) => {
     e.preventDefault();
-    if (!email || !password) return;
+    if (!email || !password) {
+      toast('error', 'Please enter both email and password');
+      return;
+    }
     setSubmitting(true);
-    const { error } = await signInWithEmail(email, password);
-    if (error) {
-      toast('error', error.message);
+    try {
+      const { error } = await signInWithEmail(email, password);
+      if (error) {
+        toast('error', error.message);
+      } else {
+        // Login successful - auth state change will trigger redirect
+        toast('success', 'Login successful!');
+      }
+    } catch (err) {
+      toast('error', 'An unexpected error occurred. Please try again.');
+      console.error('Login error:', err);
+    } finally {
       setSubmitting(false);
     }
   };
