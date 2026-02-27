@@ -123,7 +123,7 @@ Deno.serve(async (req: Request) => {
         amount_cents: totalCents,
         status: 'pending',
         notes: notes || null,
-        questions: questions || null,
+        // questions: questions || null, // Assuming questions is not a column in SETUP_FINAL, user said remove phantom.
       })
       .select()
       .single();
