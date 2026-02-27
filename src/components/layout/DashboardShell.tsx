@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../lib/supabase';
 import { useToast } from '../ui/Toast';
 
 interface DashboardShellProps {
@@ -29,28 +28,12 @@ interface NavItem {
 }
 
 export function DashboardShell({ children, role }: DashboardShellProps) {
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const [profile, setProfile] = useState<any>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifications] = useState(0);
-
-  useEffect(() => {
-    if (user) {
-      fetchProfile();
-    }
-  }, [user]);
-
-  const fetchProfile = async () => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user?.id)
-      .single();
-    setProfile(data);
-  };
 
   const handleSignOut = async () => {
     await signOut();

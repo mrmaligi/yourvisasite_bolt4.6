@@ -61,6 +61,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       console.error('[AuthContext] Unexpected error in fetchProfile:', err);
+      // Even on error, we should stop loading to prevent infinite spinners
+      // Ideally we might set an error state, but for now we clear profile to trigger setup/error UI
+      setProfile(null);
     }
   };
 
@@ -79,20 +82,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
+      console.log('[AuthContext] Auth state change:', event);
       setSession(s);
       setUser(s?.user ?? null);
 
       if (s?.user) {
         // For sign in events, we want to ensure loading state is handled
-        if (event === 'SIGNED_IN') {
+        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
           setIsLoading(true);
           fetchProfile(s.user).finally(() => setIsLoading(false));
+        } else if (event === 'TOKEN_REFRESHED') {
+           // Background refresh, don't set loading true
+           if (!profile) fetchProfile(s.user);
         } else {
-          // For other events (like token refresh), update in background
-          // or if profile is missing, fetch it
-          if (!profile) {
-            fetchProfile(s.user);
-          }
+          // Fallback
+          if (!profile) fetchProfile(s.user);
         }
       } else {
         setProfile(null);
@@ -129,7 +133,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshProfile = async () => {
-    if (user) await fetchProfile(user);
+    if (user) {
+        setIsLoading(true);
+        await fetchProfile(user).finally(() => setIsLoading(false));
+    }
   };
 
   // Role is derived exclusively from profile to ensure single source of truth
