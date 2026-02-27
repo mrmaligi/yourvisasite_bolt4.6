@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Card, CardContent, CardHeader } from '../../components/ui/card';
+import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { DataTable, type Column } from '../../components/ui/DataTable';

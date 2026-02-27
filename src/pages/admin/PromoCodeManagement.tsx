@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, Trash2, Tag, ToggleLeft, ToggleRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Card, CardContent } from '../../components/ui/card';
+import { Card, CardContent } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';

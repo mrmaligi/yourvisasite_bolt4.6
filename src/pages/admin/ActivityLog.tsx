@@ -11,7 +11,7 @@ import {
   DollarSign,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Card, CardContent, CardHeader } from '../../components/ui/card';
+import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 
 interface ActivityItem {
   id: string;

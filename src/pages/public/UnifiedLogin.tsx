@@ -42,7 +42,7 @@ export function UnifiedLogin() {
 
     try {
       // Attempt sign in
-      const { error } = await signIn(email, password);
+      const { data, error } = await signIn(email, password);
       
       if (error) {
         if (error.message.includes('Email not confirmed')) {
@@ -54,10 +54,7 @@ export function UnifiedLogin() {
         throw error;
       }
 
-      // Get user from session to ensure we have the ID
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) throw new Error('No user found');
+      if (!data.user) throw new Error('No user found');
 
       // Get user role using ID for RLS compliance
       // Retry logic to handle race condition with profile creation trigger
@@ -67,7 +64,7 @@ export function UnifiedLogin() {
         const { data } = await supabase
           .from('profiles')
           .select('role, is_active, lawyer_profiles(verification_status)')
-          .eq('id', user.id)
+          .eq('id', data.user.id)
           .maybeSingle();
 
         if (data) {
@@ -101,6 +98,7 @@ export function UnifiedLogin() {
           break;
         case 'lawyer': {
           const lawyerProfile = profile.lawyer_profiles?.[0];
+          // Check verification safely
           if (lawyerProfile?.verification_status === 'approved') {
             navigate('/lawyer/dashboard');
           } else {
@@ -112,6 +110,7 @@ export function UnifiedLogin() {
           navigate(from || '/dashboard');
       }
     } catch (error: any) {
+      console.error('Login error:', error);
       const msg = error.message || 'Invalid credentials';
       toast('error', msg);
       setErrorMsg(msg);
@@ -125,6 +124,10 @@ export function UnifiedLogin() {
     { type: 'lawyer' as LoginType, icon: Briefcase, label: 'Lawyer', desc: 'Migration agents & lawyers' },
     { type: 'admin' as LoginType, icon: Shield, label: 'Admin', desc: 'Platform administrators' },
   ];
+
+  const handleOptionClick = (type: LoginType) => {
+    setLoginType(type);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 dark:from-neutral-900 dark:to-neutral-800 flex items-center justify-center p-4">
@@ -147,7 +150,8 @@ export function UnifiedLogin() {
             return (
               <button
                 key={option.type}
-                onClick={() => setLoginType(option.type)}
+                onClick={() => handleOptionClick(option.type)}
+                type="button"
                 className={`p-4 rounded-xl border-2 text-center transition-all ${
                   isSelected
                     ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
