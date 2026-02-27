@@ -217,7 +217,7 @@ export function SubmitSuccessStory() {
 
   const fetchUserVisas = async () => {
     const { data } = await supabase
-      .from('user_visas')
+      .from('user_visa_purchases')
       .select('visa:visas(id, name, subclass)')
       .eq('user_id', user?.id)
       .eq('status', 'active');
