@@ -7,6 +7,9 @@ test.describe('Authentication Flows', () => {
     await expect(page.getByPlaceholder('you@example.com')).toBeVisible();
     // Corrected placeholder from 'Enter your password' to '••••••••' based on source code
     await expect(page.getByPlaceholder('••••••••')).toBeVisible();
+
+    // Check for Google Sign-In button
+    await expect(page.getByRole('button', { name: /sign in with google/i })).toBeVisible();
   });
 
   test('Login handles error', async ({ page }) => {
