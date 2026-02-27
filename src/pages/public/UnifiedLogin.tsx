@@ -7,6 +7,7 @@ import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { useToast } from '../../components/ui/Toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
+import { authService } from '../../lib/services/auth.service';
 
 type LoginType = 'user' | 'lawyer' | 'admin';
 
@@ -59,24 +60,8 @@ export function UnifiedLogin() {
 
       if (!user) throw new Error('No user found');
 
-      // Get user role using ID for RLS compliance
-      // Retry logic to handle race condition with profile creation trigger
-      let profile = null;
-      let attempts = 0;
-      while (attempts < 3 && !profile) {
-        const { data } = await supabase
-          .from('profiles')
-          .select('role, is_active, lawyer_profiles(verification_status)')
-          .eq('id', user.id)
-          .maybeSingle();
-
-        if (data) {
-          profile = data;
-        } else {
-          attempts++;
-          if (attempts < 3) await new Promise(r => setTimeout(r, 1000));
-        }
-      }
+      // Fetch profile using the centralized service (handles retries and consistent data fetching)
+      const profile = await authService.fetchProfile(user.id);
 
       if (!profile) {
         // Fallback if profile missing

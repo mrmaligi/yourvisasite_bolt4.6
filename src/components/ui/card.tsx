@@ -69,3 +69,6 @@ export const CardFooter = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDi
   )
 );
 CardFooter.displayName = 'CardFooter';
+export function CardBody({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return <div className={`p-6 pt-0 ${className}`}>{children}</div>;
+}
