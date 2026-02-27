@@ -168,7 +168,7 @@ test.describe('Lawyer Dashboard', () => {
     });
   };
 
-  test.fixme('Verified Lawyer Dashboard loads correctly', async ({ page }) => {
+  test('Verified Lawyer Dashboard loads correctly', async ({ page }) => {
     await setupMocks(page, {
       isVerified: true,
       bookings: [completedBooking, upcomingBooking],
@@ -203,7 +203,7 @@ test.describe('Lawyer Dashboard', () => {
     await expect(page.getByText('John Doe')).not.toBeVisible();
   });
 
-  test.fixme('Unverified Lawyer Dashboard shows warning', async ({ page }) => {
+  test('Unverified Lawyer Dashboard shows warning', async ({ page }) => {
     await setupMocks(page, { isVerified: false });
 
     await page.goto('/login');
@@ -219,7 +219,7 @@ test.describe('Lawyer Dashboard', () => {
     await expect(page.getByText('Verified Lawyer')).not.toBeVisible();
   });
 
-  test.fixme('Empty state shows no upcoming consultations', async ({ page }) => {
+  test('Empty state shows no upcoming consultations', async ({ page }) => {
     await setupMocks(page, { bookings: [] });
 
     await page.goto('/login');

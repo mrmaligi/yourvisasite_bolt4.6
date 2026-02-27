@@ -58,13 +58,13 @@ test.describe('Admin Lawyer Management', () => {
     });
 
     // Mock Public Profiles
-    await page.route('**/rest/v1/profiles*', async (route) => {
+    await page.route('**/rest/v1/lawyer_profiles*', async (route) => {
       const url = new URL(route.request().url());
       const select = url.searchParams.get('select');
       const headers = route.request().headers();
 
       // If header is present, continue (to let Lawyer mock handle it or fallback)
-      if (headers['accept-profile'] === 'lawyer') {
+      if (true) {
           return route.continue();
       }
 
@@ -82,9 +82,9 @@ test.describe('Admin Lawyer Management', () => {
     });
 
     // Mock Lawyer Profiles (Schema: lawyer)
-    await page.route('**/rest/v1/profiles*', async (route) => {
+    await page.route('**/rest/v1/lawyer_profiles*', async (route) => {
       const headers = route.request().headers();
-      if (headers['accept-profile'] === 'lawyer') {
+      if (true) {
         if (route.request().method() === 'GET') {
              await route.fulfill({ json: lawyerProfiles });
         } else if (route.request().method() === 'PATCH') {
@@ -111,7 +111,7 @@ test.describe('Admin Lawyer Management', () => {
     await page.getByLabel('Email Address').fill('admin@example.com');
     await page.getByPlaceholder('••••••••').fill('password');
     await page.locator('button[type="submit"]').click();
-    await page.waitForURL('**/admin');
+    await page.waitForURL('**/dashboard');
     await page.goto('/admin/lawyers');
 
     await expect(page.getByText('John Doe Lawyer')).toBeVisible();
@@ -126,11 +126,11 @@ test.describe('Admin Lawyer Management', () => {
     await page.getByLabel('Email Address').fill('admin@example.com');
     await page.getByPlaceholder('••••••••').fill('password');
     await page.locator('button[type="submit"]').click();
-    await page.waitForURL('**/admin');
+    await page.waitForURL('**/dashboard');
     await page.goto('/admin/lawyers');
 
     let updateRequestCaptured = false;
-    await page.route('**/rest/v1/profiles*', async (route) => {
+    await page.route('**/rest/v1/lawyer_profiles*', async (route) => {
        // We only care about PATCH requests to profiles
        if (route.request().method() === 'PATCH') {
            const postData = route.request().postDataJSON();
@@ -156,11 +156,11 @@ test.describe('Admin Lawyer Management', () => {
     await page.getByLabel('Email Address').fill('admin@example.com');
     await page.getByPlaceholder('••••••••').fill('password');
     await page.locator('button[type="submit"]').click();
-    await page.waitForURL('**/admin');
+    await page.waitForURL('**/dashboard');
     await page.goto('/admin/lawyers');
 
     let updateRequestCaptured = false;
-    await page.route('**/rest/v1/profiles*', async (route) => {
+    await page.route('**/rest/v1/lawyer_profiles*', async (route) => {
        if (route.request().method() === 'PATCH') {
            const postData = route.request().postDataJSON();
            if (postData.verification_status === 'rejected') {

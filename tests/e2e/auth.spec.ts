@@ -26,7 +26,7 @@ test.describe('Authentication Flows', () => {
     await page.locator('button[type="submit"]').click();
 
     // Verify error toast or message
-    await expect(page.getByText('Invalid login credentials')).toBeVisible();
+    await expect(page.getByRole('alert').getByText('Invalid login credentials')).toBeVisible();
   });
 
   test('Register page loads', async ({ page }) => {

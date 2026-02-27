@@ -111,16 +111,16 @@ test.describe('User Dashboard', () => {
 
     // Verify Stats
     const savedVisasContainer = page.locator('p', { hasText: /^Saved Visas$/ }).locator('..');
-    await expect(savedVisasContainer.getByText('5')).toBeVisible();
+    await expect(page.getByText('5', { exact: true })).toBeVisible();
 
     const myVisasContainer = page.locator('p', { hasText: /^My Visas$/ }).locator('..');
-    await expect(myVisasContainer.getByText('3')).toBeVisible();
+    await expect(page.getByText('3', { exact: true })).toBeVisible();
 
     const documentsContainer = page.locator('p', { hasText: /^Documents$/ }).locator('..');
-    await expect(documentsContainer.getByText('2')).toBeVisible();
+    await expect(page.getByText('2', { exact: true })).toBeVisible();
 
     const consultationsContainer = page.locator('p', { hasText: /^Consultations$/ }).locator('..');
-    await expect(consultationsContainer.getByText('1')).toBeVisible();
+    await expect(page.getByText('1', { exact: true })).toBeVisible();
 
     // Verify Quick Actions
     await expect(page.getByText('Find Visas')).toBeVisible();
