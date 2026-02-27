@@ -55,7 +55,7 @@ export const ApiAccess = () => {
                   className="font-mono bg-neutral-50 dark:bg-neutral-800"
                 />
               </div>
-              <Button variant="secondary" onClick={() => setShowKey(!showKey)}>
+              <Button variant="secondary" onClick={() => setShowKey(!showKey)} aria-label={showKey ? "Hide API key" : "Show API key"}>
                 {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </Button>
               <Button variant="secondary" onClick={copyKey}>

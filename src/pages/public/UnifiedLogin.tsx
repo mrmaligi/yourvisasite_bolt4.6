@@ -152,7 +152,8 @@ export function UnifiedLogin() {
                 key={option.type}
                 onClick={() => handleOptionClick(option.type)}
                 type="button"
-                className={`p-4 rounded-xl border-2 text-center transition-all ${
+                aria-pressed={isSelected}
+                className={`p-4 rounded-xl border-2 text-center transition-all focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:outline-none ${
                   isSelected
                     ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                     : 'border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:border-primary-300'
@@ -208,6 +209,7 @@ export function UnifiedLogin() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                   className="absolute right-3 top-8 text-neutral-400 hover:text-neutral-600"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
