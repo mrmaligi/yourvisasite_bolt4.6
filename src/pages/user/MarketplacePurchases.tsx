@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ShoppingBag, Package, Calendar, User, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Card, CardContent } from '../../components/ui/card';
+import { Card, CardContent } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { EmptyState } from '../../components/ui/EmptyState';
 

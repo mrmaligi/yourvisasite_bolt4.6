@@ -1,25 +1,24 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { type Session, type User, type AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import { authService } from '../lib/services/auth.service';
 import type { Profile, UserRole } from '../types/database';
-import type { ProfileWithLawyer } from '../lib/repositories/profile.repository';
+// import { authService } from '../lib/services/auth.service'; // Direct supabase usage to avoid loop
 
 interface AuthContextValue {
   session: Session | null;
   user: User | null;
-  profile: ProfileWithLawyer | null;
+  profile: any | null; // Typed loosely to avoid circular dependency issues
   role: UserRole | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
+  signIn: (email: string, password: string) => Promise<{ data: { user: User | null; session: Session | null }; error: AuthError | null }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ data: { user: User | null; session: Session | null }; error: AuthError | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 
   // Aliases/Compat
-  signInWithEmail: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-  signUpWithEmail: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
+  signInWithEmail: (email: string, password: string) => Promise<{ data: { user: User | null; session: Session | null }; error: AuthError | null }>;
+  signUpWithEmail: (email: string, password: string, fullName: string) => Promise<{ data: { user: User | null; session: Session | null }; error: AuthError | null }>;
   signInWithGoogle: () => Promise<void>;
 }
 
@@ -30,12 +29,12 @@ const AuthContext = createContext<AuthContextValue>({
   role: null,
   isLoading: true,
   isAuthenticated: false,
-  signIn: async () => ({ error: null }),
-  signUp: async () => ({ error: null }),
+  signIn: async () => ({ data: { user: null, session: null }, error: null }),
+  signUp: async () => ({ data: { user: null, session: null }, error: null }),
   signOut: async () => {},
   refreshProfile: async () => {},
-  signInWithEmail: async () => ({ error: null }),
-  signUpWithEmail: async () => ({ error: null }),
+  signInWithEmail: async () => ({ data: { user: null, session: null }, error: null }),
+  signUpWithEmail: async () => ({ data: { user: null, session: null }, error: null }),
   signInWithGoogle: async () => {},
 });
 
@@ -46,14 +45,18 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<ProfileWithLawyer | null>(null);
+  const [profile, setProfile] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchProfile = async (currentUser: User) => {
-    console.log('[AuthContext] Fetching profile for user:', currentUser.id);
+  const fetchProfile = async (userId: string) => {
     try {
-      const data = await authService.fetchProfile(currentUser.id);
-      console.log('[AuthContext] Profile fetch result:', data ? 'found' : 'not found');
+      // Use direct supabase query to avoid import cycles
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*, lawyer_profiles(*)')
+        .eq('id', userId)
+        .single();
+
       if (data) {
         setProfile(data);
       } else {
@@ -69,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
-        fetchProfile(s.user).finally(() => setIsLoading(false));
+        fetchProfile(s.user.id).finally(() => setIsLoading(false));
       } else {
         setIsLoading(false);
       }
@@ -83,16 +86,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(s?.user ?? null);
 
       if (s?.user) {
-        // For sign in events, we want to ensure loading state is handled
-        if (event === 'SIGNED_IN') {
-          setIsLoading(true);
-          fetchProfile(s.user).finally(() => setIsLoading(false));
-        } else {
-          // For other events (like token refresh), update in background
-          // or if profile is missing, fetch it
-          if (!profile) {
-            fetchProfile(s.user);
-          }
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+           // On sign in, ensure loading is true until profile is fetched
+           if (event === 'SIGNED_IN') setIsLoading(true);
+           fetchProfile(s.user.id).finally(() => setIsLoading(false));
         }
       } else {
         setProfile(null);
@@ -106,15 +103,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    return authService.signIn(email, password);
+    return await supabase.auth.signInWithPassword({ email, password });
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    return authService.signUp(email, password, fullName);
+    return await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
+      },
+    });
   };
 
   const signOut = async () => {
-    await authService.signOut();
+    await supabase.auth.signOut();
     setProfile(null);
     setUser(null);
     setSession(null);
@@ -129,10 +134,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshProfile = async () => {
-    if (user) await fetchProfile(user);
+    if (user) await fetchProfile(user.id);
   };
 
-  // Role is derived exclusively from profile to ensure single source of truth
   const role = profile?.role || null;
   const isAuthenticated = !!user;
 

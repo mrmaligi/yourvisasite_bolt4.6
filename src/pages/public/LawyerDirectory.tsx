@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search, MapPin, Briefcase, Clock, Scale, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Card, CardContent } from '../../components/ui/card';
+import { Card, CardContent } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { LawyerCardSkeleton } from '../../components/ui/Skeleton';
 import { Button } from '../../components/ui/Button';

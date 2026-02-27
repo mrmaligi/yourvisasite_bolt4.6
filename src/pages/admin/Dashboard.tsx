@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Users, Scale, FileText, DollarSign, BarChart3, ShieldCheck } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Card, CardContent } from '../../components/ui/card';
+import { Card, CardContent } from '../../components/ui/Card';
 
 export function AdminDashboard() {
   const [counts, setCounts] = useState({
