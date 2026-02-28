@@ -9,3 +9,7 @@
 ## 2026-02-23 - Loading State Accessibility
 **Learning:** Loading spinners used across the app (especially in Suspense fallbacks) were purely visual, leaving screen reader users unaware of content loading.
 **Action:** Always include `role="status"` and a visually hidden text label (e.g., "Loading...") in loading components to ensure status is announced.
+
+## 2026-02-23 - DataTable Pagination Accessibility
+**Learning:** Pagination buttons in `DataTable` were using icon-only chevron buttons without `aria-label`s, making navigation impossible for screen reader users to understand. The search input also relied solely on a placeholder.
+**Action:** Always add `aria-label` to pagination icon buttons and ensure table search inputs have accessible names.

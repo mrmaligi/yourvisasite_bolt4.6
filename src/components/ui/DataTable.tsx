@@ -58,7 +58,7 @@ export function DataTable<T>({
     <div className="space-y-4">
       {searchable && (
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" aria-hidden="true" />
           <input
             type="text"
             value={search}
@@ -68,6 +68,7 @@ export function DataTable<T>({
               setPage(0);
             }}
             placeholder={searchPlaceholder}
+            aria-label={searchPlaceholder}
             className="input-field pl-11 transition-colors duration-200"
           />
         </div>
@@ -148,19 +149,21 @@ export function DataTable<T>({
             <button
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
+              aria-label="Previous page"
               className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-200"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4" aria-hidden="true" />
             </button>
-            <span className="px-3 py-1 text-sm font-medium text-neutral-700 dark:text-neutral-300 transition-colors duration-200">
+            <span className="px-3 py-1 text-sm font-medium text-neutral-700 dark:text-neutral-300 transition-colors duration-200" aria-current="page">
               {page + 1} / {totalPages}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1}
+              aria-label="Next page"
               className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-200"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         </div>
