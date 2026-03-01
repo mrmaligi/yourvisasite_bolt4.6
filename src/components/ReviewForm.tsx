@@ -57,15 +57,23 @@ export function ReviewForm({ bookingId, lawyerId, onSuccess, onCancel }: ReviewF
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-neutral-700 mb-1">
-          Rating
+        <label id="rating-label" className="block text-sm font-medium text-neutral-700 mb-1">
+          Rating <span className="text-red-500" aria-hidden="true">*</span>
         </label>
-        <div className="flex gap-1">
+        <div
+          className="flex gap-1"
+          role="radiogroup"
+          aria-labelledby="rating-label"
+          aria-required="true"
+        >
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
               type="button"
-              className="focus:outline-none transition-transform hover:scale-110"
+              role="radio"
+              aria-checked={rating === star}
+              aria-label={`${star} Star${star !== 1 ? 's' : ''}`}
+              className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded-full transition-transform hover:scale-110"
               onMouseEnter={() => setHoverRating(star)}
               onMouseLeave={() => setHoverRating(0)}
               onClick={() => setRating(star)}
@@ -76,6 +84,7 @@ export function ReviewForm({ bookingId, lawyerId, onSuccess, onCancel }: ReviewF
                     ? 'text-yellow-400 fill-yellow-400'
                     : 'text-neutral-300'
                 }`}
+                aria-hidden="true"
               />
             </button>
           ))}
@@ -83,10 +92,11 @@ export function ReviewForm({ bookingId, lawyerId, onSuccess, onCancel }: ReviewF
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-neutral-700 mb-1">
-          Review
+        <label htmlFor="review-text" className="block text-sm font-medium text-neutral-700 mb-1">
+          Review <span className="text-red-500" aria-hidden="true">*</span>
         </label>
         <textarea
+          id="review-text"
           value={reviewText}
           onChange={(e) => setReviewText(e.target.value)}
           placeholder="Share your experience with this lawyer..."

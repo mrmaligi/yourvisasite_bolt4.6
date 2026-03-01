@@ -123,10 +123,15 @@ export function ReviewManagement() {
                   <h3 className="font-semibold text-neutral-900">
                     {review.user_full_name}
                   </h3>
-                  <div className="flex">
+                  <div
+                    className="flex"
+                    aria-label={`${review.rating} out of 5 stars`}
+                    title={`${review.rating} out of 5 stars`}
+                  >
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star
                         key={i}
+                        aria-hidden="true"
                         className={`w-4 h-4 ${
                           i < review.rating
                             ? 'text-yellow-400 fill-yellow-400'
@@ -160,6 +165,7 @@ export function ReviewManagement() {
                 {replyingTo === review.id ? (
                   <div className="space-y-3">
                     <textarea
+                      aria-label="Reply text"
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
                       placeholder="Write a reply to this review..."

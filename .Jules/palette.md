@@ -9,3 +9,7 @@
 ## 2026-02-23 - Loading State Accessibility
 **Learning:** Loading spinners used across the app (especially in Suspense fallbacks) were purely visual, leaving screen reader users unaware of content loading.
 **Action:** Always include `role="status"` and a visually hidden text label (e.g., "Loading...") in loading components to ensure status is announced.
+
+## 2024-10-24 - Interactive Star Ratings Accessibility
+**Learning:** Custom interactive star ratings (like ReviewForm) are often just grouped buttons. They need `role="radiogroup"` on the container and `role="radio"` with `aria-checked` on individual stars to function correctly for screen readers.
+**Action:** When building or auditing custom rating components, treat them semantically as radio button groups. Include clear `aria-label`s on both the interactive and display-only versions.
