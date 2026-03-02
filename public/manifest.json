@@ -1,0 +1,39 @@
+{
+  "name": "UVS VisaBuild - Global Mobility Platform",
+  "short_name": "VisaBuild",
+  "description": "Streamline your visa application process with UVS VisaBuild. Track applications, find lawyers, and manage documents on the go.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1E3A5F",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Check Status",
+      "short_name": "Status",
+      "description": "Check your visa application status",
+      "url": "/dashboard/visas",
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Find Lawyer",
+      "short_name": "Lawyers",
+      "description": "Find an immigration lawyer",
+      "url": "/lawyers",
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}
