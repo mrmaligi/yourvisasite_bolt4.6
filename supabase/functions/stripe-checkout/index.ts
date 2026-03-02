@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
       // Verify visa exists
       const { data: visa, error: visaError } = await supabase
         .from('visas')
-        .select('visa_subclass, name')
+        .select('subclass, name')
         .eq('id', visa_id)
         .single();
 
@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
         price_data: {
           currency: 'aud',
           product_data: {
-            name: `Premium Guide: ${visa.visa_subclass} - ${visa.name}`,
+            name: `Premium Guide: ${visa.subclass} - ${visa.name}`,
           },
           unit_amount: DEFAULT_VISA_PRICE_CENTS,
         },

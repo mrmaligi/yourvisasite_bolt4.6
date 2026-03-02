@@ -16,6 +16,7 @@ interface AuthContextValue {
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
 
   // Aliases/Compat
   signInWithEmail: (email: string, password: string) => Promise<{ error: AuthError | null }>;
@@ -34,6 +35,7 @@ const AuthContext = createContext<AuthContextValue>({
   signUp: async () => ({ error: null }),
   signOut: async () => {},
   refreshProfile: async () => {},
+  resetPassword: async () => ({ error: null }),
   signInWithEmail: async () => ({ error: null }),
   signUpWithEmail: async () => ({ error: null }),
   signInWithGoogle: async () => {},
@@ -132,6 +134,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) await fetchProfile(user);
   };
 
+  const resetPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    return { error };
+  };
+
   // Role is derived exclusively from profile to ensure single source of truth
   const role = profile?.role || null;
   const isAuthenticated = !!user;
@@ -149,6 +158,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signUp,
         signOut,
         refreshProfile,
+        resetPassword,
         signInWithEmail: signIn,
         signUpWithEmail: signUp,
         signInWithGoogle,

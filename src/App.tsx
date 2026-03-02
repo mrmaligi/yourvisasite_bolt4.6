@@ -37,6 +37,8 @@ const ContactPage = lazy(() => import('./pages/public/ContactPage').then(m => ({
 const FAQPage = lazy(() => import('./pages/public/FAQPage').then(m => ({ default: m.FAQPage })));
 const TermsPage = lazy(() => import('./pages/public/TermsPage').then(m => ({ default: m.TermsPage })));
 const PrivacyPage = lazy(() => import('./pages/public/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
+const ForgotPassword = lazy(() => import('./pages/public/ForgotPassword').then(m => ({ default: m.ForgotPassword })));
+const ResetPassword = lazy(() => import('./pages/public/ResetPassword').then(m => ({ default: m.ResetPassword })));
 const CareersPage = lazy(() => import('./pages/public/CareersPage').then(m => ({ default: m.CareersPage })));
 const ForumHomePage = lazy(() => import('./pages/public/ForumHomePage').then(m => ({ default: m.ForumHomePage })));
 const ForumCategoryPage = lazy(() => import('./pages/public/ForumCategoryPage').then(m => ({ default: m.ForumCategoryPage })));
@@ -179,6 +181,8 @@ export default function App() {
                     <Route element={<PublicLayout />}>
                     <Route index element={<Landing />} />
                     <Route path="login" element={<UnifiedLogin />} />
+                    <Route path="forgot-password" element={<ForgotPassword />} />
+                    <Route path="reset-password" element={<ResetPassword />} />
                     <Route path="role-select" element={<RoleRedirect />} />
                     <Route path="register" element={<Register />} />
                     <Route path="register/lawyer" element={<LawyerRegister />} />

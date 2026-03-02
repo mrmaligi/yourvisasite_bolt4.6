@@ -8,8 +8,7 @@ export class BookingRepository {
       .from('bookings')
       .select('*')
       .eq('user_id', userId)
-      .order('booking_date', { ascending: false })
-      .order('start_time', { ascending: false }));
+      .order('scheduled_at', { ascending: false }));
     return { data: (data || []) as Booking[], error };
   }
 
@@ -18,17 +17,15 @@ export class BookingRepository {
       .from('bookings')
       .select('*')
       .eq('lawyer_id', lawyerId)
-      .order('booking_date', { ascending: false })
-      .order('start_time', { ascending: false }));
+      .order('scheduled_at', { ascending: false }));
     return { data: (data || []) as Booking[], error };
   }
 
   async findLawyerByProfileId(profileId: string): Promise<{ data: LawyerProfile | null; error: PostgrestError | null }> {
     const { data, error } = await fetchWithRetry(() => supabase
-      .schema('lawyer')
-      .from('profiles')
+      .from('lawyer_profiles')
       .select('*')
-      .eq('profile_id', profileId)
+      .eq('user_id', profileId)
       .maybeSingle());
     return { data: data as LawyerProfile | null, error };
   }
@@ -36,8 +33,7 @@ export class BookingRepository {
   async findLawyerProfiles(lawyerIds: string[]): Promise<{ data: LawyerProfile[]; error: PostgrestError | null }> {
     if (lawyerIds.length === 0) return { data: [], error: null };
     const { data, error } = await fetchWithRetry(() => supabase
-      .schema('lawyer')
-      .from('profiles')
+      .from('lawyer_profiles')
       .select('*')
       .in('id', lawyerIds));
     return { data: (data || []) as LawyerProfile[], error };

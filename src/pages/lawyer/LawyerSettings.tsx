@@ -45,10 +45,9 @@ export function LawyerSettings() {
     if (!profile) return;
 
     const { data } = await supabase
-      .schema('lawyer')
-      .from('profiles')
+      .from('lawyer_profiles')
       .select('*')
-      .eq('profile_id', profile.id)
+      .eq('user_id', profile.id)
       .maybeSingle();
 
     if (data) {
@@ -98,8 +97,7 @@ export function LawyerSettings() {
       .filter(Boolean);
 
     const { error } = await supabase
-      .schema('lawyer')
-      .from('profiles')
+      .from('lawyer_profiles')
       .update({
         jurisdiction: lawyerData.jurisdiction,
         bar_number: lawyerData.bar_number,
@@ -110,7 +108,7 @@ export function LawyerSettings() {
           ? Math.round(parseFloat(lawyerData.hourly_rate_cents) * 100)
           : null,
       })
-      .eq('profile_id', profile.id);
+      .eq('user_id', profile.id);
 
     if (error) {
       toast('error', 'Failed to update lawyer profile');
