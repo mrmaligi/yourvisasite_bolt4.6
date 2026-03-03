@@ -9,7 +9,7 @@ import { Button } from '../../components/ui/Button';
 
 interface LawyerListItem {
   id: string;
-  profile_id: string;
+  user_id: string;
   jurisdiction: string;
   practice_areas: string[];
   years_experience: number;
@@ -33,7 +33,7 @@ export function LawyerDirectory() {
       try {
         const { data: lawyerRows, error: lawyerError } = await supabase
           .from('lawyer_profiles')
-          .select('id, profile_id, jurisdiction, practice_areas, years_experience, bio, hourly_rate_cents')
+          .select('id, user_id, jurisdiction, practice_areas, years_experience, bio, hourly_rate_cents')
           .eq('is_verified', true)
           .eq('verification_status', 'approved');
 
@@ -49,7 +49,7 @@ export function LawyerDirectory() {
           return;
         }
 
-        const profileIds = lawyerRows.map((l) => l.profile_id);
+        const profileIds = lawyerRows.map((l) => l.user_id);
         const { data: profileRows, error: profileError } = await supabase
           .from('profiles')
           .select('id, full_name, avatar_url')
@@ -64,7 +64,7 @@ export function LawyerDirectory() {
         const profileMap = new Map(profileRows?.map((p) => [p.id, p]) || []);
 
         const merged: LawyerListItem[] = lawyerRows.map((l) => {
-          const p = profileMap.get(l.profile_id);
+          const p = profileMap.get(l.user_id);
           return {
             ...l,
             full_name: p?.full_name || null,
