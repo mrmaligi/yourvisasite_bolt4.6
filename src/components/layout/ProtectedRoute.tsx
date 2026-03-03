@@ -8,16 +8,24 @@ interface ProtectedRouteProps {
   requiredRole?: UserRole;
 }
 
+// TEMPORARY BYPASS FOR TESTING - Remove in production
+const BYPASS_AUTH = false; // Set to true for testing without login
+
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { user, role, isLoading } = useAuth();
   const location = useLocation();
 
-  if (isLoading) {
+  if (isLoading && !BYPASS_AUTH) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
       </div>
     );
+  }
+
+  // TEMPORARY BYPASS FOR TESTING
+  if (BYPASS_AUTH) {
+    return children ? <>{children}</> : <Outlet />;
   }
 
   if (!user) {
