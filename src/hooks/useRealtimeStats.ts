@@ -21,7 +21,6 @@ export function useRealtimeSubscription(tables: string[], callback: () => void) 
         'postgres_changes',
         { event: '*', schema: 'public', table: table },
         () => {
-          console.log(`Change detected in ${table}, refreshing data...`);
           callback();
         }
       );

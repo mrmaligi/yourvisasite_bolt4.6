@@ -12,7 +12,8 @@ export const ApiAccess = () => {
   const { addToast } = useToast();
   const [showKey, setShowKey] = useState(false);
 
-  // TODO: Replace with real API key fetching from backend. This is a mock placeholder.
+  // NOTE: API key management is mocked for demo purposes.
+  // Production implementation should fetch from secure backend endpoint.
   const MOCK_API_KEY = "sk_test_mock_key_placeholder";
   const apiKey = MOCK_API_KEY;
 

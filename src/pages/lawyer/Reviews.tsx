@@ -41,7 +41,6 @@ export function Reviews() {
   const handleReply = (reviewId: string) => {
     if (!replyText.trim()) return;
     // In a real app, we would use reviewId here
-    console.log(`Replying to review ${reviewId}`);
 
     toast('success', 'Response posted successfully');
     setReplyText('');

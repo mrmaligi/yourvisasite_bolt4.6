@@ -21,7 +21,6 @@ export default function ResetPassword() {
     const hash = window.location.hash;
     if (!hash || !hash.includes('access_token')) {
       // No token in URL, might be direct navigation
-      console.log('No access token in URL');
     }
   }, []);
 
@@ -74,7 +73,6 @@ export default function ResetPassword() {
       setSuccess(true);
       toast('success', 'Password updated successfully');
     } catch (err: any) {
-      console.error('Password reset error:', err);
       setError(err.message || 'Failed to reset password');
       toast('error', err.message || 'Failed to reset password');
     } finally {
