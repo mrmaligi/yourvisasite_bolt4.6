@@ -29,8 +29,8 @@ export function ReviewManagement() {
     try {
       // First get lawyer profile id
       const { data: lawyerProfile } = await supabase
-        .schema('lawyer')
-        .from('profiles')
+        
+        .from('lawyer_profiles')
         .select('id')
         .eq('user_id', user!.id)
         .maybeSingle();
@@ -51,7 +51,7 @@ export function ReviewManagement() {
       // Fetch user names
       const userIds = [...new Set(reviewData?.map((r) => r.user_id) || [])];
       const { data: userProfiles } = await supabase
-        .from('profiles')
+        .from('lawyer_profiles')
         .select('id, full_name')
         .in('id', userIds);
 

@@ -25,8 +25,7 @@ export function Marketing() {
 
     // Fetch Lawyer Profile
     supabase
-      .schema('lawyer')
-      .from('profiles')
+      .from('lawyer_profiles')
       .select('*')
       .eq('user_id', profile.id)
       .maybeSingle()
@@ -94,8 +93,7 @@ export function Marketing() {
 
     // Update Lawyer Profile
     const { error: lawyerError } = await supabase
-      .schema('lawyer')
-      .from('profiles')
+      .from('lawyer_profiles')
       .update({
         bio,
         hourly_rate_cents: hourlyRate ? Math.round(parseFloat(hourlyRate) * 100) : null,

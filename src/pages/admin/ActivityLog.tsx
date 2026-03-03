@@ -69,15 +69,15 @@ export function ActivityLog() {
       weekPurchases,
       pendingLawyers,
     ] = await Promise.all([
-      supabase.from('profiles').select('id, full_name, created_at, role').order('created_at', { ascending: false }).limit(5),
-      supabase.schema('lawyer').from('profiles').select('id, user_id, jurisdiction, created_at, verification_status').order('created_at', { ascending: false }).limit(5),
+      supabase.from('lawyer_profiles').select('id, full_name, created_at, role').order('created_at', { ascending: false }).limit(5),
+      supabase.from('lawyer_profiles').select('id, user_id, jurisdiction, created_at, verification_status').order('created_at', { ascending: false }).limit(5),
       supabase.from('user_visa_purchases').select('id, amount_cents, purchased_at').order('purchased_at', { ascending: false }).limit(5),
       supabase.from('bookings').select('id, status, amount_cents, created_at').order('created_at', { ascending: false }).limit(5),
       supabase.from('user_documents').select('id, file_name, uploaded_at').order('uploaded_at', { ascending: false }).limit(5),
       supabase.from('tracker_entries').select('id, outcome, processing_days, created_at').order('created_at', { ascending: false }).limit(5),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', todayStart),
+      supabase.from('lawyer_profiles').select('id', { count: 'exact', head: true }).gte('created_at', todayStart),
       supabase.from('user_visa_purchases').select('id, amount_cents').gte('purchased_at', weekStart),
-      supabase.schema('lawyer').from('profiles').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending'),
+      supabase.from('lawyer_profiles').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending'),
     ]);
 
     const activityList: ActivityItem[] = [];

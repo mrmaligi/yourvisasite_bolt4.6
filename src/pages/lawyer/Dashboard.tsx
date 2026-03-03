@@ -29,8 +29,8 @@ export function LawyerDashboard() {
   useEffect(() => {
     if (!profile) return;
     supabase
-      .schema('lawyer')
-      .from('profiles')
+      
+      .from('lawyer_profiles')
       .select('id, is_verified, verification_status')
       .eq('user_id', profile.id)
       .maybeSingle()
@@ -58,7 +58,7 @@ export function LawyerDashboard() {
       // Fetch slot details (start_time)
       const slotIds = bookings.map(b => b.slot_id);
       const { data: slots } = await supabase
-        .schema('lawyer')
+        
         .from('consultation_slots')
         .select('id, start_time')
         .in('id', slotIds);
@@ -66,7 +66,7 @@ export function LawyerDashboard() {
       // Fetch user details
       const userIds = bookings.map(b => b.user_id);
       const { data: users } = await supabase
-        .from('profiles')
+        .from('lawyer_profiles')
         .select('id, full_name')
         .in('id', userIds);
 

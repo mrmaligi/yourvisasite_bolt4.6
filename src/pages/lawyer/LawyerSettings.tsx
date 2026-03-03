@@ -45,8 +45,8 @@ export function LawyerSettings() {
     if (!profile) return;
 
     const { data } = await supabase
-      .schema('lawyer')
-      .from('profiles')
+      
+      .from('lawyer_profiles')
       .select('*')
       .eq('user_id', profile.id)
       .maybeSingle();
@@ -70,7 +70,7 @@ export function LawyerSettings() {
     setSaving(true);
 
     const { error } = await supabase
-      .from('profiles')
+      .from('lawyer_profiles')
       .update({
         full_name: profileData.full_name,
         phone: profileData.phone,
@@ -98,8 +98,8 @@ export function LawyerSettings() {
       .filter(Boolean);
 
     const { error } = await supabase
-      .schema('lawyer')
-      .from('profiles')
+      
+      .from('lawyer_profiles')
       .update({
         jurisdiction: lawyerData.jurisdiction,
         bar_number: lawyerData.bar_number,

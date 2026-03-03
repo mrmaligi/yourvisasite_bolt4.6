@@ -10,9 +10,9 @@ export function AdminDashboard() {
 
   useEffect(() => {
     Promise.all([
-      supabase.from('profiles').select('id', { count: 'exact', head: true }),
-      supabase.schema('lawyer').from('profiles').select('id', { count: 'exact', head: true }).eq('is_verified', true),
-      supabase.schema('lawyer').from('profiles').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending'),
+      supabase.from('lawyer_profiles').select('id', { count: 'exact', head: true }),
+      supabase.from('lawyer_profiles').select('id', { count: 'exact', head: true }).eq('is_verified', true),
+      supabase.from('lawyer_profiles').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending'),
       supabase.from('visas').select('id', { count: 'exact', head: true }),
       supabase.from('user_visa_purchases').select('id', { count: 'exact', head: true }),
       supabase.from('tracker_entries').select('id', { count: 'exact', head: true }),

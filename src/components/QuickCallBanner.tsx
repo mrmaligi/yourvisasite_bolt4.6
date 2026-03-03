@@ -12,7 +12,7 @@ export function QuickCallBanner() {
       try {
         const now = new Date().toISOString();
         const { data, error } = await supabase
-          .schema('lawyer')
+          
           .from('consultation_slots')
           .select('lawyer_id')
           .eq('is_booked', false)

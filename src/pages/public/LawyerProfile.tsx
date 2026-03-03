@@ -59,8 +59,8 @@ export function LawyerProfile() {
 
     async function fetchLawyer() {
       const { data: lawyerRow } = await supabase
-        .schema('lawyer')
-        .from('profiles')
+        
+        .from('lawyer_profiles')
         .select('id, user_id, jurisdiction, specializations, years_experience, bio, hourly_rate_cents, bar_number')
         .eq('id', id)
         .eq('is_verified', true)
@@ -72,7 +72,7 @@ export function LawyerProfile() {
       }
 
       const { data: profileRow } = await supabase
-        .from('profiles')
+        .from('lawyer_profiles')
         .select('id, full_name, avatar_url')
         .eq('id', lawyerRow.user_id)
         .maybeSingle();
@@ -85,7 +85,7 @@ export function LawyerProfile() {
 
       const now = new Date().toISOString();
       const { data: slotRows } = await supabase
-        .schema('lawyer')
+        
         .from('consultation_slots')
         .select('*')
         .eq('lawyer_id', lawyerRow.id)
@@ -106,7 +106,7 @@ export function LawyerProfile() {
       if (reviewRows && reviewRows.length > 0) {
         const userIds = [...new Set(reviewRows.map(r => r.user_id))];
         const { data: users } = await supabase
-          .from('profiles')
+          .from('lawyer_profiles')
           .select('id, full_name')
           .in('id', userIds);
 

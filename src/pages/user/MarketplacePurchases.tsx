@@ -45,13 +45,13 @@ export function MarketplacePurchases() {
 
       const [listingsRes, lawyersRes] = await Promise.all([
         supabase
-          .schema('lawyer')
+          
           .from('marketplace_listings')
           .select('id, title, listing_type')
           .in('id', listingIds),
         supabase
-          .schema('lawyer')
-          .from('profiles')
+          
+          .from('lawyer_profiles')
           .select('id, user_id')
           .in('id', lawyerIds),
       ]);
@@ -61,7 +61,7 @@ export function MarketplacePurchases() {
       if (lawyersRes.data) {
         const profileIds = lawyersRes.data.map((l) => l.user_id);
         const { data: profilesData } = await supabase
-          .from('profiles')
+          .from('lawyer_profiles')
           .select('id, full_name')
           .in('id', profileIds);
 
