@@ -22,6 +22,7 @@ interface UserDashboardStats {
   myVisas: number;
   documents: number;
   upcomingConsultations: number;
+  availableVisas: number;
 }
 
 export function UserDashboard() {
@@ -31,6 +32,7 @@ export function UserDashboard() {
     myVisas: 0,
     documents: 0,
     upcomingConsultations: 0,
+    availableVisas: 86,
   });
   const [recentActivity] = useState<any[]>([]);
   const [myApplications, setMyApplications] = useState<any[]>([]);
@@ -39,8 +41,22 @@ export function UserDashboard() {
     if (user) {
       fetchUserStats();
       fetchMyApplications();
+      fetchAvailableVisas();
     }
   }, [user]);
+
+  const fetchAvailableVisas = async () => {
+    try {
+      const { count } = await supabase
+        .from('visas')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_active', true);
+      
+      setStats(prev => ({ ...prev, availableVisas: count || 86 }));
+    } catch (err) {
+      console.error('Error fetching visa count:', err);
+    }
+  };
 
   const fetchUserStats = async () => {
     if (!user?.id) return; // Add null check
@@ -83,7 +99,7 @@ export function UserDashboard() {
   };
 
   const quickActions = [
-    { to: '/visas', icon: Briefcase, label: 'Find Visas', desc: 'Search 78+ visa options' },
+    { to: '/visas', icon: Briefcase, label: 'Find Visas', desc: 'Search 86+ visa options' },
     { to: '/tracker', icon: TrendingUp, label: 'Track Application', desc: 'Check processing times' },
     { to: '/lawyers', icon: User, label: 'Find Lawyer', desc: 'Book consultation' },
     { to: '/quiz', icon: Gift, label: 'Visa Quiz', desc: 'Find your best match' },
@@ -140,7 +156,7 @@ export function UserDashboard() {
       )}
 
       {/* Stats Grid */}
-      <div className="grid md:grid-cols-4 gap-4 mb-8">
+      <div className="grid md:grid-cols-5 gap-4 mb-8">
         <Card>
           <CardBody className="flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
@@ -161,6 +177,18 @@ export function UserDashboard() {
             <div>
               <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.myVisas}</p>
               <p className="text-sm text-neutral-500">My Visas</p>
+            </div>
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardBody className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-teal-100 dark:bg-teal-900/30 rounded-xl flex items-center justify-center">
+              <Briefcase className="w-6 h-6 text-teal-600 dark:text-teal-400" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.availableVisas}</p>
+              <p className="text-sm text-neutral-500">Available Visas</p>
             </div>
           </CardBody>
         </Card>
