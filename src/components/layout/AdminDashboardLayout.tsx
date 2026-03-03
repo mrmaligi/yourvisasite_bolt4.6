@@ -16,9 +16,14 @@ import {
   PenTool,
   Gauge,
   TrendingUp,
+  Ticket,
+  Shield,
+  MessageSquare,
+  FileJson,
 } from 'lucide-react';
 import { DashboardLayout } from './DashboardLayout';
 
+// Desktop sidebar items (full list)
 const sidebarItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/admin/performance', label: 'Performance', icon: Gauge },
@@ -39,10 +44,27 @@ const sidebarItems = [
   { to: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
+// Mobile nav items (essential only - shown at bottom)
+const mobileNavItems = [
+  { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/admin/users', label: 'Users', icon: Users },
+  { to: '/admin/lawyers', label: 'Lawyers', icon: Scale },
+  { to: '/admin/visas', label: 'Visas', icon: FileText },
+  { to: '/admin/settings', label: 'Settings', icon: Settings },
+];
+
 interface AdminDashboardLayoutProps {
   children?: React.ReactNode;
 }
 
 export function AdminDashboardLayout({ children }: AdminDashboardLayoutProps) {
-  return <DashboardLayout sidebarItems={sidebarItems} title="Admin">{children}</DashboardLayout>;
+  return (
+    <DashboardLayout 
+      sidebarItems={sidebarItems} 
+      mobileNavItems={mobileNavItems}
+      title="Admin"
+    >
+      {children}
+    </DashboardLayout>
+  );
 }
