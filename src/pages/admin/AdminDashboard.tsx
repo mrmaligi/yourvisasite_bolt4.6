@@ -92,7 +92,7 @@ export function AdminDashboard() {
     ] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact' }).eq('role', 'user'),
       supabase.from('lawyer_profiles').select('id', { count: 'exact' }).eq('verification_status', 'approved'),
-      supabase.from('lawyer_profiles').select('*, profiles:user_id(full_name)').eq('verification_status', 'pending'),
+      supabase.from('lawyer_profiles').select('*, profiles:user_id(full_name, email)').eq('verification_status', 'pending'),
       supabase.from('visas').select('id', { count: 'exact' }),
       supabase.from('tracker_entries').select('id', { count: 'exact' }).eq('status', 'pending'),
       supabase.from('profiles').select('created_at').eq('role', 'user').order('created_at', { ascending: true }),
@@ -487,7 +487,7 @@ export function AdminDashboard() {
                       <tr key={lawyer.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50">
                         <td className="px-4 py-3">
                           <p className="font-medium text-neutral-900 dark:text-white">{lawyer.profiles?.full_name || 'Unknown'}</p>
-                          <p className="text-xs text-neutral-500">{'Verified Agent'}</p>
+                          <p className="text-xs text-neutral-500">{lawyer.profiles?.email}</p>
                         </td>
                         <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
                           {lawyer.bar_number}

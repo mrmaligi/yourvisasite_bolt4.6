@@ -129,7 +129,7 @@ export function LawyerDashboard() {
 
   const clientData = bookings.map(b => ({
     id: b.id,
-    name: b.user?.full_name || 'Unknown Client',
+    name: b.user?.full_name || b.user?.email || 'Unknown Client',
     status: b.status,
     service: 'General Consultation',
     nextAction: b.status === 'pending' ? 'Review Request' : b.status === 'confirmed' ? 'Prepare for Meeting' : 'View Details',
