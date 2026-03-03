@@ -52,7 +52,7 @@ export function Availability() {
     supabase
       .from('lawyer_profiles')
       .select('id')
-      .eq('profile_id', profile.id)
+      .eq('user_id', profile.id)
       .maybeSingle()
       .then(({ data }) => {
         if (data) {

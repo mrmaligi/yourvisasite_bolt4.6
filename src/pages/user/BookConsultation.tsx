@@ -13,7 +13,7 @@ import { useAuth } from '../../hooks/useAuth';
 
 interface LawyerData {
   id: string;
-  profile_id: string;
+  user_id: string;
   jurisdiction: string;
   practice_areas: string[];
   years_experience: number;
@@ -65,7 +65,7 @@ export function BookConsultation() {
         // Fetch Lawyer Profile
         const { data: lawyerRow, error: lawyerError } = await supabase
           .from('lawyer_profiles')
-          .select('id, profile_id, jurisdiction, practice_areas, years_experience, hourly_rate_cents, bar_number')
+          .select('id, user_id, jurisdiction, practice_areas, years_experience, hourly_rate_cents, bar_number')
           .eq('id', lawyerId)
           .single();
 
@@ -74,7 +74,7 @@ export function BookConsultation() {
         const { data: profileRow } = await supabase
           .from('profiles')
           .select('full_name, avatar_url')
-          .eq('id', lawyerRow.profile_id)
+          .eq('id', lawyerRow.user_id)
           .single();
 
         setLawyer({

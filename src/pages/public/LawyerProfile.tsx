@@ -14,7 +14,7 @@ import { Breadcrumbs } from '../../components/ui/Breadcrumbs';
 
 interface LawyerData {
   id: string;
-  profile_id: string;
+  user_id: string;
   jurisdiction: string;
   specializations: string[];
   years_experience: number;
@@ -61,7 +61,7 @@ export function LawyerProfile() {
       const { data: lawyerRow } = await supabase
         .schema('lawyer')
         .from('profiles')
-        .select('id, profile_id, jurisdiction, specializations, years_experience, bio, hourly_rate_cents, bar_number')
+        .select('id, user_id, jurisdiction, specializations, years_experience, bio, hourly_rate_cents, bar_number')
         .eq('id', id)
         .eq('is_verified', true)
         .maybeSingle();
@@ -74,7 +74,7 @@ export function LawyerProfile() {
       const { data: profileRow } = await supabase
         .from('profiles')
         .select('id, full_name, avatar_url')
-        .eq('id', lawyerRow.profile_id)
+        .eq('id', lawyerRow.user_id)
         .maybeSingle();
 
       setLawyer({

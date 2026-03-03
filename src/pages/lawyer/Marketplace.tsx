@@ -60,7 +60,7 @@ export function Marketplace() {
     const { data: lawyerProfile } = await supabase
       .from('lawyer_profiles')
       .select('id')
-      .eq('profile_id', profile.id)
+      .eq('user_id', profile.id)
       .maybeSingle();
 
     if (!lawyerProfile) {
@@ -107,7 +107,7 @@ export function Marketplace() {
     const { data: lawyerProfile } = await supabase
       .from('lawyer_profiles')
       .select('id')
-      .eq('profile_id', profile.id)
+      .eq('user_id', profile.id)
       .maybeSingle();
 
     if (!lawyerProfile) return;

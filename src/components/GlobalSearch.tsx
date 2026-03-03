@@ -74,12 +74,12 @@ export function GlobalSearch() {
       const { data: lawyerProfiles } = await supabase
         .schema('lawyer')
         .from('profiles')
-        .select('id, profile_id, jurisdiction')
+        .select('id, user_id, jurisdiction')
         .eq('verification_status', 'approved');
 
       let lawyersWithNames: (Pick<LawyerProfile, 'id' | 'user_id' | 'jurisdiction'> & { full_name?: string | null })[] = [];
       if (lawyerProfiles && lawyerProfiles.length > 0) {
-        const profileIds = lawyerProfiles.map(l => l.profile_id);
+        const profileIds = lawyerProfiles.map(l => l.user_id);
         const { data: publicProfiles } = await supabase
           .from('profiles')
           .select('id, full_name')
@@ -89,8 +89,8 @@ export function GlobalSearch() {
         lawyersWithNames = lawyerProfiles.map(l => ({
           id: l.id,
           jurisdiction: l.jurisdiction,
-          user_id: l.profile_id, // Map profile_id to user_id
-          full_name: profileMap.get(l.profile_id)?.full_name
+          user_id: l.user_id, // Map user_id to user_id
+          full_name: profileMap.get(l.user_id)?.full_name
         }));
       }
 

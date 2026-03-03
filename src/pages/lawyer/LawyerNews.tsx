@@ -15,7 +15,7 @@ interface NewsItem {
   published_at: string;
   is_premium: boolean;
   slug: string;
-  news_comments: { count: number }[];
+  
 }
 
 export function LawyerNews() {
@@ -31,7 +31,7 @@ export function LawyerNews() {
   const fetchNews = async () => {
     let query = supabase
       .from('news_articles')
-      .select('id, title, summary, category, published_at, is_premium, news_comments(count)')
+      .select('id, title, excerpt, category, published_at, is_published')
       .order('published_at', { ascending: false })
       .limit(20);
 
@@ -105,10 +105,10 @@ export function LawyerNews() {
                       <Badge variant="default" className="capitalize">
                         {item.category}
                       </Badge>
-                      {item.is_premium && <Badge variant="warning">Premium</Badge>}
+                      {false && <Badge variant="warning">Premium</Badge>}
                     </div>
                     <h3 className="text-lg font-semibold text-neutral-900 mb-2">{item.title}</h3>
-                    <p className="text-sm text-neutral-600 line-clamp-2 mb-3">{item.summary}</p>
+                    <p className="text-sm text-neutral-600 line-clamp-2 mb-3">{item.excerpt}</p>
                     <div className="flex items-center gap-4 text-xs text-neutral-400">
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3.5 h-3.5" />
@@ -116,7 +116,7 @@ export function LawyerNews() {
                       </span>
                       <span className="flex items-center gap-1">
                         <MessageSquare className="w-3.5 h-3.5" />
-                        {item.news_comments?.[0]?.count || 0}
+                        {0}
                       </span>
                     </div>
                   </div>

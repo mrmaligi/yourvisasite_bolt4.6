@@ -28,7 +28,7 @@ export class BookingRepository {
       .schema('lawyer')
       .from('profiles')
       .select('*')
-      .eq('profile_id', profileId)
+      .eq('user_id', profileId)
       .maybeSingle());
     return { data: data as LawyerProfile | null, error };
   }

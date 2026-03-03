@@ -80,53 +80,24 @@ export function NewsDetail() {
     fetchArticleAndRelated();
   }, [slug]);
 
-  const fetchComments = async (articleId: string) => {
-    const { data: commentRows } = await supabase
-      .from('news_comments')
-      .select('*')
-      .eq('article_id', articleId)
-      .order('created_at', { ascending: true });
-
-    if (!commentRows || commentRows.length === 0) {
-      setComments([]);
-      return;
-    }
-
-    const authorIds = [...new Set(commentRows.map((c) => c.author_id))];
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('id, full_name, role')
-      .in('id', authorIds);
-
-    const profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
-
-    const enriched: CommentWithAuthor[] = commentRows.map((c) => {
-      const author = profileMap.get(c.author_id);
-      return {
-        ...c,
-        author_name: author?.full_name || null,
-        author_role: author?.role || null,
-      };
-    });
-
-    setComments(enriched);
+  const fetchComments = async (_articleId: string) => {
+    // news_comments table not yet created - comments disabled for now
+    setComments([]);
   };
 
   const handlePostComment = async () => {
     if (!user || !article || !commentBody.trim()) return;
     setSubmittingComment(true);
 
-    const { error } = await supabase.from('news_comments').insert({
-      article_id: article.id,
-      author_id: user.id,
-      body: commentBody.trim(),
-    });
+    // news_comments table not yet created - posting disabled
+    const error = true;
 
     if (error) {
-      toast('error', 'Failed to post comment');
+      toast('error', 'Comments coming soon');
     } else {
       toast('success', 'Comment posted');
       setCommentBody('');
+
       await fetchComments(article.id);
     }
 

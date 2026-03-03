@@ -32,7 +32,7 @@ export function ReviewManagement() {
         .schema('lawyer')
         .from('profiles')
         .select('id')
-        .eq('profile_id', user!.id)
+        .eq('user_id', user!.id)
         .maybeSingle();
 
       if (!lawyerProfile) {

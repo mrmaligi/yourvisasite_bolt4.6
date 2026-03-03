@@ -89,7 +89,7 @@ export function LawyerDashboard() {
       // Get initial bookings for the table
       const { data: bookings } = await supabase
         .from('bookings')
-        .select('*, user:user_id(full_name, email)')
+        .select('*, user:user_id(full_name)')
         .eq('lawyer_id', profile.id)
         .order('created_at', { ascending: false })
         .limit(10);
@@ -120,7 +120,7 @@ export function LawyerDashboard() {
     fetchRow: async (id) => {
       const { data } = await supabase
         .from('bookings')
-        .select('*, user:user_id(full_name, email)')
+        .select('*, user:user_id(full_name)')
         .eq('id', id)
         .single();
       return data;
@@ -129,7 +129,7 @@ export function LawyerDashboard() {
 
   const clientData = bookings.map(b => ({
     id: b.id,
-    name: b.user?.full_name || b.user?.email || 'Unknown Client',
+    name: b.user?.full_name || 'Unknown Client',
     status: b.status,
     service: 'General Consultation',
     nextAction: b.status === 'pending' ? 'Review Request' : b.status === 'confirmed' ? 'Prepare for Meeting' : 'View Details',

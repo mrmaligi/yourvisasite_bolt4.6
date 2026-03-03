@@ -28,7 +28,7 @@ export function Marketing() {
       .schema('lawyer')
       .from('profiles')
       .select('*')
-      .eq('profile_id', profile.id)
+      .eq('user_id', profile.id)
       .maybeSingle()
       .then(({ data }) => {
         if (data) {

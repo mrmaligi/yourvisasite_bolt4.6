@@ -48,7 +48,7 @@ export function LawyerSettings() {
       .schema('lawyer')
       .from('profiles')
       .select('*')
-      .eq('profile_id', profile.id)
+      .eq('user_id', profile.id)
       .maybeSingle();
 
     if (data) {
@@ -110,7 +110,7 @@ export function LawyerSettings() {
           ? Math.round(parseFloat(lawyerData.hourly_rate_cents) * 100)
           : null,
       })
-      .eq('profile_id', profile.id);
+      .eq('user_id', profile.id);
 
     if (error) {
       toast('error', 'Failed to update lawyer profile');

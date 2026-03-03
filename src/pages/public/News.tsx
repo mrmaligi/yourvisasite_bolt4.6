@@ -14,7 +14,7 @@ interface NewsItem {
   body: string | null;
   category: string;
   published_at: string;
-  news_comments: { count: number }[];
+  
 }
 
 const PAGE_SIZE = 9;
@@ -42,7 +42,7 @@ export function News() {
 
     let query = supabase
       .from('news_articles')
-      .select('id, title, slug, excerpt, body, category, published_at, news_comments(count)')
+      .select('id, title, slug, excerpt, body, category, published_at')
       .eq('is_published', true)
       .order('published_at', { ascending: false })
       .range(from, to);
@@ -194,7 +194,7 @@ export function News() {
                     </span>
                     <span className="flex items-center gap-1.5">
                       <MessageSquare className="w-4 h-4" />
-                      {featuredNews.news_comments?.[0]?.count || 0}
+                      {0}
                     </span>
                   </div>
                   <Button variant="secondary" size="sm">
@@ -230,7 +230,7 @@ export function News() {
                     </span>
                     <span className="flex items-center gap-1.5">
                       <MessageSquare className="w-3.5 h-3.5" />
-                      {item.news_comments?.[0]?.count || 0}
+                      {0}
                     </span>
                   </div>
                   <span className="text-sm font-medium text-primary-600 flex items-center gap-1">

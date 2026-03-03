@@ -52,14 +52,14 @@ export function MarketplacePurchases() {
         supabase
           .schema('lawyer')
           .from('profiles')
-          .select('id, profile_id')
+          .select('id, user_id')
           .in('id', lawyerIds),
       ]);
 
       const listingMap = new Map(listingsRes.data?.map((l) => [l.id, l]) || []);
 
       if (lawyersRes.data) {
-        const profileIds = lawyersRes.data.map((l) => l.profile_id);
+        const profileIds = lawyersRes.data.map((l) => l.user_id);
         const { data: profilesData } = await supabase
           .from('profiles')
           .select('id, full_name')
@@ -67,7 +67,7 @@ export function MarketplacePurchases() {
 
         const profileMap = new Map(profilesData?.map((p) => [p.id, p.full_name]) || []);
         const lawyerProfileMap = new Map(
-          lawyersRes.data.map((l) => [l.id, profileMap.get(l.profile_id) || 'Unknown'])
+          lawyersRes.data.map((l) => [l.id, profileMap.get(l.user_id) || 'Unknown'])
         );
 
         const enriched = purchasesData.map((p) => {

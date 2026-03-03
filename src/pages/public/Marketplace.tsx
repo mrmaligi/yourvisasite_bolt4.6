@@ -57,7 +57,7 @@ export function Marketplace() {
   const fetchData = async () => {
     let query = supabase
       .from('marketplace_listings')
-      .select('id, lawyer_id, title, description, short_description, category_id, price_cents, listing_type, duration_minutes, delivery_days, features')
+      .select('id, lawyer_id, title, description, category_id, price_cents, listing_type, is_active, download_count')
       .eq('is_active', true)
       .order('created_at', { ascending: false });
 
@@ -79,27 +79,27 @@ export function Marketplace() {
       const [lawyersRes, categoriesRes, reviewsRes] = await Promise.all([
         supabase
           .from('lawyer_profiles')
-          .select('id, profile_id')
+          .select('id, user_id')
           .in('id', lawyerIds),
         categoryIds.length > 0
           ? supabase.from('marketplace_categories').select('id, name').in('id', categoryIds)
           : { data: [] },
         supabase
           .from('marketplace_reviews')
-          .select('listing_id, rating, title, comment, user_id, created_at')
+          .select('listing_id, rating, review_text, user_id, created_at')
           .in('listing_id', listingIds)
           .order('created_at', { ascending: false }),
       ]);
 
       if (lawyersRes.data) {
-        const profileIds = lawyersRes.data.map((l) => l.profile_id);
+        const profileIds = lawyersRes.data.map((l) => l.user_id);
         const { data: profilesData } = await supabase
           .from('profiles')
           .select('id, full_name')
           .in('id', profileIds);
 
         const profileMap = new Map(profilesData?.map((p) => [p.id, p.full_name]) || []);
-        const lawyerProfileMap = new Map(lawyersRes.data.map((l) => [l.id, profileMap.get(l.profile_id) || 'Unknown']));
+        const lawyerProfileMap = new Map(lawyersRes.data.map((l) => [l.id, profileMap.get(l.user_id) || 'Unknown']));
 
         const { data: lawyerDetailsData } = await supabase
           .from('lawyer_profiles')
