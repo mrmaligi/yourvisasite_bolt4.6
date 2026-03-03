@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://www.yourvisasite.com/sitemap.xml
+
+# Disallow admin and private pages
+Disallow: /admin
+Disallow: /lawyer/dashboard
+Disallow: /user/dashboard
+Disallow: /settings
+Disallow: /api/
+
+# Crawl delay to be nice to server
+Crawl-delay: 1
