@@ -174,8 +174,7 @@ export function AdminDashboard() {
         .from('lawyer_profiles')
         .update({
           verification_status: 'approved',
-          is_verified: true,
-          verified_at: new Date().toISOString()
+          is_verified: true
         })
         .eq('id', id);
 
@@ -193,8 +192,7 @@ export function AdminDashboard() {
       const { error } = await supabase
         .from('lawyer_profiles')
         .update({
-          verification_status: 'rejected',
-          rejection_reason: 'Admin rejected via dashboard'
+          verification_status: 'rejected'
         })
         .eq('id', id);
 
