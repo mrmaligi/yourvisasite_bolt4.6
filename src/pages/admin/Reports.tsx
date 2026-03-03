@@ -1,252 +1,380 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   FileText,
   Download,
   Calendar,
-  Settings,
   Clock,
   CheckCircle,
   AlertCircle,
   BarChart,
   Users,
-  DollarSign
+  DollarSign,
+  Briefcase,
+  FileSpreadsheet
 } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { useToast } from '../../components/ui/Toast';
 import { Badge } from '../../components/ui/Badge';
+import { Input } from '../../components/ui/Input';
+import { supabase } from '../../lib/supabase';
 
 interface ReportTemplate {
   id: string;
   name: string;
   description: string;
   category: 'financial' | 'user' | 'system' | 'compliance';
-  format: 'pdf' | 'csv' | 'xlsx';
-  lastGenerated: string | null;
   icon: any;
+  generateFn: () => Promise<string>;
 }
-
-const REPORT_TEMPLATES: ReportTemplate[] = [
-  {
-    id: 'R-001',
-    name: 'Monthly Revenue Report',
-    description: 'Detailed breakdown of income from subscriptions and consultations.',
-    category: 'financial',
-    format: 'pdf',
-    lastGenerated: '2024-03-01',
-    icon: DollarSign
-  },
-  {
-    id: 'R-002',
-    name: 'New User Acquisition',
-    description: 'Analysis of new signups, sources, and conversion rates.',
-    category: 'user',
-    format: 'csv',
-    lastGenerated: '2024-03-10',
-    icon: Users
-  },
-  {
-    id: 'R-003',
-    name: 'System Performance Log',
-    description: 'Server uptime, API latency, and error rate summary.',
-    category: 'system',
-    format: 'pdf',
-    lastGenerated: null,
-    icon: BarChart
-  },
-  {
-    id: 'R-004',
-    name: 'Lawyer Activity Summary',
-    description: 'Consultation hours, response times, and client ratings.',
-    category: 'compliance',
-    format: 'xlsx',
-    lastGenerated: '2024-02-28',
-    icon: FileText
-  }
-];
 
 export function Reports() {
   const { toast } = useToast();
-  const [templates, setTemplates] = useState<ReportTemplate[]>(REPORT_TEMPLATES);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
   const [selectedReport, setSelectedReport] = useState<ReportTemplate | null>(null);
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [generatedReports, setGeneratedReports] = useState<Array<{ id: string; name: string; generatedAt: string; size: string }>>([]);
+
+  useEffect(() => {
+    // Set default date range (last 30 days)
+    const end = new Date().toISOString().split('T')[0];
+    const start = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    setDateRange({ start, end });
+  }, []);
+
+  const generateRevenueReport = async (): Promise<string> => {
+    const { data: purchases } = await supabase
+      .from('user_visa_purchases')
+      .select('amount_cents, purchased_at')
+      .gte('purchased_at', dateRange.start)
+      .lte('purchased_at', dateRange.end);
+
+    const { data: bookings } = await supabase
+      .from('bookings')
+      .select('amount_cents, created_at')
+      .eq('status', 'completed')
+      .gte('created_at', dateRange.start)
+      .lte('created_at', dateRange.end);
+
+    const totalRevenue = 
+      (purchases || []).reduce((sum, p) => sum + (p.amount_cents || 0), 0) +
+      (bookings || []).reduce((sum, b) => sum + (b.amount_cents || 0), 0);
+
+    const csv = [
+      ['Report', 'Revenue Report'],
+      ['Period', `${dateRange.start} to ${dateRange.end}`],
+      ['Generated', new Date().toISOString()],
+      [],
+      ['Metric', 'Value'],
+      ['Visa Purchases', (purchases?.length || 0).toString()],
+      ['Consultations', (bookings?.length || 0).toString()],
+      ['Total Revenue', `$${(totalRevenue / 100).toFixed(2)}`],
+    ]
+      .map((row) => row.join(','))
+      .join('\n');
+
+    return csv;
+  };
+
+  const generateUserReport = async (): Promise<string> => {
+    const { data: users } = await supabase
+      .from('profiles')
+      .select('role, created_at')
+      .gte('created_at', dateRange.start)
+      .lte('created_at', dateRange.end);
+
+    const totalUsers = users?.filter((u) => u.role === 'user').length || 0;
+    const totalLawyers = users?.filter((u) => u.role === 'lawyer').length || 0;
+
+    const csv = [
+      ['Report', 'User Acquisition Report'],
+      ['Period', `${dateRange.start} to ${dateRange.end}`],
+      ['Generated', new Date().toISOString()],
+      [],
+      ['Role', 'Count'],
+      ['Users', totalUsers.toString()],
+      ['Lawyers', totalLawyers.toString()],
+      ['Total', (totalUsers + totalLawyers).toString()],
+    ]
+      .map((row) => row.join(','))
+      .join('\n');
+
+    return csv;
+  };
+
+  const generateLawyerReport = async (): Promise<string> => {
+    const { data: lawyers } = await supabase
+      .from('lawyer_profiles')
+      .select('verification_status, is_verified');
+
+    const verified = lawyers?.filter((l) => l.is_verified).length || 0;
+    const pending = lawyers?.filter((l) => l.verification_status === 'pending').length || 0;
+    const total = lawyers?.length || 0;
+
+    const csv = [
+      ['Report', 'Lawyer Activity Report'],
+      ['Generated', new Date().toISOString()],
+      [],
+      ['Status', 'Count'],
+      ['Verified', verified.toString()],
+      ['Pending Verification', pending.toString()],
+      ['Total Lawyers', total.toString()],
+    ]
+      .map((row) => row.join(','))
+      .join('\n');
+
+    return csv;
+  };
+
+  const generateVisaReport = async (): Promise<string> => {
+    const { data: visas } = await supabase.from('visas').select('category, is_active');
+
+    const categories: Record<string, number> = {};
+    visas?.forEach((v) => {
+      categories[v.category] = (categories[v.category] || 0) + 1;
+    });
+
+    const csv = [
+      ['Report', 'Visa Inventory Report'],
+      ['Generated', new Date().toISOString()],
+      [],
+      ['Category', 'Count'],
+      ...Object.entries(categories).map(([cat, count]) => [cat, count.toString()]),
+      [],
+      ['Total Visas', (visas?.length || 0).toString()],
+      ['Active Visas', (visas?.filter((v) => v.is_active).length || 0).toString()],
+    ]
+      .map((row) => row.join(','))
+      .join('\n');
+
+    return csv;
+  };
+
+  const REPORT_TEMPLATES: ReportTemplate[] = [
+    {
+      id: 'R-001',
+      name: 'Revenue Report',
+      description: 'Detailed breakdown of income from consultations and visa guide purchases.',
+      category: 'financial',
+      icon: DollarSign,
+      generateFn: generateRevenueReport,
+    },
+    {
+      id: 'R-002',
+      name: 'User Acquisition Report',
+      description: 'Analysis of new signups, user roles, and growth trends.',
+      category: 'user',
+      icon: Users,
+      generateFn: generateUserReport,
+    },
+    {
+      id: 'R-003',
+      name: 'Visa Inventory Report',
+      description: 'Overview of all visa types, categories, and active status.',
+      category: 'system',
+      icon: FileSpreadsheet,
+      generateFn: generateVisaReport,
+    },
+    {
+      id: 'R-004',
+      name: 'Lawyer Activity Summary',
+      description: 'Verification status, lawyer counts, and pending applications.',
+      category: 'compliance',
+      icon: Briefcase,
+      generateFn: generateLawyerReport,
+    },
+  ];
 
   const handleGenerate = (report: ReportTemplate) => {
     setSelectedReport(report);
-    // Open modal to select date range or confirm
   };
 
-  const confirmGenerate = () => {
+  const confirmGenerate = async () => {
     if (!selectedReport) return;
 
     setGeneratingId(selectedReport.id);
-    setSelectedReport(null); // Close modal
+    setSelectedReport(null);
 
-    // Mock generation process
-    setTimeout(() => {
+    try {
+      const csvContent = await selectedReport.generateFn();
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${selectedReport.name.replace(/\s+/g, '_')}_${dateRange.start}_${dateRange.end}.csv`;
+      link.click();
+
+      // Add to generated reports list
+      setGeneratedReports((prev) => [
+        {
+          id: Date.now().toString(),
+          name: selectedReport.name,
+          generatedAt: new Date().toLocaleString(),
+          size: `${(blob.size / 1024).toFixed(1)} KB`,
+        },
+        ...prev.slice(0, 9),
+      ]);
+
+      toast('success', `${selectedReport.name} generated successfully`);
+    } catch (error) {
+      console.error('Error generating report:', error);
+      toast('error', 'Failed to generate report');
+    } finally {
       setGeneratingId(null);
-      const updatedTemplates = templates.map(t =>
-        t.id === selectedReport.id
-          ? { ...t, lastGenerated: new Date().toISOString().split('T')[0] }
-          : t
-      );
-      setTemplates(updatedTemplates);
-      toast('success', `${selectedReport.name} generated successfully.`);
-    }, 2000);
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'financial':
+        return 'bg-green-100 text-green-700';
+      case 'user':
+        return 'bg-blue-100 text-blue-700';
+      case 'system':
+        return 'bg-purple-100 text-purple-700';
+      case 'compliance':
+        return 'bg-orange-100 text-orange-700';
+      default:
+        return 'bg-neutral-100 text-neutral-700';
+    }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Reports Center</h1>
-          <p className="text-neutral-600 dark:text-neutral-400">Generate and download platform insights</p>
+          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Reports</h1>
+          <p className="text-neutral-500 mt-1">Generate and download platform reports</p>
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {templates.map((report) => (
-          <Card key={report.id} className="flex flex-col h-full hover:border-primary-200 dark:hover:border-primary-800 transition-colors">
-            <CardBody className="flex flex-col h-full">
-              <div className="flex items-start justify-between mb-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                  report.category === 'financial' ? 'bg-green-100 text-green-600 dark:bg-green-900/30' :
-                  report.category === 'user' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30' :
-                  report.category === 'system' ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30' :
-                  'bg-orange-100 text-orange-600 dark:bg-orange-900/30'
-                }`}>
-                  <report.icon className="w-6 h-6" />
-                </div>
-                <Badge variant="secondary" className="uppercase text-[10px] tracking-wider">
-                  {report.format}
-                </Badge>
-              </div>
-
-              <h3 className="font-semibold text-lg text-neutral-900 dark:text-white mb-2">{report.name}</h3>
-              <p className="text-sm text-neutral-500 mb-6 flex-1">{report.description}</p>
-
-              <div className="mt-auto space-y-4">
-                <div className="flex items-center text-xs text-neutral-400 gap-1.5">
-                  <Clock className="w-3.5 h-3.5" />
-                  Last generated: {report.lastGenerated ? new Date(report.lastGenerated).toLocaleDateString() : 'Never'}
-                </div>
-
-                <Button
-                  className="w-full justify-center"
-                  onClick={() => handleGenerate(report)}
-                  disabled={generatingId === report.id}
-                >
-                  {generatingId === report.id ? (
-                    <>Generating...</>
-                  ) : (
-                    <>
-                      <Download className="w-4 h-4 mr-2" /> Generate Report
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardBody>
-          </Card>
-        ))}
-      </div>
-
-      <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mt-8 mb-4">Recently Generated</h2>
+      {/* Date Range Selector */}
       <Card>
-        <CardBody className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-neutral-50 dark:bg-neutral-800 text-neutral-500 font-medium border-b border-neutral-200 dark:border-neutral-700">
-                <tr>
-                  <th className="px-6 py-3">Report Name</th>
-                  <th className="px-6 py-3">Date</th>
-                  <th className="px-6 py-3">Requested By</th>
-                  <th className="px-6 py-3">Status</th>
-                  <th className="px-6 py-3 text-right">Download</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
-                {[
-                  { name: 'Monthly Revenue Report', date: '2024-03-01', user: 'Admin User', status: 'ready', size: '2.4 MB' },
-                  { name: 'User Activity Log', date: '2024-02-28', user: 'Admin User', status: 'ready', size: '156 KB' },
-                  { name: 'Lawyer Compliance Audit', date: '2024-02-28', user: 'System', status: 'failed', size: '-' },
-                ].map((item, i) => (
-                  <tr key={i} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50">
-                    <td className="px-6 py-3 font-medium text-neutral-900 dark:text-white flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-neutral-400" />
-                      {item.name}
-                    </td>
-                    <td className="px-6 py-3 text-neutral-500">{item.date}</td>
-                    <td className="px-6 py-3 text-neutral-500">{item.user}</td>
-                    <td className="px-6 py-3">
-                      <Badge variant={item.status === 'ready' ? 'success' : 'danger'} className="capitalize">
-                        {item.status}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-3 text-right">
-                      {item.status === 'ready' ? (
-                        <button className="text-primary-600 hover:text-primary-700 font-medium text-xs flex items-center justify-end gap-1 ml-auto">
-                          <Download className="w-3.5 h-3.5" /> Download ({item.size})
-                        </button>
-                      ) : (
-                        <span className="text-neutral-400 text-xs italic">Unavailable</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <CardBody className="p-6">
+          <div className="flex items-center gap-4">
+            <Calendar className="w-5 h-5 text-neutral-400" />
+            <div className="flex gap-4">
+              <div>
+                <label className="text-sm text-neutral-500">Start Date</label>
+                <Input
+                  type="date"
+                  value={dateRange.start}
+                  onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="text-sm text-neutral-500">End Date</label>
+                <Input
+                  type="date"
+                  value={dateRange.end}
+                  onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                />
+              </div>
+            </div>
           </div>
         </CardBody>
       </Card>
 
-      {/* Generation Config Modal */}
+      {/* Report Templates */}
+      <div className="grid md:grid-cols-2 gap-4">
+        {REPORT_TEMPLATES.map((report) => {
+          const Icon = report.icon;
+          const isGenerating = generatingId === report.id;
+
+          return (
+            <Card key={report.id} className="hover:border-blue-300 transition-colors">
+              <CardBody className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-neutral-100 dark:bg-neutral-800 rounded-xl flex items-center justify-center">
+                    <Icon className="w-6 h-6 text-neutral-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-neutral-900 dark:text-white">{report.name}</h3>
+                      <Badge className={getCategoryColor(report.category)}>
+                        {report.category}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-neutral-500 mb-4">{report.description}</p>
+                    <Button
+                      size="sm"
+                      onClick={() => handleGenerate(report)}
+                      loading={isGenerating}
+                      disabled={isGenerating}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      {isGenerating ? 'Generating...' : 'Generate'}
+                    </Button>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Recently Generated */}
+      {generatedReports.length > 0 && (
+        <Card>
+          <CardHeader>
+            <h2 className="font-semibold text-neutral-900 dark:text-white">Recently Generated</h2>
+          </CardHeader>
+          <CardBody>
+            <div className="space-y-2">
+              {generatedReports.map((report) => (
+                <div
+                  key={report.id}
+                  className="flex items-center justify-between p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg"
+                >
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-5 h-5 text-blue-500" />
+                    <div>
+                      <p className="font-medium">{report.name}</p>
+                      <p className="text-sm text-neutral-500">{report.generatedAt}</p>
+                    </div>
+                  </div>
+                  <span className="text-sm text-neutral-500">{report.size}</span>
+                </div>
+              ))}
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
+      {/* Generate Modal */}
       <Modal
         isOpen={!!selectedReport}
         onClose={() => setSelectedReport(null)}
-        title={`Generate ${selectedReport?.name}`}
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setSelectedReport(null)}>Cancel</Button>
-            <Button onClick={confirmGenerate}>Generate Now</Button>
-          </>
-        }
+        title="Generate Report"
+        size="md"
       >
-        <div className="space-y-4">
-          <p className="text-neutral-600 dark:text-neutral-400">
-            Configure parameters for this report. The file will be available for download once generation is complete.
-          </p>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Start Date</label>
-              <input
-                type="date"
-                className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
-                onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-              />
+        {selectedReport && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <selectedReport.icon className="w-8 h-8 text-blue-500" />
+              <div>
+                <h3 className="font-semibold">{selectedReport.name}</h3>
+                <Badge className={getCategoryColor(selectedReport.category)}>
+                  {selectedReport.category}
+                </Badge>
+              </div>            </div>
+            <p className="text-neutral-600">{selectedReport.description}</p>
+            <div className="bg-neutral-50 dark:bg-neutral-800 p-3 rounded-lg">
+              <p className="text-sm text-neutral-500">
+                <strong>Date Range:</strong> {dateRange.start} to {dateRange.end}
+              </p>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">End Date</label>
-              <input
-                type="date"
-                className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
-                onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-              />
+            <div className="flex gap-2 pt-2">
+              <Button variant="outline" onClick={() => setSelectedReport(null)}>
+                Cancel
+              </Button>
+              <Button onClick={confirmGenerate}>
+                <Download className="w-4 h-4 mr-2" />
+                Download CSV
+              </Button>
             </div>
           </div>
-
-          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-start gap-3">
-             <Settings className="w-5 h-5 text-blue-600 mt-0.5" />
-             <div>
-               <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100">Format: {selectedReport?.format.toUpperCase()}</h4>
-               <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                 This report will be generated in {selectedReport?.format.toUpperCase()} format suitable for {selectedReport?.format === 'csv' || selectedReport?.format === 'xlsx' ? 'spreadsheet analysis' : 'printing'}.
-               </p>
-             </div>
-          </div>
-        </div>
+        )}
       </Modal>
     </div>
   );

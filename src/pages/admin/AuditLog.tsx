@@ -1,197 +1,217 @@
-import { useState } from 'react';
-import {
-  Activity,
-  Search,
-  Filter,
-  User,
-  Settings,
-  Shield,
-  Database,
-  Download,
-  Calendar,
-  MoreVertical
-} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Activity, User, Settings, Shield, Database, Download } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { DataTable, type Column } from '../../components/ui/DataTable';
+import { Input } from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
+import { supabase } from '../../lib/supabase';
 
 interface AuditLogEntry {
   id: string;
   action: string;
-  category: 'auth' | 'system' | 'data' | 'user_management';
-  actorId: string;
-  actorName: string;
-  actorRole: 'admin' | 'user' | 'lawyer' | 'system';
+  category: 'auth' | 'system' | 'data' | 'user_management' | 'visa' | 'booking';
+  actor_name: string;
+  actor_role: string;
   target: string;
   details: string;
-  ipAddress: string;
-  timestamp: string;
+  ip_address: string;
   status: 'success' | 'failure';
+  created_at: string;
 }
-
-const MOCK_AUDIT_LOGS: AuditLogEntry[] = [
-  {
-    id: 'L-1001',
-    action: 'User Login',
-    category: 'auth',
-    actorId: 'U-101',
-    actorName: 'Alice Johnson',
-    actorRole: 'user',
-    target: 'Auth Service',
-    details: 'Successful login via email/password',
-    ipAddress: '192.168.1.1',
-    timestamp: '2024-03-15T10:30:00Z',
-    status: 'success'
-  },
-  {
-    id: 'L-1002',
-    action: 'Update Profile',
-    category: 'user_management',
-    actorId: 'A-001',
-    actorName: 'Admin User',
-    actorRole: 'admin',
-    target: 'User Profile (U-102)',
-    details: 'Changed role from user to lawyer',
-    ipAddress: '10.0.0.5',
-    timestamp: '2024-03-15T11:15:00Z',
-    status: 'success'
-  },
-  {
-    id: 'L-1003',
-    action: 'Database Backup',
-    category: 'system',
-    actorId: 'SYS-001',
-    actorName: 'System Cron',
-    actorRole: 'system',
-    target: 'Main Database',
-    details: 'Daily backup completed',
-    ipAddress: 'localhost',
-    timestamp: '2024-03-15T00:00:00Z',
-    status: 'success'
-  },
-  {
-    id: 'L-1004',
-    action: 'Failed Login Attempt',
-    category: 'auth',
-    actorId: 'unknown',
-    actorName: 'Unknown',
-    actorRole: 'user',
-    target: 'Auth Service',
-    details: 'Invalid password for user bob@example.com',
-    ipAddress: '203.0.113.45',
-    timestamp: '2024-03-14T22:10:00Z',
-    status: 'failure'
-  },
-  {
-    id: 'L-1005',
-    action: 'Delete Document',
-    category: 'data',
-    actorId: 'L-205',
-    actorName: 'Sarah Wilson',
-    actorRole: 'lawyer',
-    target: 'Document (D-552)',
-    details: 'Deleted client document "Passport.pdf"',
-    ipAddress: '198.51.100.2',
-    timestamp: '2024-03-14T15:45:00Z',
-    status: 'success'
-  }
-];
 
 export function AuditLog() {
   const { toast } = useToast();
-  const [logs, setLogs] = useState<AuditLogEntry[]>(MOCK_AUDIT_LOGS);
+  const [logs, setLogs] = useState<AuditLogEntry[]>([]);
+  const [filteredLogs, setFilteredLogs] = useState<AuditLogEntry[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
-  const filteredLogs = logs.filter(log =>
-    log.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    log.actorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    log.details.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const fetchLogs = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('audit_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(200);
+
+      if (error) throw error;
+      setLogs(data || []);
+      setFilteredLogs(data || []);
+    } catch (error) {
+      toast('error', 'Failed to load audit logs');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
+  useEffect(() => {
+    let filtered = logs;
+    if (searchQuery) {
+      filtered = filtered.filter(
+        (l) =>
+          l.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          l.actor_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          l.target.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    if (categoryFilter !== 'all') {
+      filtered = filtered.filter((l) => l.category === categoryFilter);
+    }
+    setFilteredLogs(filtered);
+  }, [searchQuery, categoryFilter, logs]);
+
+  const handleExport = () => {
+    const headers = ['Date', 'Action', 'Category', 'Actor', 'Role', 'Target', 'Status', 'IP'];
+    const csvContent = [
+      headers.join(','),
+      ...filteredLogs.map((l) =>
+        [
+          new Date(l.created_at).toISOString(),
+          `"${l.action}"`,
+          l.category,
+          `"${l.actor_name}"`,
+          l.actor_role,
+          `"${l.target}"`,
+          l.status,
+          l.ip_address,
+        ].join(',')
+      ),
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `audit_log_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    toast('success', 'Audit log exported');
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'auth':
+        return <Shield className="w-4 h-4" />;
+      case 'system':
+        return <Settings className="w-4 h-4" />;
+      case 'data':
+        return <Database className="w-4 h-4" />;
+      default:
+        return <User className="w-4 h-4" />;
+    }
+  };
 
   const columns: Column<AuditLogEntry>[] = [
+    {
+      key: 'created_at',
+      header: 'Timestamp',
+      render: (row) => (
+        <span className="text-sm text-neutral-500">{new Date(row.created_at).toLocaleString()}</span>
+      ),
+    },
     {
       key: 'action',
       header: 'Action',
       render: (row) => (
-        <div className="flex items-center gap-3">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-            row.category === 'auth' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30' :
-            row.category === 'system' ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30' :
-            row.category === 'data' ? 'bg-orange-100 text-orange-600 dark:bg-orange-900/30' :
-            'bg-gray-100 text-gray-600 dark:bg-gray-800'
-          }`}>
-            {row.category === 'auth' ? <Shield className="w-4 h-4" /> :
-             row.category === 'system' ? <Settings className="w-4 h-4" /> :
-             row.category === 'data' ? <Database className="w-4 h-4" /> :
-             <User className="w-4 h-4" />}
-          </div>
-          <div>
-            <p className="font-medium text-neutral-900 dark:text-white">{row.action}</p>
-            <p className="text-xs text-neutral-500">{row.target}</p>
-          </div>
+        <div className="flex items-center gap-2">
+          {getCategoryIcon(row.category)}
+          <span className="font-medium">{row.action}</span>
         </div>
-      )
+      ),
     },
     {
-      key: 'actorName',
+      key: 'actor',
       header: 'Actor',
       render: (row) => (
         <div>
-          <p className="text-sm font-medium text-neutral-900 dark:text-white">{row.actorName}</p>
-          <p className="text-xs text-neutral-500 uppercase">{row.actorRole} • {row.ipAddress}</p>
+          <p className="font-medium">{row.actor_name}</p>
+          <Badge size="sm" variant="secondary">{row.actor_role}</Badge>
         </div>
-      )
+      ),
+    },
+    {
+      key: 'target',
+      header: 'Target',
+      render: (row) => <span className="text-sm">{row.target}</span>,
     },
     {
       key: 'details',
       header: 'Details',
-      render: (row) => <span className="text-sm text-neutral-600 dark:text-neutral-400 truncate max-w-[250px] block" title={row.details}>{row.details}</span>
+      render: (row) => (
+        <p className="max-w-xs truncate text-sm text-neutral-500">{row.details}</p>
+      ),
     },
     {
       key: 'status',
       header: 'Status',
       render: (row) => (
-        <Badge variant={row.status === 'success' ? 'success' : 'danger'} className="capitalize">
+        <Badge
+          variant={row.status === 'success' ? 'success' : 'error'}
+          size="sm"
+        >
           {row.status}
         </Badge>
-      )
+      ),
     },
-    {
-      key: 'timestamp',
-      header: 'Time',
-      render: (row) => <span className="text-xs text-neutral-500 whitespace-nowrap">{new Date(row.timestamp).toLocaleString()}</span>
-    }
   ];
+
+  const categories = ['all', 'auth', 'system', 'data', 'user_management', 'visa', 'booking'];
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Audit Log</h1>
-          <p className="text-neutral-600 dark:text-neutral-400">Track system events and user actions</p>
+          <p className="text-neutral-500 mt-1">Track all system activities</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="secondary" className="flex items-center gap-2">
-            <Calendar className="w-4 h-4" /> Date Range
-          </Button>
-          <Button variant="secondary" className="flex items-center gap-2">
-            <Download className="w-4 h-4" /> Export CSV
-          </Button>
-        </div>
+        <Button variant="secondary" onClick={handleExport}>
+          <Download className="w-4 h-4 mr-2" />
+          Export
+        </Button>
       </div>
 
+      {/* Filters */}
       <Card>
-        <CardBody className="p-0">
+        <CardBody className="p-4">
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <Input
+                placeholder="Search logs..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <select
+              className="border rounded-lg px-3 py-2"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+            >
+              <option value="all">All Categories</option>
+              {categories.slice(1).map((c) => (
+                <option key={c} value={c}>
+                  {c.charAt(0).toUpperCase() + c.slice(1).replace('_', ' ')}
+                </option>
+              ))}
+            </select>
+          </div>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <h2 className="font-semibold">Activity Log ({filteredLogs.length} entries)</h2>
+        </CardHeader>
+        <CardBody>
           <DataTable
             columns={columns}
             data={filteredLogs}
-            keyExtractor={(row) => row.id}
-            searchable
-            searchPlaceholder="Search logs by action, user, or details..."
-            onSearch={setSearchQuery}
-            pageSize={15}
+            loading={loading}
+            emptyMessage="No audit logs found"
           />
         </CardBody>
       </Card>
