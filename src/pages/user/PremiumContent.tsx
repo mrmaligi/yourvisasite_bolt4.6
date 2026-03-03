@@ -155,7 +155,11 @@ function PremiumGuideViewer({ visaId }: { visaId: string }) {
     }
     setCompletedSteps(newCompleted);
     if (user) {
-        localStorage.setItem(`visa_progress_${user.id}_${visaId}`, JSON.stringify(Array.from(newCompleted)));
+        try {
+            localStorage.setItem(`visa_progress_${user.id}_${visaId}`, JSON.stringify(Array.from(newCompleted)));
+        } catch (e) {
+            console.warn('Failed to save progress:', e);
+        }
     }
   };
 

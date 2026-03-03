@@ -12,8 +12,12 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('theme');
-    return (saved as Theme) || 'system';
+    try {
+      const saved = localStorage.getItem('theme');
+      return (saved as Theme) || 'system';
+    } catch {
+      return 'system';
+    }
   });
 
   const [isDark, setIsDark] = useState(false);
@@ -33,7 +37,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       setIsDark(theme === 'dark');
     }
 
-    localStorage.setItem('theme', theme);
+    try {
+      localStorage.setItem('theme', theme);
+    } catch (e) {
+      console.warn('Failed to save theme preference:', e);
+    }
   }, [theme]);
 
   // Listen for system theme changes
