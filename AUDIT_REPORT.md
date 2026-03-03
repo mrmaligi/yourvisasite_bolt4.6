@@ -1,71 +1,193 @@
-# Codebase Audit Report
+# VisaBuild Application Audit Report
 
-## Part 1: Code Analysis
+**Date:** 2026-03-03  
+**Project:** yourvisasite_bolt4.6 (VisaBuild)  
+**Database:** zogfvzzizbbmmmnlzxdg (Supabase)
 
-### TypeScript Errors
-- **Severity:** High
-- **Issue:** `src/components/GlobalSearch.tsx` was missing import for `LawyerProfile`.
-- **Fix:** Imported `LawyerProfile` from `../types/database`.
-- **Issue:** `src/components/layout/DashboardShell.tsx` was importing non-existent `toast`.
-- **Fix:** Switched to `useToast` hook.
-- **Issue:** `src/components/auth/RoleGuard.tsx` was using incorrect `loading` property.
-- **Fix:** Switched to `isLoading`.
-- **Issue:** `AdminDashboard.tsx` and `UserDashboard.tsx` used polymorphic `Button` (`as={Link}`) which is not supported.
-- **Fix:** Replaced with `Link` components using Tailwind classes.
+---
 
-### Unused Code
-- **Severity:** Low
-- **Issue:** Unused imports and variables in `LawyerDashboard.tsx`, `DashboardShell.tsx`, `ForumCategoryPage.tsx`.
-- **Recommendation:** Run a linter auto-fix or manually remove unused variables.
+## ✅ WORKING FEATURES
 
-## Part 2: SQL & Database Audit
+### Authentication & Users
+| Feature | Status | Notes |
+|---------|--------|-------|
+| User Registration | ✅ | Working with email verification |
+| User Login | ✅ | All roles (admin, lawyer, user) working |
+| Role-based Access | ✅ | Fixed RLS recursion issue |
+| Password Reset | ⚠️ | Mobile only, desktop missing |
+| Forgot Password | ⚠️ | Mobile only, desktop missing |
 
-### RLS Policies
-- **Severity:** Critical
-- **Issue:** `supabase/migrations/20260220120000_create_all_missing_tables.sql` created policies using `FOR ALL USING (...)` without `WITH CHECK`. This potentially allowed authenticated users to insert rows belonging to other users (e.g., booking slots for other lawyers).
-- **Fix:** Created new migration `20260221000000_fix_rls_security.sql` to drop and recreate policies with `WITH CHECK` clauses for:
-    - `consultation_slots`
-    - `saved_visas`
-    - `marketplace_listings`
-    - `marketplace_reviews`
-    - `youtube_feeds`
+**Test Accounts (Working):**
+- `mrmaligi@outlook.com` / `Qwerty@2007` → Admin
+- `admin2@visabuild.com` / `Admin123!` → Admin  
+- `lawyer2@visabuild.com` / `Lawyer123!` → Lawyer
+- `user2@visabuild.com` / `User123!` → User
 
-### Indexes
-- **Severity:** Low
-- **Issue:** Most foreign keys are indexed, which is good.
-- **Recommendation:** Monitor `tracker_entries` performance as it grows; might need composite index on `(visa_id, status)`.
+### Core Features
+| Feature | Status | Data Count |
+|---------|--------|------------|
+| Visa Search/Display | ✅ | 86 visas |
+| Lawyer Directory | ✅ | 12 lawyer profiles |
+| User Dashboard | ✅ | Routed correctly |
+| Lawyer Dashboard | ✅ | Routed correctly |
+| Admin Dashboard | ✅ | Routed correctly |
 
-## Part 3: Performance Issues
+---
 
-### Bundle Size
-- **Severity:** Medium
-- **Issue:** `dist/assets/index.js` is ~540kB.
-- **Recommendation:** Investigate code splitting `src/components/ui` if used heavily, or check if large libraries (like `recharts` or `framer-motion`) can be optimized. `App.tsx` already uses `lazy` loading for routes, which is good.
+## ❌ MISSING/EMPTY FEATURES
 
-### Re-renders
-- **Severity:** Low
-- **Issue:** `GlobalSearch` fetches data every time it opens.
-- **Recommendation:** Implement caching (e.g., React Query or simple state cache) for search data.
+### Content Management
+| Feature | Status | Issue |
+|---------|--------|-------|
+| News Articles | ❌ Empty | 0 articles in DB |
+| Forum Topics | ❌ Empty | 0 topics in DB |
+| Blog Posts | ❌ Missing | Not implemented |
 
-## Part 4: Security Audit
+### Booking & Consultations
+| Feature | Status | Issue |
+|---------|--------|-------|
+| Consultation Slots | ❌ Empty | 0 slots created |
+| Bookings | ❌ Empty | 0 bookings |
+| Lawyer Availability | ⚠️ | UI exists, no backend data |
 
-### RLS
-- **Severity:** Critical
-- **Status:** Fixed. See Part 2.
+### User Features
+| Feature | Status | Issue |
+|---------|--------|-------|
+| User Documents | ❌ Empty | 0 documents |
+| Saved Visas | ❌ Empty | No data |
+| Messages | ❌ Empty | 0 messages |
+| Notifications | ❌ Empty | 0 notifications |
 
-### Input Validation
-- **Severity:** Medium
-- **Issue:** Frontend validation relies mostly on HTML attributes or simple checks.
-- **Recommendation:** Ensure all API endpoints (Supabase Edge Functions) validate input strictly using Zod or similar.
+### Marketplace
+| Feature | Status | Issue |
+|---------|--------|-------|
+| Marketplace Listings | ❌ Empty | 0 products/services |
+| Purchases | ❌ Empty | No transaction history |
 
-## Part 5: Best Practices
+### Support
+| Feature | Status | Issue |
+|---------|--------|-------|
+| Contact Submissions | ❌ Empty | 0 submissions |
+| Support Tickets | ❌ Missing | Not implemented |
+| Live Chat | ⚠️ | UI exists, no backend |
 
-### Accessibility
-- **Severity:** Medium
-- **Issue:** Some buttons/links were nested or semantically incorrect (fixed some in dashboards).
-- **Recommendation:** Run an automated accessibility tool (like Axe) to catch contrast and label issues.
+---
 
-### Error Handling
-- **Severity:** Low
-- **Issue:** `toast` was not working in `DashboardShell`.
-- **Fix:** Fixed `toast` usage.
+## 🔧 MISSING PAGES
+
+### Critical Missing Pages
+1. **ForgotPassword.tsx** (Desktop) - Linked in login but route doesn't exist
+2. **ResetPassword.tsx** (Desktop) - Needed for password reset flow
+3. **EmailVerification.tsx** - For email confirmation flow
+
+### Mobile Placeholders
+The following mobile pages exist but are just placeholders:
+- `MobileForgotPassword.tsx` - Just shows "This is the mobile optimized view"
+- `MobileResetPassword.tsx` - Just shows placeholder content
+
+---
+
+## 📋 COMPREHENSIVE FIX PLAN
+
+### Phase 1: Critical Fixes (Password Reset)
+- [ ] Create `src/pages/public/ForgotPassword.tsx`
+- [ ] Create `src/pages/public/ResetPassword.tsx`
+- [ ] Add routes to `App.tsx`
+- [ ] Fix `MobileForgotPassword.tsx` with real functionality
+- [ ] Fix `MobileResetPassword.tsx` with real functionality
+- [ ] Add `resetPassword()` to `AuthContext.tsx`
+
+### Phase 2: Seed Data
+- [ ] Create news articles (at least 5)
+- [ ] Create forum categories and sample topics
+- [ ] Create consultation slots for lawyers
+- [ ] Create sample marketplace listings
+- [ ] Create document categories
+
+### Phase 3: RLS & Security
+- [ ] Verify all tables have RLS enabled
+- [ ] Check all policies are working
+- [ ] Add policies for messages table
+- [ ] Add policies for notifications table
+- [ ] Add policies for user_documents table
+
+### Phase 4: Backend Integration
+- [ ] Connect Contact Support form to database
+- [ ] Connect Newsletter signup
+- [ ] Implement real-time notifications
+- [ ] Implement messaging system
+
+---
+
+## 📊 DATABASE TABLE STATUS
+
+| Table | Count | RLS | Notes |
+|-------|-------|-----|-------|
+| visas | 86 | ✅ | Working |
+| profiles | 41 | ✅ | Working |
+| lawyer_profiles | 12 | ✅ | Working |
+| news_articles | 0 | ✅ | Needs seed data |
+| forum_categories | ? | ✅ | Needs check |
+| forum_topics | 0 | ✅ | Needs seed data |
+| forum_replies | 0 | ✅ | Needs seed data |
+| marketplace_listings | 0 | ✅ | Needs seed data |
+| marketplace_categories | ? | ✅ | Needs check |
+| consultation_slots | 0 | ✅ | Needs seed data |
+| bookings | 0 | ✅ | Needs seed data |
+| messages | 0 | ❓ | Check RLS |
+| notifications | 0 | ❓ | Check RLS |
+| user_documents | 0 | ❓ | Check RLS |
+| contact_submissions | 0 | ❓ | Check RLS |
+| document_categories | 9 | ✅ | Working |
+| saved_visas | 0 | ✅ | Working |
+| referrals | 0 | ✅ | Working |
+
+---
+
+## 🎯 RECOMMENDED PRIORITY ORDER
+
+1. **Password Reset Pages** - Users can't recover accounts
+2. **Seed News & Forum** - Makes site look active
+3. **Consultation Slots** - Core lawyer feature
+4. **Messaging System** - User-lawyer communication
+5. **Marketplace Listings** - Revenue opportunity
+6. **Notifications** - User engagement
+
+---
+
+## 🔍 ROUTE COVERAGE
+
+### Public Routes (Implemented)
+- `/` - Landing ✅
+- `/login` - UnifiedLogin ✅
+- `/register` - Register ✅
+- `/visas` - VisaSearch ✅
+- `/visas/:id` - VisaDetail ✅
+- `/lawyers` - LawyerDirectory ✅
+- `/lawyers/:id` - LawyerProfile ✅
+- `/news` - News ✅
+- `/forum` - ForumHomePage ✅
+- `/marketplace` - Marketplace ✅
+- `/pricing` - Pricing ✅
+- `/about`, `/contact`, `/faq`, etc. ✅
+
+### Missing Public Routes
+- `/forgot-password` ❌
+- `/reset-password` ❌
+- `/verify-email` ❌
+
+### Protected Routes (Implemented)
+- `/dashboard` - UserDashboard ✅
+- `/dashboard/visas`, `/dashboard/documents`, etc. ✅
+- `/lawyer/dashboard` - LawyerDashboard ✅
+- `/admin` - AdminDashboard ✅
+
+---
+
+## 📝 NOTES
+
+- **670 pages** exist in `src/pages/` but many are not routed
+- **Mobile routes** exist but are mostly placeholders
+- **AI features** have pages but no backend implementation
+- **Integrations** have pages but no backend implementation
+- **Performance monitoring** has pages but no backend implementation

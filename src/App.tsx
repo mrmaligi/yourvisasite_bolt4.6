@@ -44,6 +44,10 @@ const ForumTopicPage = lazy(() => import('./pages/public/ForumTopicPage').then(m
 const LawyerRegister = lazy(() => import('./pages/lawyer/LawyerRegister').then(m => ({ default: m.LawyerRegister })));
 const LawyerPending = lazy(() => import('./pages/lawyer/LawyerPending').then(m => ({ default: m.LawyerPending })));
 
+// Password Reset Pages
+const ForgotPassword = lazy(() => import('./pages/public/ForgotPassword').then(m => ({ default: m.ForgotPassword })));
+const ResetPassword = lazy(() => import('./pages/public/ResetPassword').then(m => ({ default: m.ResetPassword })));
+
 const Resources = lazy(() => import('./pages/public/Resources').then(m => ({ default: m.Resources })));
 const Guides = lazy(() => import('./pages/public/Guides').then(m => ({ default: m.Guides })));
 const Checklists = lazy(() => import('./pages/public/Checklists').then(m => ({ default: m.Checklists })));
@@ -182,6 +186,8 @@ export default function App() {
                     <Route path="role-select" element={<RoleRedirect />} />
                     <Route path="register" element={<Register />} />
                     <Route path="register/lawyer" element={<LawyerRegister />} />
+                    <Route path="forgot-password" element={<ForgotPassword />} />
+                    <Route path="reset-password" element={<ResetPassword />} />
                     <Route path="visas" element={<VisaSearch />} />
                     <Route path="visas/compare" element={<VisaCompare />} />
                     <Route path="visas/:id" element={<VisaDetail />} />
