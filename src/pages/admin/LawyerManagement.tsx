@@ -41,7 +41,7 @@ export function LawyerManagement() {
     const userIds = lawyerData.map((l) => l.user_id);
     const { data: userData } = await supabase
       .from('profiles')
-      .select('id, full_name')
+      .select('id, full_name, email')
       .in('id', userIds);
 
     const userMap = new Map(userData?.map((u) => [u.id, u]) || []);
@@ -58,46 +58,31 @@ export function LawyerManagement() {
   useEffect(() => { fetchLawyers(); }, []);
 
   const handleApprove = async (lawyer: LawyerWithProfile) => {
+    // Update lawyer_profiles
     await supabase.from('lawyer_profiles').update({
       is_verified: true,
       verification_status: 'approved',
-      verified_at: new Date().toISOString(), // Note: verified_at is not in LawyerProfile interface anymore, might cause TS error if I update type but not code? Wait, LawyerProfile didn't have verified_at in my update?
-      // My updated LawyerProfile: id, user_id, bar_number, jurisdiction, specializations, years_experience, bio, credentials_url, verification_status, hourly_rate_cents, consultation_fee_cents, is_available, created_at, updated_at.
-      // Removed: verified_at, verified_by, rejection_reason.
-      // If I remove them from type, TS will complain here.
-      // But FULL_RESET.sql does NOT have verified_at, verified_by, rejection_reason in lawyer_profiles table.
-      // So I must remove them from the update call if they don't exist in DB.
-      // Or if the view supports them?
-      // The user said "Remove phantom columns".
-      // So I should remove them.
-      // But how do we track rejection reason?
-      // FULL_RESET.sql doesn't show it.
-      // Maybe I should keep them if they are useful?
-      // But user said "Remove phantom columns".
-      // So I will remove them from the update call.
-      // Wait, handleReject uses rejection_reason.
-      // If the DB doesn't have it, handleReject will fail.
-      // Maybe the user meant "phantom columns that are NOT in real schema".
-      // If real schema doesn't have rejection_reason, then I can't store it.
-      // I will remove verified_at, verified_by, rejection_reason from the code.
     }).eq('id', lawyer.id);
+    
+    // Also update profiles to mark as verified lawyer
+    await supabase.from('profiles').update({
+      is_verified: true,
+      verification_status: 'approved',
+      role: 'lawyer',
+    }).eq('id', lawyer.user_id);
+    
+    // Notify lawyer
+    await supabase.from('notifications').insert({
+      user_id: lawyer.user_id,
+      title: 'Registration Approved',
+      body: 'Your lawyer registration has been approved. You can now access your dashboard.',
+      type: 'lawyer_approved',
+      link: '/lawyer/dashboard',
+    });
 
     try {
       const { error } = await supabase.functions.invoke('verify-lawyer', {
-        body: { lawyer_profile_id: lawyer.id, action: 'approve' }, // Assuming edge function expects lawyer_profile_id as the ID of the lawyer profile row, OR the user_id?
-        // Edge function parameter name is lawyer_profile_id. In previous code it passed lawyer.profile_id which was likely user_id (since profiles.id = auth.users.id).
-        // Now LawyerProfile has user_id which refs profiles.id.
-        // If verify-lawyer expects the lawyer_profiles.id, I should pass lawyer.id.
-        // If it expects the user id, I should pass lawyer.user_id.
-        // "lawyer_profile_id" suggests the PK of lawyer_profiles table.
-        // Previously "profile_id" was used.
-        // I will assume it needs the lawyer_profiles ID if it updates it.
-        // Or if it updates public.profiles, it needs user_id.
-        // Given I changed the type to match public.lawyer_profiles, 'id' is the PK of lawyer_profiles.
-        // 'user_id' is the FK to profiles.
-        // I'll check verify-lawyer logic if possible, but I can't see it easily if it's not in my list.
-        // Wait, I saw supabase/functions/verify-lawyer in the list!
-        // I'll assume lawyer.id (PK of lawyer_profiles) is correct if the param is named lawyer_profile_id.
+        body: { lawyer_profile_id: lawyer.id, action: 'approve' },
       });
       if (error) throw error;
     } catch (err) {
@@ -110,10 +95,25 @@ export function LawyerManagement() {
 
   const handleReject = async () => {
     if (!rejectTarget) return;
+    
     await supabase.from('lawyer_profiles').update({
       verification_status: 'rejected',
-      // rejection_reason: rejectReason, // Removed
     }).eq('id', rejectTarget.id);
+    
+    // Also update profiles
+    await supabase.from('profiles').update({
+      verification_status: 'rejected',
+    }).eq('id', rejectTarget.user_id);
+    
+    // Notify lawyer
+    await supabase.from('notifications').insert({
+      user_id: rejectTarget.user_id,
+      title: 'Registration Not Approved',
+      body: rejectReason || 'Your lawyer registration was not approved. Please contact support for more information.',
+      type: 'lawyer_rejected',
+      link: '/dashboard',
+    });
+    
     toast('success', 'Lawyer rejected');
     setRejectTarget(null);
     setRejectReason('');
@@ -139,59 +139,61 @@ export function LawyerManagement() {
 
   const columns: Column<LawyerWithProfile>[] = [
     { key: 'full_name', header: 'Name', render: (r) => r.full_name, sortable: true },
-    { key: 'bar_number', header: 'Bar Number', render: (r) => r.bar_number }, // Changed key to match property
+    { key: 'bar_number', header: 'Bar Number', render: (r) => r.bar_number },
     { key: 'jurisdiction', header: 'Jurisdiction', render: (r) => r.jurisdiction },
-    { key: 'years_experience', header: 'Experience', render: (r) => `${r.years_experience} years` }, // Changed key
+    { key: 'years_experience', header: 'Experience', render: (r) => `${r.years_experience} years` },
     {
-      key: 'verification_status', // Changed key
+      key: 'verification_status',
       header: 'Status',
-      render: (r) => (
-        <div className="flex flex-col gap-1">
-            <Badge variant={statusVariant[r.verification_status]}>{r.verification_status}</Badge>
-            {/* Removed rejection_reason display */}
-        </div>
-      )
+      render: (r) => <Badge variant={statusVariant[r.verification_status]}>{r.verification_status}</Badge>
     },
-    { key: 'hourly_rate_cents', header: 'Rate', render: (r) => r.hourly_rate_cents ? `$${r.hourly_rate_cents / 100}/hr` : 'Not set' }, // Changed key
+    { key: 'hourly_rate_cents', header: 'Rate', render: (r) => r.hourly_rate_cents ? `$${r.hourly_rate_cents / 100}/hr` : 'Not set' },
     {
-      key: 'id', // Changed to id or simple key
+      key: 'id',
       header: 'Actions', render: (r) => (
         <div className="flex gap-2">
           {r.credentials_url && (
-            <Button size="sm" variant="ghost" onClick={() => viewDocument(r)}>View Doc</Button>
+            <Button size="sm" variant="secondary" onClick={() => viewDocument(r)}>
+              View Document
+            </Button>
           )}
           {r.verification_status === 'pending' && (
             <>
-              <Button size="sm" onClick={() => handleApprove(r)}>Approve</Button>
-              <Button size="sm" variant="danger" onClick={() => setRejectTarget(r)}>Reject</Button>
+              <Button size="sm" variant="secondary" onClick={() => handleApprove(r)}>
+                Approve
+              </Button>
+              <Button size="sm" variant="danger" onClick={() => setRejectTarget(r)}>
+                Reject
+              </Button>
             </>
           )}
         </div>
-      ),
+      )
     },
   ];
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-neutral-900">Lawyer Management</h1>
-      <DataTable columns={columns} data={lawyers} keyExtractor={(r) => r.id} loading={loading} />
-      <Modal
-        isOpen={!!rejectTarget}
-        onClose={() => setRejectTarget(null)}
-        title="Reject Lawyer"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setRejectTarget(null)}>Cancel</Button>
-            <Button variant="danger" onClick={handleReject} disabled={!rejectReason}>Confirm Rejection</Button>
-          </>
-        }
-      >
-        <Textarea
-          label="Rejection Reason"
-          value={rejectReason}
-          onChange={(e) => setRejectReason(e.target.value)}
-          placeholder="Provide a reason for rejection..."
-        />
+      <DataTable columns={columns} data={lawyers} loading={loading} />
+      
+      <Modal isOpen={!!rejectTarget} onClose={() => setRejectTarget(null)} title="Reject Lawyer Registration">
+        <div className="space-y-4">
+          <p className="text-sm text-neutral-500">Provide a reason for rejection (optional):</p>
+          <Textarea
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            placeholder="Reason for rejection..."
+          />
+          <div className="flex justify-end gap-2">
+            <Button variant="secondary" onClick={() => setRejectTarget(null)}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleReject}>
+              Reject
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

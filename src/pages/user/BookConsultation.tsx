@@ -83,8 +83,15 @@ export function BookConsultation() {
           avatar_url: profileRow?.avatar_url || null,
         });
 
-        // Fetch Available Slots (consultation_slots table removed)
-        setSlots([]);
+        // Fetch Available Slots
+        const { data: slotsData } = await supabase
+          .from('consultation_slots')
+          .select('id, lawyer_id, start_time, end_time, is_booked')
+          .eq('lawyer_id', lawyerId)
+          .eq('is_booked', false)
+          .gte('start_time', new Date().toISOString())
+          .order('start_time');
+        setSlots(slotsData || []);
 
         // Fetch Visas
         const { data: visaList } = await supabase

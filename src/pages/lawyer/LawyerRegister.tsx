@@ -65,10 +65,55 @@ export function LawyerRegister() {
         bio: bio || null,
         hourly_rate_cents: hourlyRate ? Math.round(parseFloat(hourlyRate) * 100) : null,
         verification_document_url: verificationUrl || null,
+        role: 'lawyer',
+        verification_status: 'pending',
       }).eq('id', user.id);
 
       if (updateError) {
         throw new Error(updateError.message);
+      }
+
+      // Create lawyer_profiles record
+      const { error: lawyerProfileError } = await supabase.from('lawyer_profiles').insert({
+        user_id: user.id,
+        bar_number: barNumber,
+        jurisdiction,
+        practice_areas: practiceAreas.split(',').map((s) => s.trim()).filter(Boolean),
+        years_experience: parseInt(yearsExperience) || 0,
+        bio: bio || null,
+        hourly_rate_cents: hourlyRate ? Math.round(parseFloat(hourlyRate) * 100) : null,
+        credentials_url: verificationUrl || null,
+        verification_status: 'pending',
+        is_verified: false,
+        is_available: true,
+      });
+
+      if (lawyerProfileError) {
+        console.warn('Could not create lawyer_profile:', lawyerProfileError);
+        // Don't throw - profile update was successful
+      }
+
+      // Create notification for admins
+      try {
+        // Get all admin IDs
+        const { data: admins } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('role', 'admin');
+        
+        if (admins && admins.length > 0) {
+          const notifications = admins.map(admin => ({
+            user_id: admin.id,
+            title: 'New Lawyer Registration',
+            body: `${user.email || 'A new lawyer'} has submitted a registration and requires approval.`,
+            type: 'lawyer_registration',
+            link: '/admin/lawyers',
+          }));
+          
+          await supabase.from('notifications').insert(notifications);
+        }
+      } catch (notifError) {
+        console.warn('Could not send admin notifications:', notifError);
       }
 
       await refreshProfile();

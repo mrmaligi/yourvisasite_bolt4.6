@@ -64,9 +64,19 @@ export function Availability() {
       });
   }, [profile]);
 
-  const fetchSlots = async (_lid: string) => {
-    // consultation_slots removed
-    setSlots([]);
+  const fetchSlots = async (lid: string) => {
+    const { data, error } = await supabase
+      .from('consultation_slots')
+      .select('id, lawyer_id, start_time, end_time, is_booked')
+      .eq('lawyer_id', lid)
+      .order('start_time');
+    
+    if (error) {
+      console.error('Error fetching slots:', error);
+      toast('error', 'Failed to load availability');
+    } else {
+      setSlots(data || []);
+    }
     setLoading(false);
   };
 
@@ -96,13 +106,19 @@ export function Availability() {
     }
 
     setSaving(true);
-    // consultation_slots removed
-    const error = { message: 'Feature disabled' };
+    const { error } = await supabase
+      .from('consultation_slots')
+      .insert({
+        lawyer_id: lawyerId,
+        start_time: startTime,
+        end_time: endTime,
+        is_booked: false
+      });
+    
     setSaving(false);
     if (error) {
       toast('error', error.message);
     } else {
-      // Unreachable
       toast('success', 'Slot added');
       setShowAdd(false);
       setStartTime('');
@@ -111,11 +127,20 @@ export function Availability() {
     }
   };
 
-  const handleDelete = async (_id: string) => {
+  const handleDelete = async (id: string) => {
     if (!lawyerId) return;
-    // consultation_slots removed
-    toast('error', 'Feature disabled');
-    // fetchSlots(lawyerId);
+    
+    const { error } = await supabase
+      .from('consultation_slots')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      toast('error', error.message);
+    } else {
+      toast('success', 'Slot deleted');
+      fetchSlots(lawyerId);
+    }
   };
 
   return (
