@@ -1,0 +1,288 @@
+{
+  "$schema": "https://yourvisasite.com/schemas/visa-import.json",
+  "version": "1.0",
+  "visa": {
+    "subclass": "417",
+    "name": "Working Holiday",
+    "category": "visitor",
+    "country": "Australia",
+    "summary": "The Working Holiday visa allows young adults to holiday in Australia and work to fund their travels.",
+    "description": "Full detailed description of the visa...",
+    "duration": "12 months initially",
+    "cost_aud": "AUD $635",
+    "processing_time_range": "18-35 days",
+    "official_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/work-holiday-417",
+    "is_active": true,
+    "key_requirements": "• Age 18-30 (18-35 for some countries)\n• Hold eligible passport\n• No dependent children\n• Sufficient funds (AUD $5,000+)",
+    "eligibility_criteria": {
+      "age": "18-30 years (inclusive), 18-35 for some countries",
+      "passport": "Must hold passport from eligible country",
+      "dependent_children": "Must not have any dependent children",
+      "funds": "AUD $5,000 recommended plus return travel funds",
+      "health": "Must meet health standards",
+      "character": "No serious criminal history"
+    },
+    "metadata": {
+      "last_updated": "2025-03-01",
+      "source": "Department of Home Affairs",
+      "reviewed_by": "Immigration Expert"
+    }
+  },
+  
+  "premium_content": [
+    {
+      "section_number": 1,
+      "title": "Executive Overview",
+      "content_type": "guide",
+      "content": "Detailed executive overview content...",
+      "is_published": true,
+      "tips": "Key insights about this visa"
+    },
+    {
+      "section_number": 2,
+      "title": "Eligibility Deep Dive",
+      "content_type": "guide",
+      "content": "Comprehensive eligibility requirements...",
+      "is_published": true
+    },
+    {
+      "section_number": 3,
+      "title": "Step-by-Step Application Guide",
+      "content_type": "guide",
+      "content": "Detailed application process...",
+      "is_published": true
+    },
+    {
+      "section_number": 4,
+      "title": "Document Checklist",
+      "content_type": "checklist",
+      "content": "Complete list of required documents...",
+      "is_published": true
+    },
+    {
+      "section_number": 5,
+      "title": "Costs & Fees Breakdown",
+      "content_type": "guide",
+      "content": "Detailed cost breakdown...",
+      "is_published": true
+    },
+    {
+      "section_number": 6,
+      "title": "Processing Times Explained",
+      "content_type": "guide",
+      "content": "Processing time details...",
+      "is_published": true
+    },
+    {
+      "section_number": 7,
+      "title": "Common Mistakes & Expert Tips",
+      "content_type": "guide",
+      "content": "Tips and common pitfalls...",
+      "is_published": true
+    },
+    {
+      "section_number": 8,
+      "title": "Official Resources & Links",
+      "content_type": "guide",
+      "content": "Links to official resources...",
+      "is_published": true
+    },
+    {
+      "section_number": 9,
+      "title": "Video Guide",
+      "content_type": "video",
+      "content": "Video embed URL or description",
+      "file_urls": ["https://youtube.com/watch?v=example"],
+      "is_published": true
+    },
+    {
+      "section_number": 10,
+      "title": "Real Timeline Tracker Data",
+      "content_type": "guide",
+      "content": "Timeline statistics and analysis...",
+      "is_published": true
+    }
+  ],
+  
+  "documents": {
+    "required": [
+      {
+        "name": "Valid Passport",
+        "description": "Must have 6+ months validity",
+        "is_mandatory": true,
+        "document_type": "identity",
+        "file_naming_pattern": "passport_[applicant_name].pdf",
+        "max_file_size_mb": 5,
+        "allowed_formats": ["pdf", "jpg", "png"],
+        "checklist_order": 1,
+        "tips": "Ensure all pages are clear and legible"
+      },
+      {
+        "name": "Bank Statements",
+        "description": "Last 3 months showing AUD $5,000+ funds",
+        "is_mandatory": true,
+        "document_type": "financial",
+        "file_naming_pattern": "bank_statements_[month]_[year].pdf",
+        "max_file_size_mb": 10,
+        "allowed_formats": ["pdf"],
+        "checklist_order": 2,
+        "tips": "Highlight closing balances"
+      },
+      {
+        "name": "Passport Photo",
+        "description": "Recent passport-sized photograph",
+        "is_mandatory": true,
+        "document_type": "identity",
+        "file_naming_pattern": "photo_[applicant_name].jpg",
+        "max_file_size_mb": 2,
+        "allowed_formats": ["jpg", "png"],
+        "checklist_order": 3,
+        "tips": "White background, neutral expression"
+      },
+      {
+        "name": "Return Flight Booking",
+        "description": "Or evidence of funds for onward travel",
+        "is_mandatory": false,
+        "document_type": "travel",
+        "file_naming_pattern": "flight_[booking_ref].pdf",
+        "max_file_size_mb": 5,
+        "allowed_formats": ["pdf", "jpg"],
+        "checklist_order": 4,
+        "tips": "Can be flexible/bookable ticket"
+      }
+    ],
+    "optional": [
+      {
+        "name": "Health Examination Results",
+        "description": "If required based on country/risk",
+        "is_mandatory": false,
+        "document_type": "health",
+        "file_naming_pattern": "health_exam_[date].pdf",
+        "tips": "Use DHA panel physician only"
+      },
+      {
+        "name": "Police Clearance",
+        "description": "From countries lived in 12+ months",
+        "is_mandatory": false,
+        "document_type": "character",
+        "file_naming_pattern": "police_clearance_[country].pdf"
+      }
+    ],
+    "folders": [
+      {
+        "name": "Identity Documents",
+        "description": "Passport, photos, birth certificate",
+        "order": 1,
+        "required_documents": ["Valid Passport", "Passport Photo"]
+      },
+      {
+        "name": "Financial Evidence",
+        "description": "Bank statements, proof of funds",
+        "order": 2,
+        "required_documents": ["Bank Statements"]
+      },
+      {
+        "name": "Travel Documents",
+        "description": "Flight bookings, itineraries",
+        "order": 3,
+        "required_documents": ["Return Flight Booking"]
+      },
+      {
+        "name": "Health & Character",
+        "description": "Medical exams, police checks",
+        "order": 4,
+        "required_documents": []
+      }
+    ]
+  },
+  
+  "timeline_tracker": {
+    "official_times": {
+      "25_percentile": "10 days",
+      "50_percentile": "18 days",
+      "75_percentile": "28 days",
+      "90_percentile": "35 days",
+      "last_updated": "2025-01-15"
+    },
+    "entries": [
+      {
+        "application_date": "2025-01-27",
+        "decision_date": "2025-02-15",
+        "days": 19,
+        "status": "granted",
+        "country": "United Kingdom",
+        "notes": "First WHV, straightforward application",
+        "is_public": true
+      },
+      {
+        "application_date": "2024-12-04",
+        "decision_date": "2024-12-11",
+        "days": 7,
+        "status": "granted",
+        "country": "Germany",
+        "notes": "2nd WHV, with partner",
+        "is_public": true
+      },
+      {
+        "application_date": "2024-07-03",
+        "decision_date": "2024-07-29",
+        "days": 26,
+        "status": "granted",
+        "country": "France",
+        "notes": "Included health check",
+        "is_public": true
+      }
+    ],
+    "statistics": {
+      "average_days": 20,
+      "median_days": 18,
+      "fastest_grant": 5,
+      "slowest_reported": 50,
+      "common_range": "14-28 days",
+      "granted_within_30_days_percent": 80
+    },
+    "factors": {
+      "fastest": ["Clean immigration history", "No health concerns", "Complete application"],
+      "slowest": ["Health examination required", "Character check needed", "Peak season"]
+    }
+  },
+  
+  "faqs": [
+    {
+      "question": "Can I study on a Working Holiday visa?",
+      "answer": "Yes, you can study for up to 4 months (17 weeks) on this visa.",
+      "category": "general",
+      "order": 1
+    },
+    {
+      "question": "How long can I work with one employer?",
+      "answer": "Maximum 6 months with any single employer. You can work for multiple employers.",
+      "category": "work",
+      "order": 2
+    },
+    {
+      "question": "Can I extend my Working Holiday visa?",
+      "answer": "Yes, you can apply for 2nd and 3rd year visas after completing specified work in regional Australia.",
+      "category": "extensions",
+      "order": 3
+    }
+  ],
+  
+  "news_and_updates": [
+    {
+      "title": "New Postcodes Added for Specified Work",
+      "content": "Additional postcodes added for disaster recovery areas...",
+      "published_at": "2025-02-01",
+      "is_published": true,
+      "category": "program_updates"
+    }
+  ],
+  
+  "related_visas": [
+    {
+      "subclass": "462",
+      "relationship": "alternative",
+      "notes": "Work and Holiday visa for different countries"
+    }
+  ]
+}
