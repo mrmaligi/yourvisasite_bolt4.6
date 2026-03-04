@@ -108,6 +108,7 @@ const UserManagement = lazy(() => import('./pages/admin/UserManagement').then(m 
 const LawyerManagement = lazy(() => import('./pages/admin/LawyerManagement').then(m => ({ default: m.LawyerManagement })));
 const VisaManagement = lazy(() => import('./pages/admin/VisaManagement').then(m => ({ default: m.VisaManagement })));
 const AdminVisaEdit = lazy(() => import('./pages/admin/VisaEdit').then(m => ({ default: m.AdminVisaEdit })));
+const VisaImport = lazy(() => import('./pages/admin/VisaImport').then(m => ({ default: m.VisaImport })));
 const PremiumContent = lazy(() => import('./pages/admin/PremiumContent').then(m => ({ default: m.PremiumContent })));
 const NewsManagement = lazy(() => import('./pages/admin/NewsManagement').then(m => ({ default: m.NewsManagement })));
 const TrackerManagement = lazy(() => import('./pages/admin/TrackerManagement').then(m => ({ default: m.TrackerManagement })));
@@ -282,6 +283,7 @@ export default function App() {
                     <Route path="admin/lawyers" element={<LawyerManagement />} />
                     <Route path="admin/visas" element={<VisaManagement />} />
 <Route path="admin/visas/:id/edit" element={<AdminVisaEdit />} />
+<Route path="admin/visas/import" element={<VisaImport />} />
                     <Route path="admin/bookings" element={<Bookings />} />
                     <Route path="admin/premium" element={<PremiumContent />} />
                     <Route path="admin/news" element={<NewsManagement />} />

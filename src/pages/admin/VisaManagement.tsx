@@ -243,7 +243,12 @@ export function VisaManagement() {
           <h1 className="text-2xl font-bold text-neutral-900">Visa Management</h1>
           <p className="text-sm text-neutral-500 mt-1">{visas.length} visas • {visas.filter(v => v.is_active).length} active</p>
         </div>
-        <Button size="sm" onClick={openCreate}><Plus className="w-4 h-4" /> Add Visa</Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="secondary" onClick={() => navigate('/admin/visas/import')}>
+            <FileJson className="w-4 h-4 mr-2" /> Import JSON
+          </Button>
+          <Button size="sm" onClick={openCreate}><Plus className="w-4 h-4" /> Add Visa</Button>
+        </div>
       </div>
 
       <DataTable columns={columns} data={filtered} keyExtractor={(r) => r.id} loading={loading} searchable onSearch={handleSearch} />
