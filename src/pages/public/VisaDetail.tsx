@@ -80,8 +80,21 @@ export function VisaDetail() {
         .from('visa_premium_content')
         .select('*')
         .eq('visa_id', id)
-        .order('section_number');
-      setPremiumContent(contentData || []);
+        .eq('is_published', true)
+        .order('created_at');
+      
+      // Map database fields to component format
+      const mappedContent = (contentData || []).map((item, index) => ({
+        id: item.id,
+        section_number: item.section_number || index + 1,
+        section_title: item.section_title || item.title || 'Untitled Section',
+        content: item.content || item.description || '',
+        tips: item.tips,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+      }));
+      
+      setPremiumContent(mappedContent);
 
       // 5. Fetch Recent Entries
       const { data: entriesData } = await supabase
@@ -232,8 +245,29 @@ export function VisaDetail() {
                             </CardHeader>
                             <CardBody>
                                 <div className="prose prose-sm max-w-none text-neutral-600 whitespace-pre-wrap">
-                                    {currentStep.content}
+                                    {currentStep.content || "No written content available."}
                                 </div>
+
+                                {/* Display file links if available */}
+                                {(currentStep as any).file_urls && (currentStep as any).file_urls.length > 0 && (
+                                    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                                        <h4 className="font-medium text-blue-900 mb-2">Attached Files</h4>
+                                        <div className="space-y-2">
+                                            {(currentStep as any).file_urls.map((url: string, idx: number) => (
+                                                <a 
+                                                    key={idx}
+                                                    href={url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
+                                                >
+                                                    <ExternalLink className="w-4 h-4" />
+                                                    {url.split('/').pop()}
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
 
                                 {currentStep.tips && (
                                     <div className="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-100 text-sm text-amber-800">
