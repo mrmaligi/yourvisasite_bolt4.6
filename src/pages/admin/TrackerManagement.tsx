@@ -70,7 +70,7 @@ export function TrackerManagement() {
     } else if (activeTab === 'approved') {
       setFilteredEntries(entries.filter((e) => e.outcome === 'approved'));
     } else if (activeTab === 'rejected') {
-      setFilteredEntries(entries.filter((e) => e.outcome === 'rejected'));
+      setFilteredEntries(entries.filter((e) => e.outcome === 'refused'));
     }
   }, [activeTab, entries]);
 
@@ -104,7 +104,7 @@ export function TrackerManagement() {
     try {
       const { error } = await supabase
         .from('tracker_entries')
-        .update({ status: 'rejected', outcome: 'rejected' })
+        .update({ status: 'rejected', outcome: 'refused' })
         .eq('id', id);
       if (error) throw error;
       toast('success', 'Entry rejected');
@@ -133,8 +133,8 @@ export function TrackerManagement() {
     switch (outcome) {
       case 'approved':
         return <Badge className="bg-green-100 text-green-700">Approved</Badge>;
-      case 'rejected':
-        return <Badge className="bg-red-100 text-red-700">Rejected</Badge>;
+      case 'refused':
+        return <Badge className="bg-red-100 text-red-700">Refused</Badge>;
       case 'withdrawn':
         return <Badge className="bg-neutral-100 text-neutral-600">Withdrawn</Badge>;
       default:
@@ -264,12 +264,12 @@ export function TrackerManagement() {
       {/* Tabs */}
       <Card>
         <CardHeader>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <Tabs value={activeTab} defaultValue={activeTab} onValueChange={setActiveTab}>
             <TabsList>
               <TabsTrigger value="all">All ({entries.length})</TabsTrigger>
               <TabsTrigger value="pending">Pending ({entries.filter((e) => e.status === 'pending').length})</TabsTrigger>
               <TabsTrigger value="approved">Approved ({entries.filter((e) => e.outcome === 'approved').length})</TabsTrigger>
-              <TabsTrigger value="rejected">Rejected ({entries.filter((e) => e.outcome === 'rejected').length})</TabsTrigger>
+              <TabsTrigger value="rejected">Rejected ({entries.filter((e) => e.outcome === 'refused').length})</TabsTrigger>
             </TabsList>
           </Tabs>
         </CardHeader>

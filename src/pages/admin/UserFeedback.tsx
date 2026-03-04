@@ -132,7 +132,7 @@ export function UserFeedback() {
       render: (row) => (
         <div>
           <p className="font-medium">{row.user_name || 'Anonymous'}</p>
-          <Badge variant={row.user_role === 'lawyer' ? 'secondary' : 'default'} size="sm">
+          <Badge variant={row.user_role === 'lawyer' ? 'secondary' : 'default'}>
             {row.user_role}
           </Badge>
         </div>
@@ -273,7 +273,7 @@ export function UserFeedback() {
             <h2 className="font-semibold">Recent Feedback</h2>
           </CardHeader>
           <CardBody>
-            <DataTable
+            <DataTable<FeedbackItem>
               columns={columns}
               data={feedback}
               loading={loading}

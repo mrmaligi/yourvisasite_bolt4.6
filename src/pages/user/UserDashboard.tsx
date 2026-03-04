@@ -69,12 +69,13 @@ export function UserDashboard() {
 
       if (data) {
         const statsData = data as UserDashboardStats;
-        setStats({
+        setStats(prev => ({
+          ...prev,
           savedVisas: statsData.savedVisas || 0,
           myVisas: statsData.myVisas || 0,
           documents: statsData.documents || 0,
           upcomingConsultations: statsData.upcomingConsultations || 0,
-        });
+        }));
       }
     } catch (err) {
       console.error('Error fetching stats:', err);

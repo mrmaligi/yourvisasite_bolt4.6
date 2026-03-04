@@ -108,7 +108,7 @@ export function LawyerNews() {
                       {false && <Badge variant="warning">Premium</Badge>}
                     </div>
                     <h3 className="text-lg font-semibold text-neutral-900 mb-2">{item.title}</h3>
-                    <p className="text-sm text-neutral-600 line-clamp-2 mb-3">{item.excerpt}</p>
+                    <p className="text-sm text-neutral-600 line-clamp-2 mb-3">{item.summary}</p>
                     <div className="flex items-center gap-4 text-xs text-neutral-400">
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3.5 h-3.5" />

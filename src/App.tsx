@@ -45,8 +45,8 @@ const LawyerRegister = lazy(() => import('./pages/lawyer/LawyerRegister').then(m
 const LawyerPending = lazy(() => import('./pages/lawyer/LawyerPending').then(m => ({ default: m.LawyerPending })));
 
 // Password Reset Pages
-const ForgotPassword = lazy(() => import('./pages/public/ForgotPassword').then(m => ({ default: m.ForgotPassword })));
-const ResetPassword = lazy(() => import('./pages/public/ResetPassword').then(m => ({ default: m.ResetPassword })));
+const ForgotPassword = lazy(() => import('./pages/public/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/public/ResetPassword'));
 
 const Resources = lazy(() => import('./pages/public/Resources').then(m => ({ default: m.Resources })));
 const Guides = lazy(() => import('./pages/public/Guides').then(m => ({ default: m.Guides })));

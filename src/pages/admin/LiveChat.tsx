@@ -15,7 +15,7 @@ export function LiveChat() {
         <p className="text-neutral-500 mt-1">Real-time customer support chat</p>
       </div>
 
-      <Alert variant="info" className="mb-4">
+      <Alert variant="default" className="mb-4">
         <Info className="w-4 h-4" />
         <div>
           <p className="font-medium">Coming Soon</p>

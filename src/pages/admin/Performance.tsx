@@ -102,8 +102,7 @@ export function Performance() {
                   <div className="flex items-center gap-2">
                     <p className="font-semibold">{service.name}</p>
                     <Badge
-                      variant={service.status === 'healthy' ? 'success' : 'error'}
-                      size="sm"
+                      variant={service.status === 'healthy' ? 'success' : 'danger'}
                     >
                       {service.status === 'healthy' ? 'Operational' : 'Error'}
                     </Badge>

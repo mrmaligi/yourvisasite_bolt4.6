@@ -57,7 +57,7 @@ export function Marketplace() {
   const fetchData = async () => {
     let query = supabase
       .from('marketplace_listings')
-      .select('id, lawyer_id, title, description, category_id, price_cents, listing_type, is_active, download_count')
+      .select('*')
       .eq('is_active', true)
       .order('created_at', { ascending: false });
 
@@ -122,8 +122,8 @@ export function Marketplace() {
           }
           reviewsByListing.get(r.listing_id)!.push({
             rating: r.rating,
-            title: r.title,
-            comment: r.comment,
+            title: r.review_text?.slice(0, 20) || 'Review',
+            comment: r.review_text,
             user_name: r.user_id ? reviewUserMap.get(r.user_id) || 'Anonymous' : 'Anonymous',
             created_at: r.created_at,
           });
@@ -137,6 +137,9 @@ export function Marketplace() {
 
           return {
             ...l,
+            duration_minutes: l.duration_minutes || null,
+            delivery_days: l.delivery_days || null,
+            short_description: l.short_description || null,
             features: Array.isArray(l.features) ? l.features : [],
             lawyer_name: lawyerProfileMap.get(l.lawyer_id) || null,
             lawyer_jurisdiction: lawyerDetailsMap.get(l.lawyer_id) || null,
