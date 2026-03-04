@@ -1,21 +1,33 @@
 import { useState, type FormEvent } from 'react';
-import { Navigate, useNavigate, Link } from 'react-router-dom';
-import { UserPlus, Eye, EyeOff } from 'lucide-react';
+import { Navigate, useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { UserPlus, Eye, EyeOff, Scale, User, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
 import { Logo } from '../../components/ui/Logo';
 
+type UserRole = 'user' | 'lawyer' | 'admin';
+
 export function Register() {
   const { user, isLoading, signUpWithEmail, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const roleParam = searchParams.get('role') as UserRole | null;
+  
+  const [selectedRole, setSelectedRole] = useState<UserRole>(roleParam || 'user');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  // Lawyer-specific fields
+  const [barNumber, setBarNumber] = useState('');
+  const [jurisdiction, setJurisdiction] = useState('');
+  const [showLawyerFields, setShowLawyerFields] = useState(roleParam === 'lawyer');
 
   if (isLoading) {
     return (
@@ -29,8 +41,16 @@ export function Register() {
   }
 
   if (user) {
+    // Redirect based on role
+    if (selectedRole === 'lawyer') return <Navigate to="/lawyer/dashboard" replace />;
+    if (selectedRole === 'admin') return <Navigate to="/admin" replace />;
     return <Navigate to="/dashboard" replace />;
   }
+
+  const handleRoleChange = (role: UserRole) => {
+    setSelectedRole(role);
+    setShowLawyerFields(role === 'lawyer');
+  };
 
   const handleRegister = async (e: FormEvent) => {
     e.preventDefault();
@@ -42,15 +62,70 @@ export function Register() {
       toast('error', 'Password must be at least 6 characters.');
       return;
     }
+    
+    // Validate lawyer fields
+    if (selectedRole === 'lawyer') {
+      if (!barNumber || !jurisdiction) {
+        toast('error', 'Please enter your Bar Number and Jurisdiction');
+        return;
+      }
+    }
+    
     setSubmitting(true);
     try {
-      const { error } = await signUpWithEmail(email, password, fullName);
+      // Sign up with metadata including role
+      const { error, data } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            role: selectedRole,
+          },
+        },
+      });
+      
       if (error) {
         toast('error', error.message);
-      } else {
-        toast('success', 'Account created successfully! Please check your email to confirm your account.');
-        // Wait a moment for auth state to update before navigating
-        setTimeout(() => navigate('/dashboard'), 1000);
+        setSubmitting(false);
+        return;
+      }
+
+      if (data.user) {
+        // Update profile with role and additional data
+        const updateData: any = {
+          full_name: fullName,
+          role: selectedRole,
+        };
+        
+        if (selectedRole === 'lawyer') {
+          updateData.bar_number = barNumber;
+          updateData.jurisdiction = jurisdiction;
+          updateData.verification_status = 'pending';
+          
+          // Create lawyer profile
+          await supabase.from('lawyer_profiles').insert({
+            user_id: data.user.id,
+            bar_number: barNumber,
+            jurisdiction: jurisdiction,
+            verification_status: 'pending',
+            is_verified: false,
+            is_available: true,
+          });
+        }
+        
+        await supabase.from('profiles').update(updateData).eq('id', data.user.id);
+        
+        toast('success', selectedRole === 'lawyer' 
+          ? 'Lawyer account created! Pending verification.' 
+          : 'Account created successfully!');
+        
+        // Redirect based on role
+        setTimeout(() => {
+          if (selectedRole === 'lawyer') navigate('/lawyer/pending');
+          else if (selectedRole === 'admin') navigate('/admin');
+          else navigate('/dashboard');
+        }, 1500);
       }
     } catch (err) {
       toast('error', 'An unexpected error occurred. Please try again.');
@@ -60,15 +135,64 @@ export function Register() {
     }
   };
 
+  const getRoleIcon = (role: UserRole) => {
+    switch (role) {
+      case 'lawyer': return <Scale className="w-4 h-4" />;
+      case 'admin': return <ShieldCheck className="w-4 h-4" />;
+      default: return <User className="w-4 h-4" />;
+    }
+  };
+
+  const getRoleLabel = (role: UserRole) => {
+    switch (role) {
+      case 'lawyer': return 'Lawyer';
+      case 'admin': return 'Admin';
+      default: return 'Applicant';
+    }
+  };
+
+  const getRoleDescription = (role: UserRole) => {
+    switch (role) {
+      case 'lawyer': return 'Provide immigration consultations';
+      case 'admin': return 'Manage the platform';
+      default: return 'Track visas and book consultations';
+    }
+  };
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-[400px] animate-fade-in-up">
-        <div className="text-center mb-10">
+      <div className="w-full max-w-[420px] animate-fade-in-up">
+        <div className="text-center mb-8">
           <div className="flex justify-center mb-6">
             <Logo size="lg" />
           </div>
           <h1 className="text-2xl font-bold text-neutral-900">Create your account</h1>
-          <p className="text-neutral-500 mt-2">Join VisaBuild to start tracking your immigration journey.</p>
+          <p className="text-neutral-500 mt-2">Join VisaBuild to start your journey.</p>
+        </div>
+
+        {/* Role Selection */}
+        <div className="mb-6">
+          <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-3">I am a...</p>
+          <div className="grid grid-cols-3 gap-2">
+            {(['user', 'lawyer', 'admin'] as UserRole[]).map((role) => (
+              <button
+                key={role}
+                type="button"
+                onClick={() => handleRoleChange(role)}
+                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all duration-200 ${
+                  selectedRole === role
+                    ? 'border-primary-600 bg-primary-50 text-primary-700'
+                    : 'border-neutral-200 hover:border-neutral-300 text-neutral-600'
+                }`}
+              >
+                {getRoleIcon(role)}
+                <span className="text-xs font-semibold">{getRoleLabel(role)}</span>
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-neutral-500 mt-2 text-center">
+            {getRoleDescription(selectedRole)}
+          </p>
         </div>
 
         <div className="card p-6 sm:p-8">
@@ -106,9 +230,51 @@ export function Register() {
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
+
+            {/* Lawyer-specific fields */}
+            {showLawyerFields && (
+              <div className="space-y-4 pt-2 border-t border-neutral-200">
+                <p className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
+                  <Scale className="w-4 h-4 text-teal-600" />
+                  Lawyer Verification
+                </p>
+                <Input
+                  label="Bar Number *"
+                  type="text"
+                  placeholder="e.g., NSW-12345"
+                  value={barNumber}
+                  onChange={(e) => setBarNumber(e.target.value)}
+                />
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                    Jurisdiction *
+                  </label>
+                  <select
+                    value={jurisdiction}
+                    onChange={(e) => setJurisdiction(e.target.value)}
+                    className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                  >
+                    <option value="">Select jurisdiction...</option>
+                    <option value="New South Wales">New South Wales</option>
+                    <option value="Victoria">Victoria</option>
+                    <option value="Queensland">Queensland</option>
+                    <option value="Western Australia">Western Australia</option>
+                    <option value="South Australia">South Australia</option>
+                    <option value="Tasmania">Tasmania</option>
+                    <option value="Australian Capital Territory">ACT</option>
+                    <option value="Northern Territory">Northern Territory</option>
+                    <option value="Federal">Federal</option>
+                  </select>
+                </div>
+                <p className="text-xs text-neutral-500">
+                  Your account will be pending verification before you can start accepting clients.
+                </p>
+              </div>
+            )}
+
             <Button type="submit" size="lg" className="w-full" loading={submitting}>
               <UserPlus className="w-4 h-4" />
-              Create account
+              Create {selectedRole === 'user' ? 'Account' : getRoleLabel(selectedRole) + ' Account'}
             </Button>
           </form>
 

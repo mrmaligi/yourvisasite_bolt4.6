@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Navigate, Link } from 'react-router-dom';
-import { Mail, Eye, EyeOff, Scale, ShieldCheck } from 'lucide-react';
+import { Mail, Eye, EyeOff, Scale, User, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/Button';
@@ -14,6 +14,8 @@ function getRoleDashboard(role: string | null) {
   return '/dashboard';
 }
 
+type UserRole = 'user' | 'lawyer' | 'admin';
+
 export function Login() {
   const { user, role, isLoading, signInWithGoogle, signInWithEmail } = useAuth();
   const { toast } = useToast();
@@ -25,6 +27,7 @@ export function Login() {
   const [resetEmail, setResetEmail] = useState('');
   const [resetSubmitting, setResetSubmitting] = useState(false);
   const [becomingAdmin, setBecomingAdmin] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<UserRole>('user');
 
   if (isLoading) {
     return (
@@ -53,7 +56,6 @@ export function Login() {
       if (error) {
         toast('error', error.message);
       } else {
-        // Login successful - auth state change will trigger redirect
         toast('success', 'Login successful!');
       }
     } catch (err) {
@@ -118,15 +120,53 @@ export function Login() {
     }
   };
 
+  const getRoleIcon = (role: UserRole) => {
+    switch (role) {
+      case 'lawyer': return <Scale className="w-4 h-4" />;
+      case 'admin': return <ShieldCheck className="w-4 h-4" />;
+      default: return <User className="w-4 h-4" />;
+    }
+  };
+
+  const getRoleLabel = (role: UserRole) => {
+    switch (role) {
+      case 'lawyer': return 'Lawyer';
+      case 'admin': return 'Admin';
+      default: return 'Applicant';
+    }
+  };
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-[400px] animate-fade-in-up">
-        <div className="text-center mb-10">
+      <div className="w-full max-w-[420px] animate-fade-in-up">
+        <div className="text-center mb-8">
           <div className="flex justify-center mb-6">
             <Logo size="lg" />
           </div>
           <h1 className="text-2xl font-bold text-neutral-900">Welcome back</h1>
-          <p className="text-neutral-500 mt-2">Sign in to access your dashboard and manage your visas.</p>
+          <p className="text-neutral-500 mt-2">Sign in to access your dashboard.</p>
+        </div>
+
+        {/* Role Selection */}
+        <div className="mb-6">
+          <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-3">I am a...</p>
+          <div className="grid grid-cols-3 gap-2">
+            {(['user', 'lawyer', 'admin'] as UserRole[]).map((role) => (
+              <button
+                key={role}
+                type="button"
+                onClick={() => setSelectedRole(role)}
+                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all duration-200 ${
+                  selectedRole === role
+                    ? 'border-primary-600 bg-primary-50 text-primary-700'
+                    : 'border-neutral-200 hover:border-neutral-300 text-neutral-600'
+                }`}
+              >
+                {getRoleIcon(role)}
+                <span className="text-xs font-semibold">{getRoleLabel(role)}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="card p-6 sm:p-8">
@@ -165,9 +205,10 @@ export function Login() {
                 Forgot password?
               </button>
             </div>
+            
             <Button type="submit" size="lg" className="w-full" loading={submitting}>
               <Mail className="w-4 h-4" />
-              Sign in
+              Sign in as {getRoleLabel(selectedRole)}
             </Button>
           </form>
 
@@ -202,40 +243,35 @@ export function Login() {
 
         <p className="text-center text-sm text-neutral-500 mt-6">
           Don't have an account?{' '}
-          <Link to="/register" className="text-primary-600 hover:text-primary-700 font-semibold transition-colors">
-            Create one
+          <Link to={`/register?role=${selectedRole}`} className="text-primary-600 hover:text-primary-700 font-semibold transition-colors">
+            Create {selectedRole === 'user' ? 'applicant' : selectedRole} account
           </Link>
         </p>
 
-        <div className="mt-8 space-y-3">
-          <Link
-            to="/register/lawyer"
-            className="flex items-center gap-3 px-5 py-4 rounded-2xl border border-neutral-200/80 hover:border-teal-300 hover:bg-teal-50/50 transition-all duration-200 group bg-white shadow-soft"
-          >
-            <div className="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center group-hover:bg-teal-200 transition-colors">
-              <Scale className="w-5 h-5 text-teal-700" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-neutral-900">Lawyer Portal</p>
-              <p className="text-xs text-neutral-500">Register as an immigration lawyer</p>
-            </div>
-          </Link>
+        {selectedRole === 'admin' && (
+          <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <p className="text-xs text-amber-800">
+              <strong>Admin Note:</strong> Create a regular account first, then sign in and click "Become Admin" below.
+            </p>
+          </div>
+        )}
 
+        <div className="mt-6">
           <button
             type="button"
             onClick={handleBecomeAdmin}
             disabled={!user || becomingAdmin}
-            className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl border border-neutral-200/80 hover:border-primary-300 hover:bg-primary-50/50 transition-all duration-200 group bg-white shadow-soft disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-neutral-200 disabled:hover:bg-white"
+            className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl border border-neutral-200/80 hover:border-primary-300 hover:bg-primary-50/50 transition-all duration-200 group bg-white shadow-soft disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div className="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
               <ShieldCheck className="w-5 h-5 text-primary-700" />
             </div>
             <div className="flex-1 min-w-0 text-left">
               <p className="text-sm font-semibold text-neutral-900">
-                {becomingAdmin ? 'Setting up admin...' : 'Admin Access'}
+                {becomingAdmin ? 'Setting up admin...' : 'Become Admin'}
               </p>
               <p className="text-xs text-neutral-500">
-                {user ? 'Click to become admin (first-time setup)' : 'Sign in first to access admin panel'}
+                {user ? 'First-time admin setup' : 'Sign in first to access admin'}
               </p>
             </div>
           </button>
