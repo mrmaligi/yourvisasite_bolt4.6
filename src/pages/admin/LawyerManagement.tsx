@@ -58,39 +58,60 @@ export function LawyerManagement() {
   useEffect(() => { fetchLawyers(); }, []);
 
   const handleApprove = async (lawyer: LawyerWithProfile) => {
-    // Update lawyer_profiles
-    await supabase.from('lawyer_profiles').update({
-      is_verified: true,
-      verification_status: 'approved',
-    }).eq('id', lawyer.id);
-    
-    // Also update profiles to mark as verified lawyer
-    await supabase.from('profiles').update({
-      is_verified: true,
-      verification_status: 'approved',
-      role: 'lawyer',
-    }).eq('id', lawyer.user_id);
-    
-    // Notify lawyer
-    await supabase.from('notifications').insert({
-      user_id: lawyer.user_id,
-      title: 'Registration Approved',
-      body: 'Your lawyer registration has been approved. You can now access your dashboard.',
-      type: 'lawyer_approved',
-      link: '/lawyer/dashboard',
-    });
-
     try {
-      const { error } = await supabase.functions.invoke('verify-lawyer', {
-        body: { lawyer_profile_id: lawyer.id, action: 'approve' },
+      // Update lawyer_profiles
+      const { error: lawyerError } = await supabase.from('lawyer_profiles').update({
+        is_verified: true,
+        verification_status: 'approved',
+      }).eq('id', lawyer.id);
+      
+      if (lawyerError) {
+        console.error('Error updating lawyer_profiles:', lawyerError);
+        toast('error', `Failed to approve lawyer: ${lawyerError.message}`);
+        return;
+      }
+      
+      // Also update profiles to mark as verified lawyer
+      const { error: profileError } = await supabase.from('profiles').update({
+        is_verified: true,
+        verification_status: 'approved',
+        role: 'lawyer',
+      }).eq('id', lawyer.user_id);
+      
+      if (profileError) {
+        console.error('Error updating profiles:', profileError);
+        toast('error', `Failed to update profile: ${profileError.message}`);
+        return;
+      }
+      
+      // Notify lawyer
+      const { error: notifError } = await supabase.from('notifications').insert({
+        user_id: lawyer.user_id,
+        title: 'Registration Approved',
+        body: 'Your lawyer registration has been approved. You can now access your dashboard.',
+        type: 'lawyer_approved',
+        link: '/lawyer/dashboard',
       });
-      if (error) throw error;
-    } catch (err) {
-      console.error('Failed to invoke verify-lawyer:', err);
-    }
+      
+      if (notifError) {
+        console.warn('Could not send notification:', notifError);
+      }
 
-    toast('success', 'Lawyer approved');
-    fetchLawyers();
+      try {
+        const { error } = await supabase.functions.invoke('verify-lawyer', {
+          body: { lawyer_profile_id: lawyer.id, action: 'approve' },
+        });
+        if (error) throw error;
+      } catch (err) {
+        console.error('Failed to invoke verify-lawyer:', err);
+      }
+
+      toast('success', `Lawyer ${lawyer.full_name || 'approved'} successfully!`);
+      fetchLawyers();
+    } catch (err: any) {
+      console.error('Approval error:', err);
+      toast('error', err?.message || 'Failed to approve lawyer');
+    }
   };
 
   const handleReject = async () => {
