@@ -113,7 +113,7 @@ export function AbuseReports() {
       render: (row) => (
         <div>
           <p className="font-medium">{row.target_name}</p>
-          <Badge size="sm" variant="secondary">{row.target_type}</Badge>
+          <Badge variant="secondary">{row.target_type}</Badge>
         </div>
       ),
     },
@@ -206,7 +206,7 @@ export function AbuseReports() {
           <h2 className="font-semibold">All Reports</h2>
         </CardHeader>
         <CardBody>
-          <DataTable
+          <DataTable<AbuseReport>
             columns={columns}
             data={reports}
             loading={loading}
@@ -231,7 +231,7 @@ export function AbuseReports() {
               <div>
                 <p className="text-sm text-neutral-500">Target</p>
                 <p className="font-medium">{selectedReport.target_name}</p>
-                <Badge size="sm">{selectedReport.target_type}</Badge>
+                <Badge>{selectedReport.target_type}</Badge>
               </div>
               <div>
                 <p className="text-sm text-neutral-500">Reporter</p>

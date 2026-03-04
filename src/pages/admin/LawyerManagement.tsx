@@ -175,7 +175,7 @@ export function LawyerManagement() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-neutral-900">Lawyer Management</h1>
-      <DataTable columns={columns} data={lawyers} loading={loading} />
+      <DataTable<LawyerWithProfile> columns={columns} data={lawyers} loading={loading} keyExtractor={(row) => row.id} />
       
       <Modal isOpen={!!rejectTarget} onClose={() => setRejectTarget(null)} title="Reject Lawyer Registration">
         <div className="space-y-4">

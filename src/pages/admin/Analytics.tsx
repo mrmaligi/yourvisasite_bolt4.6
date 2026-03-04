@@ -163,7 +163,7 @@ export function Analytics() {
           <p className="text-neutral-600 dark:text-neutral-400">Traffic, engagement, and user behavior</p>
         </div>
         <div className="flex items-center gap-3">
-          <Tabs value={timeRange} onValueChange={setTimeRange}>
+          <Tabs value={timeRange} defaultValue={timeRange} onValueChange={setTimeRange}>
             <TabsList>
               <TabsTrigger value="7">7 Days</TabsTrigger>
               <TabsTrigger value="30">30 Days</TabsTrigger>

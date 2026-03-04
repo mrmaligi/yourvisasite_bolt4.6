@@ -173,7 +173,7 @@ export function Pages() {
 
       <Card>
         <CardBody>
-          <DataTable
+          <DataTable<Page>
             columns={columns}
             data={pages}
             loading={loading}

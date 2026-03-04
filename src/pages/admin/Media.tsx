@@ -51,13 +51,11 @@ export function Media() {
     fetchMedia();
   }, []);
 
-  const handleUpload = async (files: File[]) => {
+  const handleUpload = async (file: File) => {
     try {
-      for (const file of files) {
-        const { error } = await supabase.storage.from('documents').upload(file.name, file);
-        if (error) throw error;
-      }
-      toast('success', 'Files uploaded');
+      const { error } = await supabase.storage.from('documents').upload(file.name, file);
+      if (error) throw error;
+      toast('success', 'File uploaded');
       setShowUpload(false);
       fetchMedia();
     } catch (error) {
@@ -173,11 +171,11 @@ export function Media() {
         </CardBody>
       </Card>
 
-      <Modal isOpen={showUpload} onClose={() => setShowUpload(false)} title="Upload Files">
+      <Modal isOpen={showUpload} onClose={() => setShowUpload(false)} title="Upload File">
         <FileUpload
-          onUpload={handleUpload}
+          onFileSelect={handleUpload}
           accept="image/*,.pdf,.doc,.docx"
-          maxSize={10 * 1024 * 1024}
+          maxSizeMb={10}
         />
       </Modal>
     </div>

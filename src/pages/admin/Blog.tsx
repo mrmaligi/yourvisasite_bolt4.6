@@ -196,7 +196,7 @@ export function Blog() {
 
       <Card>
         <CardBody>
-          <DataTable
+          <DataTable<BlogPost>
             columns={columns}
             data={posts}
             loading={loading}

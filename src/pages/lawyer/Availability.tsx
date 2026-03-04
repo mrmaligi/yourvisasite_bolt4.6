@@ -67,7 +67,7 @@ export function Availability() {
   const fetchSlots = async (lid: string) => {
     const { data, error } = await supabase
       .from('consultation_slots')
-      .select('id, lawyer_id, start_time, end_time, is_booked')
+      .select('*')
       .eq('lawyer_id', lid)
       .order('start_time');
     

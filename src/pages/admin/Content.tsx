@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Files, PenTool, FileText, BookOpen } from 'lucide-react';
 import { Card, CardBody } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../components/ui/Toast';
 

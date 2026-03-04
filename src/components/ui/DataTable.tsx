@@ -13,7 +13,7 @@ export interface Column<T> {
 interface DataTableProps<T> {
   columns: Column<T>[];
   data: T[];
-  keyExtractor: (row: T) => string;
+  keyExtractor?: (row: T) => string;
   loading?: boolean;
   searchable?: boolean;
   searchPlaceholder?: string;
@@ -21,12 +21,13 @@ interface DataTableProps<T> {
   pageSize?: number;
   responsive?: boolean;
   mobileDisplay?: 'card' | 'scroll';
+  emptyMessage?: ReactNode;
 }
 
 export function DataTable<T>({
   columns,
   data,
-  keyExtractor,
+  keyExtractor = (row: any) => row.id,
   loading = false,
   searchable = false,
   searchPlaceholder = 'Search...',
@@ -34,6 +35,7 @@ export function DataTable<T>({
   pageSize = 10,
   responsive = true,
   mobileDisplay = 'card',
+  emptyMessage,
 }: DataTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
@@ -135,6 +137,13 @@ export function DataTable<T>({
                   ))}
                 </tr>
               ))
+            )}
+            {!loading && pagedData.length === 0 && emptyMessage && (
+              <tr>
+                <td colSpan={columns.length} className="px-6 py-8 text-center text-sm text-neutral-500">
+                  {emptyMessage}
+                </td>
+              </tr>
             )}
           </tbody>
         </table>

@@ -217,7 +217,7 @@ export function Finance() {
               : row.status === 'pending'
               ? 'warning'
               : row.status === 'failed'
-              ? 'error'
+              ? 'danger'
               : 'default'
           }
         >
@@ -326,7 +326,7 @@ export function Finance() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis />
-                  <Tooltip formatter={(value: number) => `$${value}`} />
+                  <Tooltip formatter={(value: number | undefined) => value !== undefined ? `$${value}` : ''} />
                   <Legend />
                   <Bar dataKey="purchases" name="Visa Purchases" fill="#8b5cf6" />
                   <Bar dataKey="bookings" name="Consultations" fill="#10b981" />
@@ -343,7 +343,7 @@ export function Finance() {
           <h2 className="font-semibold text-neutral-900 dark:text-white">Recent Transactions</h2>
         </CardHeader>
         <CardBody>
-          <DataTable
+          <DataTable<Transaction>
             columns={columns}
             data={transactions.slice(0, 20)}
             loading={loading}

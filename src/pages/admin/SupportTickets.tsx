@@ -276,7 +276,7 @@ export function SupportTickets() {
       {/* Tabs and Table */}
       <Card>
         <CardHeader>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <Tabs value={activeTab} defaultValue={activeTab} onValueChange={setActiveTab}>
             <TabsList>
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="open">Open</TabsTrigger>
@@ -287,7 +287,7 @@ export function SupportTickets() {
           </Tabs>
         </CardHeader>
         <CardBody>
-          <DataTable
+          <DataTable<Ticket>
             columns={columns}
             data={filteredTickets}
             loading={loading}

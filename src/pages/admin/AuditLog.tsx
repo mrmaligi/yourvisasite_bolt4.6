@@ -130,7 +130,7 @@ export function AuditLog() {
       render: (row) => (
         <div>
           <p className="font-medium">{row.actor_name}</p>
-          <Badge size="sm" variant="secondary">{row.actor_role}</Badge>
+          <Badge variant="secondary">{row.actor_role}</Badge>
         </div>
       ),
     },
@@ -151,8 +151,7 @@ export function AuditLog() {
       header: 'Status',
       render: (row) => (
         <Badge
-          variant={row.status === 'success' ? 'success' : 'error'}
-          size="sm"
+          variant={row.status === 'success' ? 'success' : 'danger'}
         >
           {row.status}
         </Badge>
@@ -207,7 +206,7 @@ export function AuditLog() {
           <h2 className="font-semibold">Activity Log ({filteredLogs.length} entries)</h2>
         </CardHeader>
         <CardBody>
-          <DataTable
+          <DataTable<AuditLogEntry>
             columns={columns}
             data={filteredLogs}
             loading={loading}
