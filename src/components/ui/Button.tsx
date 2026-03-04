@@ -1,14 +1,16 @@
 import { forwardRef } from 'react';
 import { Loader2 } from 'lucide-react';
+import { haptic, type HapticIntensity } from '../../lib/haptics';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link' | 'primary' | 'danger';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   loading?: boolean;
+  haptic?: HapticIntensity;
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className = '', variant = 'default', size = 'default', loading = false, children, disabled, ...props }, ref) => {
+  ({ className = '', variant = 'default', size = 'default', loading = false, haptic: hapticType, children, disabled, onClick, ...props }, ref) => {
 
     // Map variants to our design system classes
     const variantClasses = {
@@ -40,11 +42,28 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       className
     ].filter(Boolean).join(' ');
 
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+      // Trigger haptic feedback
+      if (hapticType) {
+        haptic(hapticType);
+      } else if (variant === 'primary' || variant === 'default') {
+        haptic('medium');
+      } else if (variant === 'danger' || variant === 'destructive') {
+        haptic('error');
+      } else {
+        haptic('light');
+      }
+      
+      // Call original onClick
+      onClick?.(e);
+    };
+
     return (
       <button
         className={combinedClassName}
         ref={ref}
         disabled={disabled || loading}
+        onClick={handleClick}
         {...props}
       >
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
