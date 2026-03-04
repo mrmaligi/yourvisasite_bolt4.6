@@ -230,6 +230,7 @@ export function VisaManagement() {
     { key: 'actions', header: '', render: (r) => (
       <div className="flex gap-1">
         <Button size="sm" variant="ghost" onClick={() => openEdit(r)}>Edit</Button>
+        <Button size="sm" variant="ghost" onClick={() => navigate(`/admin/visas/${r.id}/edit`)}>Full Edit</Button>
         <Button size="sm" variant="ghost" onClick={() => navigate(`/admin/premium?visa_id=${r.id}`)}>Content</Button>
       </div>
     )},
