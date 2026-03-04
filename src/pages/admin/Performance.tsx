@@ -20,23 +20,34 @@ export function Performance() {
 
   const fetchStats = async () => {
     try {
-      const [usersRes, bookingsRes, visasRes, docsRes] = await Promise.all([
-        supabase.from('profiles').select('id', { count: 'exact', head: true }),
-        supabase.from('bookings').select('id', { count: 'exact', head: true }),
-        supabase.from('visas').select('id', { count: 'exact', head: true }),
-        supabase.from('user_documents').select('id', { count: 'exact', head: true }),
-      ]);
+      setLoading(true);
+      
+      // Fetch counts individually to handle errors per table
+      const usersRes = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+      const bookingsRes = await supabase.from('bookings').select('*', { count: 'exact', head: true });
+      const visasRes = await supabase.from('visas').select('*', { count: 'exact', head: true });
+      
+      // user_documents might not exist - handle gracefully
+      let docsCount = 0;
+      try {
+        const docsRes = await supabase.from('user_documents').select('*', { count: 'exact', head: true });
+        docsCount = docsRes.count || 0;
+      } catch (e) {
+        // Table might not exist - use 0
+        docsCount = 0;
+      }
 
       setStats({
         totalUsers: usersRes.count || 0,
         totalBookings: bookingsRes.count || 0,
         totalVisas: visasRes.count || 0,
-        totalDocuments: docsRes.count || 0,
+        totalDocuments: docsCount,
         dbStatus: 'healthy',
         apiStatus: 'healthy',
       });
-    } catch (error) {
-      toast('error', 'Failed to load performance stats');
+    } catch (error: any) {
+      console.error('Performance stats error:', error);
+      toast('error', 'Failed to load performance stats: ' + (error.message || 'Unknown error'));
       setStats((s) => ({ ...s, dbStatus: 'error', apiStatus: 'error' }));
     } finally {
       setLoading(false);
