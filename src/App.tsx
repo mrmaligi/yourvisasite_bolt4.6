@@ -115,6 +115,7 @@ const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagement
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings').then(m => ({ default: m.AdminSettings })));
 const YouTubeManagement = lazy(() => import('./pages/admin/YouTubeManagement').then(m => ({ default: m.YouTubeManagement })));
 const PerformanceRouter = lazy(() => import('./pages/admin/performance/PerformanceRouter').then(m => ({ default: m.PerformanceRouter })));
+const Bookings = lazy(() => import('./pages/admin/Bookings').then(m => ({ default: m.Bookings })));
 
 const AdminContentArticles = lazy(() => import('./pages/admin/content/Articles').then(m => ({ default: m.Articles })));
 const AdminContentCreateArticle = lazy(() => import('./pages/admin/content/CreateArticle').then(m => ({ default: m.CreateArticle })));
@@ -279,6 +280,7 @@ export default function App() {
                     <Route path="admin/users" element={<UserManagement />} />
                     <Route path="admin/lawyers" element={<LawyerManagement />} />
                     <Route path="admin/visas" element={<VisaManagement />} />
+                    <Route path="admin/bookings" element={<Bookings />} />
                     <Route path="admin/premium" element={<PremiumContent />} />
                     <Route path="admin/news" element={<NewsManagement />} />
                     <Route path="admin/youtube" element={<YouTubeManagement />} />

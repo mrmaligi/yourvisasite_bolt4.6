@@ -17,6 +17,7 @@ import {
   Gauge,
   TrendingUp,
   Ticket,
+  Calendar,
   Shield,
   MessageSquare,
   BarChart,
@@ -72,6 +73,7 @@ const sidebarItems: SidebarItem[] = [
   { to: '/admin/users', label: 'Users', icon: Users },
   { to: '/admin/lawyers', label: 'Lawyers', icon: Scale },
   { to: '/admin/visas', label: 'Visas', icon: FileText },
+  { to: '/admin/bookings', label: 'Bookings', icon: Calendar },
   
   // Content
   { to: '/admin/content', label: 'Content CMS', icon: Library },
@@ -85,10 +87,10 @@ const sidebarItems: SidebarItem[] = [
   { to: '/admin/tracker', label: 'Tracker', icon: BarChart3 },
   
   // Analytics
-  { to: '/admin/analytics/overview', label: 'Analytics Overview', icon: TrendingUp },
+  { to: '/admin/analytics/overview', label: 'Analytics', icon: TrendingUp },
   
   // Support
-  { to: '/admin/support/tickets', label: 'Support Tickets', icon: Ticket },
+  { to: '/admin/support/tickets', label: 'Support', icon: Ticket },
   
   // Commerce
   { to: '/admin/pricing', label: 'Pricing', icon: DollarSign },
@@ -96,7 +98,7 @@ const sidebarItems: SidebarItem[] = [
   
   // System
   { to: '/admin/settings', label: 'Settings', icon: Settings },
-  { to: '/admin/system/settings', label: 'System Settings', icon: Cog },
+  { to: '/admin/system/settings', label: 'System', icon: Cog },
 ];
 
 // Mobile nav items (essential only - shown at bottom)
