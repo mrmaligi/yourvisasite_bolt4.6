@@ -11,7 +11,12 @@ import {
   AlertCircle,
   TrendingUp,
   Printer,
-  CheckCircle
+  CheckCircle,
+  FileText,
+  Image,
+  Video,
+  Download,
+  Lock
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -20,7 +25,24 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { VisaDetailSkeleton } from '../../components/ui/Skeleton';
 import { ShareButton } from '../../components/ShareButton';
-import type { Visa, TrackerStats, VisaPremiumContent, TrackerEntry, NewsArticle } from '../../types/database';
+import type { Visa, TrackerStats, TrackerEntry, NewsArticle } from '../../types/database';
+
+// Updated interface matching actual database schema
+interface VisaPremiumContentItem {
+  id: string;
+  visa_id: string;
+  title: string;
+  description: string | null;
+  content_type: 'guide' | 'checklist' | 'template' | 'document_examples' | 'example_application' | 'video' | 'file';
+  content: string | null;
+  file_urls: string[] | null;
+  is_published: boolean;
+  section_number: number | null;
+  section_title: string | null;
+  tips: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 export function VisaDetail() {
   const { id } = useParams<{ id: string }>();
@@ -29,7 +51,7 @@ export function VisaDetail() {
   const [visa, setVisa] = useState<Visa | null>(null);
   const [stats, setStats] = useState<TrackerStats | null>(null);
   const [relatedVisas, setRelatedVisas] = useState<Visa[]>([]);
-  const [premiumContent, setPremiumContent] = useState<VisaPremiumContent[]>([]);
+  const [premiumContent, setPremiumContent] = useState<VisaPremiumContentItem[]>([]);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [recentEntries, setRecentEntries] = useState<TrackerEntry[]>([]);
   const [visaNews, setVisaNews] = useState<NewsArticle[]>([]);
@@ -81,20 +103,8 @@ export function VisaDetail() {
         .select('*')
         .eq('visa_id', id)
         .eq('is_published', true)
-        .order('created_at');
-      
-      // Map database fields to component format
-      const mappedContent = (contentData || []).map((item, index) => ({
-        id: item.id,
-        section_number: item.section_number || index + 1,
-        section_title: item.section_title || item.title || 'Untitled Section',
-        content: item.content || item.description || '',
-        tips: item.tips,
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-      }));
-      
-      setPremiumContent(mappedContent);
+        .order('created_at', { ascending: false });
+      setPremiumContent(contentData || []);
 
       // 5. Fetch Recent Entries
       const { data: entriesData } = await supabase
@@ -137,6 +147,28 @@ export function VisaDetail() {
   }
 
   const currentStep = premiumContent[currentStepIndex];
+
+  const getContentTypeIcon = (type: string) => {
+    switch (type) {
+      case 'video': return Video;
+      case 'document_examples': return Image;
+      case 'file': return Download;
+      default: return FileText;
+    }
+  };
+
+  const getContentTypeLabel = (type: string) => {
+    switch (type) {
+      case 'guide': return 'Guide';
+      case 'checklist': return 'Checklist';
+      case 'template': return 'Template';
+      case 'document_examples': return 'Document Examples';
+      case 'example_application': return 'Example Application';
+      case 'video': return 'Video';
+      case 'file': return 'File';
+      default: return 'Document';
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -223,87 +255,89 @@ export function VisaDetail() {
                 </section>
             )}
 
-            {/* Premium Content */}
+            {/* Premium Content / Resources */}
             <section id="premium-guide">
                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-neutral-900">Application Guide</h2>
+                    <h2 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
+                      <BookOpen className="w-5 h-5 text-primary-600" />
+                      Premium Resources
+                      <Badge variant="success" className="ml-2">FREE</Badge>
+                    </h2>
                     {premiumContent.length > 0 && (
-                      <Badge variant="success">Step {currentStepIndex + 1} of {premiumContent.length}</Badge>
+                      <Badge variant="secondary">{premiumContent.length} resources</Badge>
                     )}
                  </div>
 
-                 {premiumContent.length > 0 && currentStep ? (
-                    <div className="space-y-6">
-                        <Card key={currentStep.id} className="overflow-hidden">
-                            <CardHeader className="bg-primary-50/50 border-b border-primary-100">
-                                <h3 className="font-semibold text-primary-900 flex items-center">
-                                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary-100 text-primary-700 text-xs font-bold mr-3">
-                                        {currentStep.section_number}
-                                    </span>
-                                    {currentStep.section_title}
-                                </h3>
-                            </CardHeader>
-                            <CardBody>
-                                <div className="prose prose-sm max-w-none text-neutral-600 whitespace-pre-wrap">
-                                    {currentStep.content || "No written content available."}
+                 {premiumContent.length > 0 ? (
+                    <div className="space-y-4">
+                      {premiumContent.map((item, idx) => {
+                        const Icon = getContentTypeIcon(item.content_type);
+                        return (
+                          <Card key={item.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                            <CardBody className="p-5">
+                              <div className="flex items-start gap-4">
+                                <div className="p-3 bg-primary-50 rounded-lg">
+                                  <Icon className="w-6 h-6 text-primary-600" />
                                 </div>
-
-                                {/* Display file links if available */}
-                                {(currentStep as any).file_urls && (currentStep as any).file_urls.length > 0 && (
-                                    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                                        <h4 className="font-medium text-blue-900 mb-2">Attached Files</h4>
-                                        <div className="space-y-2">
-                                            {(currentStep as any).file_urls.map((url: string, idx: number) => (
-                                                <a 
-                                                    key={idx}
-                                                    href={url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
-                                                >
-                                                    <ExternalLink className="w-4 h-4" />
-                                                    {url.split('/').pop()}
-                                                </a>
-                                            ))}
-                                        </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h3 className="font-semibold text-neutral-900">{item.title}</h3>
+                                    <Badge variant="secondary" className="text-xs">
+                                      {getContentTypeLabel(item.content_type)}
+                                    </Badge>
+                                  </div>
+                                  
+                                  {item.description && (
+                                    <p className="text-sm text-neutral-600 mb-3">{item.description}</p>
+                                  )}
+                                  
+                                  {item.content && (
+                                    <div className="prose prose-sm max-w-none text-neutral-600 bg-neutral-50 rounded-lg p-4 mb-3">
+                                      <div dangerouslySetInnerHTML={{ __html: item.content.replace(/\n/g, '<br/>') }} />
                                     </div>
-                                )}
-
-                                {currentStep.tips && (
-                                    <div className="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-100 text-sm text-amber-800">
-                                        <strong>Tips:</strong> {currentStep.tips}
+                                  )}
+                                  
+                                  {item.tips && (
+                                    <div className="p-3 bg-amber-50 rounded-lg border border-amber-100 text-sm text-amber-800 mb-3">
+                                      <strong>💡 Tip:</strong> {item.tips}
                                     </div>
-                                )}
-
-                                <div className="flex items-center justify-between mt-8 pt-6 border-t border-neutral-100">
-                                    <Button
-                                      variant="secondary"
-                                      disabled={currentStepIndex === 0}
-                                      onClick={() => setCurrentStepIndex(i => i - 1)}
-                                    >
-                                      <ChevronLeft className="w-4 h-4 mr-2" />
-                                      Previous
-                                    </Button>
-
-                                    <Button
-                                      variant="primary"
-                                      disabled={currentStepIndex === premiumContent.length - 1}
-                                      onClick={() => setCurrentStepIndex(i => i + 1)}
-                                    >
-                                      Next Step
-                                      <ChevronRight className="w-4 h-4 ml-2" />
-                                    </Button>
+                                  )}
+                                  
+                                  {/* File URLs */}
+                                  {item.file_urls && item.file_urls.length > 0 && (
+                                    <div className="space-y-2">
+                                      {item.file_urls.map((url, fileIdx) => (
+                                        <a
+                                          key={fileIdx}
+                                          href={url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="inline-flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 bg-primary-50 px-3 py-2 rounded-lg hover:bg-primary-100 transition-colors"
+                                        >
+                                          <Download className="w-4 h-4" />
+                                          Download {url.split('/').pop() || `File ${fileIdx + 1}`}
+                                          <ExternalLink className="w-3 h-3" />
+                                        </a>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
+                              </div>
                             </CardBody>
-                        </Card>
+                          </Card>
+                        );
+                      })}
                     </div>
                  ) : (
                     <Card>
                       <CardBody className="py-12 text-center text-neutral-500">
                         <BookOpen className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-neutral-900 mb-2">Guide Coming Soon</h3>
-                        <p className="text-neutral-500">
-                          The step-by-step application guide for this visa is currently being prepared.
+                        <h3 className="text-lg font-medium text-neutral-900 mb-2">Resources Coming Soon</h3>
+                        <p className="text-neutral-500 max-w-md mx-auto">
+                          Premium guides, checklists, and document examples for this visa are being prepared by our team.
+                        </p>
+                        <p className="text-sm text-neutral-400 mt-4">
+                          Check back soon for free downloadable resources!
                         </p>
                       </CardBody>
                     </Card>
@@ -386,21 +420,22 @@ export function VisaDetail() {
                   </h3>
                 </CardHeader>
                 <CardBody>
-                  <div className="space-y-4">
-                    {recentEntries.map((entry) => (
-                      <div key={entry.id} className="flex items-center justify-between border-b border-neutral-100 pb-3 last:border-0 last:pb-0">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-neutral-900 capitalize">{entry.outcome}</span>
-                            {entry.submitter_role === 'lawyer' && (
-                              <Badge variant="primary" className="flex items-center gap-1">
-                                <CheckCircle className="w-3 h-3" />
-                                Verified Lawyer
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-sm text-neutral-500 mt-0.5">
-                            {entry.processing_days} days processing
+                  <div className="space-y-3">
+                    {recentEntries.slice(0, 3).map((entry) => (
+                      <div key={entry.id} className="flex items-center gap-3 text-sm">
+                        {entry.outcome === 'approved' ? (
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                        ) : entry.outcome === 'refused' ? (
+                          <AlertCircle className="w-4 h-4 text-red-500" />
+                        ) : (
+                          <Clock className="w-4 h-4 text-amber-500" />
+                        )}
+                        <div className="flex-1">
+                          <p className="font-medium text-neutral-900">
+                            {entry.processing_days ? `${entry.processing_days} days` : 'Pending'}
+                          </p>
+                          <p className="text-xs text-neutral-500">
+                            {entry.outcome === 'approved' ? 'Approved' : entry.outcome === 'refused' ? 'Refused' : 'Processing'}
                           </p>
                         </div>
                         <span className="text-xs text-neutral-400">
@@ -409,46 +444,8 @@ export function VisaDetail() {
                       </div>
                     ))}
                   </div>
-                </CardBody>
-              </Card>
-            )}
-
-            {/* Visa-Specific News */}
-            {visaNews.length > 0 && (
-              <Card className="no-print">
-                <CardHeader>
-                  <h3 className="font-bold text-neutral-900 flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-primary-600" />
-                    Latest News
-                  </h3>
-                </CardHeader>
-                <CardBody>
-                  <div className="space-y-4">
-                    {visaNews.map((article) => (
-                      <Link
-                        key={article.id}
-                        to={`/news/${article.slug}`}
-                        className="block group"
-                      >
-                        <div className="border-b border-neutral-100 pb-3 last:border-0 last:pb-0">
-                          <h4 className="font-medium text-neutral-900 group-hover:text-primary-700 transition-colors line-clamp-2">
-                            {article.title}
-                          </h4>
-                          <p className="text-xs text-neutral-500 mt-1">
-                            {article.published_at
-                              ? new Date(article.published_at).toLocaleDateString()
-                              : new Date(article.created_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                  <Link
-                    to="/news"
-                    className="inline-flex items-center text-sm text-primary-600 hover:text-primary-700 mt-4"
-                  >
-                    View all news
-                    <ArrowUpRight className="w-4 h-4 ml-1" />
+                  <Link to="/tracker" className="text-xs text-primary-600 hover:underline mt-4 block text-center">
+                    View all reports
                   </Link>
                 </CardBody>
               </Card>
@@ -456,28 +453,59 @@ export function VisaDetail() {
 
             {/* Related Visas */}
             {relatedVisas.length > 0 && (
-                <div className="no-print">
-                    <h3 className="font-bold text-neutral-900 mb-4">Related Visas</h3>
-                    <div className="space-y-3">
-                        {relatedVisas.map((v) => (
-                            <Link key={v.id} to={`/visas/${v.id}`}>
-                                <Card hover className="group">
-                                    <CardBody className="p-4">
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <Badge className="mb-2">{v.subclass}</Badge>
-                                                <h4 className="font-medium text-neutral-900 group-hover:text-primary-700 transition-colors">
-                                                    {v.name}
-                                                </h4>
-                                            </div>
-                                            <ArrowUpRight className="w-4 h-4 text-neutral-300 group-hover:text-primary-600" />
-                                        </div>
-                                    </CardBody>
-                                </Card>
-                            </Link>
-                        ))}
-                    </div>
-                </div>
+              <Card className="no-print">
+                <CardHeader>
+                  <h3 className="font-bold text-neutral-900">Related Visas</h3>
+                </CardHeader>
+                <CardBody>
+                  <div className="space-y-3">
+                    {relatedVisas.map((related) => (
+                      <Link
+                        key={related.id}
+                        to={`/visas/${related.id}`}
+                        className="block p-3 rounded-lg hover:bg-neutral-50 transition-colors"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-neutral-900">{related.name}</p>
+                            <p className="text-sm text-neutral-500">Subclass {related.subclass}</p>
+                          </div>
+                          <ArrowUpRight className="w-4 h-4 text-neutral-400" />
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </CardBody>
+              </Card>
+            )}
+
+            {/* News */}
+            {visaNews.length > 0 && (
+              <Card className="no-print">
+                <CardHeader>
+                  <h3 className="font-bold text-neutral-900">Latest News</h3>
+                </CardHeader>
+                <CardBody>
+                  <div className="space-y-4">
+                    {visaNews.map((article) => (
+                      <a
+                        key={article.id}
+                        href={article.url || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block group"
+                      >
+                        <h4 className="font-medium text-neutral-900 group-hover:text-primary-600 transition-colors line-clamp-2">
+                          {article.title}
+                        </h4>
+                        <p className="text-xs text-neutral-500 mt-1">
+                          {article.published_at && new Date(article.published_at).toLocaleDateString()}
+                        </p>
+                      </a>
+                    ))}
+                  </div>
+                </CardBody>
+              </Card>
             )}
         </div>
       </div>
