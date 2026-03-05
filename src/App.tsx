@@ -98,6 +98,7 @@ const LawyerNotes = lazy(() => import('./pages/lawyer/Notes').then(m => ({ defau
 const LawyerLeadCapture = lazy(() => import('./pages/lawyer/LeadCapture').then(m => ({ default: m.LeadCapture })));
 const LawyerTestimonials = lazy(() => import('./pages/lawyer/Testimonials').then(m => ({ default: m.Testimonials })));
 const LawyerClientDetail = lazy(() => import('./pages/lawyer/ClientDetail').then(m => ({ default: m.ClientDetail })));
+const LawyerDocumentDashboard = lazy(() => import('./pages/lawyer/DocumentDashboard').then(m => ({ default: m.DocumentDashboard })));
 
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
 const AdminContent = lazy(() => import('./pages/admin/Content').then(m => ({ default: m.Content })));
@@ -273,6 +274,7 @@ export default function App() {
                     <Route path="lawyer/leads" element={<LawyerLeadCapture />} />
                     <Route path="lawyer/testimonials" element={<LawyerTestimonials />} />
                     <Route path="lawyer/clients/:id" element={<LawyerClientDetail />} />
+                    <Route path="lawyer/clients/:id/documents" element={<LawyerDocumentDashboard />} />
                   </Route>
 
                   {/* Admin Routes - Wrapped in Layout */}

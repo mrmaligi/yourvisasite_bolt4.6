@@ -4,12 +4,8 @@ import {
   ExternalLink,
   Clock,
   BookOpen,
-  ArrowUpRight,
   ChevronRight,
-  ChevronLeft,
   ArrowLeft,
-  AlertCircle,
-  TrendingUp,
   Printer,
   CheckCircle,
   FileText,
@@ -18,12 +14,19 @@ import {
   Lock,
   Menu,
   X,
-  CheckSquare,
   DollarSign,
   Calendar,
   List,
   Lightbulb,
-  Globe
+  Shield,
+  ChevronDown,
+  ChevronUp,
+  Upload,
+  CheckSquare,
+  AlertCircle,
+  Star,
+  Crown,
+  ArrowRight
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -32,7 +35,7 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { VisaDetailSkeleton } from '../../components/ui/Skeleton';
 import { ShareButton } from '../../components/ShareButton';
-import type { Visa, TrackerStats, TrackerEntry, NewsArticle } from '../../types/database';
+import type { Visa, TrackerStats, TrackerEntry } from '../../types/database';
 
 interface VisaPremiumContentItem {
   id: string;
@@ -50,22 +53,15 @@ interface VisaPremiumContentItem {
   updated_at: string;
 }
 
-const sectionIcons: Record<string, React.ElementType> = {
-  'Executive Overview': BookOpen,
-  'Eligibility': CheckCircle,
-  'Eligibility Requirements': CheckCircle,
-  'Application Process': List,
-  'Step-by-Step': List,
-  'Documents': FileText,
-  'Document Checklist': CheckSquare,
-  'Costs': DollarSign,
-  'Processing': Clock,
-  'Processing Times': Clock,
-  'Tips': Lightbulb,
-  'Mistakes': AlertCircle,
-  'Timeline': TrendingUp,
-  'Resources': Globe,
-};
+interface DocumentItem {
+  id?: string;
+  name: string;
+  description?: string;
+  is_mandatory: boolean;
+  document_type: string;
+  status?: 'pending' | 'uploaded' | 'verified' | 'rejected';
+  fileUrl?: string;
+}
 
 export function VisaDetail() {
   const { id } = useParams<{ id: string }>();
@@ -76,10 +72,12 @@ export function VisaDetail() {
   const [relatedVisas, setRelatedVisas] = useState<Visa[]>([]);
   const [premiumContent, setPremiumContent] = useState<VisaPremiumContentItem[]>([]);
   const [recentEntries, setRecentEntries] = useState<TrackerEntry[]>([]);
-  const [visaNews, setVisaNews] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<string>('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [documents, setDocuments] = useState<DocumentItem[]>([]);
   
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -90,30 +88,16 @@ export function VisaDetail() {
       setLoading(true);
 
       // Fetch Visa
-      const { data: visaData, error: visaError } = await supabase
+      const { data: visaData } = await supabase
         .from('visas')
         .select('*')
         .eq('id', id)
         .single();
 
-      if (visaError) {
-        console.error('Error fetching visa:', visaError);
-        setLoading(false);
-        return;
-      }
-
-      setVisa(visaData);
-
-      // Fetch Stats
-      const { data: statsData } = await supabase
-        .from('tracker_stats')
-        .select('*')
-        .eq('visa_id', id)
-        .maybeSingle();
-      setStats(statsData);
-
-      // Fetch Related Visas
       if (visaData) {
+        setVisa(visaData);
+
+        // Fetch related
         const { data: relatedData } = await supabase
           .from('visas')
           .select('*')
@@ -121,9 +105,23 @@ export function VisaDetail() {
           .neq('id', id)
           .limit(3);
         setRelatedVisas(relatedData || []);
+
+        // Parse key_requirements into documents
+        if (visaData.key_requirements) {
+          const docItems = visaData.key_requirements
+            .split('\n')
+            .filter(line => line.trim().startsWith('•') || line.trim().startsWith('-'))
+            .map((line, idx) => ({
+              name: line.replace(/^[•-]\s*/, '').trim(),
+              is_mandatory: true,
+              document_type: 'requirement',
+              status: 'pending' as const
+            }));
+          setDocuments(docItems);
+        }
       }
 
-      // Fetch Premium Content - ORDERED by section_number
+      // Fetch Premium Content
       const { data: contentData } = await supabase
         .from('visa_premium_content')
         .select('*')
@@ -134,10 +132,19 @@ export function VisaDetail() {
       const sortedContent = contentData || [];
       setPremiumContent(sortedContent);
       
-      // Set first section as active
+      // Expand first section by default
       if (sortedContent.length > 0) {
+        setExpandedSections(new Set([sortedContent[0].id]));
         setActiveSection(sortedContent[0].id);
       }
+
+      // Fetch Stats
+      const { data: statsData } = await supabase
+        .from('tracker_stats')
+        .select('*')
+        .eq('visa_id', id)
+        .maybeSingle();
+      setStats(statsData);
 
       // Fetch Recent Entries
       const { data: entriesData } = await supabase
@@ -148,117 +155,69 @@ export function VisaDetail() {
         .limit(5);
       setRecentEntries(entriesData || []);
 
-      // Fetch Visa-Specific News
-      const { data: newsData } = await supabase
-        .from('news_articles')
-        .select('*')
-        .contains('visa_ids', [id])
-        .eq('is_published', true)
-        .order('published_at', { ascending: false })
-        .limit(3);
-      setVisaNews(newsData || []);
-
       setLoading(false);
     };
 
     fetchData();
-  }, [id, user]);
+  }, [id]);
 
-  // Handle scroll spy
-  useEffect(() => {
-    const handleScroll = () => {
-      const sections = premiumContent.map(item => document.getElementById(`section-${item.id}`));
-      const scrollPosition = window.scrollY + 150;
-
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const section = sections[i];
-        if (section && section.offsetTop <= scrollPosition) {
-          setActiveSection(premiumContent[i].id);
-          break;
-        }
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(sectionId)) {
+        newSet.delete(sectionId);
+      } else {
+        newSet.add(sectionId);
       }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [premiumContent]);
-
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(`section-${sectionId}`);
-    if (element) {
-      const offset = 120;
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - offset;
-      
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
-      setActiveSection(sectionId);
-      setMobileMenuOpen(false);
-    }
+      return newSet;
+    });
+    setActiveSection(sectionId);
   };
 
-  if (loading) {
-    return <VisaDetailSkeleton />;
-  }
-
-  if (!visa) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-        <h2 className="text-2xl font-bold text-neutral-900 mb-2">Visa not found</h2>
-        <Link to="/visas">
-            <Button variant="secondary">Back to search</Button>
-        </Link>
-      </div>
-    );
-  }
-
-  const getContentTypeIcon = (type: string) => {
-    switch (type) {
-      case 'video': return Video;
-      case 'document_examples': return FileText;
-      case 'file': return Download;
-      case 'checklist': return CheckSquare;
-      default: return BookOpen;
-    }
+  const formatContent = (content: string) => {
+    if (!content) return '';
+    
+    return content
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="text-neutral-900">$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/### (.*)/g, '<h3 class="text-lg font-bold text-neutral-900 mt-6 mb-3">$1</h3>')
+      .replace(/## (.*)/g, '<h2 class="text-xl font-bold text-neutral-900 mt-8 mb-4">$1</h2>')
+      .replace(/# (.*)/g, '<h1 class="text-2xl font-bold text-neutral-900 mt-8 mb-4">$1</h1>')
+      .replace(/\n\n/g, '</p><p class="mb-4 leading-relaxed">')
+      .replace(/\n/g, '<br/>')
+      .replace(/- \[ \] (.*)/g, '<div class="flex items-start gap-2 mb-2"><span class="w-5 h-5 border-2 border-neutral-300 rounded flex-shrink-0 mt-0.5"></span><span>$1</span></div>')
+      .replace(/- \[x\] (.*)/g, '<div class="flex items-start gap-2 mb-2"><span class="w-5 h-5 bg-green-500 border-2 border-green-500 rounded flex-shrink-0 mt-0.5 flex items-center justify-center"><svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></span><span class="line-through text-neutral-500">$1</span></div>')
+      .replace(/- (.*)/g, '<li class="flex items-start gap-2 mb-2"><span class="w-2 h-2 bg-primary-500 rounded-full mt-2 flex-shrink-0"></span><span>$1</span></li>')
+      .replace(/\| (.*) \| (.*) \|/g, '<tr><td class="border px-4 py-2 font-medium">$1</td><td class="border px-4 py-2">$2</td></tr>')
+      .replace(/^/, '<p class="mb-4 leading-relaxed text-neutral-700">')
+      .replace(/$/, '</p>');
   };
 
-  const getSectionIcon = (title: string) => {
-    for (const [key, Icon] of Object.entries(sectionIcons)) {
-      if (title.toLowerCase().includes(key.toLowerCase())) {
-        return Icon;
-      }
-    }
-    return FileText;
-  };
+  if (loading) return <VisaDetailSkeleton />;
+  if (!visa) return (
+    <div className="max-w-4xl mx-auto px-4 py-20 text-center">
+      <h2 className="text-2xl font-bold text-neutral-900 mb-2">Visa not found</h2>
+      <Link to="/visas"><Button variant="secondary">Back to search</Button></Link>
+    </div>
+  );
 
-  // Group content by type for sidebar
-  const groupedContent = {
-    overview: premiumContent.filter(c => c.section_number === 1),
-    eligibility: premiumContent.filter(c => c.section_number === 2),
-    process: premiumContent.filter(c => c.section_number === 3 || c.section_number === 4),
-    details: premiumContent.filter(c => c.section_number === 5 || c.section_number === 6),
-    tips: premiumContent.filter(c => c.section_number === 7 || c.section_number === 8),
-    timeline: premiumContent.filter(c => c.section_number === 10),
-  };
+  const freeContent = premiumContent.slice(0, 2);
+  const lockedContent = premiumContent.slice(2);
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      {/* Sticky Header */}
+      {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b border-neutral-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
               <Link to="/visas" className="flex items-center text-neutral-600 hover:text-neutral-900">
                 <ArrowLeft className="w-5 h-5 mr-2" />
-                <span className="hidden sm:inline">Back to Visas</span>
+                <span className="hidden sm:inline">Back</span>
               </Link>
               <div className="h-6 w-px bg-neutral-300 hidden sm:block" />
-              <div className="flex items-center gap-2">
-                <Badge className="text-sm">{visa.subclass}</Badge>
-                <span className="font-semibold text-neutral-900 hidden sm:inline">{visa.name}</span>
-              </div>
+              <Badge className="text-sm">{visa.subclass}</Badge>
+              <span className="font-semibold text-neutral-900 hidden sm:inline">{visa.name}</span>
             </div>
             <div className="flex items-center gap-3">
               <Button variant="ghost" size="sm" onClick={() => window.print()}>
@@ -266,10 +225,7 @@ export function VisaDetail() {
                 Print
               </Button>
               <ShareButton title={`Visa Guide: ${visa.name}`} />
-              <button
-                className="lg:hidden p-2 text-neutral-600 hover:text-neutral-900"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
+              <button className="lg:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                 {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
             </div>
@@ -277,23 +233,16 @@ export function VisaDetail() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <div className="bg-gradient-to-br from-primary-600 to-primary-700 text-white">
+      {/* Hero */}
+      <div className="bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-          <div className="flex flex-wrap gap-3 mb-4">
-            <Badge variant="secondary" className="bg-white/20 text-white border-0">
-              Subclass {visa.subclass}
-            </Badge>
-            <Badge variant="secondary" className="bg-white/20 text-white border-0 capitalize">
-              {visa.category}
-            </Badge>
+          <div className="flex flex-wrap gap-2 mb-4">
+            <Badge variant="secondary" className="bg-white/20 text-white border-0">Subclass {visa.subclass}</Badge>
+            <Badge variant="secondary" className="bg-white/20 text-white border-0 capitalize">{visa.category}</Badge>
           </div>
           <h1 className="text-3xl lg:text-5xl font-bold mb-4">{visa.name}</h1>
-          <p className="text-lg lg:text-xl text-primary-100 max-w-3xl">
-            {visa.summary}
-          </p>
+          <p className="text-lg lg:text-xl text-primary-100 max-w-3xl">{visa.summary}</p>
           
-          {/* Quick Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
               <DollarSign className="w-5 h-5 mb-2 text-primary-200" />
@@ -313,214 +262,192 @@ export function VisaDetail() {
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
               <ExternalLink className="w-5 h-5 mb-2 text-primary-200" />
               <p className="text-sm text-primary-200">Official</p>
-              <a 
-                href={visa.official_url || '#'} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="font-semibold text-lg hover:underline flex items-center gap-1"
-              >
-                DHA <ArrowUpRight className="w-4 h-4" />
+              <a href={visa.official_url || '#'} target="_blank" rel="noopener noreferrer" className="font-semibold text-lg hover:underline flex items-center gap-1">
+                DHA <ExternalLink className="w-4 h-4" />
               </a>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Premium CTA Banner */}
+      <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Crown className="w-8 h-8" />
+              <div>
+                <p className="font-bold text-lg">Unlock Premium Guide</p>
+                <p className="text-amber-100 text-sm">Get {lockedContent.length} more sections + document checklist + expert tips</p>
+              </div>
+            </div>
+            <Button 
+              variant="secondary" 
+              className="bg-white text-orange-600 hover:bg-amber-50"
+              onClick={() => setShowPremiumModal(true)}
+            >
+              <Lock className="w-4 h-4 mr-2" />
+              Unlock Now
+            </Button>
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8">
-          {/* Sidebar Navigation */}
-          <aside className={`
-            fixed inset-y-0 left-0 z-40 w-72 bg-white shadow-xl transform transition-transform lg:translate-x-0 lg:static lg:shadow-none lg:bg-transparent lg:w-64 lg:block lg:h-fit lg:sticky lg:top-24
-            ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-          `}>
-            <div className="h-full overflow-y-auto lg:overflow-visible p-4 lg:p-0">
-              {/* Progress */}
-              <div className="mb-6 lg:mb-8">
-                <h3 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-3">
-                  Guide Sections
-                </h3>
-                <div className="w-full bg-neutral-200 rounded-full h-2">
-                  <div 
-                    className="bg-primary-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${((premiumContent.findIndex(c => c.id === activeSection) + 1) / premiumContent.length) * 100}%` }}
-                  />
-                </div>
-                <p className="text-xs text-neutral-500 mt-2">
-                  {premiumContent.findIndex(c => c.id === activeSection) + 1} of {premiumContent.length} sections
-                </p>
+          {/* Sidebar */}
+          <aside className={`fixed inset-y-0 left-0 z-40 w-72 bg-white shadow-xl transform transition-transform lg:translate-x-0 lg:static lg:shadow-none lg:bg-transparent lg:w-64 lg:block lg:h-fit lg:sticky lg:top-24 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            <div className="h-full overflow-y-auto p-4 lg:p-0">
+              <h3 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-3">Guide Contents</h3>
+              <div className="w-full bg-neutral-200 rounded-full h-2 mb-2">
+                <div className="bg-primary-600 h-2 rounded-full" style={{ width: `${(expandedSections.size / premiumContent.length) * 100}%` }} />
               </div>
-
-              {/* Navigation Menu */}
+              <p className="text-xs text-neutral-500 mb-4">{expandedSections.size} of {premiumContent.length} sections viewed</p>
+              
               <nav className="space-y-1">
-                {groupedContent.overview.map((item) => (
-                  <NavItem 
+                {freeContent.map((item) => (
+                  <button
                     key={item.id}
-                    item={item}
-                    isActive={activeSection === item.id}
-                    onClick={() => scrollToSection(item.id)}
-                    icon={getSectionIcon(item.title)}
-                  />
+                    onClick={() => toggleSection(item.id)}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm transition-all ${activeSection === item.id ? 'bg-primary-50 text-primary-700 font-medium' : 'text-neutral-600 hover:bg-neutral-100'}`}
+                  >
+                    <BookOpen className={`w-4 h-4 ${activeSection === item.id ? 'text-primary-600' : 'text-neutral-400'}`} />
+                    <span className="flex-1 truncate">{item.title}</span>
+                    {expandedSections.has(item.id) ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </button>
                 ))}
                 
-                {groupedContent.eligibility.length > 0 && (
-                  <NavGroup title="Eligibility">
-                    {groupedContent.eligibility.map((item) => (
-                      <NavItem 
-                        key={item.id}
-                        item={item}
-                        isActive={activeSection === item.id}
-                        onClick={() => scrollToSection(item.id)}
-                        icon={getSectionIcon(item.title)}
-                      />
-                    ))}
-                  </NavGroup>
-                )}
-
-                {groupedContent.process.length > 0 && (
-                  <NavGroup title="Application Process">
-                    {groupedContent.process.map((item) => (
-                      <NavItem 
-                        key={item.id}
-                        item={item}
-                        isActive={activeSection === item.id}
-                        onClick={() => scrollToSection(item.id)}
-                        icon={getSectionIcon(item.title)}
-                      />
-                    ))}
-                  </NavGroup>
-                )}
-
-                {groupedContent.details.length > 0 && (
-                  <NavGroup title="Details">
-                    {groupedContent.details.map((item) => (
-                      <NavItem 
-                        key={item.id}
-                        item={item}
-                        isActive={activeSection === item.id}
-                        onClick={() => scrollToSection(item.id)}
-                        icon={getSectionIcon(item.title)}
-                      />
-                    ))}
-                  </NavGroup>
-                )}
-
-                {groupedContent.tips.length > 0 && (
-                  <NavGroup title="Tips & Resources">
-                    {groupedContent.tips.map((item) => (
-                      <NavItem 
-                        key={item.id}
-                        item={item}
-                        isActive={activeSection === item.id}
-                        onClick={() => scrollToSection(item.id)}
-                        icon={getSectionIcon(item.title)}
-                      />
-                    ))}
-                  </NavGroup>
-                )}
-
-                {groupedContent.timeline.length > 0 && (
-                  <NavGroup title="Timeline Data">
-                    {groupedContent.timeline.map((item) => (
-                      <NavItem 
-                        key={item.id}
-                        item={item}
-                        isActive={activeSection === item.id}
-                        onClick={() => scrollToSection(item.id)}
-                        icon={TrendingUp}
-                      />
-                    ))}
-                  </NavGroup>
-                )}
-              </nav>
-
-              {/* Key Requirements Quick Link */}
-              {visa.key_requirements && (
-                <div className="mt-6 pt-6 border-t border-neutral-200">
-                  <button
-                    onClick={() => {
-                      const el = document.getElementById('key-requirements');
-                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }}
-                    className="flex items-center gap-2 text-sm text-neutral-600 hover:text-primary-600 transition-colors"
-                  >
-                    <CheckCircle className="w-4 h-4" />
-                    Key Requirements
-                  </button>
+                {/* Locked Premium Sections */}
+                <div className="mt-4 pt-4 border-t border-neutral-200">
+                  <div className="flex items-center gap-2 px-3 mb-2">
+                    <Lock className="w-4 h-4 text-amber-500" />
+                    <span className="text-sm font-medium text-amber-700">Premium Content</span>
+                  </div>
+                  {lockedContent.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setShowPremiumModal(true)}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm text-neutral-400 hover:bg-amber-50 transition-all"
+                    >
+                      <Lock className="w-4 h-4" />
+                      <span className="flex-1 truncate">{item.title}</span>
+                    </button>
+                  ))}
                 </div>
-              )}
+              </nav>
             </div>
           </aside>
 
-          {/* Main Content Area */}
+          {/* Main Content */}
           <main className="flex-1 min-w-0" ref={contentRef}>
-            {/* Key Requirements Card */}
+            {/* Key Requirements */}
             {visa.key_requirements && (
-              <section id="key-requirements" className="mb-8">
+              <section className="mb-8">
                 <Card className="border-l-4 border-l-primary-500">
                   <CardHeader className="pb-3">
                     <h2 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
-                      <CheckCircle className="w-6 h-6 text-primary-600" />
+                      <Shield className="w-6 h-6 text-primary-600" />
                       Key Requirements
                     </h2>
                   </CardHeader>
                   <CardBody>
-                    <div className="prose prose-neutral max-w-none whitespace-pre-line text-neutral-700">
-                      {visa.key_requirements}
-                    </div>
+                    <div 
+                      className="prose prose-neutral max-w-none text-neutral-700"
+                      dangerouslySetInnerHTML={{ __html: formatContent(visa.key_requirements) }}
+                    />
                   </CardBody>
                 </Card>
               </section>
             )}
 
-            {/* Premium Content Sections */}
-            <div className="space-y-8">
-              {premiumContent.map((item, index) => {
-                const Icon = getContentTypeIcon(item.content_type);
-                return (
-                  <section
-                    key={item.id}
-                    id={`section-${item.id}`}
-                    className="scroll-mt-24"
-                  >
-                    <Card className={`overflow-hidden transition-all duration-300 ${activeSection === item.id ? 'ring-2 ring-primary-500 ring-offset-2' : ''}`}>
-                      <CardHeader className="bg-gradient-to-r from-neutral-50 to-white border-b">
-                        <div className="flex items-start gap-4">
-                          <div className="p-3 bg-primary-100 rounded-xl">
-                            <Icon className="w-6 h-6 text-primary-600" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <h2 className="text-xl font-bold text-neutral-900">{item.title}</h2>
-                              <Badge variant="secondary" className="text-xs capitalize">
-                                {item.content_type}
-                              </Badge>
-                            </div>
-                            {item.section_number && (
-                              <p className="text-sm text-neutral-500 mt-1">
-                                Section {item.section_number} of {premiumContent.length}
-                              </p>
-                            )}
-                          </div>
+            {/* Document Upload Section */}
+            <section className="mb-8">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
+                      <Upload className="w-6 h-6 text-primary-600" />
+                      Document Checklist
+                    </h2>
+                    <Badge variant="secondary">
+                      {documents.filter(d => d.status === 'uploaded').length} / {documents.length} Uploaded
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardBody>
+                  <div className="space-y-3">
+                    {documents.map((doc, idx) => (
+                      <div key={idx} className="flex items-center gap-4 p-4 bg-neutral-50 rounded-lg">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${doc.status === 'uploaded' ? 'bg-green-100' : 'bg-neutral-200'}`}>
+                          {doc.status === 'uploaded' ? (
+                            <CheckCircle className="w-5 h-5 text-green-600" />
+                          ) : (
+                            <FileText className="w-5 h-5 text-neutral-500" />
+                          )}
                         </div>
-                      </CardHeader>
+                        <div className="flex-1">
+                          <p className="font-medium text-neutral-900">{doc.name}</p>
+                          {doc.description && <p className="text-sm text-neutral-500">{doc.description}</p>}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {doc.status === 'uploaded' ? (
+                            <Button variant="ghost" size="sm">
+                              <Download className="w-4 h-4 mr-2" />
+                              View
+                            </Button>
+                          ) : (
+                            <Button variant="secondary" size="sm">
+                              <Upload className="w-4 h-4 mr-2" />
+                              Upload
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Upload Zone */}
+                  <div className="mt-6 p-8 border-2 border-dashed border-neutral-300 rounded-lg text-center hover:border-primary-400 hover:bg-primary-50 transition-all cursor-pointer">
+                    <Upload className="w-12 h-12 mx-auto mb-4 text-neutral-400" />
+                    <p className="text-neutral-600 font-medium">Drag and drop files here</p>
+                    <p className="text-sm text-neutral-400 mt-1">or click to browse</p>
+                    <input type="file" className="hidden" multiple />
+                  </div>
+                </CardBody>
+              </Card>
+            </section>
+
+            {/* Free Content Sections */}
+            <div className="space-y-6">
+              {freeContent.map((item) => (
+                <section key={item.id} id={`section-${item.id}`} className="scroll-mt-24">
+                  <Card className={`overflow-hidden transition-all duration-300 ${expandedSections.has(item.id) ? 'ring-2 ring-primary-500 ring-offset-2' : ''}`}>
+                    <button
+                      onClick={() => toggleSection(item.id)}
+                      className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-neutral-50 to-white border-b hover:bg-neutral-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="p-2 bg-primary-100 rounded-lg">
+                          <BookOpen className="w-5 h-5 text-primary-600" />
+                        </div>
+                        <div className="text-left">
+                          <h2 className="text-lg font-bold text-neutral-900">{item.title}</h2>
+                          <p className="text-sm text-neutral-500">Section {item.section_number}</p>
+                        </div>
+                      </div>
+                      {expandedSections.has(item.id) ? (
+                        <ChevronUp className="w-5 h-5 text-neutral-400" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-neutral-400" />
+                      )}
+                    </button>
+                    
+                    {expandedSections.has(item.id) && (
                       <CardBody className="p-6">
-                        {item.content && (
-                          <div className="prose prose-neutral max-w-none">
-                            <div 
-                              className="text-neutral-700 leading-relaxed"
-                              dangerouslySetInnerHTML={{ 
-                                __html: item.content
-                                  .replace(/\n\n/g, '</p><p>')
-                                  .replace(/\n/g, '<br/>')
-                                  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                                  .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                                  .replace(/^/g, '<p>')
-                                  .replace(/$/g, '</p>')
-                              }} 
-                            />
-                          </div>
-                        )}
+                        <div 
+                          className="prose prose-neutral max-w-none"
+                          dangerouslySetInnerHTML={{ __html: formatContent(item.content || '') }}
+                        />
                         
                         {item.tips && (
                           <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
@@ -530,82 +457,47 @@ export function VisaDetail() {
                             </div>
                           </div>
                         )}
-
-                        {item.file_urls && item.file_urls.length > 0 && (
-                          <div className="mt-6 space-y-2">
-                            <h4 className="font-semibold text-neutral-900">Attached Files</h4>
-                            {item.file_urls.map((url, idx) => (
-                              <a
-                                key={idx}
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 p-3 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors"
-                              >
-                                <Download className="w-4 h-4 text-neutral-500" />
-                                <span className="text-sm text-neutral-700">Download File {idx + 1}</span>
-                              </a>
-                            ))}
-                          </div>
-                        )}
                       </CardBody>
-                    </Card>
-
-                    {/* Navigation between sections */}
-                    <div className="flex justify-between mt-4 px-2">
-                      {index > 0 && (
-                        <button
-                          onClick={() => scrollToSection(premiumContent[index - 1].id)}
-                          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600 transition-colors"
-                        >
-                          <ChevronLeft className="w-4 h-4" />
-                          Previous: {premiumContent[index - 1].title}
-                        </button>
-                      )}
-                      {index < premiumContent.length - 1 && (
-                        <button
-                          onClick={() => scrollToSection(premiumContent[index + 1].id)}
-                          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600 transition-colors ml-auto"
-                        >
-                          Next: {premiumContent[index + 1].title}
-                          <ChevronRight className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                  </section>
-                );
-              })}
+                    )}
+                  </Card>
+                </section>
+              ))}
             </div>
 
-            {/* Timeline Stats */}
-            {stats && (
-              <section className="mt-12">
-                <Card>
-                  <CardHeader>
-                    <h2 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
-                      <TrendingUp className="w-6 h-6 text-primary-600" />
-                      Processing Timeline
-                    </h2>
-                  </CardHeader>
-                  <CardBody>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="text-center p-4 bg-neutral-50 rounded-lg">
-                        <p className="text-2xl font-bold text-primary-600">{stats.percentile_25 || 'N/A'}</p>
-                        <p className="text-sm text-neutral-500">25% Processed</p>
-                      </div>
-                      <div className="text-center p-4 bg-neutral-50 rounded-lg">
-                        <p className="text-2xl font-bold text-primary-600">{stats.percentile_50 || 'N/A'}</p>
-                        <p className="text-sm text-neutral-500">50% Processed</p>
-                      </div>
-                      <div className="text-center p-4 bg-neutral-50 rounded-lg">
-                        <p className="text-2xl font-bold text-primary-600">{stats.percentile_75 || 'N/A'}</p>
-                        <p className="text-sm text-neutral-500">75% Processed</p>
-                      </div>
-                      <div className="text-center p-4 bg-neutral-50 rounded-lg">
-                        <p className="text-2xl font-bold text-primary-600">{stats.percentile_90 || 'N/A'}</p>
-                        <p className="text-sm text-neutral-500">90% Processed</p>
-                      </div>
+            {/* Premium Lock Section */}
+            {lockedContent.length > 0 && (
+              <section className="mt-8">
+                <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
+                  <CardBody className="p-8 text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Crown className="w-8 h-8 text-white" />
                     </div>
+                    <h2 className="text-2xl font-bold text-neutral-900 mb-2">
+                      {lockedContent.length} Premium Sections Locked
+                    </h2>
+                    <p className="text-neutral-600 mb-6 max-w-md mx-auto">
+                      Get access to document checklists, processing timelines, expert tips, and detailed guides to boost your application success.
+                    </p>
+                    
+                    <div className="grid md:grid-cols-2 gap-4 mb-6 text-left">
+                      {lockedContent.slice(0, 4).map((item) => (
+                        <div key={item.id} className="flex items-center gap-2 text-sm text-neutral-600">
+                          <Lock className="w-4 h-4 text-amber-500" />
+                          <span>{item.title}</span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <Button 
+                      size="lg" 
+                      className="bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600"
+                      onClick={() => setShowPremiumModal(true)}
+                    >
+                      <Lock className="w-5 h-5 mr-2" />
+                      Unlock Premium Guide
+                    </Button>
+                    
+                    <p className="text-xs text-neutral-500 mt-4">One-time payment • Lifetime access • Money-back guarantee</p>
                   </CardBody>
                 </Card>
               </section>
@@ -633,44 +525,81 @@ export function VisaDetail() {
           </main>
         </div>
       </div>
-    </div>
-  );
-}
 
-// Navigation Components
-function NavItem({ item, isActive, onClick, icon: Icon }: { 
-  item: VisaPremiumContentItem; 
-  isActive: boolean; 
-  onClick: () => void;
-  icon: React.ElementType;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`
-        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm transition-all
-        ${isActive 
-          ? 'bg-primary-50 text-primary-700 font-medium' 
-          : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900'
-        }
-      `}
-    >
-      <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-primary-600' : 'text-neutral-400'}`} />
-      <span className="truncate">{item.title}</span>
-      {isActive && <ChevronRight className="w-4 h-4 ml-auto text-primary-600" />}
-    </button>
-  );
-}
-
-function NavGroup({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="mt-4">
-      <h4 className="px-3 text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
-        {title}
-      </h4>
-      <div className="space-y-0.5">
-        {children}
-      </div>
+      {/* Premium Modal */}
+      {showPremiumModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <Card className="max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <CardHeader className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Crown className="w-8 h-8 text-amber-500" />
+                <div>
+                  <h2 className="text-xl font-bold text-neutral-900">Unlock Premium</h2>
+                  <p className="text-sm text-neutral-500">Complete visa guide access</p>
+                </div>
+              </div>
+              <button onClick={() => setShowPremiumModal(false)} className="p-2 hover:bg-neutral-100 rounded-full">
+                <X className="w-5 h-5" />
+              </button>
+            </CardHeader>
+            <CardBody>
+              <div className="space-y-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-neutral-900">{lockedContent.length} Premium Sections</p>
+                    <p className="text-sm text-neutral-500">Detailed guides and expert tips</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-neutral-900">Document Upload System</p>
+                    <p className="text-sm text-neutral-500">Track and manage all required documents</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-neutral-900">Real Timeline Data</p>
+                    <p className="text-sm text-neutral-500">See actual processing times from applicants</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-neutral-900">Lawyer Dashboard Access</p>
+                    <p className="text-sm text-neutral-500">Share with your immigration lawyer</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-neutral-50 rounded-lg p-4 mb-6">
+                <div className="flex items-baseline justify-between mb-2">
+                  <span className="text-sm text-neutral-500">Price</span>
+                  <span className="text-3xl font-bold text-neutral-900">$49</span>
+                </div>
+                <p className="text-xs text-neutral-400">One-time payment • Lifetime access • 30-day money-back guarantee</p>
+              </div>
+              
+              <Button 
+                size="lg" 
+                className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600"
+              >
+                <Lock className="w-5 h-5 mr-2" />
+                Unlock Now - $49
+              </Button>
+              
+              <button 
+                onClick={() => setShowPremiumModal(false)}
+                className="w-full mt-3 text-sm text-neutral-500 hover:text-neutral-700"
+              >
+                Maybe later
+              </button>
+            </CardBody>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
