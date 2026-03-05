@@ -128,13 +128,14 @@ export function VisaDetail() {
 
       if (visaData) {
         setVisa(visaData);
+        const visaId = visaData.id;
 
         // Fetch related
         const { data: relatedData } = await supabase
           .from('visas')
           .select('*')
           .eq('category', visaData.category)
-          .neq('id', subclass)
+          .neq('id', visaId)
           .limit(3);
         setRelatedVisas(relatedData || []);
 
@@ -151,41 +152,41 @@ export function VisaDetail() {
             }));
           setDocuments(docItems);
         }
+
+        // Fetch Premium Content
+        const { data: contentData } = await supabase
+          .from('visa_premium_content')
+          .select('*')
+          .eq('visa_id', visaId)
+          .eq('is_published', true)
+          .order('section_number', { ascending: true });
+        
+        const sortedContent = contentData || [];
+        setPremiumContent(sortedContent);
+        
+        // Expand first section by default
+        if (sortedContent.length > 0) {
+          setExpandedSections(new Set([sortedContent[0].id]));
+          setActiveSection(sortedContent[0].id);
+        }
+
+        // Fetch Stats
+        const { data: statsData } = await supabase
+          .from('tracker_stats')
+          .select('*')
+          .eq('visa_id', visaId)
+          .maybeSingle();
+        setStats(statsData);
+
+        // Fetch Recent Entries
+        const { data: entriesData } = await supabase
+          .from('tracker_entries')
+          .select('*')
+          .eq('visa_id', visaId)
+          .order('created_at', { ascending: false })
+          .limit(5);
+        setRecentEntries(entriesData || []);
       }
-
-      // Fetch Premium Content
-      const { data: contentData } = await supabase
-        .from('visa_premium_content')
-        .select('*')
-        .eq('visa_id', id)
-        .eq('is_published', true)
-        .order('section_number', { ascending: true });
-      
-      const sortedContent = contentData || [];
-      setPremiumContent(sortedContent);
-      
-      // Expand first section by default
-      if (sortedContent.length > 0) {
-        setExpandedSections(new Set([sortedContent[0].id]));
-        setActiveSection(sortedContent[0].id);
-      }
-
-      // Fetch Stats
-      const { data: statsData } = await supabase
-        .from('tracker_stats')
-        .select('*')
-        .eq('visa_id', id)
-        .maybeSingle();
-      setStats(statsData);
-
-      // Fetch Recent Entries
-      const { data: entriesData } = await supabase
-        .from('tracker_entries')
-        .select('*')
-        .eq('visa_id', id)
-        .order('created_at', { ascending: false })
-        .limit(5);
-      setRecentEntries(entriesData || []);
 
       setLoading(false);
     };
