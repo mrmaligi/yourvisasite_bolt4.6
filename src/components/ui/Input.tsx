@@ -1,4 +1,4 @@
-import { type InputHTMLAttributes, type TextareaHTMLAttributes, type SelectHTMLAttributes, forwardRef } from 'react';
+import { type InputHTMLAttributes, type TextareaHTMLAttributes, type SelectHTMLAttributes, forwardRef, useId } from 'react';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -10,7 +10,11 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, helperText, icon, className = '', id, ...props }, ref) => {
     // Generate ID if not provided, for label accessibility
-    const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
+    const generatedId = useId();
+    const inputId = id || generatedId;
+    const errorId = `${inputId}-error`;
+    const helperId = `${inputId}-helper`;
+    const describedBy = error ? errorId : (helperText ? helperId : undefined);
 
     return (
       <div className="space-y-1.5 w-full">
@@ -29,11 +33,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={`input-field ${icon ? 'pl-10' : ''} ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''} ${className}`}
+            aria-invalid={!!error}
+            aria-describedby={describedBy}
             {...props}
           />
         </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        {helperText && !error && <p className="text-sm text-neutral-500">{helperText}</p>}
+        {error && <p id={errorId} className="text-sm text-red-600" aria-live="polite">{error}</p>}
+        {helperText && !error && <p id={helperId} className="text-sm text-neutral-500">{helperText}</p>}
       </div>
     );
   }
@@ -47,7 +53,9 @@ export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElemen
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ label, error, className = '', id, ...props }, ref) => {
-    const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
+    const generatedId = useId();
+    const inputId = id || generatedId;
+    const errorId = `${inputId}-error`;
 
     return (
       <div className="space-y-1.5 w-full">
@@ -60,9 +68,11 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           id={inputId}
           className={`input-field min-h-[100px] ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''} ${className}`}
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
           {...props}
         />
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p id={errorId} className="text-sm text-red-600" aria-live="polite">{error}</p>}
       </div>
     );
   }
@@ -77,7 +87,9 @@ export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, error, options, className = '', id, ...props }, ref) => {
-    const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
+    const generatedId = useId();
+    const inputId = id || generatedId;
+    const errorId = `${inputId}-error`;
 
     return (
       <div className="space-y-1.5 w-full">
@@ -90,6 +102,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           ref={ref}
           id={inputId}
           className={`input-field ${error ? 'border-red-500' : ''} ${className}`}
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
           {...props}
         >
           {options.map((opt) => (
@@ -98,7 +112,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             </option>
           ))}
         </select>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p id={errorId} className="text-sm text-red-600" aria-live="polite">{error}</p>}
       </div>
     );
   }
