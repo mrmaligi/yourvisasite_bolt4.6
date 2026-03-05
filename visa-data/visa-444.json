@@ -1,0 +1,107 @@
+{
+  "version": "1.0",
+  "visa": {
+    "subclass": "444",
+    "name": "Special Category",
+    "category": "other",
+    "country": "Australia",
+    "summary": "",
+    "description": "",
+    "duration": "",
+    "cost_aud": "",
+    "processing_time_range": "",
+    "official_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/special-category-444",
+    "key_requirements": "",
+    "is_active": true,
+    "eligibility_criteria": {},
+    "metadata": {
+      "last_updated": "2025-03-01",
+      "source": "Department of Home Affairs Research",
+      "reviewed_by": "Immigration Expert"
+    }
+  },
+  "premium_content": [
+    {
+      "section_number": 1,
+      "title": "Executive Overview",
+      "content_type": "guide",
+      "content": "",
+      "is_published": true
+    },
+    {
+      "section_number": 2,
+      "title": "Eligibility Requirements",
+      "content_type": "guide",
+      "content": "",
+      "is_published": true
+    },
+    {
+      "section_number": 3,
+      "title": "Step-by-Step Application Process",
+      "content_type": "guide",
+      "content": "",
+      "is_published": true
+    },
+    {
+      "section_number": 4,
+      "title": "Document Checklist",
+      "content_type": "checklist",
+      "content": "",
+      "is_published": true
+    },
+    {
+      "section_number": 5,
+      "title": "Costs and Fees",
+      "content_type": "guide",
+      "content": "",
+      "is_published": true
+    },
+    {
+      "section_number": 6,
+      "title": "Processing Times",
+      "content_type": "guide",
+      "content": "",
+      "is_published": true
+    },
+    {
+      "section_number": 7,
+      "title": "Common Mistakes and Tips",
+      "content_type": "guide",
+      "content": "",
+      "is_published": true
+    },
+    {
+      "section_number": 10,
+      "title": "Real Timeline Tracker Data",
+      "content_type": "guide",
+      "content": "",
+      "is_published": true
+    }
+  ],
+  "documents": {
+    "required": [],
+    "folders": [
+      {
+        "name": "Identity Documents",
+        "description": "Passport, photos, birth certificates",
+        "order": 1
+      },
+      {
+        "name": "Financial Evidence",
+        "description": "Bank statements, proof of funds",
+        "order": 2
+      },
+      {
+        "name": "Travel Documents",
+        "description": "Flight bookings, itineraries",
+        "order": 3
+      }
+    ]
+  },
+  "timeline_tracker": {
+    "official_times": {},
+    "entries": []
+  },
+  "faqs": [],
+  "news_and_updates": []
+}
