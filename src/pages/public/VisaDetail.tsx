@@ -200,20 +200,54 @@ export function VisaDetail() {
   const formatContent = (content: string) => {
     if (!content) return '';
     
-    return content
-      .replace(/\*\*(.*?)\*\*/g, '<strong class="text-neutral-900">$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/### (.*)/g, '<h3 class="text-lg font-bold text-neutral-900 mt-6 mb-3">$1</h3>')
-      .replace(/## (.*)/g, '<h2 class="text-xl font-bold text-neutral-900 mt-8 mb-4">$1</h2>')
-      .replace(/# (.*)/g, '<h1 class="text-2xl font-bold text-neutral-900 mt-8 mb-4">$1</h1>')
-      .replace(/\n\n/g, '</p><p class="mb-4 leading-relaxed">')
-      .replace(/\n/g, '<br/>')
-      .replace(/- \[ \] (.*)/g, '<div class="flex items-start gap-2 mb-2"><span class="w-5 h-5 border-2 border-neutral-300 rounded flex-shrink-0 mt-0.5"></span><span>$1</span></div>')
-      .replace(/- \[x\] (.*)/g, '<div class="flex items-start gap-2 mb-2"><span class="w-5 h-5 bg-green-500 border-2 border-green-500 rounded flex-shrink-0 mt-0.5 flex items-center justify-center"><svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></span><span class="line-through text-neutral-500">$1</span></div>')
-      .replace(/- (.*)/g, '<li class="flex items-start gap-2 mb-2"><span class="w-2 h-2 bg-primary-500 rounded-full mt-2 flex-shrink-0"></span><span>$1</span></li>')
-      .replace(/\| (.*) \| (.*) \|/g, '<tr><td class="border px-4 py-2 font-medium">$1</td><td class="border px-4 py-2">$2</td></tr>')
-      .replace(/^/, '<p class="mb-4 leading-relaxed text-neutral-700">')
-      .replace(/$/, '</p>');
+    // First, escape HTML to prevent XSS
+    let formatted = content
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    
+    // Convert markdown to HTML
+    formatted = formatted
+      // Headers (must be at start of line)
+      .replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold text-neutral-900 mt-8 mb-4">$1</h3>')
+      .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold text-neutral-900 mt-10 mb-5">$1</h2>')
+      .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold text-neutral-900 mt-10 mb-6">$1</h1>')
+      
+      // Bold text
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-neutral-900">$1</strong>')
+      
+      // Italic text
+      .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+      
+      // Checkboxes
+      .replace(/- \[ \] (.*)/g, '<div class="flex items-start gap-3 mb-3"><div class="w-5 h-5 border-2 border-neutral-300 rounded flex-shrink-0 mt-0.5"></div><span class="text-neutral-700">$1</span></div>')
+      .replace(/- \[x\] (.*)/g, '<div class="flex items-start gap-3 mb-3"><div class="w-5 h-5 bg-green-500 border-2 border-green-500 rounded flex-shrink-0 mt-0.5 flex items-center justify-center"><svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div><span class="text-neutral-500 line-through">$1</span></div>')
+      
+      // Bullet lists
+      .replace(/^- (.*)/gm, '<li class="flex items-start gap-3 mb-2"><span class="w-2 h-2 bg-primary-500 rounded-full mt-2 flex-shrink-0"></span><span class="text-neutral-700">$1</span></li>')
+      
+      // Numbered lists (1. item)
+      .replace(/^\d+\. (.*)/gm, '<li class="flex items-start gap-3 mb-2"><span class="font-semibold text-primary-600 min-w-[1.5rem]">$&</span></li>')
+      
+      // Tables (simple two-column)
+      .replace(/\|([^|]+)\|([^|]+)\|/g, '<tr><td class="border border-neutral-200 px-4 py-2 font-medium bg-neutral-50">$1</td><td class="border border-neutral-200 px-4 py-2">$2</td></tr>')
+      
+      // Line breaks - preserve paragraphs
+      .replace(/\n\n/g, '</p><p class="mb-4 leading-relaxed text-neutral-700">')
+      .replace(/\n/g, '<br/>');
+    
+    // Wrap in paragraph if not already wrapped
+    if (!formatted.startsWith('<h') && !formatted.startsWith('<div') && !formatted.startsWith('<li') && !formatted.startsWith('<tr')) {
+      formatted = '<p class="mb-4 leading-relaxed text-neutral-700">' + formatted + '</p>';
+    }
+    
+    // Wrap lists in ul
+    formatted = formatted.replace(/(<li.*<\/li>)+/g, '<ul class="mb-6 space-y-1">$&</ul>');
+    
+    // Wrap tables
+    formatted = formatted.replace(/(<tr>.*<\/tr>)+/g, '<table class="w-full border-collapse mb-6">$&</table>');
+    
+    return formatted;
   };
 
   if (loading) return <VisaDetailSkeleton />;
@@ -263,8 +297,33 @@ export function VisaDetail() {
             <Badge variant="secondary" className="bg-white/20 text-white border-0">Subclass {visa.subclass}</Badge>
             <Badge variant="secondary" className="bg-white/20 text-white border-0 capitalize">{visa.category}</Badge>
           </div>
-          <h1 className="text-3xl lg:text-5xl font-bold mb-4">{visa.name}</h1>
-          <p className="text-lg lg:text-xl text-primary-100 max-w-3xl">{visa.summary}</p>
+          <h1 className="text-3xl lg:text-5xl font-bold mb-6">{visa.name}</h1>
+          
+          {/* Summary with proper formatting */}
+          {visa.summary && (
+            <div className="max-w-3xl">
+              {/* Split summary into key-value pairs */}
+              <div className="grid sm:grid-cols-2 gap-4 mb-6">
+                {visa.summary.split('**').filter((_, i) => i % 2 === 1).map((item, idx) => {
+                  const parts = item.split(':**');
+                  if (parts.length === 2) {
+                    return (
+                      <div key={idx} className="bg-white/10 backdrop-blur rounded-lg p-4">
+                        <p className="text-sm text-primary-200 mb-1">{parts[0]}</p>
+                        <p className="font-semibold text-lg">{parts[1]}</p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }).filter(Boolean)}
+              </div>
+              
+              {/* Description paragraph */}
+              <p className="text-lg text-primary-100 leading-relaxed">
+                {visa.summary.split('###')[0]?.replace(/\*\*/g, '').split('.')[0]}.
+              </p>
+            </div>
+          )}
           
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
@@ -376,10 +435,24 @@ export function VisaDetail() {
                     </h2>
                   </CardHeader>
                   <CardBody>
-                    <div 
-                      className="prose prose-neutral max-w-none text-neutral-700"
-                      dangerouslySetInnerHTML={{ __html: formatContent(visa.key_requirements) }}
-                    />
+                    <div className="space-y-3">
+                      {visa.key_requirements.split('\n').filter(line => line.trim()).map((line, idx) => {
+                        const cleanLine = line.replace(/^[•-]\s*/, '').trim();
+                        const isBold = cleanLine.startsWith('**') && cleanLine.endsWith('**');
+                        const displayText = cleanLine.replace(/\*\*/g, '');
+                        
+                        return (
+                          <div key={idx} className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-xs font-semibold text-primary-600">{idx + 1}</span>
+                            </div>
+                            <p className={`text-neutral-700 leading-relaxed ${isBold ? 'font-semibold text-neutral-900' : ''}`}>
+                              {displayText}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </CardBody>
                 </Card>
               </section>
