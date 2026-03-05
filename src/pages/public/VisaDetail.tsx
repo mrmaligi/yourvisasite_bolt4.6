@@ -377,7 +377,7 @@ export function VisaDetail() {
               <Button 
                 variant="secondary" 
                 className="bg-white text-orange-600 hover:bg-amber-50"
-                onClick={() => navigate(`/checkout?visa=${visa?.id}&plan=premium`)}
+                onClick={() => navigate(`/checkout?visa=${visa?.subclass}&plan=premium`)}
               >
                 <Lock className="w-4 h-4 mr-2" />
                 Unlock Now
