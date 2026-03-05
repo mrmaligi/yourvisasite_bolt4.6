@@ -79,7 +79,7 @@ export function VirtualizedVisaList({
               <div style={style} className="flex gap-6">
                 {rowVisas.map((visa) => (
                   <div key={visa.id} style={{ width: columnWidth, height: '100%' }}>
-                     <Link to={`/visas/${visa.id}`} className="block h-full">
+                     <Link to={`/visas/${visa.subclass}`} className="block h-full">
                         <Card hover className="h-full group">
                             <CardBody className="space-y-4 h-full flex flex-col">
                             <div className="flex items-start justify-between">

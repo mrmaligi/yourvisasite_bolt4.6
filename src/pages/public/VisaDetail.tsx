@@ -64,7 +64,7 @@ interface DocumentItem {
 }
 
 export function VisaDetail() {
-  const { id } = useParams<{ id: string }>();
+  const { subclass } = useParams<{ subclass: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
@@ -86,26 +86,26 @@ export function VisaDetail() {
 
   // Check if content is unlocked from query param or localStorage
   useEffect(() => {
-    if (!id) return;
+    if (!subclass) return;
     
     // Check query param (from checkout redirect)
     const unlockedParam = searchParams.get('unlocked');
     if (unlockedParam === 'true') {
       setIsUnlocked(true);
-      localStorage.setItem(`visa_${id}_unlocked`, 'true');
+      localStorage.setItem(`visa_${subclass}_unlocked`, 'true');
       // Remove param from URL without refreshing
       navigate(`/visas/${id}`, { replace: true });
     } else {
       // Check localStorage
-      const stored = localStorage.getItem(`visa_${id}_unlocked`);
+      const stored = localStorage.getItem(`visa_${subclass}_unlocked`);
       if (stored === 'true') {
         setIsUnlocked(true);
       }
     }
-  }, [id, searchParams, navigate]);
+  }, [subclass, searchParams, navigate]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!subclass) return;
 
     const fetchData = async () => {
       setLoading(true);
@@ -114,7 +114,7 @@ export function VisaDetail() {
       const { data: visaData } = await supabase
         .from('visas')
         .select('*')
-        .eq('id', id)
+        .eq('subclass', subclass)
         .single();
 
       if (visaData) {
@@ -125,7 +125,7 @@ export function VisaDetail() {
           .from('visas')
           .select('*')
           .eq('category', visaData.category)
-          .neq('id', id)
+          .neq('id', subclass)
           .limit(3);
         setRelatedVisas(relatedData || []);
 
@@ -182,7 +182,7 @@ export function VisaDetail() {
     };
 
     fetchData();
-  }, [id]);
+  }, [subclass]);
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections(prev => {
@@ -660,7 +660,7 @@ export function VisaDetail() {
                   {relatedVisas.map((related) => (
                     <Link
                       key={related.id}
-                      to={`/visas/${related.id}`}
+                      to={`/visas/${related.subclass}`}
                       className="block p-4 bg-white border border-neutral-200 rounded-lg hover:border-primary-300 hover:shadow-md transition-all"
                     >
                       <Badge className="mb-2">{related.subclass}</Badge>

@@ -352,7 +352,7 @@ export function VisaSearch() {
                             />
                          </div>
                     </div>
-                    <Link to={`/visas/${visa.id}`} className="block h-full">
+                    <Link to={`/visas/${visa.subclass}`} className="block h-full">
                         <Card hover className="h-full">
                             <CardBody className="space-y-4">
                             <div className="flex items-start justify-between">

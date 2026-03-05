@@ -92,7 +92,7 @@ export function VisaComparison() {
                         <Badge variant="secondary" className="mb-2 text-xs">{visa.subclass}</Badge>
                         <h3 className="text-xl font-bold text-neutral-900 dark:text-white leading-tight">{visa.name}</h3>
                     </div>
-                    <Link to={`/visas/${visa.id}`} className="block mt-2">
+                    <Link to={`/visas/${visa.subclass}`} className="block mt-2">
                          <Button size="sm" variant="secondary" className="w-full justify-center">View Full Details</Button>
                     </Link>
                   </div>

@@ -195,7 +195,7 @@ export default function App() {
                     <Route path="reset-password" element={<ResetPassword />} />
                     <Route path="visas" element={<VisaSearch />} />
                     <Route path="visas/compare" element={<VisaCompare />} />
-                    <Route path="visas/:id" element={<VisaDetail />} />
+                    <Route path="visas/:subclass" element={<VisaDetail />} />
                     <Route path="checkout" element={<Checkout />} />
                     <Route path="tracker" element={<Tracker />} />
                     <Route path="lawyers" element={<LawyerDirectory />} />

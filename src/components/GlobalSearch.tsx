@@ -108,7 +108,7 @@ export function GlobalSearch() {
         type: 'visa',
         title: `${v.subclass} - ${v.name}`,
         subtitle: v.category,
-        url: `/visas/${v.id}`,
+        url: `/visas/${v.subclass}`,
         icon: FileText
       }));
 
