@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ExternalLink,
@@ -13,10 +13,17 @@ import {
   Printer,
   CheckCircle,
   FileText,
-  Image,
   Video,
   Download,
-  Lock
+  Lock,
+  Menu,
+  X,
+  CheckSquare,
+  DollarSign,
+  Calendar,
+  List,
+  Lightbulb,
+  Globe
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -27,7 +34,6 @@ import { VisaDetailSkeleton } from '../../components/ui/Skeleton';
 import { ShareButton } from '../../components/ShareButton';
 import type { Visa, TrackerStats, TrackerEntry, NewsArticle } from '../../types/database';
 
-// Updated interface matching actual database schema
 interface VisaPremiumContentItem {
   id: string;
   visa_id: string;
@@ -44,6 +50,23 @@ interface VisaPremiumContentItem {
   updated_at: string;
 }
 
+const sectionIcons: Record<string, React.ElementType> = {
+  'Executive Overview': BookOpen,
+  'Eligibility': CheckCircle,
+  'Eligibility Requirements': CheckCircle,
+  'Application Process': List,
+  'Step-by-Step': List,
+  'Documents': FileText,
+  'Document Checklist': CheckSquare,
+  'Costs': DollarSign,
+  'Processing': Clock,
+  'Processing Times': Clock,
+  'Tips': Lightbulb,
+  'Mistakes': AlertCircle,
+  'Timeline': TrendingUp,
+  'Resources': Globe,
+};
+
 export function VisaDetail() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
@@ -52,10 +75,13 @@ export function VisaDetail() {
   const [stats, setStats] = useState<TrackerStats | null>(null);
   const [relatedVisas, setRelatedVisas] = useState<Visa[]>([]);
   const [premiumContent, setPremiumContent] = useState<VisaPremiumContentItem[]>([]);
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [recentEntries, setRecentEntries] = useState<TrackerEntry[]>([]);
   const [visaNews, setVisaNews] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeSection, setActiveSection] = useState<string>('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -63,7 +89,7 @@ export function VisaDetail() {
     const fetchData = async () => {
       setLoading(true);
 
-      // 1. Fetch Visa
+      // Fetch Visa
       const { data: visaData, error: visaError } = await supabase
         .from('visas')
         .select('*')
@@ -78,7 +104,7 @@ export function VisaDetail() {
 
       setVisa(visaData);
 
-      // 2. Fetch Stats
+      // Fetch Stats
       const { data: statsData } = await supabase
         .from('tracker_stats')
         .select('*')
@@ -86,7 +112,7 @@ export function VisaDetail() {
         .maybeSingle();
       setStats(statsData);
 
-      // 3. Fetch Related Visas
+      // Fetch Related Visas
       if (visaData) {
         const { data: relatedData } = await supabase
           .from('visas')
@@ -97,16 +123,23 @@ export function VisaDetail() {
         setRelatedVisas(relatedData || []);
       }
 
-      // 4. Fetch Premium Content (now free)
+      // Fetch Premium Content - ORDERED by section_number
       const { data: contentData } = await supabase
         .from('visa_premium_content')
         .select('*')
         .eq('visa_id', id)
         .eq('is_published', true)
-        .order('created_at', { ascending: false });
-      setPremiumContent(contentData || []);
+        .order('section_number', { ascending: true });
+      
+      const sortedContent = contentData || [];
+      setPremiumContent(sortedContent);
+      
+      // Set first section as active
+      if (sortedContent.length > 0) {
+        setActiveSection(sortedContent[0].id);
+      }
 
-      // 5. Fetch Recent Entries
+      // Fetch Recent Entries
       const { data: entriesData } = await supabase
         .from('tracker_entries')
         .select('*')
@@ -115,7 +148,7 @@ export function VisaDetail() {
         .limit(5);
       setRecentEntries(entriesData || []);
 
-      // 7. Fetch Visa-Specific News
+      // Fetch Visa-Specific News
       const { data: newsData } = await supabase
         .from('news_articles')
         .select('*')
@@ -130,6 +163,41 @@ export function VisaDetail() {
 
     fetchData();
   }, [id, user]);
+
+  // Handle scroll spy
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = premiumContent.map(item => document.getElementById(`section-${item.id}`));
+      const scrollPosition = window.scrollY + 150;
+
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const section = sections[i];
+        if (section && section.offsetTop <= scrollPosition) {
+          setActiveSection(premiumContent[i].id);
+          break;
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [premiumContent]);
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(`section-${sectionId}`);
+    if (element) {
+      const offset = 120;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+      setActiveSection(sectionId);
+      setMobileMenuOpen(false);
+    }
+  };
 
   if (loading) {
     return <VisaDetailSkeleton />;
@@ -146,368 +214,462 @@ export function VisaDetail() {
     );
   }
 
-  const currentStep = premiumContent[currentStepIndex];
-
   const getContentTypeIcon = (type: string) => {
     switch (type) {
       case 'video': return Video;
-      case 'document_examples': return Image;
+      case 'document_examples': return FileText;
       case 'file': return Download;
-      default: return FileText;
+      case 'checklist': return CheckSquare;
+      default: return BookOpen;
     }
   };
 
-  const getContentTypeLabel = (type: string) => {
-    switch (type) {
-      case 'guide': return 'Guide';
-      case 'checklist': return 'Checklist';
-      case 'template': return 'Template';
-      case 'document_examples': return 'Document Examples';
-      case 'example_application': return 'Example Application';
-      case 'video': return 'Video';
-      case 'file': return 'File';
-      default: return 'Document';
+  const getSectionIcon = (title: string) => {
+    for (const [key, Icon] of Object.entries(sectionIcons)) {
+      if (title.toLowerCase().includes(key.toLowerCase())) {
+        return Icon;
+      }
     }
+    return FileText;
+  };
+
+  // Group content by type for sidebar
+  const groupedContent = {
+    overview: premiumContent.filter(c => c.section_number === 1),
+    eligibility: premiumContent.filter(c => c.section_number === 2),
+    process: premiumContent.filter(c => c.section_number === 3 || c.section_number === 4),
+    details: premiumContent.filter(c => c.section_number === 5 || c.section_number === 6),
+    tips: premiumContent.filter(c => c.section_number === 7 || c.section_number === 8),
+    timeline: premiumContent.filter(c => c.section_number === 10),
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      {/* Breadcrumbs & Back */}
-      <div className="flex items-center gap-2 text-sm text-neutral-500 mb-6 no-print">
-        <Link to="/" className="hover:text-primary-600">Home</Link>
-        <ChevronRight className="w-4 h-4" />
-        <Link to="/visas" className="hover:text-primary-600">Visas</Link>
-        <ChevronRight className="w-4 h-4" />
-        <span className="text-neutral-900 font-medium truncate">{visa.name}</span>
+    <div className="min-h-screen bg-neutral-50">
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-50 bg-white border-b border-neutral-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-4">
+              <Link to="/visas" className="flex items-center text-neutral-600 hover:text-neutral-900">
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                <span className="hidden sm:inline">Back to Visas</span>
+              </Link>
+              <div className="h-6 w-px bg-neutral-300 hidden sm:block" />
+              <div className="flex items-center gap-2">
+                <Badge className="text-sm">{visa.subclass}</Badge>
+                <span className="font-semibold text-neutral-900 hidden sm:inline">{visa.name}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="sm" onClick={() => window.print()}>
+                <Printer className="w-4 h-4 mr-2" />
+                Print
+              </Button>
+              <ShareButton title={`Visa Guide: ${visa.name}`} />
+              <button
+                className="lg:hidden p-2 text-neutral-600 hover:text-neutral-900"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <div className="bg-gradient-to-br from-primary-600 to-primary-700 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+          <div className="flex flex-wrap gap-3 mb-4">
+            <Badge variant="secondary" className="bg-white/20 text-white border-0">
+              Subclass {visa.subclass}
+            </Badge>
+            <Badge variant="secondary" className="bg-white/20 text-white border-0 capitalize">
+              {visa.category}
+            </Badge>
+          </div>
+          <h1 className="text-3xl lg:text-5xl font-bold mb-4">{visa.name}</h1>
+          <p className="text-lg lg:text-xl text-primary-100 max-w-3xl">
+            {visa.summary}
+          </p>
+          
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+            <div className="bg-white/10 backdrop-blur rounded-xl p-4">
+              <DollarSign className="w-5 h-5 mb-2 text-primary-200" />
+              <p className="text-sm text-primary-200">Cost</p>
+              <p className="font-semibold text-lg">{visa.cost_aud || 'Varies'}</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur rounded-xl p-4">
+              <Clock className="w-5 h-5 mb-2 text-primary-200" />
+              <p className="text-sm text-primary-200">Processing</p>
+              <p className="font-semibold text-lg">{visa.processing_time_range || 'N/A'}</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur rounded-xl p-4">
+              <Calendar className="w-5 h-5 mb-2 text-primary-200" />
+              <p className="text-sm text-primary-200">Duration</p>
+              <p className="font-semibold text-lg">{visa.duration || 'Permanent'}</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur rounded-xl p-4">
+              <ExternalLink className="w-5 h-5 mb-2 text-primary-200" />
+              <p className="text-sm text-primary-200">Official</p>
+              <a 
+                href={visa.official_url || '#'} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="font-semibold text-lg hover:underline flex items-center gap-1"
+              >
+                DHA <ArrowUpRight className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="flex items-center justify-between mb-8 no-print">
-        <Link to="/visas" className="inline-flex items-center text-sm font-medium text-neutral-500 hover:text-neutral-900 transition-colors">
-          <ArrowLeft className="w-4 h-4 mr-1" />
-          Back to Search
-        </Link>
-        <Button variant="secondary" size="sm" onClick={() => window.print()}>
-          <Printer className="w-4 h-4 mr-2" />
-          Print Guide
-        </Button>
-      </div>
-
-      {/* Header */}
-      <div className="mb-10">
-        <div className="flex flex-wrap items-center gap-3 mb-4">
-            <Badge className="text-sm px-3 py-1">{visa.subclass}</Badge>
-            <Badge variant="primary" className="text-sm px-3 py-1">{visa.category}</Badge>
-        </div>
-        <div className="flex justify-between items-start gap-4 mb-6">
-            <h1 className="text-3xl md:text-4xl font-bold text-neutral-900">{visa.name}</h1>
-            <ShareButton title={`Check out this visa guide: ${visa.name}`} />
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 bg-neutral-50 rounded-2xl border border-neutral-100">
-            <div>
-                <p className="text-sm text-neutral-500 mb-1">Cost</p>
-                <p className="font-semibold text-neutral-900">
-                  {visa.cost_aud || 'Varies'}
-                </p>
-            </div>
-            <div>
-                <p className="text-sm text-neutral-500 mb-1">Processing Time</p>
-                <p className="font-semibold text-neutral-900">{visa.processing_time_range || 'Unknown'}</p>
-            </div>
-            <div>
-                <p className="text-sm text-neutral-500 mb-1">Duration</p>
-                <p className="font-semibold text-neutral-900">{visa.duration || 'Permanent'}</p>
-            </div>
-            <div className="no-print">
-                 <a
-                    href={visa.official_url || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`inline-flex items-center justify-center w-full h-full text-sm font-medium rounded-lg transition-colors ${visa.official_url ? 'text-primary-600 bg-white border border-primary-200 hover:bg-primary-50' : 'text-neutral-400 bg-neutral-100 cursor-not-allowed'}`}
-                 >
-                    Official Site <ExternalLink className="w-4 h-4 ml-2" />
-                 </a>
-            </div>
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-            {/* Summary */}
-            <section>
-                <h2 className="text-xl font-bold text-neutral-900 mb-4">Overview</h2>
-                <div className="prose prose-neutral max-w-none text-neutral-600">
-                    <p>{visa.summary || visa.description || "No summary available."}</p>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex gap-8">
+          {/* Sidebar Navigation */}
+          <aside className={`
+            fixed inset-y-0 left-0 z-40 w-72 bg-white shadow-xl transform transition-transform lg:translate-x-0 lg:static lg:shadow-none lg:bg-transparent lg:w-64 lg:block lg:h-fit lg:sticky lg:top-24
+            ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+          `}>
+            <div className="h-full overflow-y-auto lg:overflow-visible p-4 lg:p-0">
+              {/* Progress */}
+              <div className="mb-6 lg:mb-8">
+                <h3 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-3">
+                  Guide Sections
+                </h3>
+                <div className="w-full bg-neutral-200 rounded-full h-2">
+                  <div 
+                    className="bg-primary-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${((premiumContent.findIndex(c => c.id === activeSection) + 1) / premiumContent.length) * 100}%` }}
+                  />
                 </div>
-            </section>
+                <p className="text-xs text-neutral-500 mt-2">
+                  {premiumContent.findIndex(c => c.id === activeSection) + 1} of {premiumContent.length} sections
+                </p>
+              </div>
 
-            {/* Requirements */}
+              {/* Navigation Menu */}
+              <nav className="space-y-1">
+                {groupedContent.overview.map((item) => (
+                  <NavItem 
+                    key={item.id}
+                    item={item}
+                    isActive={activeSection === item.id}
+                    onClick={() => scrollToSection(item.id)}
+                    icon={getSectionIcon(item.title)}
+                  />
+                ))}
+                
+                {groupedContent.eligibility.length > 0 && (
+                  <NavGroup title="Eligibility">
+                    {groupedContent.eligibility.map((item) => (
+                      <NavItem 
+                        key={item.id}
+                        item={item}
+                        isActive={activeSection === item.id}
+                        onClick={() => scrollToSection(item.id)}
+                        icon={getSectionIcon(item.title)}
+                      />
+                    ))}
+                  </NavGroup>
+                )}
+
+                {groupedContent.process.length > 0 && (
+                  <NavGroup title="Application Process">
+                    {groupedContent.process.map((item) => (
+                      <NavItem 
+                        key={item.id}
+                        item={item}
+                        isActive={activeSection === item.id}
+                        onClick={() => scrollToSection(item.id)}
+                        icon={getSectionIcon(item.title)}
+                      />
+                    ))}
+                  </NavGroup>
+                )}
+
+                {groupedContent.details.length > 0 && (
+                  <NavGroup title="Details">
+                    {groupedContent.details.map((item) => (
+                      <NavItem 
+                        key={item.id}
+                        item={item}
+                        isActive={activeSection === item.id}
+                        onClick={() => scrollToSection(item.id)}
+                        icon={getSectionIcon(item.title)}
+                      />
+                    ))}
+                  </NavGroup>
+                )}
+
+                {groupedContent.tips.length > 0 && (
+                  <NavGroup title="Tips & Resources">
+                    {groupedContent.tips.map((item) => (
+                      <NavItem 
+                        key={item.id}
+                        item={item}
+                        isActive={activeSection === item.id}
+                        onClick={() => scrollToSection(item.id)}
+                        icon={getSectionIcon(item.title)}
+                      />
+                    ))}
+                  </NavGroup>
+                )}
+
+                {groupedContent.timeline.length > 0 && (
+                  <NavGroup title="Timeline Data">
+                    {groupedContent.timeline.map((item) => (
+                      <NavItem 
+                        key={item.id}
+                        item={item}
+                        isActive={activeSection === item.id}
+                        onClick={() => scrollToSection(item.id)}
+                        icon={TrendingUp}
+                      />
+                    ))}
+                  </NavGroup>
+                )}
+              </nav>
+
+              {/* Key Requirements Quick Link */}
+              {visa.key_requirements && (
+                <div className="mt-6 pt-6 border-t border-neutral-200">
+                  <button
+                    onClick={() => {
+                      const el = document.getElementById('key-requirements');
+                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                    className="flex items-center gap-2 text-sm text-neutral-600 hover:text-primary-600 transition-colors"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    Key Requirements
+                  </button>
+                </div>
+              )}
+            </div>
+          </aside>
+
+          {/* Main Content Area */}
+          <main className="flex-1 min-w-0" ref={contentRef}>
+            {/* Key Requirements Card */}
             {visa.key_requirements && (
-                <section>
-                    <h2 className="text-xl font-bold text-neutral-900 mb-4">Key Requirements</h2>
-                    <Card>
-                        <CardBody className="pt-6">
-                            <div className="prose prose-sm max-w-none text-neutral-600 whitespace-pre-line">
-                                {visa.key_requirements}
-                            </div>
-                        </CardBody>
-                    </Card>
-                </section>
+              <section id="key-requirements" className="mb-8">
+                <Card className="border-l-4 border-l-primary-500">
+                  <CardHeader className="pb-3">
+                    <h2 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
+                      <CheckCircle className="w-6 h-6 text-primary-600" />
+                      Key Requirements
+                    </h2>
+                  </CardHeader>
+                  <CardBody>
+                    <div className="prose prose-neutral max-w-none whitespace-pre-line text-neutral-700">
+                      {visa.key_requirements}
+                    </div>
+                  </CardBody>
+                </Card>
+              </section>
             )}
 
-            {/* Premium Content / Resources */}
-            <section id="premium-guide">
-                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
-                      <BookOpen className="w-5 h-5 text-primary-600" />
-                      Premium Resources
-                      <Badge variant="success" className="ml-2">FREE</Badge>
-                    </h2>
-                    {premiumContent.length > 0 && (
-                      <Badge variant="secondary">{premiumContent.length} resources</Badge>
-                    )}
-                 </div>
+            {/* Premium Content Sections */}
+            <div className="space-y-8">
+              {premiumContent.map((item, index) => {
+                const Icon = getContentTypeIcon(item.content_type);
+                return (
+                  <section
+                    key={item.id}
+                    id={`section-${item.id}`}
+                    className="scroll-mt-24"
+                  >
+                    <Card className={`overflow-hidden transition-all duration-300 ${activeSection === item.id ? 'ring-2 ring-primary-500 ring-offset-2' : ''}`}>
+                      <CardHeader className="bg-gradient-to-r from-neutral-50 to-white border-b">
+                        <div className="flex items-start gap-4">
+                          <div className="p-3 bg-primary-100 rounded-xl">
+                            <Icon className="w-6 h-6 text-primary-600" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h2 className="text-xl font-bold text-neutral-900">{item.title}</h2>
+                              <Badge variant="secondary" className="text-xs capitalize">
+                                {item.content_type}
+                              </Badge>
+                            </div>
+                            {item.section_number && (
+                              <p className="text-sm text-neutral-500 mt-1">
+                                Section {item.section_number} of {premiumContent.length}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardBody className="p-6">
+                        {item.content && (
+                          <div className="prose prose-neutral max-w-none">
+                            <div 
+                              className="text-neutral-700 leading-relaxed"
+                              dangerouslySetInnerHTML={{ 
+                                __html: item.content
+                                  .replace(/\n\n/g, '</p><p>')
+                                  .replace(/\n/g, '<br/>')
+                                  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                  .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                                  .replace(/^/g, '<p>')
+                                  .replace(/$/g, '</p>')
+                              }} 
+                            />
+                          </div>
+                        )}
+                        
+                        {item.tips && (
+                          <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                            <div className="flex items-start gap-2">
+                              <Lightbulb className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                              <p className="text-sm text-amber-800">{item.tips}</p>
+                            </div>
+                          </div>
+                        )}
 
-                 {premiumContent.length > 0 ? (
-                    <div className="space-y-4">
-                      {premiumContent.map((item, idx) => {
-                        const Icon = getContentTypeIcon(item.content_type);
-                        return (
-                          <Card key={item.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                            <CardBody className="p-5">
-                              <div className="flex items-start gap-4">
-                                <div className="p-3 bg-primary-50 rounded-lg">
-                                  <Icon className="w-6 h-6 text-primary-600" />
-                                </div>
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <h3 className="font-semibold text-neutral-900">{item.title}</h3>
-                                    <Badge variant="secondary" className="text-xs">
-                                      {getContentTypeLabel(item.content_type)}
-                                    </Badge>
-                                  </div>
-                                  
-                                  {item.description && (
-                                    <p className="text-sm text-neutral-600 mb-3">{item.description}</p>
-                                  )}
-                                  
-                                  {item.content && (
-                                    <div className="prose prose-sm max-w-none text-neutral-600 bg-neutral-50 rounded-lg p-4 mb-3">
-                                      <div dangerouslySetInnerHTML={{ __html: item.content.replace(/\n/g, '<br/>') }} />
-                                    </div>
-                                  )}
-                                  
-                                  {item.tips && (
-                                    <div className="p-3 bg-amber-50 rounded-lg border border-amber-100 text-sm text-amber-800 mb-3">
-                                      <strong>💡 Tip:</strong> {item.tips}
-                                    </div>
-                                  )}
-                                  
-                                  {/* File URLs */}
-                                  {item.file_urls && item.file_urls.length > 0 && (
-                                    <div className="space-y-2">
-                                      {item.file_urls.map((url, fileIdx) => (
-                                        <a
-                                          key={fileIdx}
-                                          href={url}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="inline-flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 bg-primary-50 px-3 py-2 rounded-lg hover:bg-primary-100 transition-colors"
-                                        >
-                                          <Download className="w-4 h-4" />
-                                          Download {url.split('/').pop() || `File ${fileIdx + 1}`}
-                                          <ExternalLink className="w-3 h-3" />
-                                        </a>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </CardBody>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                 ) : (
-                    <Card>
-                      <CardBody className="py-12 text-center text-neutral-500">
-                        <BookOpen className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-neutral-900 mb-2">Resources Coming Soon</h3>
-                        <p className="text-neutral-500 max-w-md mx-auto">
-                          Premium guides, checklists, and document examples for this visa are being prepared by our team.
-                        </p>
-                        <p className="text-sm text-neutral-400 mt-4">
-                          Check back soon for free downloadable resources!
-                        </p>
+                        {item.file_urls && item.file_urls.length > 0 && (
+                          <div className="mt-6 space-y-2">
+                            <h4 className="font-semibold text-neutral-900">Attached Files</h4>
+                            {item.file_urls.map((url, idx) => (
+                              <a
+                                key={idx}
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 p-3 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors"
+                              >
+                                <Download className="w-4 h-4 text-neutral-500" />
+                                <span className="text-sm text-neutral-700">Download File {idx + 1}</span>
+                              </a>
+                            ))}
+                          </div>
+                        )}
                       </CardBody>
                     </Card>
-                 )}
-            </section>
-        </div>
 
-        <div className="space-y-8">
-            {/* Processing Stats */}
-            <Card>
-                <CardHeader>
-                    <h3 className="font-bold text-neutral-900 flex items-center gap-2">
-                        <Clock className="w-5 h-5 text-primary-600" />
-                        Real Processing Times
-                    </h3>
-                </CardHeader>
-                <CardBody>
-                    {stats ? (
-                        <div className="space-y-6">
-                            <div className="text-center">
-                                <p className="text-3xl font-bold text-neutral-900">
-                                    {Math.round(stats.median_days || 0)} days
-                                </p>
-                                <p className="text-sm text-neutral-500">Median waiting time</p>
-                            </div>
+                    {/* Navigation between sections */}
+                    <div className="flex justify-between mt-4 px-2">
+                      {index > 0 && (
+                        <button
+                          onClick={() => scrollToSection(premiumContent[index - 1].id)}
+                          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600 transition-colors"
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                          Previous: {premiumContent[index - 1].title}
+                        </button>
+                      )}
+                      {index < premiumContent.length - 1 && (
+                        <button
+                          onClick={() => scrollToSection(premiumContent[index + 1].id)}
+                          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600 transition-colors ml-auto"
+                        >
+                          Next: {premiumContent[index + 1].title}
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
 
-                            <div className="space-y-3 pt-4 border-t border-neutral-100">
-                                <div className="relative pt-6 pb-2">
-                                    {/* Visual Distribution Bar */}
-                                    <div className="h-2 bg-neutral-100 rounded-full overflow-hidden flex">
-                                        <div className="w-1/4 bg-primary-200" />
-                                        <div className="w-2/4 bg-primary-400" />
-                                        <div className="w-1/4 bg-primary-600" />
-                                    </div>
-
-                                    {/* Markers */}
-                                    <div className="absolute top-0 left-[25%] -translate-x-1/2 flex flex-col items-center">
-                                        <span className="text-xs font-medium text-neutral-700">{Math.round(stats.p25_days || 0)}d</span>
-                                        <div className="h-2 w-px bg-neutral-300 mt-1" />
-                                    </div>
-                                    <div className="absolute top-0 left-[50%] -translate-x-1/2 flex flex-col items-center">
-                                        <span className="text-xs font-bold text-primary-700">{Math.round(stats.median_days || 0)}d</span>
-                                        <div className="h-2 w-px bg-primary-500 mt-1" />
-                                    </div>
-                                    <div className="absolute top-0 left-[75%] -translate-x-1/2 flex flex-col items-center">
-                                        <span className="text-xs font-medium text-neutral-700">{Math.round(stats.p75_days || 0)}d</span>
-                                        <div className="h-2 w-px bg-neutral-300 mt-1" />
-                                    </div>
-
-                                    <div className="flex justify-between text-xs text-neutral-400 mt-2">
-                                        <span>Fast (25%)</span>
-                                        <span>Slow (75%)</span>
-                                    </div>
-                                </div>
-                                <div className="text-center">
-                                     <p className="text-xs text-neutral-400 mt-2">Based on {stats.total_entries} user reports</p>
-                                     <Link to="/tracker" className="text-xs text-primary-600 hover:underline">View full tracker stats</Link>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="text-center py-6">
-                            <AlertCircle className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
-                            <p className="text-neutral-500 text-sm">No sufficient data yet.</p>
-                            <Link to="/tracker" className="text-xs text-primary-600 hover:underline mt-2 block">
-                                Check global stats
-                            </Link>
-                        </div>
-                    )}
-                </CardBody>
-            </Card>
-
-            {/* Recent Reports */}
-            {recentEntries.length > 0 && (
-              <Card className="no-print">
-                <CardHeader>
-                  <h3 className="font-bold text-neutral-900 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-primary-600" />
-                    Recent Reports
-                  </h3>
-                </CardHeader>
-                <CardBody>
-                  <div className="space-y-3">
-                    {recentEntries.slice(0, 3).map((entry) => (
-                      <div key={entry.id} className="flex items-center gap-3 text-sm">
-                        {entry.outcome === 'approved' ? (
-                          <CheckCircle className="w-4 h-4 text-green-500" />
-                        ) : entry.outcome === 'refused' ? (
-                          <AlertCircle className="w-4 h-4 text-red-500" />
-                        ) : (
-                          <Clock className="w-4 h-4 text-amber-500" />
-                        )}
-                        <div className="flex-1">
-                          <p className="font-medium text-neutral-900">
-                            {entry.processing_days ? `${entry.processing_days} days` : 'Pending'}
-                          </p>
-                          <p className="text-xs text-neutral-500">
-                            {entry.outcome === 'approved' ? 'Approved' : entry.outcome === 'refused' ? 'Refused' : 'Processing'}
-                          </p>
-                        </div>
-                        <span className="text-xs text-neutral-400">
-                          {new Date(entry.created_at).toLocaleDateString()}
-                        </span>
+            {/* Timeline Stats */}
+            {stats && (
+              <section className="mt-12">
+                <Card>
+                  <CardHeader>
+                    <h2 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
+                      <TrendingUp className="w-6 h-6 text-primary-600" />
+                      Processing Timeline
+                    </h2>
+                  </CardHeader>
+                  <CardBody>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center p-4 bg-neutral-50 rounded-lg">
+                        <p className="text-2xl font-bold text-primary-600">{stats.percentile_25 || 'N/A'}</p>
+                        <p className="text-sm text-neutral-500">25% Processed</p>
                       </div>
-                    ))}
-                  </div>
-                  <Link to="/tracker" className="text-xs text-primary-600 hover:underline mt-4 block text-center">
-                    View all reports
-                  </Link>
-                </CardBody>
-              </Card>
+                      <div className="text-center p-4 bg-neutral-50 rounded-lg">
+                        <p className="text-2xl font-bold text-primary-600">{stats.percentile_50 || 'N/A'}</p>
+                        <p className="text-sm text-neutral-500">50% Processed</p>
+                      </div>
+                      <div className="text-center p-4 bg-neutral-50 rounded-lg">
+                        <p className="text-2xl font-bold text-primary-600">{stats.percentile_75 || 'N/A'}</p>
+                        <p className="text-sm text-neutral-500">75% Processed</p>
+                      </div>
+                      <div className="text-center p-4 bg-neutral-50 rounded-lg">
+                        <p className="text-2xl font-bold text-primary-600">{stats.percentile_90 || 'N/A'}</p>
+                        <p className="text-sm text-neutral-500">90% Processed</p>
+                      </div>
+                    </div>
+                  </CardBody>
+                </Card>
+              </section>
             )}
 
             {/* Related Visas */}
             {relatedVisas.length > 0 && (
-              <Card className="no-print">
-                <CardHeader>
-                  <h3 className="font-bold text-neutral-900">Related Visas</h3>
-                </CardHeader>
-                <CardBody>
-                  <div className="space-y-3">
-                    {relatedVisas.map((related) => (
-                      <Link
-                        key={related.id}
-                        to={`/visas/${related.id}`}
-                        className="block p-3 rounded-lg hover:bg-neutral-50 transition-colors"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium text-neutral-900">{related.name}</p>
-                            <p className="text-sm text-neutral-500">Subclass {related.subclass}</p>
-                          </div>
-                          <ArrowUpRight className="w-4 h-4 text-neutral-400" />
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </CardBody>
-              </Card>
+              <section className="mt-12">
+                <h2 className="text-xl font-bold text-neutral-900 mb-4">Related Visas</h2>
+                <div className="grid md:grid-cols-3 gap-4">
+                  {relatedVisas.map((related) => (
+                    <Link
+                      key={related.id}
+                      to={`/visas/${related.id}`}
+                      className="block p-4 bg-white border border-neutral-200 rounded-lg hover:border-primary-300 hover:shadow-md transition-all"
+                    >
+                      <Badge className="mb-2">{related.subclass}</Badge>
+                      <h3 className="font-semibold text-neutral-900">{related.name}</h3>
+                      <p className="text-sm text-neutral-500 mt-1 line-clamp-2">{related.summary}</p>
+                    </Link>
+                  ))}
+                </div>
+              </section>
             )}
-
-            {/* News */}
-            {visaNews.length > 0 && (
-              <Card className="no-print">
-                <CardHeader>
-                  <h3 className="font-bold text-neutral-900">Latest News</h3>
-                </CardHeader>
-                <CardBody>
-                  <div className="space-y-4">
-                    {visaNews.map((article) => (
-                      <a
-                        key={article.id}
-                        href={article.url || '#'}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block group"
-                      >
-                        <h4 className="font-medium text-neutral-900 group-hover:text-primary-600 transition-colors line-clamp-2">
-                          {article.title}
-                        </h4>
-                        <p className="text-xs text-neutral-500 mt-1">
-                          {article.published_at && new Date(article.published_at).toLocaleDateString()}
-                        </p>
-                      </a>
-                    ))}
-                  </div>
-                </CardBody>
-              </Card>
-            )}
+          </main>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// Navigation Components
+function NavItem({ item, isActive, onClick, icon: Icon }: { 
+  item: VisaPremiumContentItem; 
+  isActive: boolean; 
+  onClick: () => void;
+  icon: React.ElementType;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`
+        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm transition-all
+        ${isActive 
+          ? 'bg-primary-50 text-primary-700 font-medium' 
+          : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900'
+        }
+      `}
+    >
+      <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-primary-600' : 'text-neutral-400'}`} />
+      <span className="truncate">{item.title}</span>
+      {isActive && <ChevronRight className="w-4 h-4 ml-auto text-primary-600" />}
+    </button>
+  );
+}
+
+function NavGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="mt-4">
+      <h4 className="px-3 text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
+        {title}
+      </h4>
+      <div className="space-y-0.5">
+        {children}
       </div>
     </div>
   );
