@@ -17,6 +17,7 @@ import { Loading } from './components/ui/Loading';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 
 const Landing = lazy(() => import('./pages/public/Landing').then(m => ({ default: m.Landing })));
+const Checkout = lazy(() => import('./pages/public/Checkout').then(m => ({ default: m.Checkout })));
 const UnifiedLogin = lazy(() => import('./pages/public/UnifiedLogin').then(m => ({ default: m.UnifiedLogin })));
 const Register = lazy(() => import('./pages/public/Register').then(m => ({ default: m.Register })));
 const VisaSearch = lazy(() => import('./pages/public/VisaSearch').then(m => ({ default: m.VisaSearch })));
@@ -195,6 +196,7 @@ export default function App() {
                     <Route path="visas" element={<VisaSearch />} />
                     <Route path="visas/compare" element={<VisaCompare />} />
                     <Route path="visas/:id" element={<VisaDetail />} />
+                    <Route path="checkout" element={<Checkout />} />
                     <Route path="tracker" element={<Tracker />} />
                     <Route path="lawyers" element={<LawyerDirectory />} />
                     <Route path="lawyers/:id" element={<LawyerProfile />} />

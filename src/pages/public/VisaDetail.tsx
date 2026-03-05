@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   ExternalLink,
   Clock,
@@ -65,6 +65,7 @@ interface DocumentItem {
 
 export function VisaDetail() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   const [visa, setVisa] = useState<Visa | null>(null);
@@ -284,7 +285,7 @@ export function VisaDetail() {
             <Button 
               variant="secondary" 
               className="bg-white text-orange-600 hover:bg-amber-50"
-              onClick={() => setShowPremiumModal(true)}
+              onClick={() => navigate(`/checkout?visa=${visa?.id}&plan=premium`)}
             >
               <Lock className="w-4 h-4 mr-2" />
               Unlock Now
@@ -360,58 +361,50 @@ export function VisaDetail() {
               </section>
             )}
 
-            {/* Document Upload Section */}
+            {/* Document Upload Section - PREMIUM ONLY */}
             <section className="mb-8">
-              <Card>
+              <Card className="border-2 border-dashed border-amber-300 bg-gradient-to-br from-amber-50 to-orange-50">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
-                      <Upload className="w-6 h-6 text-primary-600" />
-                      Document Checklist
+                      <Lock className="w-6 h-6 text-amber-600" />
+                      Document Checklist & Upload
+                      <Badge variant="warning" className="ml-2">PREMIUM</Badge>
                     </h2>
-                    <Badge variant="secondary">
-                      {documents.filter(d => d.status === 'uploaded').length} / {documents.length} Uploaded
-                    </Badge>
                   </div>
                 </CardHeader>
                 <CardBody>
-                  <div className="space-y-3">
-                    {documents.map((doc, idx) => (
-                      <div key={idx} className="flex items-center gap-4 p-4 bg-neutral-50 rounded-lg">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${doc.status === 'uploaded' ? 'bg-green-100' : 'bg-neutral-200'}`}>
-                          {doc.status === 'uploaded' ? (
-                            <CheckCircle className="w-5 h-5 text-green-600" />
-                          ) : (
-                            <FileText className="w-5 h-5 text-neutral-500" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-medium text-neutral-900">{doc.name}</p>
-                          {doc.description && <p className="text-sm text-neutral-500">{doc.description}</p>}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {doc.status === 'uploaded' ? (
-                            <Button variant="ghost" size="sm">
-                              <Download className="w-4 h-4 mr-2" />
-                              View
-                            </Button>
-                          ) : (
-                            <Button variant="secondary" size="sm">
-                              <Upload className="w-4 h-4 mr-2" />
-                              Upload
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {/* Upload Zone */}
-                  <div className="mt-6 p-8 border-2 border-dashed border-neutral-300 rounded-lg text-center hover:border-primary-400 hover:bg-primary-50 transition-all cursor-pointer">
-                    <Upload className="w-12 h-12 mx-auto mb-4 text-neutral-400" />
-                    <p className="text-neutral-600 font-medium">Drag and drop files here</p>
-                    <p className="text-sm text-neutral-400 mt-1">or click to browse</p>
-                    <input type="file" className="hidden" multiple />
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Upload className="w-8 h-8 text-amber-600" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-neutral-900 mb-2">Document Checklist Locked</h3>
+                    <p className="text-neutral-600 mb-6 max-w-md mx-auto">
+                      Get the complete document checklist with upload functionality. Track your progress and ensure you have all required documents.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <Button 
+                        className="bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600"
+                        onClick={() => setShowPremiumModal(true)}
+                      >
+                        <Lock className="w-4 h-4 mr-2" />
+                        Unlock Document Checklist
+                      </Button>
+                    </div>
+                    <ul className="mt-6 text-sm text-neutral-500 space-y-2">
+                      <li className="flex items-center justify-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        Complete document checklist
+                      </li>
+                      <li className="flex items-center justify-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        Upload and track documents
+                      </li>
+                      <li className="flex items-center justify-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        Lawyer review ready
+                      </li>
+                    </ul>
                   </div>
                 </CardBody>
               </Card>
@@ -585,6 +578,10 @@ export function VisaDetail() {
               <Button 
                 size="lg" 
                 className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600"
+                onClick={() => {
+                  // Redirect to Stripe checkout or payment page
+                  window.location.href = `/checkout?visa=${visa?.id}&plan=premium`;
+                }}
               >
                 <Lock className="w-5 h-5 mr-2" />
                 Unlock Now - $49
