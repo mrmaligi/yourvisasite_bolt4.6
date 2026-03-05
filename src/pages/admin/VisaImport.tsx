@@ -170,133 +170,41 @@ export function VisaImport() {
     const newResults: string[] = [];
 
     try {
-      const visaData = preview.visa;
+      // Use Edge Function for import (bypasses RLS)
+      const { data: { session } } = await supabase.auth.getSession();
       
-      // Check if visa exists
-      const { data: existingVisa } = await supabase
-        .from('visas')
-        .select('id')
-        .eq('subclass', visaData.subclass)
-        .maybeSingle();
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/import-visa`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session?.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(preview),
+        }
+      );
 
-      let visaId: string;
+      const result = await response.json();
 
-      if (existingVisa) {
-        const { error: updateError } = await supabase
-          .from('visas')
-          .update({
-            name: visaData.name,
-            category: visaData.category,
-            summary: visaData.summary,
-            description: visaData.description,
-            duration: visaData.duration,
-            cost_aud: visaData.cost_aud,
-            processing_time_range: visaData.processing_time_range,
-            official_url: visaData.official_url,
-            key_requirements: visaData.key_requirements,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', existingVisa.id);
-
-        if (updateError) throw updateError;
-        visaId = existingVisa.id;
-        newResults.push(`Updated visa ${visaData.subclass} - ${visaData.name}`);
-      } else {
-        const { data: newVisa, error: insertError } = await supabase
-          .from('visas')
-          .insert({
-            subclass: visaData.subclass,
-            name: visaData.name,
-            category: visaData.category,
-            country: 'Australia',
-            summary: visaData.summary,
-            description: visaData.description,
-            duration: visaData.duration,
-            cost_aud: visaData.cost_aud,
-            processing_time_range: visaData.processing_time_range,
-            official_url: visaData.official_url,
-            key_requirements: visaData.key_requirements,
-            is_active: true
-          })
-          .select('id')
-          .single();
-
-        if (insertError) throw insertError;
-        visaId = newVisa.id;
-        newResults.push(`Created new visa ${visaData.subclass} - ${visaData.name}`);
+      if (!result.success) {
+        throw new Error(result.error || 'Import failed');
       }
 
-      // Import premium content
-      if (preview.premium_content && preview.premium_content.length > 0) {
-        let premiumCount = 0;
-        for (const content of preview.premium_content) {
-          const { error: contentError } = await supabase
-            .from('visa_premium_content')
-            .upsert({
-              visa_id: visaId,
-              section_number: content.section_number,
-              title: content.title,
-              section_title: content.title,
-              content_type: content.content_type,
-              content: content.content,
-              is_published: content.is_published ?? true,
-              description: content.title,
-              updated_at: new Date().toISOString()
-            }, {
-              onConflict: 'visa_id,section_number'
-            });
-
-          if (!contentError) premiumCount++;
-        }
-        newResults.push(`Imported ${premiumCount} premium content sections`);
+      newResults.push(`✅ ${result.message}`);
+      if (result.results.premiumContent > 0) {
+        newResults.push(`✅ Imported ${result.results.premiumContent} premium content sections`);
       }
-
-      // Import documents
-      if (preview.documents?.required) {
-        let docCount = 0;
-        for (const doc of preview.documents.required) {
-          const { error: docError } = await supabase
-            .from('visa_documents')
-            .upsert({
-              visa_id: visaId,
-              name: doc.name,
-              description: doc.description,
-              is_mandatory: doc.is_mandatory,
-              document_type: doc.document_type
-            }, {
-              onConflict: 'visa_id,name'
-            });
-
-          if (!docError) docCount++;
-        }
-        newResults.push(`Imported ${docCount} document requirements`);
+      if (result.results.documents > 0) {
+        newResults.push(`✅ Imported ${result.results.documents} document requirements`);
       }
-
-      // Import timeline entries
-      if (preview.timeline_tracker?.entries) {
-        let entryCount = 0;
-        for (const entry of preview.timeline_tracker.entries) {
-          const { error: entryError } = await supabase
-            .from('tracker_entries')
-            .insert({
-              visa_id: visaId,
-              application_date: entry.application_date,
-              decision_date: entry.decision_date,
-              status: entry.status,
-              country: entry.country,
-              notes: entry.notes,
-              is_public: entry.is_public ?? true,
-              created_at: new Date().toISOString()
-            });
-
-          if (!entryError) entryCount++;
-        }
-        newResults.push(`Imported ${entryCount} timeline tracker entries`);
+      if (result.results.timelineEntries > 0) {
+        newResults.push(`✅ Imported ${result.results.timelineEntries} timeline entries`);
       }
 
       toast('success', 'Visa import completed successfully!');
     } catch (error: any) {
-      newResults.push(`Error: ${error.message}`);
+      newResults.push(`❌ Error: ${error.message}`);
       toast('error', 'Import failed: ' + error.message);
     }
 
