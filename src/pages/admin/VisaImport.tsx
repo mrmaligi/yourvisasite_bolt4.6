@@ -1,5 +1,4 @@
-import { useState, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { useState, useRef } from 'react';
 import { Upload, FileJson, CheckCircle, AlertCircle, Loader2, Download } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/Button';
@@ -25,8 +24,7 @@ interface VisaImportData {
     processing_time_range?: string;
     official_url?: string;
     key_requirements?: string;
-    eligibility_criteria?: Record<string, string>;
-    metadata?: Record<string, string>;
+    is_active?: boolean;
   };
   premium_content?: Array<{
     section_number: number;
@@ -62,12 +60,7 @@ interface VisaImportData {
     }>;
   };
   timeline_tracker?: {
-    official_times?: {
-      '25_percentile'?: string;
-      '50_percentile'?: string;
-      '75_percentile'?: string;
-      '90_percentile'?: string;
-    };
+    official_times?: Record<string, string>;
     entries?: Array<{
       application_date: string;
       decision_date?: string;
@@ -77,33 +70,21 @@ interface VisaImportData {
       notes?: string;
       is_public?: boolean;
     }>;
-    statistics?: Record<string, any>;
   };
-  faqs?: Array<{
-    question: string;
-    answer: string;
-    category?: string;
-    order?: number;
-  }>;
-  news_and_updates?: Array<{
-    title: string;
-    content: string;
-    published_at?: string;
-    is_published?: boolean;
-  }>;
 }
 
 export function VisaImport() {
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<VisaImportData | null>(null);
   const [importing, setImporting] = useState(false);
   const [results, setResults] = useState<ImportResult[]>([]);
+  const [dragActive, setDragActive] = useState(false);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (file) {
-      setFile(file);
+  const handleFileSelect = (selectedFile: File) => {
+    if (selectedFile && selectedFile.type === 'application/json') {
+      setFile(selectedFile);
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
@@ -113,17 +94,41 @@ export function VisaImport() {
         } catch (error) {
           toast('error', 'Invalid JSON file');
           setFile(null);
+          setPreview(null);
         }
       };
-      reader.readAsText(file);
+      reader.readAsText(selectedFile);
+    } else {
+      toast('error', 'Please select a valid JSON file');
     }
-  }, [toast]);
+  };
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: { 'application/json': ['.json'] },
-    maxFiles: 1
-  });
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileSelect(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    if (e.target.files && e.target.files[0]) {
+      handleFileSelect(e.target.files[0]);
+    }
+  };
 
   const downloadTemplate = () => {
     const template = {
@@ -295,7 +300,6 @@ export function VisaImport() {
       if (preview.documents) {
         let docCount = 0;
         
-        // Required documents
         if (preview.documents.required) {
           for (const doc of preview.documents.required) {
             const { error: docError } = await supabase
@@ -319,26 +323,6 @@ export function VisaImport() {
           }
         }
         
-        // Optional documents
-        if (preview.documents.optional) {
-          for (const doc of preview.documents.optional) {
-            const { error: docError } = await supabase
-              .from('visa_documents')
-              .upsert({
-                visa_id: visaId,
-                name: doc.name,
-                description: doc.description,
-                is_mandatory: false,
-                document_type: doc.document_type
-              }, {
-                onConflict: 'visa_id,name'
-              });
-
-            if (!docError) docCount++;
-          }
-        }
-
-        // Document folders
         if (preview.documents.folders) {
           for (const folder of preview.documents.folders) {
             await supabase
@@ -383,50 +367,6 @@ export function VisaImport() {
         newResults.push({ success: true, message: `Imported ${entryCount} timeline tracker entries` });
       }
 
-      // Step 5: Import FAQs
-      if (preview.faqs && preview.faqs.length > 0) {
-        let faqCount = 0;
-        
-        for (const faq of preview.faqs) {
-          const { error: faqError } = await supabase
-            .from('visa_faqs')
-            .upsert({
-              visa_id: visaId,
-              question: faq.question,
-              answer: faq.answer,
-              category: faq.category,
-              sort_order: faq.order
-            }, {
-              onConflict: 'visa_id,question'
-            });
-
-          if (!faqError) faqCount++;
-        }
-        
-        newResults.push({ success: true, message: `Imported ${faqCount} FAQs` });
-      }
-
-      // Step 6: Import news
-      if (preview.news_and_updates && preview.news_and_updates.length > 0) {
-        let newsCount = 0;
-        
-        for (const news of preview.news_and_updates) {
-          const { error: newsError } = await supabase
-            .from('news_articles')
-            .insert({
-              title: news.title,
-              content: news.content,
-              published_at: news.published_at || new Date().toISOString(),
-              is_published: news.is_published ?? true,
-              visa_ids: [visaId]
-            });
-
-          if (!newsError) newsCount++;
-        }
-        
-        newResults.push({ success: true, message: `Imported ${newsCount} news articles` });
-      }
-
       toast('success', 'Visa import completed successfully!');
       
     } catch (error: any) {
@@ -462,16 +402,26 @@ export function VisaImport() {
         <Card>
           <CardBody>
             <div
-              {...getRootProps()}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
               className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${
-                isDragActive 
+                dragActive 
                   ? 'border-primary-500 bg-primary-50' 
                   : 'border-neutral-300 hover:border-neutral-400'
               }`}
             >
-              <input {...getInputProps()} />
+              <input 
+                ref={fileInputRef}
+                type="file" 
+                accept=".json,application/json"
+                onChange={handleChange}
+                className="hidden"
+              />
               <FileJson className="w-12 h-12 mx-auto mb-4 text-neutral-400" />
-              {isDragActive ? (
+              {dragActive ? (
                 <p className="text-primary-600 font-medium">Drop the JSON file here</p>
               ) : (
                 <>
@@ -496,7 +446,7 @@ export function VisaImport() {
               <div className="grid md:grid-cols-2 gap-4 mb-6">
                 <div className="p-4 bg-neutral-50 rounded-lg">
                   <p className="text-sm text-neutral-500">Category</p>
-                  <p className="font-medium">{preview.visa.category}</p>
+                  <p className="font-medium capitalize">{preview.visa.category}</p>
                 </div>
                 <div className="p-4 bg-neutral-50 rounded-lg">
                   <p className="text-sm text-neutral-500">Cost</p>
@@ -522,20 +472,12 @@ export function VisaImport() {
                   <span className="font-medium">{preview.documents?.required?.length || 0}</span>
                 </div>
                 <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <span className="text-sm">Optional Documents</span>
-                  <span className="font-medium">{preview.documents?.optional?.length || 0}</span>
-                </div>
-                <div className="flex items-center justify-between p-3 border rounded-lg">
                   <span className="text-sm">Document Folders</span>
                   <span className="font-medium">{preview.documents?.folders?.length || 0}</span>
                 </div>
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <span className="text-sm">Timeline Entries</span>
                   <span className="font-medium">{preview.timeline_tracker?.entries?.length || 0}</span>
-                </div>
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <span className="text-sm">FAQs</span>
-                  <span className="font-medium">{preview.faqs?.length || 0}</span>
                 </div>
               </div>
             </CardBody>
