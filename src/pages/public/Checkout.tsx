@@ -1,33 +1,52 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { CheckCircle, Lock, Shield, Clock, FileText, Star, CreditCard, ArrowLeft } from 'lucide-react';
+import { CheckCircle, Lock, Shield, Clock, FileText, Star, CreditCard, ArrowLeft, User } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { useToast } from '../../components/ui/Toast';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 
 export function Checkout() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   
-  const visaId = searchParams.get('visa');
+  const visaSubClass = searchParams.get('visa');
   const plan = searchParams.get('plan');
   
   const [loading, setLoading] = useState(false);
   const [visaName, setVisaName] = useState('');
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    if (visaId) {
-      fetchVisaName();
+    // Check if user is logged in
+    if (!checkingAuth) {
+      if (!user) {
+        // Redirect to login with return URL
+        toast('error', 'Please sign in to purchase premium content');
+        navigate(`/login?redirect=/checkout?visa=${visaSubClass}&plan=${plan}`);
+        return;
+      }
+      
+      if (visaSubClass) {
+        fetchVisaName();
+      }
     }
-  }, [visaId]);
+  }, [user, checkingAuth, visaSubClass, plan, navigate, toast]);
+
+  useEffect(() => {
+    // Small delay to allow auth context to load
+    const timer = setTimeout(() => setCheckingAuth(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const fetchVisaName = async () => {
     const { data } = await supabase
       .from('visas')
       .select('name')
-      .eq('id', visaId)
+      .eq('subclass', visaSubClass)
       .single();
     
     if (data) {
@@ -36,22 +55,42 @@ export function Checkout() {
   };
 
   const handlePayment = async () => {
+    if (!user) {
+      toast('error', 'Please sign in first');
+      navigate('/login');
+      return;
+    }
+    
     setLoading(true);
     
     // Simulate payment processing
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // In real implementation, you would:
-    // 1. Create Stripe checkout session
-    // 2. Redirect to Stripe
-    // 3. Handle webhook callback
-    // 4. Unlock content for user
+    // Store purchase in database (in real app, this would be done via webhook)
+    const { error } = await supabase
+      .from('user_purchases')
+      .upsert({
+        user_id: user.id,
+        visa_subclass: visaSubClass,
+        plan: plan,
+        purchased_at: new Date().toISOString(),
+        status: 'active'
+      }, {
+        onConflict: 'user_id,visa_subclass'
+      });
+    
+    if (error) {
+      console.error('Purchase storage error:', error);
+    }
+    
+    // Also store in localStorage for quick access
+    localStorage.setItem(`visa_${visaSubClass}_${user.id}_unlocked`, 'true');
     
     toast('success', 'Payment successful! Content unlocked.');
-    
-    // Redirect back to visa page with unlocked content
-    if (visaId) {
-      navigate(`/visas/${visaId}?unlocked=true`);
+
+    // Redirect back to visa page with unlocked flag
+    if (visaSubClass) {
+      navigate(`/visas/${visaSubClass}?unlocked=true`);
     } else {
       navigate('/visas');
     }
@@ -67,6 +106,48 @@ export function Checkout() {
     { icon: Lock, text: 'Lifetime access to all updates' },
     { icon: CheckCircle, text: '30-day money-back guarantee' },
   ];
+
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-neutral-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardBody className="text-center py-12">
+            <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <User className="w-8 h-8 text-primary-600" />
+            </div>
+            <h2 className="text-xl font-bold text-neutral-900 mb-2">Sign In Required</h2>
+            <p className="text-neutral-600 mb-6">Please sign in or create an account to purchase premium content.</p>
+            <div className="space-y-3">
+              <Button 
+                className="w-full"
+                onClick={() => navigate(`/login?redirect=/checkout?visa=${visaSubClass}&plan=${plan}`)}
+              >
+                Sign In
+              </Button>
+              <Button 
+                variant="secondary"
+                className="w-full"
+                onClick={() => navigate(`/register?redirect=/checkout?visa=${visaSubClass}&plan=${plan}`)}
+              >
+                Create Account
+              </Button>
+            </div>
+          </CardBody>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -122,8 +203,15 @@ export function Checkout() {
             <CardBody>
               <div className="text-center mb-6">
                 <p className="text-sm text-neutral-500 mb-1">Total Amount</p>
-                <p className="text-4xl font-bold text-neutral-900">$49.00</p>
-                <p className="text-sm text-neutral-500 mt-1">One-time payment • Lifetime access</p>
+                <p className="text-3xl font-bold text-neutral-900">$49.00</p>
+                <p className="text-xs text-neutral-400">One-time payment • Lifetime access • 30-day money-back guarantee</p>
+              </div>
+
+              <div className="bg-amber-100 rounded-lg p-3 mb-4">
+                <div className="flex items-center gap-2 text-sm text-amber-800">
+                  <User className="w-4 h-4" />
+                  <span>Purchasing as: {user.email}</span>
+                </div>
               </div>
 
               <div className="space-y-4">

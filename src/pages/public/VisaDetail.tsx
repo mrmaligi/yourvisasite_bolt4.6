@@ -84,25 +84,34 @@ export function VisaDetail() {
   
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Check if content is unlocked from query param or localStorage
+  // Check if content is unlocked from query param or localStorage - REQUIRES AUTH
   useEffect(() => {
     if (!subclass) return;
+    
+    // Only check unlock status if user is logged in
+    if (!user) {
+      setIsUnlocked(false);
+      return;
+    }
     
     // Check query param (from checkout redirect)
     const unlockedParam = searchParams.get('unlocked');
     if (unlockedParam === 'true') {
-      setIsUnlocked(true);
-      localStorage.setItem(`visa_${subclass}_unlocked`, 'true');
-      // Remove param from URL without refreshing
-      navigate(`/visas/${id}`, { replace: true });
+      // Verify user is authenticated before unlocking
+      if (user) {
+        setIsUnlocked(true);
+        localStorage.setItem(`visa_${subclass}_${user.id}_unlocked`, 'true');
+        // Remove param from URL without refreshing
+        navigate(`/visas/${subclass}`, { replace: true });
+      }
     } else {
-      // Check localStorage
-      const stored = localStorage.getItem(`visa_${subclass}_unlocked`);
+      // Check localStorage - must be user-specific
+      const stored = localStorage.getItem(`visa_${subclass}_${user.id}_unlocked`);
       if (stored === 'true') {
         setIsUnlocked(true);
       }
     }
-  }, [subclass, searchParams, navigate]);
+  }, [subclass, searchParams, navigate, user]);
 
   useEffect(() => {
     if (!subclass) return;
