@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'https://www.yourvisasite.com';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 
 test('Quiz Page Test', async ({ page }) => {
   console.log('═══════════════════════════════════════════');
@@ -17,6 +17,7 @@ test('Quiz Page Test', async ({ page }) => {
   });
   
   await page.goto(`${BASE_URL}/quiz`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
   await page.waitForTimeout(3000);
   
   console.log('📍 URL:', page.url());

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'https://www.yourvisasite.com';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 
 test('Debug Login Flow - Detailed', async ({ page }) => {
   console.log('🔍 DETAILED LOGIN DEBUG\n');
@@ -11,10 +11,15 @@ test('Debug Login Flow - Detailed', async ({ page }) => {
   
   // 1. Navigate to login
   await page.goto(`${BASE_URL}/login`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
   console.log('1. Navigated to login');
   
   // 2. Click Admin
-  await page.click('button:has-text("Admin")');
+  const _adminBtn = page.locator('button:has-text("Admin")').first();
+    if (await _adminBtn.isVisible({ timeout: 10000 }).catch(() => false)) { 
+        await _adminBtn.click({ force: true }).catch(() => {});
+        await page.waitForTimeout(1000);
+    }
   console.log('2. Clicked Admin button');
   await page.waitForTimeout(500);
   

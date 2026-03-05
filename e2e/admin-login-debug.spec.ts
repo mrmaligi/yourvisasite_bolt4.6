@@ -1,12 +1,13 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'https://www.yourvisasite.com';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 
 test('Debug Admin Login Flow', async ({ page }) => {
   console.log('🔍 DEBUGGING ADMIN LOGIN\n');
   
   // 1. Navigate to login
   await page.goto(`${BASE_URL}/login`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
   await page.waitForTimeout(2000);
   
   // 2. Take screenshot of initial state

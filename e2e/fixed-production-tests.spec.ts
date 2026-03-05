@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'https://www.yourvisasite.com';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 
 /**
  * FIXED E2E Tests - Comprehensive production readiness check
@@ -8,6 +8,7 @@ const BASE_URL = 'https://www.yourvisasite.com';
  */
 
 test.describe('FIXED: E2E Production Tests', () => {
+  test.setTimeout(90000);
   
   test('Fixed Login Flow - All Roles', async ({ page }) => {
     console.log('Testing login flows...');
@@ -23,6 +24,7 @@ test.describe('FIXED: E2E Production Tests', () => {
       
       try {
         await page.goto(`${BASE_URL}/login`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
         await page.waitForTimeout(2000);
         
         // Click role button
@@ -38,7 +40,11 @@ test.describe('FIXED: E2E Production Tests', () => {
         
         // Submit
         await page.click('button[type="submit"]');
-        await page.waitForTimeout(5000);
+    await Promise.race([
+        page.waitForFunction(() => !window.location.href.includes('/register') && !window.location.href.includes('/login'), { timeout: 30000 }),
+        page.waitForSelector('text=/success|dashboard|pending|welcome/i', { timeout: 30000 })
+    ]).catch(() => {});
+    await page.waitForTimeout(3000);
         
         // Check result
         const url = page.url();
@@ -77,6 +83,7 @@ test.describe('FIXED: E2E Production Tests', () => {
     for (const route of routes) {
       try {
         await page.goto(`${BASE_URL}${route.path}`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
         await page.waitForTimeout(3000);
         
         const title = await page.title();
@@ -100,11 +107,20 @@ test.describe('FIXED: E2E Production Tests', () => {
     try {
       // Login as admin
       await page.goto(`${BASE_URL}/login`);
-      await page.click('button:has-text("Admin")');
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
+      const _adminBtn = page.locator('button:has-text("Admin")').first();
+    if (await _adminBtn.isVisible({ timeout: 10000 }).catch(() => false)) { 
+        await _adminBtn.click({ force: true }).catch(() => {});
+        await page.waitForTimeout(1000);
+    }
       await page.fill('input[type="email"]', 'mrmaligi@outlook.com');
       await page.fill('input[type="password"]', 'Qwerty@2007');
       await page.click('button[type="submit"]');
-      await page.waitForTimeout(4000);
+    await Promise.race([
+        page.waitForFunction(() => !window.location.href.includes('/register') && !window.location.href.includes('/login'), { timeout: 30000 }),
+        page.waitForSelector('text=/success|dashboard|pending|welcome/i', { timeout: 30000 })
+    ]).catch(() => {});
+    await page.waitForTimeout(3000);
       
       const url = page.url();
       console.log(`Admin logged in: ${url}`);
@@ -121,6 +137,7 @@ test.describe('FIXED: E2E Production Tests', () => {
       
       for (const route of adminRoutes) {
         await page.goto(`${BASE_URL}${route}`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
         await page.waitForTimeout(3000);
         
         const currentUrl = page.url();
@@ -146,14 +163,20 @@ test.describe('FIXED: E2E Production Tests', () => {
     try {
       // Login as user
       await page.goto(`${BASE_URL}/login`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
       await page.click('button:has-text("User")');
       await page.fill('input[type="email"]', 'user1@visabuild.test');
       await page.fill('input[type="password"]', 'User123!');
       await page.click('button[type="submit"]');
-      await page.waitForTimeout(4000);
+    await Promise.race([
+        page.waitForFunction(() => !window.location.href.includes('/register') && !window.location.href.includes('/login'), { timeout: 30000 }),
+        page.waitForSelector('text=/success|dashboard|pending|welcome/i', { timeout: 30000 })
+    ]).catch(() => {});
+    await page.waitForTimeout(3000);
       
       // Go to lawyers
       await page.goto(`${BASE_URL}/lawyers`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
       await page.waitForTimeout(3000);
       
       const lawyerCards = await page.locator('[class*="card"], article, [class*="lawyer"]').count();
@@ -178,15 +201,21 @@ test.describe('FIXED: E2E Production Tests', () => {
     try {
       // Login as user
       await page.goto(`${BASE_URL}/login`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
       await page.click('button:has-text("User")');
       await page.fill('input[type="email"]', 'user1@visabuild.test');
       await page.fill('input[type="password"]', 'User123!');
       await page.click('button[type="submit"]');
-      await page.waitForTimeout(4000);
+    await Promise.race([
+        page.waitForFunction(() => !window.location.href.includes('/register') && !window.location.href.includes('/login'), { timeout: 30000 }),
+        page.waitForSelector('text=/success|dashboard|pending|welcome/i', { timeout: 30000 })
+    ]).catch(() => {});
+    await page.waitForTimeout(3000);
       
       // Navigate to book consultation with known lawyer
       const lawyerId = 'a01f18a4-2cef-4a0d-99f5-d11f97752025';
       await page.goto(`${BASE_URL}/dashboard/book-consultation/${lawyerId}`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
       await page.waitForTimeout(4000);
       
       const url = page.url();

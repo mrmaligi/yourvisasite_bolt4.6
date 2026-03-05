@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'https://www.yourvisasite.com';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 
 test('Verify Production Deployment', async ({ page }) => {
   console.log('═══════════════════════════════════════════════════════════');
@@ -10,6 +10,7 @@ test('Verify Production Deployment', async ({ page }) => {
   // Test homepage
   console.log('1. Testing Homepage...');
   await page.goto(BASE_URL);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
   await page.waitForTimeout(3000);
   
   const homeTitle = await page.title();
@@ -21,6 +22,7 @@ test('Verify Production Deployment', async ({ page }) => {
   // Test visa detail page
   console.log('\n2. Testing Visa Detail Page...');
   await page.goto(`${BASE_URL}/visas/1fc2675f-ce81-47b2-b48c-8caed01bc526`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
   await page.waitForTimeout(4000);
   
   const visaTitle = await page.title();
@@ -47,6 +49,7 @@ test('Verify Production Deployment', async ({ page }) => {
   // Test login page
   console.log('\n3. Testing Login Page...');
   await page.goto(`${BASE_URL}/login`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
   await page.waitForTimeout(3000);
   
   const loginLoaded = await page.locator('text=/login|Login|sign in|Sign In/i').count() > 0;

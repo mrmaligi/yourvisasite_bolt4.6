@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'https://www.yourvisasite.com';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 const LAWYER_ID = 'a01f18a4-2cef-4a0d-99f5-d11f97752025';
 
 test('Debug Book Consultation - Detailed', async ({ page }) => {
@@ -19,15 +19,21 @@ test('Debug Book Consultation - Detailed', async ({ page }) => {
   
   // Login
   await page.goto(`${BASE_URL}/login`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
   await page.click('button:has-text("User")');
   await page.fill('input[type="email"]', 'user1@visabuild.test');
   await page.fill('input[type="password"]', 'User123!');
   await page.click('button[type="submit"]');
-  await page.waitForTimeout(3000);
+    await Promise.race([
+        page.waitForFunction(() => !window.location.href.includes('/register') && !window.location.href.includes('/login'), { timeout: 30000 }),
+        page.waitForSelector('text=/success|dashboard|pending|welcome/i', { timeout: 30000 })
+    ]).catch(() => {});
+    await page.waitForTimeout(3000);
   
   // Navigate to book consultation
   console.log('📍 Loading book consultation page...');
   await page.goto(`${BASE_URL}/dashboard/book-consultation/${LAWYER_ID}`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
   
   // Wait for loading to finish
   console.log('⏳ Waiting for page to fully load...');

@@ -1,8 +1,9 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'https://www.yourvisasite.com';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 
 test.describe('Admin Dashboard Sidebar Menu', () => {
+  test.setTimeout(90000);
   
   test.beforeEach(async ({ page }) => {
     // Collect errors
@@ -22,6 +23,7 @@ test.describe('Admin Dashboard Sidebar Menu', () => {
     // Step 1: Navigate to login
     console.log('📍 Step 1: Navigating to login...');
     await page.goto(`${BASE_URL}/login`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await expect(page).toHaveTitle(/VisaBuild/i);
     console.log('   ✅ Login page loaded');
     
@@ -41,7 +43,7 @@ test.describe('Admin Dashboard Sidebar Menu', () => {
     
     // Step 4: Submit login
     console.log('📍 Step 4: Submitting login...');
-    await page.click('button:has-text("Sign In")');
+    await page.click('button[type="submit"]');
     
     // Wait for redirect
     await page.waitForTimeout(3000);

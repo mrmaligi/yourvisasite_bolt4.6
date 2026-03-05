@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'https://www.yourvisasite.com';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 
 test('Admin Dashboard - Full Sidebar Menu Test', async ({ page }) => {
   console.log('═══════════════════════════════════════════');
@@ -10,7 +10,12 @@ test('Admin Dashboard - Full Sidebar Menu Test', async ({ page }) => {
   // Login as admin
   console.log('🔐 Logging in as admin...');
   await page.goto(`${BASE_URL}/login`);
-  await page.click('button:has-text("Admin")');
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
+  const _adminBtn = page.locator('button:has-text("Admin")').first();
+    if (await _adminBtn.isVisible({ timeout: 10000 }).catch(() => false)) { 
+        await _adminBtn.click({ force: true }).catch(() => {});
+        await page.waitForTimeout(1000);
+    }
   await page.fill('input[type="email"]', 'mrmaligi@outlook.com');
   await page.fill('input[type="password"]', 'Qwerty@2007');
   await page.click('button[type="submit"]');

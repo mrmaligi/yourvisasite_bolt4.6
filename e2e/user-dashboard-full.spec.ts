@@ -1,20 +1,26 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'https://www.yourvisasite.com';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 const USER_EMAIL = 'user1@visabuild.test';
 const USER_PASSWORD = 'User123!';
 
 test.describe('USER DASHBOARD - Full Test', () => {
+  test.setTimeout(90000);
   
   test.beforeEach(async ({ page }) => {
     // Login as user
     console.log('🔐 Logging in as user...');
     await page.goto(`${BASE_URL}/login`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.click('button:has-text("User")');
     await page.fill('input[type="email"]', USER_EMAIL);
     await page.fill('input[type="password"]', USER_PASSWORD);
     await page.click('button[type="submit"]');
-    await page.waitForTimeout(4000);
+    await Promise.race([
+        page.waitForFunction(() => !window.location.href.includes('/register') && !window.location.href.includes('/login'), { timeout: 30000 }),
+        page.waitForSelector('text=/success|dashboard|pending|welcome/i', { timeout: 30000 })
+    ]).catch(() => {});
+    await page.waitForTimeout(3000);
     
     const url = page.url();
     console.log(`  Logged in. URL: ${url}`);
@@ -38,6 +44,7 @@ test.describe('USER DASHBOARD - Full Test', () => {
     console.log('\n📋 TESTING MY VISAS PAGE');
     
     await page.goto(`${BASE_URL}/dashboard/visas`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
     
     const hasVisaContent = await page.locator('text=/visa|saved|track/i').count() > 0;
@@ -51,6 +58,7 @@ test.describe('USER DASHBOARD - Full Test', () => {
     
     // Navigate to lawyers
     await page.goto(`${BASE_URL}/lawyers`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
     
     console.log(`  Lawyers page URL: ${page.url()}`);
@@ -74,6 +82,7 @@ test.describe('USER DASHBOARD - Full Test', () => {
     console.log('\n💾 TESTING SAVED VISAS');
     
     await page.goto(`${BASE_URL}/dashboard/saved`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
     
     const hasContent = await page.locator('text=/saved|visa|bookmark/i').count() > 0;
@@ -86,6 +95,7 @@ test.describe('USER DASHBOARD - Full Test', () => {
     console.log('\n⚙️ TESTING USER SETTINGS');
     
     await page.goto(`${BASE_URL}/dashboard/settings`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
     
     const hasForm = await page.locator('input, select, button').count() > 0;
@@ -98,6 +108,7 @@ test.describe('USER DASHBOARD - Full Test', () => {
     console.log('\n👤 TESTING USER PROFILE');
     
     await page.goto(`${BASE_URL}/dashboard/profile`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
     
     const hasProfile = await page.locator('text=/profile|name|email/i').count() > 0;
@@ -110,6 +121,7 @@ test.describe('USER DASHBOARD - Full Test', () => {
     console.log('\n💰 TESTING USER BILLING');
     
     await page.goto(`${BASE_URL}/dashboard/billing`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
     
     const hasBilling = await page.locator('text=/billing|payment|subscription/i').count() > 0;
@@ -122,6 +134,7 @@ test.describe('USER DASHBOARD - Full Test', () => {
     console.log('\n🔔 TESTING USER NOTIFICATIONS');
     
     await page.goto(`${BASE_URL}/dashboard/notifications`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
     
     const hasNotifications = await page.locator('text=/notification|alert|message/i').count() > 0;

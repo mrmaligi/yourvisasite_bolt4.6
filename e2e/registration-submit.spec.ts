@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'https://www.yourvisasite.com';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 
 test('Registration - Submit Test', async ({ page }) => {
   console.log('═══════════════════════════════════════════');
@@ -9,6 +9,7 @@ test('Registration - Submit Test', async ({ page }) => {
   
   // Navigate to register
   await page.goto(`${BASE_URL}/register`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
   await page.waitForTimeout(2000);
   
   // Capture console messages
@@ -76,7 +77,7 @@ test('Registration - Submit Test', async ({ page }) => {
       try {
         await Promise.race([
           Promise.all([
-            page.waitForNavigation({ timeout: 10000 }).catch(() => null),
+            page.waitForURL('**/*', { timeout: 10000 }).catch(() => null),
             btn.click()
           ]),
           new Promise(resolve => setTimeout(resolve, 5000))

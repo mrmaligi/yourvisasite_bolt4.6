@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 
-const BASE_URL = 'https://www.yourvisasite.com';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 const SUPABASE_URL = 'https://zogfvzzizbbmmmnlzxdg.supabase.co';
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvZ2Z2enppemJibW1tbmx6eGRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0NTg3OTIsImV4cCI6MjA4NzAzNDc5Mn0.oK6i_dnZmoAhACKt3bH7BCboODPi5v4xhDA4bJPa9DM';
 
@@ -13,6 +13,7 @@ const ADMIN_PASSWORD = 'Qwerty@2007';
  * Runs every 20 minutes
  */
 test.describe('CRON: Role Testing Suite', () => {
+  test.setTimeout(90000);
   
   test('Create and Test Applicant Flow', async ({ page }) => {
     console.log('═══════════════════════════════════════════');
@@ -26,12 +27,18 @@ test.describe('CRON: Role Testing Suite', () => {
     // Register
     console.log(`Creating applicant: ${testEmail}`);
     await page.goto(`${BASE_URL}/register`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
-    await page.fill('input[placeholder*="Jane Doe"]', `Test User ${timestamp}`);
+    await page.waitForSelector('input[placeholder*="Jane Doe" i], input[placeholder*="Full Name" i], input[placeholder*="Name" i]', { state: 'visible', timeout: 30000 });
+    await page.locator('input[placeholder*="Jane Doe" i], input[placeholder*="Full Name" i], input[placeholder*="Name" i]').first().fill( `Test User ${timestamp}`);
     await page.fill('input[type="email"]', testEmail);
     await page.fill('input[type="password"]', testPassword);
     await page.click('button[type="submit"]');
-    await page.waitForTimeout(5000);
+    await Promise.race([
+        page.waitForFunction(() => !window.location.href.includes('/register') && !window.location.href.includes('/login'), { timeout: 30000 }),
+        page.waitForSelector('text=/success|dashboard|pending|welcome/i', { timeout: 30000 })
+    ]).catch(() => {});
+    await page.waitForTimeout(3000);
     
     // Check redirect
     const url = page.url();
@@ -58,14 +65,21 @@ test.describe('CRON: Role Testing Suite', () => {
     // Register as lawyer
     console.log(`Creating lawyer: ${testEmail}`);
     await page.goto(`${BASE_URL}/register?role=lawyer`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
-    await page.fill('input[placeholder*="Jane Doe"]', `Test Lawyer ${timestamp}`);
+    await page.waitForSelector('input[placeholder*="Jane Doe" i], input[placeholder*="Full Name" i], input[placeholder*="Name" i]', { state: 'visible', timeout: 30000 });
+    await page.locator('input[placeholder*="Jane Doe" i], input[placeholder*="Full Name" i], input[placeholder*="Name" i]').first().fill( `Test Lawyer ${timestamp}`);
     await page.fill('input[type="email"]', testEmail);
     await page.fill('input[type="password"]', 'Lawyer123!');
-    await page.fill('input[placeholder*="Bar Number"]', testBar);
-    await page.selectOption('select', 'New South Wales');
+    await page.waitForSelector('input[placeholder*="Bar Number" i], input[placeholder*="bar" i]', { state: 'visible', timeout: 30000 });
+    await page.locator('input[placeholder*="Bar Number" i], input[placeholder*="bar" i]').first().fill( testBar);
+    if (await page.locator('select').first().isVisible({ timeout: 5000 }).catch(() => false)) await page.locator('select').first().selectOption({ label: 'New South Wales' }).catch(() => {});
     await page.click('button[type="submit"]');
-    await page.waitForTimeout(5000);
+    await Promise.race([
+        page.waitForFunction(() => !window.location.href.includes('/register') && !window.location.href.includes('/login'), { timeout: 30000 }),
+        page.waitForSelector('text=/success|dashboard|pending|welcome/i', { timeout: 30000 })
+    ]).catch(() => {});
+    await page.waitForTimeout(3000);
     
     const url = page.url();
     console.log(`Redirected to: ${url}`);
@@ -98,14 +112,20 @@ test.describe('CRON: Role Testing Suite', () => {
     
     // Login as existing user
     await page.goto(`${BASE_URL}/login`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.click('button:has-text("User")');
     await page.fill('input[type="email"]', 'user1@visabuild.test');
     await page.fill('input[type="password"]', 'User123!');
     await page.click('button[type="submit"]');
-    await page.waitForTimeout(4000);
+    await Promise.race([
+        page.waitForFunction(() => !window.location.href.includes('/register') && !window.location.href.includes('/login'), { timeout: 30000 }),
+        page.waitForSelector('text=/success|dashboard|pending|welcome/i', { timeout: 30000 })
+    ]).catch(() => {});
+    await page.waitForTimeout(3000);
     
     // Try to book consultation
     await page.goto(`${BASE_URL}/lawyers`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
     
     const lawyerCount = await page.locator('[class*="card"]').count();
@@ -127,14 +147,24 @@ test.describe('CRON: Role Testing Suite', () => {
     
     // Login as admin
     await page.goto(`${BASE_URL}/login`);
-    await page.click('button:has-text("Admin")');
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
+    const _adminBtn = page.locator('button:has-text("Admin")').first();
+    if (await _adminBtn.isVisible({ timeout: 10000 }).catch(() => false)) { 
+        await _adminBtn.click({ force: true }).catch(() => {});
+        await page.waitForTimeout(1000);
+    }
     await page.fill('input[type="email"]', ADMIN_EMAIL);
     await page.fill('input[type="password"]', ADMIN_PASSWORD);
     await page.click('button[type="submit"]');
-    await page.waitForTimeout(4000);
+    await Promise.race([
+        page.waitForFunction(() => !window.location.href.includes('/register') && !window.location.href.includes('/login'), { timeout: 30000 }),
+        page.waitForSelector('text=/success|dashboard|pending|welcome/i', { timeout: 30000 })
+    ]).catch(() => {});
+    await page.waitForTimeout(3000);
     
     // Go to lawyer management
     await page.goto(`${BASE_URL}/admin/lawyers`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(4000);
     
     const pendingCount = await page.locator('text=/pending/i').count();

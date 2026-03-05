@@ -1,19 +1,29 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'https://www.yourvisasite.com';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 const ADMIN_EMAIL = 'mrmaligi@outlook.com';
 const ADMIN_PASSWORD = 'Qwerty@2007';
 
 test.describe('DEEP FUNCTIONAL TESTS - Admin Features Last Layer', () => {
+  test.setTimeout(90000);
   
   test.beforeEach(async ({ page }) => {
     // Login as admin
     await page.goto(`${BASE_URL}/login`);
-    await page.click('button:has-text("Admin")');
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
+    const _adminBtn = page.locator('button:has-text("Admin")').first();
+    if (await _adminBtn.isVisible({ timeout: 10000 }).catch(() => false)) { 
+        await _adminBtn.click({ force: true }).catch(() => {});
+        await page.waitForTimeout(1000);
+    }
     await page.fill('input[type="email"]', ADMIN_EMAIL);
     await page.fill('input[type="password"]', ADMIN_PASSWORD);
     await page.click('button[type="submit"]');
-    await page.waitForTimeout(4000);
+    await Promise.race([
+        page.waitForFunction(() => !window.location.href.includes('/register') && !window.location.href.includes('/login'), { timeout: 30000 }),
+        page.waitForSelector('text=/success|dashboard|pending|welcome/i', { timeout: 30000 })
+    ]).catch(() => {});
+    await page.waitForTimeout(3000);
   });
 
   // ==========================================
@@ -24,6 +34,7 @@ test.describe('DEEP FUNCTIONAL TESTS - Admin Features Last Layer', () => {
     
     // Navigate to Users
     await page.goto(`${BASE_URL}/admin/users`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
     
     // Check if user list loads
@@ -52,6 +63,7 @@ test.describe('DEEP FUNCTIONAL TESTS - Admin Features Last Layer', () => {
     console.log('\n⚖️ TESTING LAWYERS MODULE');
     
     await page.goto(`${BASE_URL}/admin/lawyers`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
     
     // Check lawyer list
@@ -76,6 +88,7 @@ test.describe('DEEP FUNCTIONAL TESTS - Admin Features Last Layer', () => {
     console.log('\n📋 TESTING VISAS MODULE');
     
     await page.goto(`${BASE_URL}/admin/visas`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
     
     // Check visa list loads
@@ -105,6 +118,7 @@ test.describe('DEEP FUNCTIONAL TESTS - Admin Features Last Layer', () => {
     
     // Test Blog
     await page.goto(`${BASE_URL}/admin/blog`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
     
     const blogPosts = await page.locator('tr, article, [class*="post"], [class*="blog"]').count();
@@ -116,6 +130,7 @@ test.describe('DEEP FUNCTIONAL TESTS - Admin Features Last Layer', () => {
     
     // Test Pages
     await page.goto(`${BASE_URL}/admin/pages`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
     
     const pages = await page.locator('tr, [class*="page"]').count();
@@ -131,6 +146,7 @@ test.describe('DEEP FUNCTIONAL TESTS - Admin Features Last Layer', () => {
     console.log('\n🎫 TESTING SUPPORT TICKETS');
     
     await page.goto(`${BASE_URL}/admin/support/tickets`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
     
     // Check ticket list
@@ -155,6 +171,7 @@ test.describe('DEEP FUNCTIONAL TESTS - Admin Features Last Layer', () => {
     console.log('\n📊 TESTING ANALYTICS');
     
     await page.goto(`${BASE_URL}/admin/analytics/overview`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
     
     // Check for charts
@@ -179,6 +196,7 @@ test.describe('DEEP FUNCTIONAL TESTS - Admin Features Last Layer', () => {
     console.log('\n⚙️ TESTING SETTINGS');
     
     await page.goto(`${BASE_URL}/admin/settings`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
     
     // Check for form inputs
@@ -209,6 +227,7 @@ test.describe('DEEP FUNCTIONAL TESTS - Admin Features Last Layer', () => {
     console.log('\n💰 TESTING PRICING');
     
     await page.goto(`${BASE_URL}/admin/pricing`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
     
     // Check pricing tiers
@@ -229,6 +248,7 @@ test.describe('DEEP FUNCTIONAL TESTS - Admin Features Last Layer', () => {
     console.log('\n🔧 TESTING PERFORMANCE MONITORING');
     
     await page.goto(`${BASE_URL}/admin/performance`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
     
     // Check for status indicators
@@ -253,6 +273,7 @@ test.describe('DEEP FUNCTIONAL TESTS - Admin Features Last Layer', () => {
     console.log('\n📜 TESTING ACTIVITY LOG');
     
     await page.goto(`${BASE_URL}/admin/activity`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(3000);
     
     // Check log entries

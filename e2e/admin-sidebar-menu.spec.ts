@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'https://www.yourvisasite.com';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 
 // Store console logs
 const consoleLogs: string[] = [];
@@ -24,6 +24,7 @@ test('Admin Dashboard - Sidebar Menu Test', async ({ page }) => {
   // STEP 1: Navigate and login
   console.log('STEP 1: Navigate to login page');
   await page.goto(`${BASE_URL}/login`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
   await page.waitForLoadState('domcontentloaded');
   await page.screenshot({ path: 'test-results/admin-01-login.png' });
   
@@ -40,8 +41,12 @@ test('Admin Dashboard - Sidebar Menu Test', async ({ page }) => {
   console.log('  ✅ Credentials entered');
   
   // Submit and wait
-  await page.click('button:has-text("Sign In")');
-  await page.waitForTimeout(5000); // Wait for auth + redirect
+  await page.click('button[type="submit"]');
+    await Promise.race([
+        page.waitForFunction(() => !window.location.href.includes('/register') && !window.location.href.includes('/login'), { timeout: 30000 }),
+        page.waitForSelector('text=/success|dashboard|pending|welcome/i', { timeout: 30000 })
+    ]).catch(() => {});
+    await page.waitForTimeout(3000); // Wait for auth + redirect
   
   const url = page.url();
   console.log(`  📍 URL after login: ${url}`);

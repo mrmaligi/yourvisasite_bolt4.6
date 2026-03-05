@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'https://www.yourvisasite.com';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 
 test('Check new registration UI', async ({ page }) => {
   await page.goto(`${BASE_URL}/register`);
+    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
   await page.waitForTimeout(4000);
   
   console.log('URL:', page.url());
