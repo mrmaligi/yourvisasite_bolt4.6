@@ -8,10 +8,10 @@ import {
   Heart, 
   User,
   Bell,
-  TrendingUp,
   Clock,
   ChevronRight,
-  Gift
+  Gift,
+  TrendingUp
 } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { useAuth } from '../../contexts/AuthContext';
@@ -107,41 +107,83 @@ export function UserDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Welcome Back!</h1>
-          <p className="text-neutral-600 dark:text-neutral-300">Here's what's happening with your visa journey</p>
+    <div className="space-y-8 pb-12">
+      {/* Welcome Banner */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900 via-indigo-800 to-indigo-900 p-8 sm:p-10 shadow-lg border border-indigo-700/50 text-white">
+        {/* Abstract background elements */}
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-indigo-500/20 blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-teal-500/20 blur-3xl"></div>
+
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold mb-2 tracking-tight">Welcome Back!</h1>
+            <p className="text-indigo-200 text-lg max-w-xl">Here's what's happening with your visa journey today.</p>
+          </div>
+
+          <div className="hidden md:flex items-center gap-3">
+            <span className="px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-full text-sm font-semibold border border-white/20 shadow-sm">
+              Applicant Dashboard
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
-            Applicant
-          </span>
-          <button className="p-2 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg">
-            <Bell className="w-5 h-5" />
-          </button>
-        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        {[
+          { label: 'Saved Visas', value: stats.savedVisas, icon: Heart, color: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-100 dark:bg-pink-900/30', border: 'border-pink-200 dark:border-pink-800/50' },
+          { label: 'My Visas', value: stats.myVisas, icon: Briefcase, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100 dark:bg-indigo-900/30', border: 'border-indigo-200 dark:border-indigo-800/50' },
+          { label: 'Available', value: stats.availableVisas, icon: TrendingUp, color: 'text-teal-600 dark:text-teal-400', bg: 'bg-teal-100 dark:bg-teal-900/30', border: 'border-teal-200 dark:border-teal-800/50' },
+          { label: 'Documents', value: stats.documents, icon: FileText, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-100 dark:bg-purple-900/30', border: 'border-purple-200 dark:border-purple-800/50' },
+          { label: 'Meetings', value: stats.upcomingConsultations, icon: Calendar, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-100 dark:bg-orange-900/30', border: 'border-orange-200 dark:border-orange-800/50' },
+        ].map((stat, i) => {
+          const Icon = stat.icon;
+          return (
+            <div key={i} className={`p-5 rounded-2xl bg-white dark:bg-slate-800 border ${stat.border} shadow-sm hover:shadow-md transition-shadow`}>
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.bg}`}>
+                  <Icon className={`w-6 h-6 ${stat.color}`} />
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-slate-900 dark:text-white leading-none">{stat.value}</p>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">{stat.label}</p>
+                </div>
+              </div>
+            </div>
+          )
+        })}
       </div>
 
       {/* My Applications Tracker */}
       {myApplications.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">My Application Journey</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Active Applications</h2>
+          </div>
           <div className="grid gap-6">
             {myApplications.map((app: any) => (
-              <Card key={app.id}>
-                <CardBody>
-                  <div className="flex justify-between items-start mb-6">
-                    <div>
-                      <h3 className="font-bold text-lg text-neutral-900 dark:text-white">{app.visas.subclass} - {app.visas.name}</h3>
-                      <p className="text-sm text-neutral-500">Applied on {new Date(app.application_date).toLocaleDateString()}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-neutral-900 dark:text-white">In Progress</p>
-                      <p className="text-xs text-neutral-500">{Math.floor((Date.now() - new Date(app.application_date).getTime()) / (1000 * 60 * 60 * 24))} days elapsed</p>
+              <Card key={app.id} className="overflow-hidden border-slate-200 dark:border-slate-700 shadow-sm">
+                <div className="bg-slate-50 dark:bg-slate-800/50 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <span className="px-2.5 py-1 rounded-md bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs font-bold tracking-wider">
+                        {app.visas.subclass}
+                      </span>
+                      <h3 className="font-bold text-lg text-slate-900 dark:text-white">{app.visas.name}</h3>
                     </div>
                   </div>
-
+                  <div className="text-right">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 text-sm font-semibold">
+                      <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
+                      In Progress
+                    </span>
+                  </div>
+                </div>
+                <CardBody className="p-6">
+                  <div className="mb-6 flex justify-between text-sm text-slate-500 dark:text-slate-400">
+                    <p>Applied: <span className="font-medium text-slate-900 dark:text-slate-200">{new Date(app.application_date).toLocaleDateString()}</span></p>
+                    <p>Elapsed: <span className="font-medium text-slate-900 dark:text-slate-200">{Math.floor((Date.now() - new Date(app.application_date).getTime()) / (1000 * 60 * 60 * 24))} days</span></p>
+                  </div>
                   <TrackerTimeline
                     steps={[
                       { id: '1', label: 'Received', status: 'completed', date: new Date(app.application_date).toLocaleDateString() },
@@ -156,152 +198,94 @@ export function UserDashboard() {
         </div>
       )}
 
-      {/* Stats Grid */}
-      <div className="grid md:grid-cols-5 gap-4 mb-8">
-        <Card>
-          <CardBody className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-              <Heart className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.savedVisas}</p>
-              <p className="text-sm text-neutral-500">Saved Visas</p>
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardBody className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-              <Briefcase className="w-6 h-6 text-green-600 dark:text-green-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.myVisas}</p>
-              <p className="text-sm text-neutral-500">My Visas</p>
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardBody className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-teal-100 dark:bg-teal-900/30 rounded-xl flex items-center justify-center">
-              <Briefcase className="w-6 h-6 text-teal-600 dark:text-teal-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.availableVisas}</p>
-              <p className="text-sm text-neutral-500">Available Visas</p>
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardBody className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
-              <FileText className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.documents}</p>
-              <p className="text-sm text-neutral-500">Documents</p>
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardBody className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
-              <Calendar className="w-6 h-6 text-orange-600 dark:text-orange-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.upcomingConsultations}</p>
-              <p className="text-sm text-neutral-500">Consultations</p>
-            </div>
-          </CardBody>
-        </Card>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
-        <Card>
-          <CardHeader>
-            <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Quick Actions</h2>
-          </CardHeader>
-          <CardBody className="grid grid-cols-2 gap-4">
+      {/* Main Grid: Quick Actions & Activity */}
+      <div className="grid lg:grid-cols-2 gap-8 mb-8">
+        {/* Quick Actions */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Quick Actions</h2>
+          <div className="grid sm:grid-cols-2 gap-4">
             {quickActions.map((action) => {
               const Icon = action.icon;
               return (
                 <Link
                   key={action.to}
                   to={action.to}
-                  className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-primary-300 dark:hover:border-primary-700 transition-colors"
+                  className="group p-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-md transition-all duration-200"
                 >
-                  <Icon className="w-6 h-6 text-primary-600 dark:text-primary-400 mb-2" />
-                  <h3 className="font-medium text-neutral-900 dark:text-white">{action.label}</h3>
-                  <p className="text-sm text-neutral-500">{action.desc}</p>
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-700/50 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/30 transition-all duration-200">
+                    <Icon className="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
+                  </div>
+                  <h3 className="font-semibold text-slate-900 dark:text-white mb-1">{action.label}</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{action.desc}</p>
                 </Link>
               );
             })}
-          </CardBody>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Recent Activity</h2>
-          </CardHeader>
-          <CardBody>
-            {recentActivity.length === 0 ? (
-              <div className="text-center py-8 text-neutral-500">
-                <Clock className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>No recent activity</p>
-                <p className="text-sm">Start by exploring visas or taking the quiz</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {recentActivity.map((activity, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
-                    <div className="w-2 h-2 bg-primary-500 dark:bg-primary-400 rounded-full" />
-                    <p className="text-sm text-neutral-700 dark:text-neutral-300">{activity.description}</p>
+        {/* Recent Activity */}
+        <div className="space-y-4 flex flex-col h-full">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Recent Activity</h2>
+          <Card className="flex-1 border-slate-200 dark:border-slate-700 shadow-sm">
+            <CardBody className="h-full">
+              {recentActivity.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-slate-500 min-h-[200px]">
+                  <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-4">
+                    <Clock className="w-8 h-8 text-slate-400" />
                   </div>
-                ))}
-              </div>
-            )}
-          </CardBody>
-        </Card>
+                  <p className="font-medium text-slate-900 dark:text-slate-200 mb-1">No recent activity</p>
+                  <p className="text-sm text-center max-w-[200px]">Start your journey by exploring visas or taking the quiz</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {recentActivity.map((activity, i) => (
+                    <div key={i} className="flex items-start gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                      <div className="w-2 h-2 mt-2 bg-indigo-500 rounded-full shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-slate-900 dark:text-slate-200">{activity.description}</p>
+                        <p className="text-xs text-slate-500 mt-1">Just now</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardBody>
+          </Card>
+        </div>
       </div>
 
       {/* Recommended Visas */}
-      <Card>
-        <CardHeader className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Recommended for You</h2>
-          <Link to="/visas" className="text-primary-600 dark:text-primary-400 hover:underline text-sm flex items-center gap-1">
-            View All <ChevronRight className="w-4 h-4" />
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Recommended for You</h2>
+          <Link to="/visas" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 font-medium text-sm flex items-center gap-1 group">
+            View All <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
-        </CardHeader>
-        <CardBody>
-          <div className="grid md:grid-cols-3 gap-4">
-            <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
-              <h3 className="font-semibold text-neutral-900 dark:text-white">Skilled Independent (189)</h3>
-              <p className="text-sm text-neutral-500 mt-1">Permanent visa for skilled workers</p>
-              <Link to="/visas/189" className="mt-3 btn-secondary text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]">
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {[
+            { subclass: '189', name: 'Skilled Independent', desc: 'Permanent visa for invited workers' },
+            { subclass: '500', name: 'Student Visa', desc: 'Study full-time in Australia' },
+            { subclass: '417', name: 'Working Holiday', desc: 'Work and travel for young adults' }
+          ].map((visa) => (
+            <div key={visa.subclass} className="group relative p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl hover:border-indigo-300 dark:hover:border-indigo-600 shadow-sm hover:shadow-md transition-all">
+              <div className="absolute top-6 right-6 w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-700 flex items-center justify-center group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/30 transition-colors">
+                <Briefcase className="w-5 h-5 text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
+              </div>
+              <span className="inline-block px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold tracking-wider mb-4">
+                SUBCLASS {visa.subclass}
+              </span>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2 pr-12">{visa.name}</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">{visa.desc}</p>
+
+              <Link to={`/visas/${visa.subclass}`} className="inline-flex items-center justify-center w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 text-slate-900 dark:text-white hover:text-indigo-700 dark:hover:text-indigo-300 rounded-xl text-sm font-semibold transition-colors">
                 Learn More
               </Link>
             </div>
-            <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
-              <h3 className="font-semibold text-neutral-900 dark:text-white">Student Visa (500)</h3>
-              <p className="text-sm text-neutral-500 mt-1">Study at Australian institutions</p>
-              <Link to="/visas/500" className="mt-3 btn-secondary text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]">
-                Learn More
-              </Link>
-            </div>
-            <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl">
-              <h3 className="font-semibold text-neutral-900 dark:text-white">Working Holiday (417)</h3>
-              <p className="text-sm text-neutral-500 mt-1">Work and travel in Australia</p>
-              <Link to="/visas/417" className="mt-3 btn-secondary text-sm px-3 py-2 min-h-[44px] sm:min-h-[36px]">
-                Learn More
-              </Link>
-            </div>
-          </div>
-        </CardBody>
-      </Card>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

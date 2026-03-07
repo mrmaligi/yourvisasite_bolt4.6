@@ -178,35 +178,43 @@ export function VisaSearch() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">Visa Search</h1>
-        <p className="text-neutral-500 dark:text-neutral-400">
-          Find detailed information, processing times, and expert guides for Australian visas.
+      <div className="mb-12 relative">
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-emerald-50/50 via-transparent to-transparent dark:from-emerald-900/20 rounded-3xl blur-2xl"></div>
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full text-xs font-semibold mb-4 border border-emerald-100 dark:border-emerald-800">
+          <FileText className="w-3.5 h-3.5" />
+          Comprehensive Database
+        </div>
+        <h1 className="text-4xl font-extrabold text-neutral-900 dark:text-white tracking-tight mb-4">Visa Search</h1>
+        <p className="text-lg text-neutral-600 dark:text-neutral-400 max-w-2xl leading-relaxed">
+          Find detailed information, processing times, and expert guides for Australian visas tailored to your unique journey.
         </p>
       </div>
 
-      <div className="flex flex-col gap-4 mb-8">
-        <div className="flex flex-col md:flex-row gap-4 items-center">
+      <div className="flex flex-col gap-4 mb-10">
+        <div className="flex flex-col md:flex-row gap-4 items-center bg-white dark:bg-neutral-800/50 p-2 rounded-2xl shadow-sm border border-neutral-200 dark:border-neutral-700 backdrop-blur-sm">
           <div className="relative flex-1 w-full">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 dark:text-neutral-500" />
-            <Input
+            <input
+              type="text"
               placeholder="Search by name or subclass..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-12"
+              className="w-full h-12 pl-12 pr-4 bg-transparent border-none focus:ring-0 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 outline-none"
             />
           </div>
 
-          <div className="flex gap-2 w-full md:w-auto">
+          <div className="hidden md:block w-px h-8 bg-neutral-200 dark:bg-neutral-700 self-center mx-2"></div>
+
+          <div className="flex gap-2 w-full md:w-auto px-2">
              <Button
-                variant="secondary"
-                className="flex-1 md:flex-none"
+                variant="ghost"
+                className="flex-1 md:flex-none text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800"
                 onClick={() => setShowFilters(!showFilters)}
             >
                 <Filter className="w-4 h-4 mr-2" />
                 Filters
                 {(selectedCategories.length + selectedCostRanges.length + selectedTimeRanges.length) > 0 && (
-                    <span className="ml-1 bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300 px-1.5 py-0.5 rounded-full text-xs font-medium">
+                    <span className="ml-1.5 bg-emerald-600 text-white dark:bg-emerald-500 px-2 py-0.5 rounded-full text-xs font-bold">
                         {selectedCategories.length + selectedCostRanges.length + selectedTimeRanges.length}
                     </span>
                 )}
@@ -218,6 +226,7 @@ export function VisaSearch() {
                     options={SORTS}
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
+                    className="border-none bg-neutral-50 dark:bg-neutral-800/80 shadow-none focus:ring-1 focus:ring-emerald-500"
                 />
             </div>
           </div>
@@ -285,7 +294,7 @@ export function VisaSearch() {
                 {selectedCategories.map(cat => (
                     <Badge key={cat} variant="primary" className="pl-2 pr-1 py-1 flex items-center gap-1">
                         {CATEGORIES.find(c => c.value === cat)?.label || cat}
-                        <button onClick={() => toggleFilter(cat, selectedCategories, setSelectedCategories)} className="hover:bg-primary-200 dark:hover:bg-primary-800 rounded-full p-0.5 transition-colors">
+                        <button onClick={() => toggleFilter(cat, selectedCategories, setSelectedCategories)} className="hover:bg-emerald-200 dark:hover:bg-emerald-800 rounded-full p-0.5 transition-colors">
                             <X className="w-3 h-3" />
                         </button>
                     </Badge>
@@ -335,17 +344,19 @@ export function VisaSearch() {
         />
       ) : (
         <>
-            <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
-                Showing {filteredVisas.length} of {visas.length} visas
-            </p>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
+            <div className="flex items-center justify-between mb-6">
+                <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
+                    Showing <span className="text-neutral-900 dark:text-white">{filteredVisas.length}</span> of {visas.length} visas
+                </p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
             {filteredVisas.map((visa) => (
-                <div key={visa.id} className="relative group">
-                    <div className="absolute top-4 right-4 z-10" onClick={(e) => {
+                <div key={visa.id} className="relative group block h-full">
+                    <div className="absolute top-4 right-4 z-20" onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                     }}>
-                         <div className="bg-white/90 dark:bg-neutral-800/90 backdrop-blur-sm rounded-md shadow-sm p-1 border border-neutral-200 dark:border-neutral-700">
+                         <div className="bg-white/95 dark:bg-neutral-800/95 backdrop-blur-md rounded-lg shadow-md p-1.5 border border-neutral-200/80 dark:border-neutral-700/80 hover:scale-105 transition-transform">
                             <Checkbox
                                 checked={selectedVisas.includes(visa.id)}
                                 onChange={() => toggleVisaSelection(visa.id)}
@@ -354,37 +365,50 @@ export function VisaSearch() {
                          </div>
                     </div>
                     <Link to={`/visas/${createVisaSlug(visa.name, visa.subclass)}`} className="block h-full">
-                        <Card hover className="h-full">
-                            <CardBody className="space-y-4">
-                            <div className="flex items-start justify-between">
-                                <div className="flex items-center gap-2">
-                                <Badge>{visa.subclass}</Badge>
-                                <Badge variant="primary">{visa.category}</Badge>
+                        <div className="h-full bg-white dark:bg-neutral-800 rounded-3xl border border-neutral-200 dark:border-neutral-700 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-1 relative">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-100/50 to-transparent dark:from-emerald-900/20 rounded-bl-full -z-10 transition-transform duration-500 group-hover:scale-110"></div>
+                            <div className="p-6 space-y-5 h-full flex flex-col">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <span className="px-2.5 py-1 bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded-lg text-xs font-bold border border-neutral-200 dark:border-neutral-600">
+                                            {visa.subclass}
+                                        </span>
+                                        <span className="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-lg text-xs font-semibold border border-emerald-100 dark:border-emerald-800/50">
+                                            {visa.category}
+                                        </span>
+                                    </div>
+                                    <div className="w-8 h-8 rounded-full bg-neutral-50 dark:bg-neutral-800 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <ArrowUpRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                                    </div>
                                 </div>
-                                <ArrowUpRight className="w-4 h-4 text-neutral-400 group-hover:text-primary-600 transition-colors" />
-                            </div>
 
-                            <div className="pr-8">
-                                <h3 className="font-semibold text-neutral-900 dark:text-white mb-1 group-hover:text-primary-700 dark:group-hover:text-primary-400 transition-colors">
-                                    {visa.name}
-                                </h3>
-                                <p className="text-sm text-neutral-500 dark:text-neutral-400 line-clamp-2">
-                                    {visa.summary}
-                                </p>
-                            </div>
+                                <div className="pr-4 flex-grow">
+                                    <h3 className="font-bold text-xl text-neutral-900 dark:text-white mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                        {visa.name}
+                                    </h3>
+                                    <p className="text-sm text-neutral-600 dark:text-neutral-400 line-clamp-3 leading-relaxed">
+                                        {visa.summary}
+                                    </p>
+                                </div>
 
-                            <div className="pt-4 border-t border-neutral-100 dark:border-neutral-700 flex items-center justify-between text-sm">
-                                <span className="text-neutral-600 dark:text-neutral-300 font-medium">
-                                    {formatCost(visa)}
-                                </span>
-                                {visa.processing_time_range && (
-                                    <span className="text-neutral-500 dark:text-neutral-400">
-                                        {visa.processing_time_range}
-                                    </span>
-                                )}
+                                <div className="pt-5 border-t border-neutral-100 dark:border-neutral-700/50 flex flex-col gap-2 mt-auto">
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-neutral-500 dark:text-neutral-500 text-xs uppercase tracking-wider font-medium">Cost</span>
+                                        <span className="text-neutral-900 dark:text-white font-bold">
+                                            {formatCost(visa)}
+                                        </span>
+                                    </div>
+                                    {visa.processing_time_range && (
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-neutral-500 dark:text-neutral-500 text-xs uppercase tracking-wider font-medium">Processing Time</span>
+                                            <span className="text-neutral-700 dark:text-neutral-300 font-medium">
+                                                {visa.processing_time_range}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                            </CardBody>
-                        </Card>
+                        </div>
                     </Link>
                 </div>
             ))}
@@ -396,7 +420,7 @@ export function VisaSearch() {
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 z-50 animate-in slide-in-from-bottom-4 duration-300">
             <div className="bg-white dark:bg-neutral-800 rounded-2xl shadow-xl border border-neutral-200 dark:border-neutral-700 p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-3 py-1 rounded-full text-sm font-medium">
+                    <div className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full text-sm font-medium">
                         {selectedVisas.length} selected
                     </div>
                     <p className="text-sm text-neutral-500 dark:text-neutral-400 hidden sm:block">

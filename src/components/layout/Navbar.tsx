@@ -17,6 +17,7 @@ export function Navbar() {
     { to: '/tracker', label: 'Tracker' },
     { to: '/visas', label: 'Visas' },
     { to: '/lawyers', label: 'Lawyers' },
+    { to: '/marketplace', label: 'Marketplace' },
     { to: '/forum', label: 'Forum' },
     { to: '/news', label: 'News' },
   ];
@@ -38,7 +39,7 @@ export function Navbar() {
                   to={link.to}
                   className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ease-out ${
                     location.pathname === link.to
-                      ? 'text-primary-600 bg-white dark:bg-neutral-900 dark:text-primary-400 shadow-sm'
+                      ? 'text-emerald-600 bg-white dark:bg-neutral-900 dark:text-emerald-400 shadow-sm'
                       : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-200/50 dark:text-neutral-400 dark:hover:text-neutral-200 dark:hover:bg-neutral-700/50'
                   }`}
                 >
@@ -90,7 +91,7 @@ export function Navbar() {
                 onClick={() => setMobileOpen(false)}
                 className={`block px-4 py-3.5 rounded-2xl text-base font-medium transition-colors ${
                    location.pathname === link.to
-                      ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400'
+                      ? 'bg-primary-50 text-emerald-600 dark:bg-primary-900/20 dark:text-emerald-400'
                       : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800'
                 }`}
               >

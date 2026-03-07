@@ -123,13 +123,13 @@ export function News() {
 
   if (loading && page === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
-        <div className="max-w-6xl mx-auto px-4 py-16">
+      <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="animate-pulse space-y-8">
-            <div className="h-96 bg-neutral-200 rounded-2xl" />
-            <div className="grid md:grid-cols-2 gap-6">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-48 bg-neutral-200 rounded-xl" />
+            <div className="h-96 bg-neutral-200 dark:bg-neutral-800 rounded-3xl" />
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-64 bg-neutral-200 dark:bg-neutral-800 rounded-3xl" />
               ))}
             </div>
           </div>
@@ -139,107 +139,119 @@ export function News() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
-      <div className="max-w-6xl mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-100 mb-6">
-            <Newspaper className="w-8 h-8 text-primary-600" />
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
+        <div className="text-center mb-16 relative">
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-100/40 via-transparent to-transparent dark:from-emerald-900/20 rounded-[4rem] blur-3xl"></div>
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/20 mb-6 text-white transform -rotate-6 hover:rotate-0 transition-transform duration-300">
+            <Newspaper className="w-8 h-8" />
           </div>
-          <h1 className="text-4xl font-bold text-neutral-900 mb-4">Immigration News & Updates</h1>
-          <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-            Stay informed with the latest immigration policy updates, processing times, and regulatory changes.
+          <h1 className="text-4xl md:text-5xl font-extrabold text-neutral-900 dark:text-white mb-6 tracking-tight">Immigration News & Updates</h1>
+          <p className="text-lg md:text-xl text-neutral-600 dark:text-neutral-400 max-w-3xl mx-auto leading-relaxed">
+            Stay informed with the latest immigration policy updates, processing times, and regulatory changes affecting your visa journey.
           </p>
         </div>
 
-        <div className="flex gap-2 flex-wrap justify-center mb-12">
+        <div className="flex gap-3 flex-wrap justify-center mb-12">
           {categories.map((cat) => (
-            <Button
+            <button
               key={cat.value}
-              variant={filter === cat.value ? 'default' : 'secondary'}
-              size="sm"
               onClick={() => setFilter(cat.value as typeof filter)}
+              className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
+                filter === cat.value
+                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-md transform scale-105'
+                  : 'bg-white text-neutral-600 hover:bg-neutral-100 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700'
+              }`}
             >
               {cat.label}
-            </Button>
+            </button>
           ))}
         </div>
 
         {featuredNews && (
-          <Card
-            className="mb-12 overflow-hidden hover:shadow-2xl transition-all cursor-pointer border-2 border-primary-100"
+          <div
+            className="mb-16 group cursor-pointer relative"
             onClick={() => navigate(`/news/${featuredNews.slug}`)}
           >
-            <CardContent className="p-0">
-              <div className="bg-gradient-to-r from-primary-500 to-primary-600 h-2" />
-              <div className="p-8">
-                <div className="flex items-center gap-3 mb-4">
-                  <Badge variant="default" className="text-xs font-semibold">
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-blue-500/10 dark:from-emerald-500/5 dark:to-blue-500/5 rounded-[2.5rem] transform group-hover:scale-[1.02] transition-transform duration-500 -z-10"></div>
+            <div className="bg-white dark:bg-neutral-800 rounded-[2.5rem] border border-neutral-200 dark:border-neutral-700 overflow-hidden shadow-sm group-hover:shadow-2xl transition-all duration-500">
+              <div className="h-2 w-full bg-gradient-to-r from-emerald-500 via-blue-500 to-teal-500"></div>
+              <div className="p-8 md:p-12">
+                <div className="flex flex-wrap items-center gap-3 mb-6">
+                  <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 rounded-full text-xs font-bold uppercase tracking-wider">
                     Featured
-                  </Badge>
-                  <Badge variant="default" className="capitalize">
+                  </span>
+                  <span className="px-3 py-1 bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded-full text-xs font-bold uppercase tracking-wider">
                     {featuredNews.category}
-                  </Badge>
-                </div>
-                <h2 className="text-3xl font-bold text-neutral-900 mb-4">{featuredNews.title}</h2>
-                <p className="text-lg text-neutral-600 mb-6 line-clamp-3">{getExcerpt(featuredNews)}</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 text-sm text-neutral-500">
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="w-4 h-4" />
-                      {new Date(featuredNews.published_at).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <MessageSquare className="w-4 h-4" />
-                      {0}
-                    </span>
-                  </div>
-                  <Button variant="secondary" size="sm">
-                    Read More
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        <div className="grid md:grid-cols-2 gap-6 mb-12">
-          {news.map((item) => (
-            <Card
-              key={item.id}
-              className="hover:shadow-xl transition-all cursor-pointer"
-              onClick={() => navigate(`/news/${item.slug}`)}
-            >
-              <CardContent>
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="default" className="capitalize text-xs">
-                    {item.category}
-                  </Badge>
-                </div>
-                <h3 className="text-xl font-semibold text-neutral-900 mb-3 line-clamp-2">{item.title}</h3>
-                <p className="text-sm text-neutral-600 line-clamp-3 mb-4">{getExcerpt(item)}</p>
-                <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
-                  <div className="flex items-center gap-4 text-xs text-neutral-400">
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {new Date(item.published_at).toLocaleDateString()}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      {0}
-                    </span>
-                  </div>
-                  <span className="text-sm font-medium text-primary-600 flex items-center gap-1">
-                    Read More
-                    <ArrowRight className="w-4 h-4" />
+                  </span>
+                  <span className="flex items-center gap-1.5 text-sm text-neutral-500 dark:text-neutral-400 ml-auto">
+                    <Calendar className="w-4 h-4" />
+                    {new Date(featuredNews.published_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
                   </span>
                 </div>
-              </CardContent>
-            </Card>
+                <h2 className="text-3xl md:text-4xl font-extrabold text-neutral-900 dark:text-white mb-6 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors leading-tight">
+                  {featuredNews.title}
+                </h2>
+                <p className="text-lg md:text-xl text-neutral-600 dark:text-neutral-300 mb-8 line-clamp-3 leading-relaxed">
+                  {getExcerpt(featuredNews)}
+                </p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center">
+                      <Newspaper className="w-5 h-5 text-neutral-500 dark:text-neutral-400" />
+                    </div>
+                    <span className="font-medium text-neutral-900 dark:text-white">VisaBuild Editorial</span>
+                  </div>
+                  <div className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 font-semibold text-sm group-hover:bg-emerald-600 dark:group-hover:bg-emerald-500 transition-colors">
+                    Read Full Article
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+          {news.map((item) => (
+            <div
+              key={item.id}
+              className="group cursor-pointer flex flex-col h-full bg-white dark:bg-neutral-800 rounded-3xl border border-neutral-200 dark:border-neutral-700 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              onClick={() => navigate(`/news/${item.slug}`)}
+            >
+              <div className="p-6 md:p-8 flex flex-col h-full">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="px-2.5 py-1 bg-neutral-100 dark:bg-neutral-700/50 text-neutral-700 dark:text-neutral-300 rounded-lg text-xs font-bold uppercase tracking-wider">
+                    {item.category}
+                  </span>
+                  <span className="flex items-center gap-1.5 text-xs text-neutral-400 dark:text-neutral-500 font-medium">
+                    <Calendar className="w-3.5 h-3.5" />
+                    {new Date(item.published_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </span>
+                </div>
+
+                <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-3 line-clamp-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                  {item.title}
+                </h3>
+
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 line-clamp-3 mb-6 flex-grow leading-relaxed">
+                  {getExcerpt(item)}
+                </p>
+
+                <div className="pt-5 border-t border-neutral-100 dark:border-neutral-700/50 mt-auto flex items-center justify-between">
+                  <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors">
+                    Read Article
+                  </span>
+                  <div className="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/40 transition-colors">
+                    <ArrowRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:translate-x-0.5 transition-transform" />
+                  </div>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
 
