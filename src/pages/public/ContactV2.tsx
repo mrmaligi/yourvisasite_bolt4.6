@@ -61,10 +61,10 @@ export function ContactV2() {
               Thank you for reaching out. We'll get back to you within 24 hours.
             </p>
             <Link to="/">
-              <ModernButton>
+              <Button>
                 Return Home
                 <ArrowRight className="ml-2 w-5 h-5" />
-              </ModernButton>
+              </Button>
             </Link>
           </motion.div>
         </ContentContainer>
@@ -143,7 +143,7 @@ export function ContactV2() {
                   />
                 </div>
 
-                <ModernButton
+                <Button
                   type="submit"
                   size="lg"
                   fullWidth
@@ -151,7 +151,7 @@ export function ContactV2() {
                 >
                   Send Message
                   <Send className="ml-2 w-5 h-5" />
-                </ModernButton>
+                </Button>
               </form>
             </ModernCard>
           </motion.div>

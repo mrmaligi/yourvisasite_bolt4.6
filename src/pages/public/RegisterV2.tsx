@@ -197,7 +197,7 @@ export function RegisterV2() {
               </span>
             </div>
 
-            <ModernButton
+            <Button
               type="submit"
               size="lg"
               fullWidth
@@ -205,7 +205,7 @@ export function RegisterV2() {
             >
               Create Account
               <ArrowRight className="ml-2 w-5 h-5" />
-            </ModernButton>
+            </Button>
           </form>
 
           {/* Footer */}

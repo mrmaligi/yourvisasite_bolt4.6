@@ -104,22 +104,22 @@ export function HomeV2() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <ModernButton 
+              <Button 
                 size="lg" 
                 onClick={() => navigate('/visas')}
                 className="shadow-xl shadow-blue-600/20"
               >
                 Find Your Visa
                 <ArrowRight className="ml-2 w-5 h-5" />
-              </ModernButton>
+              </Button>
               
-              <ModernButton 
+              <Button 
                 variant="outline" 
                 size="lg"
                 onClick={() => navigate('/lawyers')}
               >
                 Find a Lawyer
-              </ModernButton>
+              </Button>
             </div>
           </motion.div>
         </ContentContainer>
@@ -258,22 +258,22 @@ export function HomeV2() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <ModernButton 
+              <Button 
                 size="lg"
                 className="bg-white text-blue-600 hover:bg-blue-50"
                 onClick={() => navigate('/register')}
               >
                 Get Started Free
-              </ModernButton>
+              </Button>
               
-              <ModernButton 
+              <Button 
                 variant="outline" 
                 size="lg"
                 className="border-white text-white hover:bg-white/10"
                 onClick={() => navigate('/visas')}
               >
                 Browse Visas
-              </ModernButton>
+              </Button>
             </div>
           </motion.div>
         </ContentContainer>

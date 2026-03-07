@@ -118,7 +118,7 @@ export function LoginV2() {
               </Link>
             </div>
 
-            <ModernButton
+            <Button
               type="submit"
               size="lg"
               fullWidth
@@ -126,7 +126,7 @@ export function LoginV2() {
             >
               Sign In
               <ArrowRight className="ml-2 w-5 h-5" />
-            </ModernButton>
+            </Button>
           </form>
 
           {/* Footer */}
