@@ -176,7 +176,7 @@ export function HomeV2() {
                 transition={{ delay: index * 0.1 }}
               >
                 <Link to={category.path}>
-                  <ModernCard className="h-full group cursor-pointer p-6">
+                  <Card className="h-full group cursor-pointer p-6">
                     <div className={`w-14 h-14 ${category.color} rounded-2xl flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform`}>
                       <category.icon className="w-7 h-7" />
                     </div>
@@ -188,7 +188,7 @@ export function HomeV2() {
                       Explore
                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </div>
-                  </ModernCard>
+                  </Card>
                 </Link>
               </motion.div>
             ))}
@@ -220,7 +220,7 @@ export function HomeV2() {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <ModernCard className="p-6 h-full">
+                <Card className="p-6 h-full">
                   <div className="flex gap-1 mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
                       <Star key={i} className="w-5 h-5 text-amber-400 fill-amber-400" />
@@ -233,7 +233,7 @@ export function HomeV2() {
                     <p className="font-semibold text-slate-900">{testimonial.name}</p>
                     <p className="text-sm text-slate-500">{testimonial.role}</p>
                   </div>
-                </ModernCard>
+                </Card>
               </motion.div>
             ))}
           </div>

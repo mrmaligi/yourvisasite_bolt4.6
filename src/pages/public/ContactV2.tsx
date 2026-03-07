@@ -86,7 +86,7 @@ export function ContactV2() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
           >
-            <ModernCard className="p-8">
+            <Card className="p-8">
               <h2 className="text-2xl font-bold text-slate-900 mb-6">Send us a message</h2>
               
               <form onSubmit={handleSubmit} className="space-y-5">
@@ -153,7 +153,7 @@ export function ContactV2() {
                   <Send className="ml-2 w-5 h-5" />
                 </Button>
               </form>
-            </ModernCard>
+            </Card>
           </motion.div>
 
           {/* Contact Info */}
@@ -170,7 +170,7 @@ export function ContactV2() {
             </div>
 
             <div className="space-y-4">
-              <ModernCard className="p-6">
+              <Card className="p-6">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
                     <Mail className="w-6 h-6 text-blue-600" />
@@ -181,9 +181,9 @@ export function ContactV2() {
                     <p className="text-sm text-slate-500">For general inquiries</p>
                   </div>
                 </div>
-              </ModernCard>
+              </Card>
 
-              <ModernCard className="p-6">
+              <Card className="p-6">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
                     <Phone className="w-6 h-6 text-green-600" />
@@ -194,9 +194,9 @@ export function ContactV2() {
                     <p className="text-sm text-slate-500">Australia toll-free</p>
                   </div>
                 </div>
-              </ModernCard>
+              </Card>
 
-              <ModernCard className="p-6">
+              <Card className="p-6">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
                     <MapPin className="w-6 h-6 text-purple-600" />
@@ -207,7 +207,7 @@ export function ContactV2() {
                     <p className="text-sm text-slate-500">By appointment only</p>
                   </div>
                 </div>
-              </ModernCard>
+              </Card>
             </div>
           </motion.div>
         </div>

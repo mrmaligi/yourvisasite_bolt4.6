@@ -162,7 +162,7 @@ export function VisaSearchV2() {
               {filteredVisas.map((visa) => (
                 <motion.div key={visa.id} variants={itemVariants}>
                   <Link to={`/visas/${createVisaSlug(visa.name, visa.subclass)}`}>
-                    <ModernCard className="h-full group cursor-pointer">
+                    <Card className="h-full group cursor-pointer">
                       <div className="p-6">
                         <div className="flex items-start justify-between mb-4">
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg ${
@@ -205,7 +205,7 @@ export function VisaSearchV2() {
                           <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
                         </div>
                       </div>
-                    </ModernCard>
+                    </Card>
                   </Link>
                 </motion.div>
               ))}
