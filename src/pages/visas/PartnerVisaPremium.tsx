@@ -202,7 +202,7 @@ const PartnerVisaPremiumPage = () => {
                         </ul>
                       </div>
                     </div>
-                  </div㸼
+                  </div>
                   
                   <div className="mt-8 p-6 bg-green-50 rounded-xl border border-green-200">
                     <h4 className="font-bold text-green-900 mb-4">📊 Evidence Requirements Detail</h4>
@@ -217,7 +217,7 @@ const PartnerVisaPremiumPage = () => {
                       </div>
                       
                       <div>
-                        <h5 className="font-semibold text-green-800">2. Nature of Household</h3e
+                        <h5 className="font-semibold text-green-800">2. Nature of Household</h5>
                         <p className="text-sm text-green-700">
                           Evidence you live together: joint lease, utility bills, correspondence to same address, 
                           shared responsibilities.

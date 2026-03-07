@@ -197,7 +197,7 @@ const Home = () => {
                         <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
                           i < 3 ? 'bg-green-500' : 'bg-white/20'
                         }`}>
-                          <i < 3 ? <FileCheck className="w-4 h-4 text-white" /> : <div className="w-2 h-2 bg-white rounded-full" />}
+                          {i < 3 ? <FileCheck className="w-4 h-4 text-white" /> : <div className="w-2 h-2 bg-white rounded-full" />}
                         </div>
                         <span className={i < 3 ? '' : 'text-blue-200'}>{step}</span>
                       </div>
