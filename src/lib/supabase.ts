@@ -16,11 +16,6 @@ if (typeof window !== 'undefined') {
   (window as any).supabase = supabase;
 }
 
-// Expose for debugging
-if (typeof window !== 'undefined') {
-  (window as any).supabase = supabase;
-}
-
 /**
  * Wraps a Supabase query with retry logic for network errors and 5xx server errors.
  *
