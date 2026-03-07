@@ -16,7 +16,7 @@ import { ProtectedRoute, RoleRedirect } from './components/auth/RoleGuard';
 import { Loading } from './components/ui/Loading';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 
-const Landing = lazy(() => import('./pages/public/HomeModern').then(m => ({ default: m.HomeModern })));
+const Landing = lazy(() => import('./pages/public/HomeV2').then(m => ({ default: m.HomeV2 })));
 const Checkout = lazy(() => import('./pages/public/Checkout').then(m => ({ default: m.Checkout })));
 const UnifiedLogin = lazy(() => import('./pages/public/LoginModern').then(m => ({ default: m.LoginModern })));
 const Register = lazy(() => import('./pages/public/RegisterModern').then(m => ({ default: m.RegisterModern })));
