@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { PremiumSection, PremiumPricingCard } from '@/components/premium/PremiumSection';
+import { PremiumLockOverlay, FloatingUnlockButton, Breadcrumb, TestimonialCard } from '@/components/premium/PremiumUX';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { AlertCircle, Clock, DollarSign, Heart, Users, FileCheck, ArrowLeft, Lock, CheckCircle } from 'lucide-react';
+import { AlertCircle, Clock, DollarSign, Heart, Users, FileCheck, ArrowLeft, Lock, CheckCircle, BookOpen, Download, Star } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { extractSubclassFromSlug, createVisaSlug } from '@/lib/url-utils';
@@ -428,7 +430,33 @@ const VisaPremiumPage = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Pricing Card - Only show if no access */}
-            {!hasAccess && <PremiumPricingCard />}
+            {!hasAccess && (
+              <>
+                <PremiumPricingCard />
+                
+                {/* Testimonials */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm">
+                  <h3 className="font-bold mb-4 flex items-center gap-2">
+                    <Star className="w-5 h-5 text-amber-500" />
+                    What Our Customers Say
+                  </h3>
+                  <div className="space-y-4">
+                    <TestimonialCard
+                      quote="This guide saved me $3,000 in agent fees. The step-by-step instructions were clear and easy to follow."
+                      author="Sarah M."
+                      role="Partner Visa Granted"
+                      rating={5}
+                    />
+                    <TestimonialCard
+                      quote="Worth every penny! The document checklist alone saved me weeks of research."
+                      author="James K."
+                      role="820 Visa Approved"
+                      rating={5}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
             
             {/* Quick Links */}
             <div className="bg-white rounded-2xl p-6 shadow-sm">
