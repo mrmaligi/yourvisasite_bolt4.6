@@ -18,7 +18,7 @@ import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { supabase } from '../../lib/supabase';
 
-// Simple container component
+// Layout container component - updated for deployment
 const ContentContainer = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
   <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${className}`}>{children}</div>
 );
