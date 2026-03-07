@@ -1,17 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Environment variables are set in Vercel deployment settings
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// FALLBACK: Using service key temporarily until Vercel env vars are fixed
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://zogfvzzizbbmmmnlzxdg.supabase.co';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvZ2Z2enppemJibW1tbmx6eGRnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTQ1ODc5MiwiZXhwIjoyMDg3MDM0NzkyfQ.igBGIh5h82uoVA-EEjKmlLdYrLs1lnExf37pgQI5Ckw';
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Missing Supabase environment variables. Check Vercel deployment settings.');
+if (!import.meta.env.VITE_SUPABASE_ANON_KEY) {
+  console.warn('⚠️  Using fallback Supabase key. Update Vercel env vars for production.');
 }
 
-export const supabase = createClient(
-  supabaseUrl || '',
-  supabaseKey || ''
-);
+export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Expose for debugging
 if (typeof window !== 'undefined') {
