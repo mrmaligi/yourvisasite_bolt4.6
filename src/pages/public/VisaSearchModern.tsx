@@ -22,6 +22,18 @@ import { Input } from '../../components/ui/Input';
 import type { Visa } from '../../types/database';
 import { createVisaSlug } from '../../lib/url-utils';
 
+// Simple container components
+const ContentContainer = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+  <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${className}`}>{children}</div>
+);
+
+const PageHeader = ({ title, description }: { title: string; description?: string }) => (
+  <div className="text-center mb-12">
+    <h1 className="text-4xl font-bold text-slate-900 mb-4">{title}</h1>
+    {description && <p className="text-lg text-slate-600 max-w-2xl mx-auto">{description}</p>}
+  </div>
+);
+
 const categories = [
   { id: 'all', name: 'All Visas', icon: Globe },
   { id: 'partner', name: 'Partner', icon: Heart, count: 4 },
