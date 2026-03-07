@@ -16,11 +16,11 @@ import { ProtectedRoute, RoleRedirect } from './components/auth/RoleGuard';
 import { Loading } from './components/ui/Loading';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 
-const Landing = lazy(() => import('./pages/public/Landing').then(m => ({ default: m.Landing })));
+const Landing = lazy(() => import('./pages/public/HomeModern').then(m => ({ default: m.HomeModern })));
 const Checkout = lazy(() => import('./pages/public/Checkout').then(m => ({ default: m.Checkout })));
-const UnifiedLogin = lazy(() => import('./pages/public/UnifiedLogin').then(m => ({ default: m.UnifiedLogin })));
-const Register = lazy(() => import('./pages/public/Register').then(m => ({ default: m.Register })));
-const VisaSearch = lazy(() => import('./pages/public/VisaSearch').then(m => ({ default: m.VisaSearch })));
+const UnifiedLogin = lazy(() => import('./pages/public/LoginModern').then(m => ({ default: m.LoginModern })));
+const Register = lazy(() => import('./pages/public/RegisterModern').then(m => ({ default: m.RegisterModern })));
+const VisaSearch = lazy(() => import('./pages/public/VisaSearchModern').then(m => ({ default: m.VisaSearchModern })));
 const VisaCompare = lazy(() => import('./pages/public/VisaComparison').then(m => ({ default: m.VisaComparison })));
 const VisaDetail = lazy(() => import('./pages/public/VisaDetail').then(m => ({ default: m.VisaDetail })));
 const Tracker = lazy(() => import('./pages/public/Tracker').then(m => ({ default: m.Tracker })));
@@ -34,8 +34,9 @@ const Pricing = lazy(() => import('./pages/Pricing').then(m => ({ default: m.Pri
 const EligibilityQuizPage = lazy(() => import('./pages/public/EligibilityQuizPage').then(m => ({ default: m.EligibilityQuizPage })));
 const SuccessStoriesPage = lazy(() => import('./pages/public/SuccessStoriesPage').then(m => ({ default: m.SuccessStoriesPage })));
 const AboutPage = lazy(() => import('./pages/public/AboutPage').then(m => ({ default: m.AboutPage })));
-const ContactPage = lazy(() => import('./pages/public/ContactPage').then(m => ({ default: m.ContactPage })));
+const ContactPage = lazy(() => import('./pages/public/ContactModern').then(m => ({ default: m.ContactModern })));
 const FAQPage = lazy(() => import('./pages/public/FAQPage').then(m => ({ default: m.FAQPage })));
+const HelpCenterPage = lazy(() => import('./pages/public/HelpCenter').then(m => ({ default: m.HelpCenter })));
 const TermsPage = lazy(() => import('./pages/public/TermsPage').then(m => ({ default: m.TermsPage })));
 const PrivacyPage = lazy(() => import('./pages/public/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
 const CareersPage = lazy(() => import('./pages/public/CareersPage').then(m => ({ default: m.CareersPage })));
@@ -214,6 +215,7 @@ export default function App() {
                     <Route path="about" element={<AboutPage />} />
                     <Route path="contact" element={<ContactPage />} />
                     <Route path="faq" element={<FAQPage />} />
+                    <Route path="help" element={<HelpCenterPage />} />
                     <Route path="terms" element={<TermsPage />} />
                     <Route path="privacy" element={<PrivacyPage />} />
                     <Route path="careers" element={<CareersPage />} />
