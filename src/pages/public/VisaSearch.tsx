@@ -11,6 +11,7 @@ import { VisaCardSkeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { useToast } from '../../components/ui/Toast';
 import type { Visa } from '../../types/database';
+import { createVisaSlug } from '../../lib/url-utils';
 
 const CATEGORIES = [
   { value: 'work', label: 'Work' },
@@ -352,7 +353,7 @@ export function VisaSearch() {
                             />
                          </div>
                     </div>
-                    <Link to={`/visas/${visa.subclass}`} className="block h-full">
+                    <Link to={`/visas/${createVisaSlug(visa.name, visa.subclass)}`} className="block h-full">
                         <Card hover className="h-full">
                             <CardBody className="space-y-4">
                             <div className="flex items-start justify-between">

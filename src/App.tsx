@@ -101,6 +101,9 @@ const LawyerTestimonials = lazy(() => import('./pages/lawyer/Testimonials').then
 const LawyerClientDetail = lazy(() => import('./pages/lawyer/ClientDetail').then(m => ({ default: m.ClientDetail })));
 const LawyerDocumentDashboard = lazy(() => import('./pages/lawyer/DocumentDashboard').then(m => ({ default: m.DocumentDashboard })));
 
+// Premium Visa Page
+const PartnerVisaPremium = lazy(() => import('./pages/visas/PartnerVisaPremium').then(m => ({ default: m.default })));
+
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
 const AdminContent = lazy(() => import('./pages/admin/Content').then(m => ({ default: m.Content })));
 const AdminPages = lazy(() => import('./pages/admin/Pages').then(m => ({ default: m.Pages })));
@@ -195,7 +198,8 @@ export default function App() {
                     <Route path="reset-password" element={<ResetPassword />} />
                     <Route path="visas" element={<VisaSearch />} />
                     <Route path="visas/compare" element={<VisaCompare />} />
-                    <Route path="visas/:subclass" element={<VisaDetail />} />
+                    <Route path="visas/:slug" element={<VisaDetail />} />
+                    <Route path="visas/:slug/premium" element={<PartnerVisaPremium />} />
                     <Route path="checkout" element={<Checkout />} />
                     <Route path="tracker" element={<Tracker />} />
                     <Route path="lawyers" element={<LawyerDirectory />} />

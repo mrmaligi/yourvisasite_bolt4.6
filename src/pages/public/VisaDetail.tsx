@@ -36,6 +36,7 @@ import { Button } from '../../components/ui/Button';
 import { VisaDetailSkeleton } from '../../components/ui/Skeleton';
 import { ShareButton } from '../../components/ShareButton';
 import type { Visa, TrackerStats, TrackerEntry } from '../../types/database';
+import { extractSubclassFromSlug } from '../../lib/url-utils';
 
 interface VisaPremiumContentItem {
   id: string;
@@ -64,10 +65,13 @@ interface DocumentItem {
 }
 
 export function VisaDetail() {
-  const { subclass } = useParams<{ subclass: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
+
+  // Extract subclass from slug (handles both old format "820/801" and new format "partner-visa-820-801")
+  const subclass = slug ? extractSubclassFromSlug(slug) : null;
 
   const [visa, setVisa] = useState<Visa | null>(null);
   const [stats, setStats] = useState<TrackerStats | null>(null);
