@@ -58,7 +58,7 @@ const testimonials = [
   }
 ];
 
-export function HomeModern() {
+export function HomeV2() {
   const navigate = useNavigate();
   const [visaCount, setVisaCount] = useState(86);
 
@@ -282,4 +282,4 @@ export function HomeModern() {
   );
 }
 
-export default HomeModern;
+export default HomeV2;
