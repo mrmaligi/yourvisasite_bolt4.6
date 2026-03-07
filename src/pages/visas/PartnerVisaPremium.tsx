@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { PremiumSection, PremiumPricingCard } from '@/components/premium/PremiumSection';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { AlertCircle, Clock, DollarSign, Heart, Users, FileCheck, ArrowLeft, Lock } from 'lucide-react';
+import { AlertCircle, Clock, DollarSign, Heart, Users, FileCheck, ArrowLeft, Lock, CheckCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { extractSubclassFromSlug, createVisaSlug } from '@/lib/url-utils';
@@ -61,53 +61,147 @@ const defaultPartnerContent: VisaContent = {
 
 const VisaPremiumPage = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const [hasAccess, setHasAccess] = useState(false);
   const [visa, setVisa] = useState<Visa | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [content, setContent] = useState<VisaContent>(defaultPartnerContent);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   // Extract subclass from slug
   const subclass = slug ? extractSubclassFromSlug(slug) : null;
 
+  // Check for successful purchase from URL param
+  const purchaseSuccess = searchParams.get('success') === 'true';
+  const sessionId = searchParams.get('session_id');
+
   useEffect(() => {
     const fetchVisa = async () => {
-      if (!subclass) return;
+      if (!subclass) {
+        setError('Invalid visa URL');
+        setLoading(false);
+        return;
+      }
       
       setLoading(true);
-      const { data, error } = await supabase
-        .from('visas')
-        .select('*')
-        .eq('subclass', subclass)
-        .single();
+      setError(null);
+      
+      try {
+        // Fetch Visa
+        const { data, error: visaError } = await supabase
+          .from('visas')
+          .select('*')
+          .eq('subclass', subclass)
+          .single();
 
-      if (data) {
+        if (visaError) {
+          console.error('Visa fetch error:', visaError);
+          setError(`Could not find visa: ${visaError.message}`);
+          setLoading(false);
+          return;
+        }
+
+        if (!data) {
+          setError(`No visa found for subclass: ${subclass}`);
+          setLoading(false);
+          return;
+        }
+
         setVisa(data);
+
         // Check if user has purchased premium access
         if (user) {
-          const { data: purchase } = await supabase
-            .from('premium_purchases')
-            .select('*')
-            .eq('visa_id', data.id)
-            .eq('user_id', user.id)
-            .eq('status', 'completed')
-            .single();
-          
-          if (purchase) {
+          // Method 1: Check URL parameter (from Stripe redirect)
+          if (purchaseSuccess) {
+            setHasAccess(true);
+            setShowSuccessMessage(true);
+            // Clear URL params
+            window.history.replaceState({}, '', window.location.pathname);
+          } else {
+            // Method 2: Check database
+            try {
+              const { data: purchase, error: purchaseError } = await supabase
+                .from('premium_purchases')
+                .select('*')
+                .eq('visa_id', data.id)
+                .eq('user_id', user.id)
+                .eq('status', 'completed')
+                .maybeSingle();
+              
+              if (purchaseError && purchaseError.code !== 'PGRST116') {
+                console.error('Purchase check error:', purchaseError);
+              }
+              
+              if (purchase) {
+                setHasAccess(true);
+              }
+            } catch (e) {
+              console.error('Error checking purchase:', e);
+              // Don't block the page if purchase check fails
+            }
+          }
+
+          // Method 3: Check localStorage for purchased visas
+          const purchasedVisas = JSON.parse(localStorage.getItem('purchased_visas') || '[]');
+          if (purchasedVisas.includes(data.id)) {
             setHasAccess(true);
           }
         }
+      } catch (e) {
+        console.error('Unexpected error:', e);
+        setError('An unexpected error occurred');
       }
+      
       setLoading(false);
     };
 
     fetchVisa();
-  }, [subclass, user]);
+  }, [subclass, user, purchaseSuccess]);
+
+  // Handle purchase completion
+  const handlePurchaseComplete = () => {
+    if (user && visa) {
+      // Add to localStorage
+      const purchasedVisas = JSON.parse(localStorage.getItem('purchased_visas') || '[]');
+      if (!purchasedVisas.includes(visa.id)) {
+        purchasedVisas.push(visa.id);
+        localStorage.setItem('purchased_visas', JSON.stringify(purchasedVisas));
+      }
+      setHasAccess(true);
+    }
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading premium content...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8 text-red-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Something went wrong</h1>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <div className="flex flex-col gap-2">
+            <Button asChild>
+              <Link to="/visas">Browse All Visas</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/">Go Home</Link>
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -128,6 +222,16 @@ const VisaPremiumPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Success Message Banner */}
+      {showSuccessMessage && (
+        <div className="bg-green-500 text-white py-4 px-4">
+          <div className="container mx-auto flex items-center justify-center gap-2">
+            <CheckCircle className="w-5 h-5" />
+            <span className="font-medium">Payment successful! You now have full access to this guide.</span>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-6">
@@ -145,10 +249,17 @@ const VisaPremiumPage = () => {
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <Badge>Subclass {visa.subclass}</Badge>
-                <Badge className="bg-amber-500 text-white">
-                  <Lock className="w-3 h-3 mr-1" />
-                  PREMIUM
-                </Badge>
+                {hasAccess ? (
+                  <Badge className="bg-green-500 text-white">
+                    <CheckCircle className="w-3 h-3 mr-1" />
+                    UNLOCKED
+                  </Badge>
+                ) : (
+                  <Badge className="bg-amber-500 text-white">
+                    <Lock className="w-3 h-3 mr-1" />
+                    PREMIUM
+                  </Badge>
+                )}
               </div>
               
               <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -208,7 +319,7 @@ const VisaPremiumPage = () => {
                 hasAccess={hasAccess}
                 previewLength={2}
                 visaId={visa.id}
-                onPurchase={() => window.location.href = '/checkout?visa=' + visa.id}
+                onPurchase={handlePurchaseComplete}
               >
                 <div className="space-y-6">
                   <h3 className="text-xl font-bold">Step-by-Step Application Process</h3>
@@ -316,8 +427,8 @@ const VisaPremiumPage = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Pricing Card */}
-            <PremiumPricingCard />
+            {/* Pricing Card - Only show if no access */}
+            {!hasAccess && <PremiumPricingCard />}
             
             {/* Quick Links */}
             <div className="bg-white rounded-2xl p-6 shadow-sm">
