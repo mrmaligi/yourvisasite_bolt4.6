@@ -1,4 +1,4 @@
-import { type InputHTMLAttributes, type TextareaHTMLAttributes, type SelectHTMLAttributes, forwardRef } from 'react';
+import { type InputHTMLAttributes, type TextareaHTMLAttributes, type SelectHTMLAttributes, forwardRef, useId } from 'react';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -9,8 +9,14 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, helperText, icon, className = '', id, ...props }, ref) => {
-    // Generate ID if not provided, for label accessibility
-    const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
+    const generatedId = useId();
+    const errorId = useId();
+    const helperId = useId();
+    const inputId = id || generatedId;
+
+    let describedBy;
+    if (error) describedBy = errorId;
+    else if (helperText) describedBy = helperId;
 
     return (
       <div className="space-y-1.5 w-full">
@@ -28,12 +34,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             id={inputId}
+            aria-invalid={!!error}
+            aria-describedby={describedBy}
             className={`input-field ${icon ? 'pl-10' : ''} ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''} ${className}`}
             {...props}
           />
         </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        {helperText && !error && <p className="text-sm text-neutral-500">{helperText}</p>}
+        {error && <p id={errorId} className="text-sm text-red-600">{error}</p>}
+        {helperText && !error && <p id={helperId} className="text-sm text-neutral-500">{helperText}</p>}
       </div>
     );
   }
@@ -47,7 +55,9 @@ export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElemen
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ label, error, className = '', id, ...props }, ref) => {
-    const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
+    const generatedId = useId();
+    const errorId = useId();
+    const inputId = id || generatedId;
 
     return (
       <div className="space-y-1.5 w-full">
@@ -59,10 +69,12 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         <textarea
           ref={ref}
           id={inputId}
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
           className={`input-field min-h-[100px] ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''} ${className}`}
           {...props}
         />
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p id={errorId} className="text-sm text-red-600">{error}</p>}
       </div>
     );
   }
@@ -77,7 +89,9 @@ export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, error, options, className = '', id, ...props }, ref) => {
-    const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
+    const generatedId = useId();
+    const errorId = useId();
+    const inputId = id || generatedId;
 
     return (
       <div className="space-y-1.5 w-full">
@@ -89,6 +103,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         <select
           ref={ref}
           id={inputId}
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
           className={`input-field ${error ? 'border-red-500' : ''} ${className}`}
           {...props}
         >
@@ -98,7 +114,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             </option>
           ))}
         </select>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p id={errorId} className="text-sm text-red-600">{error}</p>}
       </div>
     );
   }
