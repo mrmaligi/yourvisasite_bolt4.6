@@ -12,8 +12,8 @@ import {
   CheckCircle,
   Briefcase
 } from 'lucide-react';
-import { ModernButton } from '../components/ui/ModernButton';
-import { useAuth } from '../contexts/AuthContext';
+import { Button } from '../../components/ui/Button';
+import { useAuth } from '../../contexts/AuthContext';
 
 export function RegisterModern() {
   const navigate = useNavigate();

@@ -15,8 +15,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
-import { ModernButton } from '../../components/ui/ModernButton';
-import { ModernCard, PageHeader, ContentContainer } from '../../components/layout/ModernLayout';
+import { Button } from '../../components/ui/Button';
+import { Card, CardBody } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Input } from '../../components/ui/Input';
 import type { Visa } from '../../types/database';

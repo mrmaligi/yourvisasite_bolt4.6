@@ -10,8 +10,8 @@ import {
   MapPin,
   Send
 } from 'lucide-react';
-import { ModernButton } from '../components/ui/ModernButton';
-import { ModernCard, ContentContainer, PageHeader } from '../components/layout/ModernLayout';
+import { Button } from '../../components/ui/Button';
+import { Card, CardBody } from '../../components/ui/Card';
 
 export function ContactModern() {
   const [formData, setFormData] = useState({

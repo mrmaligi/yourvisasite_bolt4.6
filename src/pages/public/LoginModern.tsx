@@ -10,9 +10,9 @@ import {
   EyeOff,
   Loader2
 } from 'lucide-react';
-import { ModernButton } from '../components/ui/ModernButton';
-import { ContentContainer } from '../components/layout/ModernLayout';
-import { useAuth } from '../contexts/AuthContext';
+import { Button } from '../../components/ui/Button';
+import { Card, CardBody } from '../../components/ui/Card';
+import { useAuth } from '../../contexts/AuthContext';
 
 export function LoginModern() {
   const navigate = useNavigate();

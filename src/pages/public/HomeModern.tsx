@@ -13,10 +13,10 @@ import {
   Heart,
   GraduationCap
 } from 'lucide-react';
-import { ModernButton } from '../components/ui/ModernButton';
-import { ModernCard, ContentContainer } from '../components/layout/ModernLayout';
-import { Badge } from '../components/ui/Badge';
-import { supabase } from '../lib/supabase';
+import { Button } from '../../components/ui/Button';
+import { Card, CardBody } from '../../components/ui/Card';
+import { Badge } from '../../components/ui/Badge';
+import { supabase } from '../../lib/supabase';
 
 const visaCategories = [
   { name: 'Partner Visas', icon: Heart, count: 4, color: 'bg-rose-500', path: '/visas?category=partner' },
