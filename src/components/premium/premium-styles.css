@@ -1,0 +1,251 @@
+/* Premium Section Styles */
+
+/* Gradient Badge */
+.badge-premium {
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.3);
+}
+
+/* Locked Content Blur Effect */
+.locked-content-preview {
+  position: relative;
+}
+
+.locked-content-preview::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(to top, white, transparent);
+  pointer-events: none;
+}
+
+/* Premium Card Gradient */
+.premium-card {
+  background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+  border: 2px solid #fbbf24;
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.premium-card:hover {
+  box-shadow: 0 25px 50px -12px rgba(245, 158, 11, 0.25);
+  transform: translateY(-4px);
+}
+
+/* CTA Button Gradient */
+.btn-premium {
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+  color: white;
+  font-weight: 600;
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-premium:hover {
+  background: linear-gradient(135deg, #d97706 0%, #c2410c 100%);
+  box-shadow: 0 10px 20px -5px rgba(245, 158, 11, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Lock Icon Animation */
+@keyframes pulse-lock {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.lock-icon {
+  animation: pulse-lock 2s infinite;
+}
+
+/* Price Tag */
+.price-tag {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.price-original {
+  color: #9ca3af;
+  text-decoration: line-through;
+  font-size: 1.125rem;
+}
+
+.price-current {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+}
+
+.price-currency {
+  font-size: 1rem;
+  color: #6b7280;
+}
+
+/* Savings Badge */
+.savings-badge {
+  background: #dc2626;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Feature List Checkmark */
+.feature-check {
+  color: #22c55e;
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Guarantee Box */
+.guarantee-box {
+  background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+  border: 1px solid #3b82f6;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+/* Trust Stats */
+.trust-stat {
+  text-align: center;
+}
+
+.trust-stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.trust-stat-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* Premium Hero Background */
+.premium-hero {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #312e81 100%);
+  color: white;
+  padding: 5rem 0;
+}
+
+/* Card Hover Effect */
+.guide-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.guide-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+}
+
+.guide-card-image {
+  overflow: hidden;
+}
+
+.guide-card-image img {
+  transition: transform 0.5s ease;
+}
+
+.guide-card:hover .guide-card-image img {
+  transform: scale(1.05);
+}
+
+/* Progress Bar for Preview */
+.preview-progress {
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.preview-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%);
+  width: 30%;
+}
+
+/* Premium Section Divider */
+.premium-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #fbbf24 50%, transparent 100%);
+  margin: 2rem 0;
+}
+
+/* Floating Lock Icon */
+.floating-lock {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+  color: white;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 30px -5px rgba(245, 158, 11, 0.5);
+  transition: all 0.3s ease;
+  z-index: 50;
+}
+
+.floating-lock:hover {
+  transform: scale(1.1) rotate(10deg);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .price-current {
+    font-size: 2.5rem;
+  }
+  
+  .premium-hero {
+    padding: 3rem 0;
+  }
+  
+  .premium-hero h1 {
+    font-size: 2rem;
+  }
+}
+
+/* Print Styles for PDF */
+@media print {
+  .premium-section-locked {
+    display: none;
+  }
+  
+  .btn-premium {
+    background: #f59e0b !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
