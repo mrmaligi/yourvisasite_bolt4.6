@@ -110,11 +110,14 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
   const navigation = getNavigation();
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 font-sans selection:bg-indigo-500/30">
       {/* Mobile Header */}
-      <div className="lg:hidden bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 px-4 py-3 flex items-center justify-between">
-        <Link to="/" className="font-bold text-xl text-primary-600">VisaBuild</Link>
-        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+      <div className="lg:hidden sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
+        <Link to="/" className="font-bold text-xl text-indigo-600 dark:text-indigo-400">VisaBuild</Link>
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        >
           {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
@@ -122,18 +125,20 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
       <div className="flex">
         {/* Sidebar */}
         <aside className={`
-          fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white dark:bg-neutral-800 border-r border-neutral-200 dark:border-neutral-700
-          transform transition-transform duration-200 ease-in-out
+          fixed lg:sticky top-0 h-screen inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800
+          transform transition-transform duration-300 ease-in-out flex flex-col
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}>
           {/* Logo */}
-          <div className="p-6 border-b border-neutral-200 dark:border-neutral-700">
-            <Link to="/" className="font-bold text-2xl text-primary-600">VisaBuild</Link>
-            <p className="text-xs text-neutral-500 mt-1">{getRoleLabel()} Portal</p>
+          <div className="p-6">
+            <Link to="/" className="font-bold text-2xl bg-gradient-to-r from-indigo-600 to-teal-500 bg-clip-text text-transparent inline-block">
+              VisaBuild
+            </Link>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">{getRoleLabel()} Portal</p>
           </div>
 
           {/* Navigation */}
-          <nav className="p-4 space-y-1">
+          <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto custom-scrollbar">
             {navigation.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.to;
@@ -143,40 +148,40 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
                   key={item.to}
                   to={item.to}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group ${
                     isActive
-                      ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300'
-                      : 'text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700'
+                      ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300 font-semibold'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span className="font-medium flex-1">{item.label}</span>
+                  <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />
+                  <span className="flex-1">{item.label}</span>
                   {item.badge ? (
-                    <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                    <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
                       {item.badge}
                     </span>
-                  ) : isActive && <ChevronRight className="w-4 h-4" />}
+                  ) : isActive && <ChevronRight className="w-4 h-4 text-indigo-400" />}
                 </Link>
               );
             })}
           </nav>
 
           {/* User Profile */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-neutral-200 dark:border-neutral-700">
-            <div className="flex items-center gap-3 mb-3">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getRoleColor()}`}>
+          <div className="p-4 m-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-3 mb-4">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm ${getRoleColor()}`}>
                 {role === 'admin' ? <Shield className="w-5 h-5" /> : 
                  role === 'lawyer' ? <Briefcase className="w-5 h-5" /> : <User className="w-5 h-5" />}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-neutral-900 dark:text-white truncate">
+                <p className="font-semibold text-sm text-slate-900 dark:text-white truncate">
                   {profile?.full_name || 'User'}
                 </p>
-                <p className="text-xs text-neutral-500 capitalize">{role}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">{role}</p>
               </div>
             </div>
             
-            <Button variant="secondary" size="sm" onClick={handleSignOut} className="w-full">
+            <Button variant="secondary" size="sm" onClick={handleSignOut} className="w-full justify-start rounded-xl text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 shadow-sm border border-slate-200 dark:border-slate-700 transition-all">
               <LogOut className="w-4 h-4 mr-2" />
               Sign Out
             </Button>
@@ -186,31 +191,31 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
         {/* Mobile Overlay */}
         {mobileMenuOpen && (
           <div 
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden transition-opacity"
             onClick={() => setMobileMenuOpen(false)}
           />
         )}
 
         {/* Main Content */}
-        <main className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0 flex flex-col min-h-screen">
           {/* Top Bar */}
-          <header className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 px-6 py-4">
-            <div className="flex items-center justify-between">
-              <h1 className="text-xl font-semibold text-neutral-900 dark:text-white">
+          <header className="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-6 py-4 transition-colors">
+            <div className="flex items-center justify-between max-w-7xl mx-auto">
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight hidden sm:block">
                 {navigation.find(n => n.to === location.pathname)?.label || 'Dashboard'}
               </h1>
               
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 ml-auto">
                 {/* Role Badge */}
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getRoleColor()}`}>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${getRoleColor()}`}>
                   {getRoleLabel()}
                 </span>
                 
                 {/* Notifications */}
-                <button className="relative p-2 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg">
+                <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
                   <Bell className="w-5 h-5" />
                   {notifications > 0 && (
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border-2 border-white dark:border-slate-900 rounded-full" />
                   )}
                 </button>
               </div>
@@ -218,8 +223,10 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
           </header>
 
           {/* Page Content */}
-          <div className="p-6">
-            {children}
+          <div className="p-4 sm:p-6 lg:p-8 flex-1 w-full max-w-7xl mx-auto">
+            <div className="animate-fade-in-up">
+              {children}
+            </div>
           </div>
         </main>
       </div>

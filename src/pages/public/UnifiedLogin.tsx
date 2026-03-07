@@ -1,20 +1,20 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Briefcase, User, Shield, ArrowRight, Eye, EyeOff } from 'lucide-react';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { User, Briefcase, Shield, Eye, EyeOff, ArrowRight, Lock } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
-import { useToast } from '../../components/ui/Toast';
+import { Input } from '../../components/ui/Input';
+import { Button } from '../../components/ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
+import { useToast } from '../../components/ui/Toast';
 
 type LoginType = 'user' | 'lawyer' | 'admin';
 
 export function UnifiedLogin() {
+  const { signIn } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
-  const { signIn } = useAuth();
 
   const [loginType, setLoginType] = useState<LoginType>('user');
   const [email, setEmail] = useState('');
@@ -120,170 +120,152 @@ export function UnifiedLogin() {
   };
 
   const loginOptions = [
-    { type: 'user' as LoginType, icon: User, label: 'Applicant', desc: 'Visa applicants & users' },
-    { type: 'lawyer' as LoginType, icon: Briefcase, label: 'Lawyer', desc: 'Migration agents & lawyers' },
-    { type: 'admin' as LoginType, icon: Shield, label: 'Admin', desc: 'Platform administrators' },
+    { type: 'user' as LoginType, icon: User, label: 'Applicant' },
+    { type: 'lawyer' as LoginType, icon: Briefcase, label: 'Lawyer' },
+    { type: 'admin' as LoginType, icon: Shield, label: 'Admin' },
   ];
 
-  const handleOptionClick = (type: LoginType) => {
-    setLoginType(type);
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 dark:from-neutral-900 dark:to-neutral-800 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">
-            Welcome Back
-          </h1>
-          <p className="text-neutral-600 dark:text-neutral-300">
-            Sign in to your VisaBuild account
-          </p>
-        </div>
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex relative overflow-hidden">
+      {/* Background Orbs */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary-400/20 blur-[120px] mix-blend-multiply dark:mix-blend-lighten pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-accent-400/20 blur-[120px] mix-blend-multiply dark:mix-blend-lighten pointer-events-none" />
 
-        {/* Login Type Selection */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          {loginOptions.map((option) => {
-            const Icon = option.icon;
-            const isSelected = loginType === option.type;
+      <div className="w-full flex items-center justify-center p-4 relative z-10">
+        <div className="w-full max-w-lg animate-fade-in-up">
 
-            return (
-              <button
-                key={option.type}
-                onClick={() => handleOptionClick(option.type)}
-                type="button"
-                className={`p-4 rounded-xl border-2 text-center transition-all ${isSelected
-                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                    : 'border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:border-primary-300'
-                  }`}
-              >
-                <Icon className={`w-8 h-8 mx-auto mb-2 ${isSelected ? 'text-primary-600' : 'text-neutral-400'}`} />
-                <h3 className={`font-semibold ${isSelected ? 'text-primary-700' : 'text-neutral-700 dark:text-neutral-300'}`}>
-                  {option.label}
-                </h3>
-                <p className="text-xs text-neutral-500 mt-1">{option.desc}</p>
-              </button>
-            );
-          })}
-        </div>
+          <div className="text-center mb-10">
+            <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-3 tracking-tight">
+              Welcome back
+            </h1>
+            <p className="text-lg text-neutral-600 dark:text-neutral-400 font-light">
+              Sign in to your VisaBuild account
+            </p>
+          </div>
 
-        {/* Login Form */}
-        <Card className="max-w-md mx-auto">
-          <CardHeader>
-            <h2 className="text-xl font-semibold text-neutral-900 dark:text-white">
-              {loginType === 'user' && 'Applicant Login'}
-              {loginType === 'lawyer' && 'Lawyer Login'}
-              {loginType === 'admin' && 'Admin Login'}
-            </h2>
-          </CardHeader>
-          <CardBody>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {errorMsg && (
-                <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg border border-red-200 dark:border-red-800">
-                  {errorMsg}
-                </div>
-              )}
+          <Card className="border-0 shadow-elevated bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl ring-1 ring-neutral-200/50 dark:ring-neutral-800/50">
+            <CardBody className="p-8 md:p-10">
 
-              <Input
-                label="Email Address"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={handleEmailChange}
-                required
-                disabled={loading}
-              />
+              {/* Modern Segmented Control for Login Type */}
+              <div className="flex p-1 bg-neutral-100 dark:bg-neutral-800/50 rounded-2xl mb-8 border border-neutral-200/50 dark:border-neutral-700/50 relative">
+                {loginOptions.map((option) => {
+                  const Icon = option.icon;
+                  const isSelected = loginType === option.type;
 
-              <div className="relative">
-                <Input
-                  label="Password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={handlePasswordChange}
-                  required
-                  disabled={loading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-8 text-neutral-400 hover:text-neutral-600"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
+                  return (
+                    <button
+                      key={option.type}
+                      onClick={() => setLoginType(option.type)}
+                      type="button"
+                      className={`flex-1 flex items-center justify-center gap-2 py-3 px-2 text-sm font-semibold rounded-xl transition-all duration-300 relative z-10 ${
+                        isSelected
+                          ? 'text-primary-600 dark:text-primary-400 shadow-sm bg-white dark:bg-neutral-900'
+                          : 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200'
+                      }`}
+                      aria-pressed={isSelected}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {option.label}
+                    </button>
+                  );
+                })}
               </div>
 
-              <div className="flex items-center justify-between text-sm">
-                <Link to="/forgot-password" className="text-primary-600 hover:underline">
-                  Forgot password?
-                </Link>
-              </div>
-
-              <Button type="submit" disabled={loading} className="w-full">
-                {loading ? 'Signing in...' : (
-                  <>
-                    Sign In
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </>
+              {/* Login Form */}
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {errorMsg && (
+                  <div className="p-4 bg-red-50/50 dark:bg-red-900/10 text-red-600 dark:text-red-400 text-sm rounded-xl border border-red-200/50 dark:border-red-800/50 backdrop-blur-sm flex gap-3 items-start animate-fade-in">
+                    <Shield className="w-5 h-5 shrink-0" />
+                    <p>{errorMsg}</p>
+                  </div>
                 )}
-              </Button>
-            </form>
 
-            {loginType === 'user' && (
-              <p className="text-center text-sm text-neutral-600 dark:text-neutral-400 mt-4">
-                Don't have an account?{' '}
-                <Link to="/register" className="text-primary-600 hover:underline">
-                  Sign up
-                </Link>
-              </p>
-            )}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                      Email Address
+                    </label>
+                    <Input
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={handleEmailChange}
+                      required
+                      disabled={loading}
+                      className="h-12 bg-neutral-50/50 dark:bg-neutral-800/50 focus:bg-white dark:focus:bg-neutral-900 transition-colors"
+                    />
+                  </div>
 
-            {loginType === 'lawyer' && (
-              <p className="text-center text-sm text-neutral-600 dark:text-neutral-400 mt-4">
-                Want to join as a lawyer?{' '}
-                <Link to="/register/lawyer" className="text-primary-600 hover:underline">
-                  Apply here
-                </Link>
-              </p>
-            )}
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                        Password
+                      </label>
+                      <Link to="/forgot-password" className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors">
+                        Forgot password?
+                      </Link>
+                    </div>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={handlePasswordChange}
+                        required
+                        disabled={loading}
+                        className="h-12 bg-neutral-50/50 dark:bg-neutral-800/50 focus:bg-white dark:focus:bg-neutral-900 pr-12 transition-colors"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
 
-            <div className="mt-6 pt-4 border-t border-neutral-200 dark:border-neutral-700">
-              <p className="text-xs text-neutral-500 text-center">
-                Test Account: admin@visabuild.local / admin123
-              </p>
-            </div>
-          </CardBody>
-        </Card>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-14 text-lg font-bold shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  {loading ? 'Signing in...' : (
+                    <>
+                      Sign In
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </>
+                  )}
+                </Button>
+              </form>
 
-        {/* Role Info Cards */}
-        <div className="grid md:grid-cols-3 gap-4 mt-8">
-          <Card className="bg-white/50 dark:bg-neutral-800/50">
-            <CardBody className="text-center">
-              <User className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-              <h4 className="font-medium text-neutral-900 dark:text-white">Applicants</h4>
-              <p className="text-xs text-neutral-500 mt-1">
-                Search visas, track applications, book consultations
-              </p>
-            </CardBody>
-          </Card>
+              {/* Footer Links */}
+              <div className="mt-8 pt-6 border-t border-neutral-200/50 dark:border-neutral-800/50">
+                {loginType === 'user' && (
+                  <p className="text-center text-neutral-600 dark:text-neutral-400 font-medium">
+                    New to VisaBuild?{' '}
+                    <Link to="/register" className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-semibold transition-colors">
+                      Create an account
+                    </Link>
+                  </p>
+                )}
 
-          <Card className="bg-white/50 dark:bg-neutral-800/50">
-            <CardBody className="text-center">
-              <Briefcase className="w-6 h-6 text-green-500 mx-auto mb-2" />
-              <h4 className="font-medium text-neutral-900 dark:text-white">Lawyers</h4>
-              <p className="text-xs text-neutral-500 mt-1">
-                Manage clients, set availability, offer services
-              </p>
-            </CardBody>
-          </Card>
+                {loginType === 'lawyer' && (
+                  <p className="text-center text-neutral-600 dark:text-neutral-400 font-medium">
+                    Want to offer your services?{' '}
+                    <Link to="/register/lawyer" className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-semibold transition-colors">
+                      Apply as a Lawyer
+                    </Link>
+                  </p>
+                )}
 
-          <Card className="bg-white/50 dark:bg-neutral-800/50">
-            <CardBody className="text-center">
-              <Shield className="w-6 h-6 text-purple-500 mx-auto mb-2" />
-              <h4 className="font-medium text-neutral-900 dark:text-white">Admins</h4>
-              <p className="text-xs text-neutral-500 mt-1">
-                Platform management, user verification, analytics
-              </p>
+                <div className="mt-6 flex items-center justify-center gap-2 text-xs text-neutral-400 dark:text-neutral-500">
+                  <Lock className="w-3 h-3" />
+                  <p>Secure login provided by Supabase Auth</p>
+                </div>
+              </div>
+
             </CardBody>
           </Card>
         </div>

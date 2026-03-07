@@ -107,38 +107,45 @@ export function FAQPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 dark:text-white mb-4">
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 pb-20">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
+        <div className="text-center mb-16 relative">
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-100/40 via-transparent to-transparent dark:from-indigo-900/20 rounded-[4rem] blur-3xl"></div>
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/20 mb-6 text-white transform hover:scale-105 transition-transform duration-300">
+            <HelpCircle className="w-8 h-8" />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-neutral-900 dark:text-white mb-6 tracking-tight">
             Frequently Asked Questions
           </h1>
-          <p className="text-lg text-neutral-600 dark:text-neutral-300">
-            Find answers to common questions about VisaBuild
+          <p className="text-lg md:text-xl text-neutral-600 dark:text-neutral-400 max-w-3xl mx-auto mb-8 leading-relaxed">
+            Find answers to common questions about VisaBuild, our services, and the Australian immigration process.
           </p>
         </div>
 
         {/* Search */}
-        <div className="relative mb-8">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
-          <Input
+        <div className="relative mb-10 max-w-2xl mx-auto">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <Search className="h-6 w-6 text-neutral-400 dark:text-neutral-500" />
+          </div>
+          <input
+            type="text"
             placeholder="Search for answers..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-12"
+            className="block w-full pl-12 pr-4 py-4 rounded-2xl border-none bg-white dark:bg-neutral-800 shadow-lg shadow-neutral-200/50 dark:shadow-none text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:ring-2 focus:ring-indigo-500 text-lg transition-shadow"
           />
         </div>
 
         {/* Categories */}
-        <div className="flex flex-wrap gap-2 mb-8">
+        <div className="flex flex-wrap gap-2 justify-center mb-12">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
                 selectedCategory === cat
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700'
+                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-md transform scale-105'
+                  : 'bg-white text-neutral-600 hover:bg-neutral-100 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700'
               }`}
             >
               {cat}
@@ -149,31 +156,31 @@ export function FAQPage() {
         {/* FAQ Items */}
         <div className="space-y-4">
           {filteredFaqs.map((faq, index) => (
-            <Card key={index} className="overflow-hidden">
+            <div key={index} className="bg-white dark:bg-neutral-800 rounded-3xl border border-neutral-200 dark:border-neutral-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
               <button
                 onClick={() => toggleItem(index)}
-                className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors"
+                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors group"
               >
-                <div className="flex items-center gap-3">
-                  <HelpCircle className="w-5 h-5 text-primary-600 flex-shrink-0" />
-                  <span className="font-medium text-neutral-900 dark:text-white">
+                <div className="flex items-center gap-4">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${expandedItems.has(index) ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400' : 'bg-neutral-100 text-neutral-500 dark:bg-neutral-700 dark:text-neutral-400 group-hover:bg-indigo-50 dark:group-hover:text-indigo-500'}`}>
+                     <HelpCircle className="w-4 h-4" />
+                  </div>
+                  <span className="font-bold text-lg text-neutral-900 dark:text-white">
                     {faq.question}
                   </span>
                 </div>
-                {expandedItems.has(index) ? (
-                  <ChevronUp className="w-5 h-5 text-neutral-400" />
-                ) : (
-                  <ChevronDown className="w-5 h-5 text-neutral-400" />
-                )}
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-transform duration-300 ${expandedItems.has(index) ? 'rotate-180 bg-neutral-100 dark:bg-neutral-700' : 'bg-transparent'}`}>
+                  <ChevronDown className={`w-5 h-5 ${expandedItems.has(index) ? 'text-neutral-900 dark:text-white' : 'text-neutral-400 group-hover:text-neutral-600 dark:group-hover:text-neutral-300'}`} />
+                </div>
               </button>
               {expandedItems.has(index) && (
-                <CardBody className="pt-0 pb-6 px-6 pl-14">
-                  <p className="text-neutral-600 dark:text-neutral-300">
+                <div className="px-6 pb-6 pt-0 pl-[4.5rem] animate-in slide-in-from-top-2 duration-200">
+                  <p className="text-neutral-600 dark:text-neutral-300 leading-relaxed text-lg">
                     {faq.answer}
                   </p>
-                </CardBody>
+                </div>
               )}
-            </Card>
+            </div>
           ))}
         </div>
 
@@ -187,16 +194,17 @@ export function FAQPage() {
         )}
 
         {/* Contact CTA */}
-        <div className="mt-12 text-center p-8 bg-primary-50 dark:bg-primary-900/20 rounded-2xl">
-          <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">
+        <div className="mt-16 text-center p-12 bg-indigo-50 dark:bg-indigo-900/20 rounded-[2.5rem] border border-indigo-100 dark:border-indigo-800/50 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+          <h3 className="text-3xl font-extrabold text-neutral-900 dark:text-white mb-4 relative z-10">
             Still have questions?
           </h3>
-          <p className="text-neutral-600 dark:text-neutral-300 mb-4">
-            Our support team is here to help.
+          <p className="text-lg text-neutral-600 dark:text-neutral-300 mb-8 max-w-xl mx-auto relative z-10">
+            Can't find the answer you're looking for? Our dedicated support team is ready to assist you.
           </p>
           <a
             href="/contact"
-            className="inline-flex items-center justify-center px-6 py-3 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors"
+            className="inline-flex items-center justify-center px-8 py-4 bg-indigo-600 text-white rounded-xl font-bold text-lg hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/25 hover:-translate-y-1 relative z-10"
           >
             Contact Support
           </a>
