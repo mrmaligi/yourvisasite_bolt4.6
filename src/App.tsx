@@ -18,9 +18,9 @@ import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 
 const Landing = lazy(() => import('./pages/public/HomeV2').then(m => ({ default: m.HomeV2 })));
 const Checkout = lazy(() => import('./pages/public/Checkout').then(m => ({ default: m.Checkout })));
-const UnifiedLogin = lazy(() => import('./pages/public/LoginModern').then(m => ({ default: m.LoginModern })));
-const Register = lazy(() => import('./pages/public/RegisterModern').then(m => ({ default: m.RegisterModern })));
-const VisaSearch = lazy(() => import('./pages/public/VisaSearchModern').then(m => ({ default: m.VisaSearchModern })));
+const UnifiedLogin = lazy(() => import('./pages/public/LoginV2').then(m => ({ default: m.LoginV2 })));
+const Register = lazy(() => import('./pages/public/RegisterV2').then(m => ({ default: m.RegisterV2 })));
+const VisaSearch = lazy(() => import('./pages/public/VisaSearchV2').then(m => ({ default: m.VisaSearchV2 })));
 const VisaCompare = lazy(() => import('./pages/public/VisaComparison').then(m => ({ default: m.VisaComparison })));
 const VisaDetail = lazy(() => import('./pages/public/VisaDetail').then(m => ({ default: m.VisaDetail })));
 const Tracker = lazy(() => import('./pages/public/Tracker').then(m => ({ default: m.Tracker })));
@@ -34,7 +34,7 @@ const Pricing = lazy(() => import('./pages/Pricing').then(m => ({ default: m.Pri
 const EligibilityQuizPage = lazy(() => import('./pages/public/EligibilityQuizPage').then(m => ({ default: m.EligibilityQuizPage })));
 const SuccessStoriesPage = lazy(() => import('./pages/public/SuccessStoriesPage').then(m => ({ default: m.SuccessStoriesPage })));
 const AboutPage = lazy(() => import('./pages/public/AboutPage').then(m => ({ default: m.AboutPage })));
-const ContactPage = lazy(() => import('./pages/public/ContactModern').then(m => ({ default: m.ContactModern })));
+const ContactPage = lazy(() => import('./pages/public/ContactV2').then(m => ({ default: m.ContactV2 })));
 const FAQPage = lazy(() => import('./pages/public/FAQPage').then(m => ({ default: m.FAQPage })));
 const HelpCenterPage = lazy(() => import('./pages/public/HelpCenter').then(m => ({ default: m.HelpCenter })));
 const TermsPage = lazy(() => import('./pages/public/TermsPage').then(m => ({ default: m.TermsPage })));

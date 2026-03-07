@@ -14,7 +14,7 @@ import { Button } from '../../components/ui/Button';
 import { Card, CardBody } from '../../components/ui/Card';
 import { useAuth } from '../../contexts/AuthContext';
 
-export function LoginModern() {
+export function LoginV2() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
@@ -144,4 +144,4 @@ export function LoginModern() {
   );
 }
 
-export default LoginModern;
+export default LoginV2;

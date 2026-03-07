@@ -15,7 +15,7 @@ import {
 import { Button } from '../../components/ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
 
-export function RegisterModern() {
+export function RegisterV2() {
   const navigate = useNavigate();
   const { register } = useAuth();
   const [userType, setUserType] = useState<'user' | 'lawyer'>('user');
@@ -223,4 +223,4 @@ export function RegisterModern() {
   );
 }
 
-export default RegisterModern;
+export default RegisterV2;

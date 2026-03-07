@@ -43,7 +43,7 @@ const categories = [
   { id: 'business', name: 'Business', icon: Briefcase, count: 4 },
 ];
 
-export function VisaSearchModern() {
+export function VisaSearchV2() {
   const [visas, setVisas] = useState<Visa[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -227,4 +227,4 @@ export function VisaSearchModern() {
   );
 }
 
-export default VisaSearchModern;
+export default VisaSearchV2;

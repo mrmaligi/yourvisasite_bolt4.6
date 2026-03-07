@@ -25,7 +25,7 @@ const PageHeader = ({ title, description }: { title: string; description?: strin
   </div>
 );
 
-export function ContactModern() {
+export function ContactV2() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -216,4 +216,4 @@ export function ContactModern() {
   );
 }
 
-export default ContactModern;
+export default ContactV2;
