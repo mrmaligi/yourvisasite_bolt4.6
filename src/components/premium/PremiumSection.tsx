@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Lock, Unlock, CheckCircle, FileText, Download, ChevronRight, Star, Shield } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Modal } from '@/components/ui/Modal';
 
 // Premium Content Section Component
 export const PremiumSection = ({ 
@@ -102,21 +102,20 @@ export const PremiumCTA = () => {
         </div>
       </div>
 
-      {/* Pricing Dialog */}
-      <Dialog open={showPricing} onOpenChange={setShowPricing}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-2xl text-center">
-              Unlock Complete Partner Visa Guide
-            </DialogTitle>
-            <DialogDescription className="text-center">
-              Everything you need for a successful partner visa application
-            </DialogDescription>
-          </DialogHeader>
-
-          <PremiumPricingCard />
-        </DialogContent>
-      </Dialog>
+      {/* Pricing Modal */}
+      <Modal
+        isOpen={showPricing}
+        onClose={() => setShowPricing(false)}
+        title="Unlock Complete Partner Visa Guide"
+        size="lg"
+      >
+        <div className="text-center mb-6">
+          <p className="text-gray-600">
+            Everything you need for a successful partner visa application
+          </p>
+        </div>
+        <PremiumPricingCard />
+      </Modal>
     </>
   );
 };
