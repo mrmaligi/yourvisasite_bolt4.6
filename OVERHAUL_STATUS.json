@@ -2,12 +2,12 @@
   "project": "VisaBuild Complete UI/UX Overhaul",
   "startDate": "2026-03-08",
   "totalPages": 183,
-  "completedV2": 22,
-  "remaining": 161,
-  "percentage": 12.0,
+  "completedV2": 23,
+  "remaining": 160,
+  "percentage": 12.6,
   "cronJobId": "e141451f-907d-4463-9517-e9be5b3be332",
-  "cronInterval": "Every 10 minutes",
-  "estimatedCompletion": "2026-03-08T22:00:00+11:00",
+  "cronInterval": "Every 10 minutes (BLOCKED - billing)",
+  "estimatedCompletion": "2026-03-09T06:00:00+11:00",
   "designSystem": {
     "shapes": "SQUARE (no border-radius)",
     "primaryColor": "#2563EB (Blue)",
@@ -17,7 +17,7 @@
   },
   "breakdown": {
     "public": {"total": 64, "v2": 20, "remaining": 44},
-    "user": {"total": 54, "v2": 2, "remaining": 52},
+    "user": {"total": 54, "v2": 3, "remaining": 51},
     "lawyer": {"total": 26, "v2": 0, "remaining": 26},
     "admin": {"total": 29, "v2": 0, "remaining": 29},
     "root": {"total": 10, "v2": 0, "remaining": 10}
@@ -27,12 +27,14 @@
     "VisaDetailV2", "LawyerDirectoryV2", "FAQV2", "AboutV2", "ResourcesV2",
     "NewsV2", "PricingV2", "TrackerV2", "TermsV2", "PrivacyV2",
     "ForumHomePageV2", "ForumCategoryPageV2", "ForumTopicPageV2",
-    "NewsDetailV2", "SuccessStoriesPageV2", "DashboardV2", "UserSettingsV2"
+    "NewsDetailV2", "SuccessStoriesPageV2", "DashboardV2", "UserSettingsV2",
+    "ProfileV2"
   ],
   "nextBatch": [
-    "ProfileV2", "ProfileEditV2", "DocumentsV2", "ConsultationsV2"
+    "DocumentsV2", "ConsultationsV2", "BillingV2", "CalendarV2"
   ],
-  "status": "RUNNING - Manual updates active (cron blocked)",
-  "lastUpdate": "2026-03-08T18:50:00+11:00",
-  "latestCommit": "107d38d"
+  "status": "RUNNING - Manual updates (cron blocked by billing)",
+  "lastUpdate": "2026-03-08T19:40:00+11:00",
+  "latestCommit": "407aa6e",
+  "notes": "Fixed Vercel build errors (NewsV2, PricingV2). Created DashboardV2, UserSettingsV2, ProfileV2."
 }
