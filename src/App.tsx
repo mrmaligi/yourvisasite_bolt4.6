@@ -32,7 +32,7 @@ const PublicMarketplace = lazy(() => import('./pages/public/Marketplace').then(m
 const Success = lazy(() => import('./pages/Success').then(m => ({ default: m.Success })));
 const Pricing = lazy(() => import('./pages/public/PricingV2').then(m => ({ default: m.PricingV2 })));
 const EligibilityQuizPage = lazy(() => import('./pages/public/EligibilityQuizPage').then(m => ({ default: m.EligibilityQuizPage })));
-const SuccessStoriesPage = lazy(() => import('./pages/public/SuccessStoriesPage').then(m => ({ default: m.SuccessStoriesPage })));
+const SuccessStoriesPage = lazy(() => import('./pages/public/SuccessStoriesPageV2').then(m => ({ default: m.SuccessStoriesPageV2 })));
 const AboutPage = lazy(() => import('./pages/public/AboutV2').then(m => ({ default: m.AboutV2 })));
 const ContactPage = lazy(() => import('./pages/public/ContactV2').then(m => ({ default: m.ContactV2 })));
 const FAQPage = lazy(() => import('./pages/public/FAQV2').then(m => ({ default: m.FAQV2 })));
