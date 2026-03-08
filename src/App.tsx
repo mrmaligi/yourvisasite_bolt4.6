@@ -41,8 +41,8 @@ const TermsPage = lazy(() => import('./pages/public/TermsV2').then(m => ({ defau
 const PrivacyPage = lazy(() => import('./pages/public/PrivacyV2').then(m => ({ default: m.PrivacyV2 })));
 const CareersPage = lazy(() => import('./pages/public/CareersPage').then(m => ({ default: m.CareersPage })));
 const ForumHomePage = lazy(() => import('./pages/public/ForumHomePageV2').then(m => ({ default: m.ForumHomePageV2 })));
-const ForumCategoryPage = lazy(() => import('./pages/public/ForumCategoryPage').then(m => ({ default: m.ForumCategoryPage })));
-const ForumTopicPage = lazy(() => import('./pages/public/ForumTopicPage').then(m => ({ default: m.ForumTopicPage })));
+const ForumCategoryPage = lazy(() => import('./pages/public/ForumCategoryPageV2').then(m => ({ default: m.ForumCategoryPageV2 })));
+const ForumTopicPage = lazy(() => import('./pages/public/ForumTopicPageV2').then(m => ({ default: m.ForumTopicPageV2 })));
 const LawyerRegister = lazy(() => import('./pages/lawyer/LawyerRegister').then(m => ({ default: m.LawyerRegister })));
 const LawyerPending = lazy(() => import('./pages/lawyer/LawyerPending').then(m => ({ default: m.LawyerPending })));
 
