@@ -23,7 +23,7 @@ const Register = lazy(() => import('./pages/public/RegisterV2').then(m => ({ def
 const VisaSearch = lazy(() => import('./pages/public/VisaSearchV2').then(m => ({ default: m.VisaSearchV2 })));
 const VisaCompare = lazy(() => import('./pages/public/VisaComparison').then(m => ({ default: m.VisaComparison })));
 const VisaDetail = lazy(() => import('./pages/public/VisaDetailV2').then(m => ({ default: m.VisaDetailV2 })));
-const Tracker = lazy(() => import('./pages/public/Tracker').then(m => ({ default: m.Tracker })));
+const Tracker = lazy(() => import('./pages/public/TrackerV2').then(m => ({ default: m.TrackerV2 })));
 const LawyerDirectory = lazy(() => import('./pages/public/LawyerDirectoryV2').then(m => ({ default: m.LawyerDirectoryV2 })));
 const LawyerProfile = lazy(() => import('./pages/public/LawyerProfile').then(m => ({ default: m.LawyerProfile })));
 const News = lazy(() => import('./pages/public/NewsV2').then(m => ({ default: m.NewsV2 })));
@@ -37,8 +37,8 @@ const AboutPage = lazy(() => import('./pages/public/AboutV2').then(m => ({ defau
 const ContactPage = lazy(() => import('./pages/public/ContactV2').then(m => ({ default: m.ContactV2 })));
 const FAQPage = lazy(() => import('./pages/public/FAQV2').then(m => ({ default: m.FAQV2 })));
 const HelpCenterPage = lazy(() => import('./pages/public/HelpCenter').then(m => ({ default: m.HelpCenter })));
-const TermsPage = lazy(() => import('./pages/public/TermsPage').then(m => ({ default: m.TermsPage })));
-const PrivacyPage = lazy(() => import('./pages/public/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
+const TermsPage = lazy(() => import('./pages/public/TermsV2').then(m => ({ default: m.TermsV2 })));
+const PrivacyPage = lazy(() => import('./pages/public/PrivacyV2').then(m => ({ default: m.PrivacyV2 })));
 const CareersPage = lazy(() => import('./pages/public/CareersPage').then(m => ({ default: m.CareersPage })));
 const ForumHomePage = lazy(() => import('./pages/public/ForumHomePage').then(m => ({ default: m.ForumHomePage })));
 const ForumCategoryPage = lazy(() => import('./pages/public/ForumCategoryPage').then(m => ({ default: m.ForumCategoryPage })));
