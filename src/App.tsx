@@ -112,7 +112,7 @@ const AdminBlog = lazy(() => import('./pages/admin/Blog').then(m => ({ default: 
 const AdminActivityLog = lazy(() => import('./pages/admin/ActivityLog').then(m => ({ default: m.ActivityLog })));
 const UserManagement = lazy(() => import('./pages/admin/UserManagementV2').then(m => ({ default: m.UserManagementV2 })));
 const LawyerManagement = lazy(() => import('./pages/admin/LawyerManagement').then(m => ({ default: m.LawyerManagement })));
-const VisaManagement = lazy(() => import('./pages/admin/VisaManagement').then(m => ({ default: m.VisaManagement })));
+const VisaManagement = lazy(() => import('./pages/admin/VisaManagementV2').then(m => ({ default: m.VisaManagementV2 })));
 const AdminVisaEdit = lazy(() => import('./pages/admin/VisaEdit').then(m => ({ default: m.AdminVisaEdit })));
 const VisaImport = lazy(() => import('./pages/admin/VisaImport').then(m => ({ default: m.VisaImport })));
 const PremiumContent = lazy(() => import('./pages/admin/PremiumContent').then(m => ({ default: m.PremiumContent })));
