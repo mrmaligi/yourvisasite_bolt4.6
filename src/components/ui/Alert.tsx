@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, AlertTriangle, Info } from 'lucide-react';
 
 interface AlertProps {
   variant?: 'default' | 'destructive' | 'success' | 'warning';
@@ -17,9 +17,16 @@ export function Alert({ variant = 'default', children, className = '' }: AlertPr
 
   const style = variantStyles[variant] || variantStyles.default;
 
+  const Icon = {
+    default: Info,
+    destructive: AlertCircle,
+    success: CheckCircle,
+    warning: AlertTriangle,
+  }[variant] || Info;
+
   return (
     <div className={`flex p-4 rounded-lg border ${style} ${className}`} role="alert">
-      <AlertCircle className="h-5 w-5 mr-3 shrink-0" />
+      <Icon className="h-5 w-5 mr-3 shrink-0" />
       <div>{children}</div>
     </div>
   );
