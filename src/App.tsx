@@ -105,7 +105,7 @@ const LawyerDocumentDashboard = lazy(() => import('./pages/lawyer/DocumentDashbo
 // Premium Visa Page
 const PartnerVisaPremium = lazy(() => import('./pages/visas/PartnerVisaPremium').then(m => ({ default: m.default })));
 
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboardV2').then(m => ({ default: m.AdminDashboardV2 })));
 const AdminContent = lazy(() => import('./pages/admin/Content').then(m => ({ default: m.Content })));
 const AdminPages = lazy(() => import('./pages/admin/Pages').then(m => ({ default: m.Pages })));
 const AdminBlog = lazy(() => import('./pages/admin/Blog').then(m => ({ default: m.Blog })));
