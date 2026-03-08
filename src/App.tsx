@@ -33,7 +33,7 @@ const Success = lazy(() => import('./pages/Success').then(m => ({ default: m.Suc
 const Pricing = lazy(() => import('./pages/Pricing').then(m => ({ default: m.Pricing })));
 const EligibilityQuizPage = lazy(() => import('./pages/public/EligibilityQuizPage').then(m => ({ default: m.EligibilityQuizPage })));
 const SuccessStoriesPage = lazy(() => import('./pages/public/SuccessStoriesPage').then(m => ({ default: m.SuccessStoriesPage })));
-const AboutPage = lazy(() => import('./pages/public/AboutPage').then(m => ({ default: m.AboutPage })));
+const AboutPage = lazy(() => import('./pages/public/AboutV2').then(m => ({ default: m.AboutV2 })));
 const ContactPage = lazy(() => import('./pages/public/ContactV2').then(m => ({ default: m.ContactV2 })));
 const FAQPage = lazy(() => import('./pages/public/FAQV2').then(m => ({ default: m.FAQV2 })));
 const HelpCenterPage = lazy(() => import('./pages/public/HelpCenter').then(m => ({ default: m.HelpCenter })));
@@ -50,7 +50,7 @@ const LawyerPending = lazy(() => import('./pages/lawyer/LawyerPending').then(m =
 const ForgotPassword = lazy(() => import('./pages/public/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/public/ResetPassword'));
 
-const Resources = lazy(() => import('./pages/public/Resources').then(m => ({ default: m.Resources })));
+const Resources = lazy(() => import('./pages/public/ResourcesV2').then(m => ({ default: m.ResourcesV2 })));
 const Guides = lazy(() => import('./pages/public/Guides').then(m => ({ default: m.Guides })));
 const Checklists = lazy(() => import('./pages/public/Checklists').then(m => ({ default: m.Checklists })));
 const Templates = lazy(() => import('./pages/public/Templates').then(m => ({ default: m.Templates })));
