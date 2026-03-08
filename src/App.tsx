@@ -27,7 +27,7 @@ const Tracker = lazy(() => import('./pages/public/TrackerV2').then(m => ({ defau
 const LawyerDirectory = lazy(() => import('./pages/public/LawyerDirectoryV2').then(m => ({ default: m.LawyerDirectoryV2 })));
 const LawyerProfile = lazy(() => import('./pages/public/LawyerProfile').then(m => ({ default: m.LawyerProfile })));
 const News = lazy(() => import('./pages/public/NewsV2').then(m => ({ default: m.NewsV2 })));
-const NewsDetail = lazy(() => import('./pages/public/NewsDetail').then(m => ({ default: m.NewsDetail })));
+const NewsDetail = lazy(() => import('./pages/public/NewsDetailV2').then(m => ({ default: m.NewsDetailV2 })));
 const PublicMarketplace = lazy(() => import('./pages/public/Marketplace').then(m => ({ default: m.Marketplace })));
 const Success = lazy(() => import('./pages/Success').then(m => ({ default: m.Success })));
 const Pricing = lazy(() => import('./pages/public/PricingV2').then(m => ({ default: m.PricingV2 })));
@@ -40,7 +40,7 @@ const HelpCenterPage = lazy(() => import('./pages/public/HelpCenter').then(m => 
 const TermsPage = lazy(() => import('./pages/public/TermsV2').then(m => ({ default: m.TermsV2 })));
 const PrivacyPage = lazy(() => import('./pages/public/PrivacyV2').then(m => ({ default: m.PrivacyV2 })));
 const CareersPage = lazy(() => import('./pages/public/CareersPage').then(m => ({ default: m.CareersPage })));
-const ForumHomePage = lazy(() => import('./pages/public/ForumHomePage').then(m => ({ default: m.ForumHomePage })));
+const ForumHomePage = lazy(() => import('./pages/public/ForumHomePageV2').then(m => ({ default: m.ForumHomePageV2 })));
 const ForumCategoryPage = lazy(() => import('./pages/public/ForumCategoryPage').then(m => ({ default: m.ForumCategoryPage })));
 const ForumTopicPage = lazy(() => import('./pages/public/ForumTopicPage').then(m => ({ default: m.ForumTopicPage })));
 const LawyerRegister = lazy(() => import('./pages/lawyer/LawyerRegister').then(m => ({ default: m.LawyerRegister })));
