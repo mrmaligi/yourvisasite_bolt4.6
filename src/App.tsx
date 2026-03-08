@@ -64,7 +64,7 @@ const ApiDocs = lazy(() => import('./pages/public/ApiDocs').then(m => ({ default
 const UserDashboard = lazy(() => import('./pages/user/UserDashboard').then(m => ({ default: m.UserDashboard })));
 const MyVisas = lazy(() => import('./pages/user/MyVisas').then(m => ({ default: m.MyVisas })));
 const MyDocuments = lazy(() => import('./pages/user/MyDocuments').then(m => ({ default: m.MyDocuments })));
-const Consultations = lazy(() => import('./pages/user/Consultations').then(m => ({ default: m.Consultations })));
+const Consultations = lazy(() => import('./pages/user/ConsultationsV2').then(m => ({ default: m.ConsultationsV2 })));
 const BookConsultation = lazy(() => import('./pages/user/BookConsultation').then(m => ({ default: m.BookConsultation })));
 const UserPremiumContent = lazy(() => import('./pages/user/PremiumContent').then(m => ({ default: m.PremiumContent })));
 const UserMarketplacePurchases = lazy(() => import('./pages/user/MarketplacePurchases').then(m => ({ default: m.MarketplacePurchases })));
