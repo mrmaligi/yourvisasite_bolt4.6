@@ -81,7 +81,7 @@ const ApplicationTimeline = lazy(() => import('./pages/user/ApplicationTimeline'
 const DeadlineAlerts = lazy(() => import('./pages/user/DeadlineAlerts').then(m => ({ default: m.DeadlineAlerts })));
 const UserProfile = lazy(() => import('./pages/user/Profile').then(m => ({ default: m.Profile })));
 const Notifications = lazy(() => import('./pages/user/Notifications').then(m => ({ default: m.Notifications })));
-const Billing = lazy(() => import('./pages/user/Billing').then(m => ({ default: m.Billing })));
+const Billing = lazy(() => import('./pages/user/BillingV2').then(m => ({ default: m.BillingV2 })));
 
 const PortalLanding = lazy(() => import('./pages/lawyer/PortalLanding').then(m => ({ default: m.PortalLanding })));
 const LawyerDashboard = lazy(() => import('./pages/lawyer/LawyerDashboard').then(m => ({ default: m.LawyerDashboard })));
