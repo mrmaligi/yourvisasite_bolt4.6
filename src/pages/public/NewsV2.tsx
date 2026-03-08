@@ -122,8 +122,7 @@ export function NewsV2() {
                   to={`/news/${item.slug}`}
                   className="bg-white border border-slate-200 p-6 hover:border-blue-400 transition-colors group"
                 >
-                  <div className="flex items-center gap-2 mb-3"
-003e
+                  <div className="flex items-center gap-2 mb-3">
                     <Badge variant="secondary" className="text-xs">
                       {item.category}
                     </Badge>

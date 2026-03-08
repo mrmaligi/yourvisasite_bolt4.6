@@ -1,8 +1,8 @@
 import { Helmet } from 'react-helmet-async';
 import { Check, Sparkles, Users, Crown } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Button } from '../components/ui/Button';
-import { Badge } from '../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { Badge } from '../../components/ui/Badge';
 
 const plans = [
   {
