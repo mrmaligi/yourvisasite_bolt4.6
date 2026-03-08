@@ -26,11 +26,11 @@ const VisaDetail = lazy(() => import('./pages/public/VisaDetailV2').then(m => ({
 const Tracker = lazy(() => import('./pages/public/Tracker').then(m => ({ default: m.Tracker })));
 const LawyerDirectory = lazy(() => import('./pages/public/LawyerDirectoryV2').then(m => ({ default: m.LawyerDirectoryV2 })));
 const LawyerProfile = lazy(() => import('./pages/public/LawyerProfile').then(m => ({ default: m.LawyerProfile })));
-const News = lazy(() => import('./pages/public/News').then(m => ({ default: m.News })));
+const News = lazy(() => import('./pages/public/NewsV2').then(m => ({ default: m.NewsV2 })));
 const NewsDetail = lazy(() => import('./pages/public/NewsDetail').then(m => ({ default: m.NewsDetail })));
 const PublicMarketplace = lazy(() => import('./pages/public/Marketplace').then(m => ({ default: m.Marketplace })));
 const Success = lazy(() => import('./pages/Success').then(m => ({ default: m.Success })));
-const Pricing = lazy(() => import('./pages/Pricing').then(m => ({ default: m.Pricing })));
+const Pricing = lazy(() => import('./pages/public/PricingV2').then(m => ({ default: m.PricingV2 })));
 const EligibilityQuizPage = lazy(() => import('./pages/public/EligibilityQuizPage').then(m => ({ default: m.EligibilityQuizPage })));
 const SuccessStoriesPage = lazy(() => import('./pages/public/SuccessStoriesPage').then(m => ({ default: m.SuccessStoriesPage })));
 const AboutPage = lazy(() => import('./pages/public/AboutV2').then(m => ({ default: m.AboutV2 })));
