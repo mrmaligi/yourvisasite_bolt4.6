@@ -6,8 +6,8 @@
   "remaining": 160,
   "percentage": 12.6,
   "cronJobId": "e141451f-907d-4463-9517-e9be5b3be332",
-  "cronInterval": "Every 10 minutes (BLOCKED - billing)",
-  "estimatedCompletion": "2026-03-09T06:00:00+11:00",
+  "cronInterval": "Every 10 minutes (BLOCKED - API billing)",
+  "estimatedCompletion": "2026-03-08T23:00:00+11:00",
   "designSystem": {
     "shapes": "SQUARE (no border-radius)",
     "primaryColor": "#2563EB (Blue)",
@@ -31,10 +31,9 @@
     "ProfileV2"
   ],
   "nextBatch": [
-    "DocumentsV2", "ConsultationsV2", "BillingV2", "CalendarV2"
+    "DocumentsV2", "ConsultationsV2", "BillingV2", "SavedVisasV2"
   ],
-  "status": "RUNNING - Manual updates (cron blocked by billing)",
-  "lastUpdate": "2026-03-08T19:40:00+11:00",
-  "latestCommit": "407aa6e",
-  "notes": "Fixed Vercel build errors (NewsV2, PricingV2). Created DashboardV2, UserSettingsV2, ProfileV2."
+  "status": "RUNNING - Manual updates (cron blocked by API billing)",
+  "lastUpdate": "2026-03-08T19:50:00+11:00",
+  "latestCommit": "424c0f5"
 }
