@@ -69,7 +69,7 @@ const BookConsultation = lazy(() => import('./pages/user/BookConsultation').then
 const UserPremiumContent = lazy(() => import('./pages/user/PremiumContent').then(m => ({ default: m.PremiumContent })));
 const UserMarketplacePurchases = lazy(() => import('./pages/user/MarketplacePurchases').then(m => ({ default: m.MarketplacePurchases })));
 const UserSettings = lazy(() => import('./pages/user/UserSettingsV2').then(m => ({ default: m.UserSettingsV2 })));
-const SavedVisas = lazy(() => import('./pages/user/SavedVisas').then(m => ({ default: m.SavedVisas })));
+const SavedVisas = lazy(() => import('./pages/user/SavedVisasV2').then(m => ({ default: m.SavedVisasV2 })));
 const Referrals = lazy(() => import('./pages/user/Referrals').then(m => ({ default: m.Referrals })));
 
 const Welcome = lazy(() => import('./pages/user/Welcome').then(m => ({ default: m.Welcome })));
