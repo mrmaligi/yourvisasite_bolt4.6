@@ -118,7 +118,7 @@ const VisaImport = lazy(() => import('./pages/admin/VisaImportV2').then(m => ({ 
 const PremiumContent = lazy(() => import('./pages/admin/PremiumContentV2').then(m => ({ default: m.PremiumContentV2 })));
 const NewsManagement = lazy(() => import('./pages/admin/NewsManagementV2').then(m => ({ default: m.NewsManagementV2 })));
 const TrackerManagement = lazy(() => import('./pages/admin/TrackerManagementV2').then(m => ({ default: m.TrackerManagementV2 })));
-const AdminPricing = lazy(() => import('./pages/admin/Pricing').then(m => ({ default: m.Pricing })));
+const AdminPricing = lazy(() => import('./pages/admin/PricingV2').then(m => ({ default: m.PricingV2 })));
 const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagementV2').then(m => ({ default: m.PromoCodeManagementV2 })));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettingsV2').then(m => ({ default: m.AdminSettingsV2 })));
 const YouTubeManagement = lazy(() => import('./pages/admin/YouTubeManagementV2').then(m => ({ default: m.YouTubeManagementV2 })));
