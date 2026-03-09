@@ -54,7 +54,6 @@ export function LawyerTrackerV2() {
       </Helmet>
 
       <div className="min-h-screen bg-slate-50">
-        {/* Header - SQUARE */}
         <div className="bg-white border-b border-slate-200">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between">
@@ -71,7 +70,6 @@ export function LawyerTrackerV2() {
         </div>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Stats - SQUARE */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             {[
               { label: 'Total', value: stats.total, icon: TrendingUp, color: 'bg-blue-100 text-blue-600' },
@@ -93,7 +91,6 @@ export function LawyerTrackerV2() {
             ))}
           </div>
 
-          {/* Entries Table - SQUARE */}
           <div className="bg-white border border-slate-200">
             <div className="overflow-x-auto">
               <table className="w-full">
