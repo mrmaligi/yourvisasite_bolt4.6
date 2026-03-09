@@ -1,195 +1,71 @@
-import { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { CreditCard, Download, Clock, CheckCircle, AlertCircle, Plus } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../lib/supabase';
+import { CreditCard, Receipt, Download, DollarSign } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
 
-interface Transaction {
-  id: string;
-  description: string;
-  amount: number;
-  date: string;
-  status: 'succeeded' | 'pending' | 'failed';
-  invoiceUrl?: string;
-}
+export function UserBillingV2() {
+  const invoices = [
+    { id: 'INV-001', date: '2024-03-15', amount: '$299', status: 'paid', description: 'Partner Visa Premium Guide' },
+    { id: 'INV-002', date: '2024-02-20', amount: '$150', status: 'paid', description: 'Consultation with Jane Smith' },
+    { id: 'INV-003', date: '2024-01-10', amount: '$49', status: 'paid', description: 'Document Templates Bundle' },
+  ];
 
-export function BillingV2() {
-  const { user } = useAuth();
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!user) return;
-
-    const fetchData = async () => {
-      try {
-        const [purchases, bookings] = await Promise.all([
-          supabase
-            .from('user_visa_purchases')
-            .select('id, amount_paid_cents, purchased_at, visas(name)')
-            .eq('user_id', user.id)
-            .order('purchased_at', { ascending: false }),
-          supabase
-            .from('bookings')
-            .select('id, amount_paid_cents, created_at, status')
-            .eq('user_id', user.id)
-            .eq('payment_status', 'paid')
-            .order('created_at', { ascending: false })
-        ]);
-
-        const purchaseTx: Transaction[] = (purchases.data || []).map((p: any) => ({
-          id: p.id,
-          description: `Premium Guide: ${p.visas?.name || 'Visa Guide'}`,
-          amount: (p.amount_paid_cents || 0) / 100,
-          date: p.purchased_at,
-          status: 'succeeded',
-          invoiceUrl: '#'
-        }));
-
-        const bookingTx: Transaction[] = (bookings.data || []).map((b: any) => ({
-          id: b.id,
-          description: 'Legal Consultation',
-          amount: (b.amount_paid_cents || 0) / 100,
-          date: b.created_at,
-          status: 'succeeded',
-          invoiceUrl: '#'
-        }));
-
-        setTransactions([...purchaseTx, ...bookingTx].sort((a, b) => 
-          new Date(b.date).getTime() - new Date(a.date).getTime()
-        ));
-      } catch (error) {
-        console.error('Error fetching billing data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [user]);
-
-  const totalSpent = transactions.reduce((sum, t) => sum + t.amount, 0);
+  const paymentMethods = [
+    { id: 1, type: 'Visa', last4: '4242', expiry: '12/25', default: true },
+    { id: 2, type: 'Mastercard', last4: '8888', expiry: '08/26', default: false },
+  ];
 
   return (
-    <>
-      <Helmet>
-        <title>Billing | VisaBuild</title>
-      </Helmet>
-
-      <div className="min-h-screen bg-slate-50">
-        {/* Header - SQUARE */}
-        <div className="bg-white border-b border-slate-200">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900">Billing</h1>
-                <p className="text-slate-600">Manage your payments and invoices</p>
-              </div>
-              
-              <Button variant="primary">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Payment Method
-              </Button>
-            </div>
-          </div>
+    <div className="min-h-screen bg-slate-50 p-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-slate-900">Billing</h1>
+          <p className="text-slate-600">Manage your payments and invoices</p>
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Stats - SQUARE */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div className="bg-white border border-slate-200 p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-blue-100 flex items-center justify-center">
-                  <CreditCard className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-slate-900">${totalSpent.toFixed(2)}</p>
-                  <p className="text-sm text-slate-600">Total Spent</p>
-                </div>
-              </div>
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white border border-slate-200 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Receipt className="w-5 h-5 text-blue-600" />
+              <h2 className="font-semibold text-slate-900">Recent Invoices</h2>
             </div>
-
-            <div className="bg-white border border-slate-200 p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-green-100 flex items-center justify-center">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
+            <div className="space-y-3">
+              {invoices.slice(0, 3).map((inv) => (
+                <div key={inv.id} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                  <div>
+                    <p className="font-medium text-slate-900">{inv.description}</p>
+                    <p className="text-sm text-slate-500">{inv.date}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-slate-900">{inv.amount}</p>
+                    <button className="text-sm text-blue-600"><Download className="w-4 h-4 inline" /> PDF</button>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-2xl font-bold text-slate-900">{transactions.length}</p>
-                  <p className="text-sm text-slate-600">Transactions</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white border border-slate-200 p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-purple-100 flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-slate-900">Active</p>
-                  <p className="text-sm text-slate-600">Account Status</p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
-          {/* Transactions - SQUARE */}
-          <div className="bg-white border border-slate-200">
-            <div className="p-6 border-b border-slate-200">
-              <h2 className="text-lg font-semibold text-slate-900">Transaction History</h2>
+          <div className="bg-white border border-slate-200 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <CreditCard className="w-5 h-5 text-blue-600" />
+              <h2 className="font-semibold text-slate-900">Payment Methods</h2>
             </div>
-
-            {loading ? (
-              <div className="p-8 text-center text-slate-600">Loading transactions...</div>
-            ) : transactions.length === 0 ? (
-              <div className="p-8 text-center">
-                <CreditCard className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">No transactions yet</h3>
-                <p className="text-slate-600">Your billing history will appear here.</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-slate-200">
-                {transactions.map((tx) => (
-                  <div key={tx.id} className="p-6 flex items-center justify-between hover:bg-slate-50">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-blue-100 flex items-center justify-center">
-                        {tx.status === 'succeeded' ? (
-                          <CheckCircle className="w-5 h-5 text-green-600" />
-                        ) : tx.status === 'pending' ? (
-                          <Clock className="w-5 h-5 text-yellow-600" />
-                        ) : (
-                          <AlertCircle className="w-5 h-5 text-red-600" />
-                        )}
-                      </div>
-                      
-                      <div>
-                        <p className="font-medium text-slate-900">{tx.description}</p>
-                        <p className="text-sm text-slate-600">{new Date(tx.date).toLocaleDateString()}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                      <p className="font-semibold text-slate-900">${tx.amount.toFixed(2)}</p>
-                      
-                      <Badge variant={tx.status === 'succeeded' ? 'success' : tx.status === 'pending' ? 'warning' : 'danger'}>
-                        {tx.status}
-                      </Badge>
-
-                      <Button variant="outline" size="sm">
-                        <Download className="w-4 h-4 mr-2" />
-                        Invoice
-                      </Button>
+            <div className="space-y-3">
+              {paymentMethods.map((pm) => (
+                <div key={pm.id} className="flex items-center justify-between p-3 bg-slate-50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-6 bg-slate-200" />
+                    <div>
+                      <p className="font-medium text-slate-900">{pm.type} ****{pm.last4}</p>
+                      <p className="text-sm text-slate-500">Expires {pm.expiry}</p>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
+                  {pm.default && <span className="text-xs text-slate-500">Default</span>}
+                </div>
+              ))}
+            </div>
+            <Button variant="outline" size="sm" className="mt-4 w-full">Add Payment Method</Button>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
