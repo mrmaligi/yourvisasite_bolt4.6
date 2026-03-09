@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Folder, FileText, Upload, Plus, Download, Trash2 } from 'lucide-react';
+import { Folder, FileText, Upload, Plus, Download, Trash2, Search } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
 
 interface DocItem {
   id: string;
@@ -22,12 +21,12 @@ const MOCK_DOCS: DocItem[] = [
 
 export function DocumentsV2() {
   const [items] = useState<DocItem[]>(MOCK_DOCS);
+  const [search, setSearch] = useState('');
 
-  const stats = {
-    total: items.length,
-    folders: items.filter(i => i.type === 'folder').length,
-    files: items.filter(i => i.type === 'file').length,
-  };
+  const filteredItems = items.filter(i => i.name.toLowerCase().includes(search.toLowerCase()));
+
+  const folders = filteredItems.filter(i => i.type === 'folder');
+  const files = filteredItems.filter(i => i.type === 'file');
 
   return (
     <>
@@ -58,57 +57,65 @@ export function DocumentsV2() {
         </div>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            {[
-              { label: 'Total Items', value: stats.total, icon: FileText },
-              { label: 'Folders', value: stats.folders, icon: Folder, color: 'text-yellow-600' },
-              { label: 'Files', value: stats.files, icon: FileText, color: 'text-blue-600' },
-            ].map((stat) => (
-              <div key={stat.label} className="bg-white border border-slate-200 p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-slate-100 flex items-center justify-center">
-                    <stat.icon className={`w-5 h-5 ${stat.color || 'text-slate-600'}`} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
-                    <p className="text-sm text-slate-600">{stat.label}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="bg-white border border-slate-200 p-4 mb-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search documents..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-slate-200"
+              />
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className="bg-white border border-slate-200 p-4 hover:border-blue-300 transition-colors group"
-              >
-                <div className="aspect-square bg-slate-100 flex items-center justify-center mb-3">
-                  {item.type === 'folder' ? (
-                    <Folder className="w-12 h-12 text-yellow-500" />
-                  ) : (
-                    <FileText className="w-12 h-12 text-blue-500" />
-                  )}
-                </div>
-                
-                <p className="text-sm font-medium text-slate-900 truncate">{item.name}</p>
-                
-                {item.size && <p className="text-xs text-slate-500">{item.size}</p>}
-                
-                <p className="text-xs text-slate-400">{item.updatedAt}</p>
-                
-                <div className="flex gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button variant="outline" size="sm">
-                    <Download className="w-3 h-3" />
-                  </Button>
-                  <Button variant="danger" size="sm">
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
+          {folders.length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-sm font-medium text-slate-600 mb-3">Folders</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {folders.map((folder) => (
+                  <div key={folder.id} className="bg-white border border-slate-200 p-4 hover:border-blue-400 cursor-pointer">
+                    <div className="flex flex-col items-center text-center">
+                      <Folder className="w-12 h-12 text-yellow-500 mb-2" />
+                      <p className="font-medium text-slate-900 truncate w-full">{folder.name}</p>
+                      <p className="text-xs text-slate-500">{folder.updatedAt}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {files.length > 0 && (
+            <div>
+              <h2 className="text-sm font-medium text-slate-600 mb-3">Files</h2>
+              <div className="bg-white border border-slate-200">
+                <div className="divide-y divide-slate-200">
+                  {files.map((file) => (
+                    <div key={file.id} className="flex items-center justify-between p-4 hover:bg-slate-50">
+                      <div className="flex items-center gap-3">
+                        <FileText className="w-8 h-8 text-blue-500" />
+                        <div>
+                          <p className="font-medium text-slate-900">{file.name}</p>
+                          <p className="text-sm text-slate-500">{file.size} • {file.updatedAt}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm">
+                          <Download className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </>
