@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Plus, Folder, Clock, CheckCircle } from 'lucide-react';
+import { Plus, Briefcase, Clock, CheckCircle } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 
@@ -30,15 +30,7 @@ const STAGES = [
 export function CasesV2() {
   const [cases] = useState<Case[]>(MOCK_CASES);
 
-  const stats = {
-    total: cases.length,
-    received: cases.filter(c => c.stage === 'received').length,
-    processing: cases.filter(c => c.stage === 'processing').length,
-    assessment: cases.filter(c => c.stage === 'assessment').length,
-    decision: cases.filter(c => c.stage === 'decision').length,
-  };
-
-  const getCasesByStage = (stage: string) => cases.filter(c => c.stage === stage);
+  const getStageCount = (stage: string) => cases.filter(c => c.stage === stage).length;
 
   return (
     <>
@@ -63,23 +55,14 @@ export function CasesV2() {
         </div>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-            {[
-              { label: 'Total', value: stats.total, icon: Folder },
-              { label: 'Received', value: stats.received, icon: Folder, color: 'text-blue-600' },
-              { label: 'Processing', value: stats.processing, icon: Clock, color: 'text-yellow-600' },
-              { label: 'Assessment', value: stats.assessment, icon: Clock, color: 'text-purple-600' },
-              { label: 'Decision', value: stats.decision, icon: CheckCircle, color: 'text-green-600' },
-            ].map((stat) => (
-              <div key={stat.label} className="bg-white border border-slate-200 p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-slate-100 flex items-center justify-center">
-                    <stat.icon className={`w-5 h-5 ${stat.color || 'text-slate-600'}`} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
-                    <p className="text-sm text-slate-600">{stat.label}</p>
-                  </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            {STAGES.map((stage) => (
+              <div key={stage.id} className="bg-white border border-slate-200 p-4">
+                <div className="flex items-center justify-between">
+                  <span className={`px-2 py-1 text-xs font-medium ${stage.color}`}>
+                    {stage.title}
+                  </span>
+                  <span className="text-2xl font-bold text-slate-900">{getStageCount(stage.id)}</span>
                 </div>
               </div>
             ))}
@@ -88,19 +71,32 @@ export function CasesV2() {
           <div className="grid md:grid-cols-4 gap-4">
             {STAGES.map((stage) => (
               <div key={stage.id} className="bg-white border border-slate-200">
-                <div className={`p-3 ${stage.color}`}>
-                  <h3 className="font-semibold">{stage.title}</h3>
-                  <p className="text-sm">{getCasesByStage(stage.id).length} cases</p>
+                <div className="p-3 border-b border-slate-200">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-slate-900">{stage.title}</span>
+                    <span className="text-sm text-slate-500">{getStageCount(stage.id)}</span>
+                  </div>
                 </div>
                 
                 <div className="p-3 space-y-3">
-                  {getCasesByStage(stage.id).map((c) => (
-                    <div key={c.id} className="bg-slate-50 border border-slate-200 p-3">
-                      <p className="font-medium text-slate-900">{c.clientName}</p>
-                      <p className="text-sm text-slate-600">{c.visaType}</p>
-                      <p className="text-xs text-slate-500 mt-1">Updated: {c.lastUpdated}</p>
+                  {cases.filter(c => c.stage === stage.id).map((c) => (
+                    <div key={c.id} className="p-3 bg-slate-50 border border-slate-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Briefcase className="w-4 h-4 text-slate-400" />
+                        <span className="font-medium text-slate-900">{c.clientName}</span>
+                      </div>
+                      <p className="text-sm text-slate-600 mb-2">{c.visaType}</p>
+                      
+                      <div className="flex items-center gap-1 text-xs text-slate-500">
+                        <Clock className="w-3 h-3" />
+                        {c.lastUpdated}
+                      </div>
                     </div>
                   ))}
+                  
+                  {cases.filter(c => c.stage === stage.id).length === 0 && (
+                    <div className="text-center py-4 text-slate-400 text-sm">No cases</div>
+                  )}
                 </div>
               </div>
             ))}
