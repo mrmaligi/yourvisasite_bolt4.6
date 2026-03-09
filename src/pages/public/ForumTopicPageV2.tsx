@@ -88,9 +88,9 @@ export function ForumTopicPageV2() {
                         <span>{post.timestamp}</span>
                       </div>
                       <div className="flex gap-3">
-                        <button className="hover:text-[#2563EB]"><MessageSquare className="w-4 h-4" /></button>
-                        <button className="hover:text-[#2563EB]"><Share2 className="w-4 h-4" /></button>
-                        <button className="hover:text-red-600"><Flag className="w-4 h-4" /></button>
+                        <button aria-label="Reply to post" title="Reply to post" className="hover:text-[#2563EB] transition-colors"><MessageSquare className="w-4 h-4" /></button>
+                        <button aria-label="Share post" title="Share post" className="hover:text-[#2563EB] transition-colors"><Share2 className="w-4 h-4" /></button>
+                        <button aria-label="Report post" title="Report post" className="hover:text-red-600 transition-colors"><Flag className="w-4 h-4" /></button>
                       </div>
                     </div>
                     <div className="text-slate-700 leading-relaxed">{post.content}</div>
