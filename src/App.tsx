@@ -17,7 +17,7 @@ import { Loading } from './components/ui/Loading';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 
 const Landing = lazy(() => import('./pages/public/HomeV2').then(m => ({ default: m.HomeV2 })));
-const Checkout = lazy(() => import('./pages/public/Checkout').then(m => ({ default: m.Checkout })));
+const Checkout = lazy(() => import('./pages/public/CheckoutV2').then(m => ({ default: m.CheckoutV2 })));
 const UnifiedLogin = lazy(() => import('./pages/public/LoginV2').then(m => ({ default: m.LoginV2 })));
 const Register = lazy(() => import('./pages/public/RegisterV2').then(m => ({ default: m.RegisterV2 })));
 const VisaSearch = lazy(() => import('./pages/public/VisaSearchV2').then(m => ({ default: m.VisaSearchV2 })));
