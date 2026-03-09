@@ -1,17 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { 
-  Mail, 
-  Lock, 
-  User,
-  ArrowRight,
-  Shield,
-  Eye,
-  EyeOff,
-  CheckCircle,
-  Briefcase
-} from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Shield, Eye, EyeOff, Briefcase } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -58,16 +47,12 @@ export function RegisterV2() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center py-12 px-4">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-lg">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8"
-        >
+        <div className="bg-white border border-slate-200 p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-blue-600 flex items-center justify-center mx-auto mb-4">
               <Shield className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-slate-900 mb-2">Create your account</h1>
@@ -75,13 +60,13 @@ export function RegisterV2() {
           </div>
 
           {/* User Type Toggle */}
-          <div className="flex gap-2 p-1 bg-slate-100 rounded-xl mb-6">
+          <div className="flex gap-2 p-1 bg-slate-100 mb-6">
             <button
               type="button"
               onClick={() => setUserType('user')}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 py-3 font-medium transition-all ${
                 userType === 'user'
-                  ? 'bg-white text-blue-600 shadow-sm'
+                  ? 'bg-white text-blue-600 border border-slate-200'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -90,9 +75,9 @@ export function RegisterV2() {
             <button
               type="button"
               onClick={() => setUserType('lawyer')}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 py-3 font-medium transition-all ${
                 userType === 'lawyer'
-                  ? 'bg-white text-blue-600 shadow-sm'
+                  ? 'bg-white text-blue-600 border border-slate-200'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -102,7 +87,7 @@ export function RegisterV2() {
 
           {/* Error */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 text-sm">
               {error}
             </div>
           )}
@@ -116,18 +101,19 @@ export function RegisterV2() {
                   type="text"
                   value={formData.firstName}
                   onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                  className="w-full px-4 py-3 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                   placeholder="John"
                   required
                 />
               </div>
+              
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Last Name</label>
                 <input
                   type="text"
                   value={formData.lastName}
                   onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                  className="w-full px-4 py-3 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                   placeholder="Doe"
                   required
                 />
@@ -142,7 +128,7 @@ export function RegisterV2() {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                  className="w-full pl-12 pr-4 py-3 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                   placeholder="you@example.com"
                   required
                 />
@@ -157,7 +143,7 @@ export function RegisterV2() {
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  className="w-full pl-12 pr-12 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                  className="w-full pl-12 pr-12 py-3 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                   placeholder="••••••••"
                   required
                   minLength={8}
@@ -180,7 +166,7 @@ export function RegisterV2() {
                   type={showPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                  className="w-full pl-12 pr-4 py-3 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                   placeholder="••••••••"
                   required
                 />
@@ -188,7 +174,7 @@ export function RegisterV2() {
             </div>
 
             <div className="flex items-start gap-2">
-              <input type="checkbox" className="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600" required />
+              <input type="checkbox" className="mt-1 w-4 h-4 border-slate-300 text-blue-600" required />
               <span className="text-sm text-slate-600">
                 I agree to the{' '}
                 <Link to="/terms" className="text-blue-600 hover:underline">Terms of Service</Link>
@@ -197,13 +183,8 @@ export function RegisterV2() {
               </span>
             </div>
 
-            <Button
-              type="submit"
-              size="lg"
-              fullWidth
-              isLoading={isLoading}
-            >
-              Create Account
+            <Button type="submit" variant="primary" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Creating account...' : 'Create Account'}
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </form>
@@ -217,7 +198,7 @@ export function RegisterV2() {
               </Link>
             </p>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

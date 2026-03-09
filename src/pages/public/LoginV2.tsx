@@ -1,17 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { 
-  Mail, 
-  Lock, 
-  ArrowRight, 
-  Shield,
-  Eye,
-  EyeOff,
-  Loader2
-} from 'lucide-react';
+import { Mail, Lock, ArrowRight, Shield, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
-import { Card, CardBody } from '../../components/ui/Card';
 import { useAuth } from '../../contexts/AuthContext';
 
 export function LoginV2() {
@@ -39,16 +29,12 @@ export function LoginV2() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center py-12 px-4">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8"
-        >
+        <div className="bg-white border border-slate-200 p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-blue-600 flex items-center justify-center mx-auto mb-4">
               <Shield className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-slate-900 mb-2">Welcome back</h1>
@@ -57,7 +43,7 @@ export function LoginV2() {
 
           {/* Error */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 text-sm">
               {error}
             </div>
           )}
@@ -65,16 +51,14 @@ export function LoginV2() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Email Address
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Email Address</label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                  className="w-full pl-12 pr-4 py-3 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                   placeholder="you@example.com"
                   required
                 />
@@ -82,16 +66,14 @@ export function LoginV2() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Password
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-12 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                  className="w-full pl-12 pr-12 py-3 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                   placeholder="••••••••"
                   required
                 />
@@ -107,24 +89,16 @@ export function LoginV2() {
 
             <div className="flex items-center justify-between">
               <label className="flex items-center">
-                <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-blue-600" />
+                <input type="checkbox" className="w-4 h-4 border-slate-300 text-blue-600" />
                 <span className="ml-2 text-sm text-slate-600">Remember me</span>
               </label>
-              <Link 
-                to="/forgot-password" 
-                className="text-sm text-blue-600 hover:text-blue-700"
-              >
+              <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
                 Forgot password?
               </Link>
             </div>
 
-            <Button
-              type="submit"
-              size="lg"
-              fullWidth
-              isLoading={isLoading}
-            >
-              Sign In
+            <Button type="submit" variant="primary" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Signing in...' : 'Sign In'}
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </form>
@@ -138,7 +112,7 @@ export function LoginV2() {
               </Link>
             </p>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
