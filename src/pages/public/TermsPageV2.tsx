@@ -1,82 +1,48 @@
-import { Helmet } from 'react-helmet-async';
-import { FileText } from 'lucide-react';
+import { FileText, Scale, AlertCircle, CheckCircle, ExternalLink } from 'lucide-react';
 
-export function TermsPageV2() {
+export function PublicTermsPageV2() {
   return (
-    <>
-      <Helmet>
-        <title>Terms of Service | VisaBuild</title>
-      </Helmet>
+    <div className="min-h-screen bg-slate-50 py-12">
+      <div className="max-w-4xl mx-auto px-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-slate-900">Terms of Service</h1>
+          <p className="text-slate-600 mt-2">Last updated: March 2024</p>
+        </div>
 
-      <div className="min-h-screen bg-slate-50 py-12 px-4">
-        <div className="max-w-3xl mx-auto">
-          <div className="bg-white border border-slate-200 p-8">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 bg-blue-100 flex items-center justify-center">
-                <FileText className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-slate-900">Terms of Service</h1>
-                <p className="text-slate-500">Last updated: February 19, 2026</p>
-              </div>
+        <div className="bg-white border border-slate-200 p-8 space-y-8">
+          <section>
+            <div className="flex items-center gap-3 mb-4">
+              <Scale className="w-6 h-6 text-blue-600" />
+              <h2 className="text-xl font-semibold text-slate-900">1. Acceptance of Terms</h2>
             </div>
+            <p className="text-slate-700">By accessing and using VisaBuild, you accept and agree to be bound by the terms and provision of this agreement.</p>
+          </section>
 
-            <div className="space-y-8">
-              <section>
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">1. Acceptance of Terms</h2>
-                <p className="text-slate-600">
-                  By accessing or using VisaBuild, you agree to be bound by these Terms of Service. 
-                  If you do not agree to these terms, please do not use our platform.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">2. Description of Service</h2>
-                <p className="text-slate-600">
-                  VisaBuild provides information about Australian visas, processing times, and 
-                  connects users with registered immigration lawyers. We do not provide legal 
-                  advice. All information is for educational purposes only.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">3. Not Legal Advice</h2>
-                <p className="text-slate-600">
-                  <strong>Important:</strong> Nothing on this website constitutes legal advice. 
-                  VisaBuild is not a law firm. Our guides, articles, and tools are for informational 
-                  purposes only. Always consult with a registered migration agent or lawyer for 
-                  advice specific to your situation.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">4. User Accounts</h2>
-                <p className="text-slate-600">
-                  You are responsible for maintaining the confidentiality of your account 
-                  information and for all activities that occur under your account. You agree 
-                  to notify us immediately of any unauthorized use of your account.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">5. Privacy</h2>
-                <p className="text-slate-600">
-                  Your use of VisaBuild is also governed by our Privacy Policy. Please review 
-                  our Privacy Policy to understand our practices.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">6. Contact</h2>
-                <p className="text-slate-600">
-                  If you have any questions about these Terms, please contact us at 
-                  support@visabuild.com.
-                </p>
-              </section>
+          <section>
+            <div className="flex items-center gap-3 mb-4">
+              <FileText className="w-6 h-6 text-green-600" />
+              <h2 className="text-xl font-semibold text-slate-900">2. Use License</h2>
             </div>
-          </div>
+            <p className="text-slate-700">Permission is granted to temporarily use VisaBuild for personal, non-commercial transitory viewing only.</p>
+          </section>
+
+          <section>
+            <div className="flex items-center gap-3 mb-4">
+              <AlertCircle className="w-6 h-6 text-amber-600" />
+              <h2 className="text-xl font-semibold text-slate-900">3. Disclaimer</h2>
+            </div>
+            <p className="text-slate-700">The materials on VisaBuild are provided on an 'as is' basis. We do not guarantee visa approval.</p>
+          </section>
+
+          <section>
+            <div className="flex items-center gap-3 mb-4">
+              <CheckCircle className="w-6 h-6 text-purple-600" />
+              <h2 className="text-xl font-semibold text-slate-900">4. Governing Law</h2>
+            </div>
+            <p className="text-slate-700">These terms shall be governed by and construed in accordance with the laws of Australia.</p>
+          </section>
         </div>
       </div>
-    </>
+    </div>
   );
 }
