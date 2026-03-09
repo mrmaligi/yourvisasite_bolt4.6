@@ -25,7 +25,7 @@ const VisaCompare = lazy(() => import('./pages/public/VisaComparisonV2').then(m 
 const VisaDetail = lazy(() => import('./pages/public/VisaDetailV2').then(m => ({ default: m.VisaDetailV2 })));
 const Tracker = lazy(() => import('./pages/public/TrackerV2').then(m => ({ default: m.TrackerV2 })));
 const LawyerDirectory = lazy(() => import('./pages/public/LawyerDirectoryV2').then(m => ({ default: m.LawyerDirectoryV2 })));
-const LawyerProfile = lazy(() => import('./pages/public/LawyerProfile').then(m => ({ default: m.LawyerProfile })));
+const LawyerProfile = lazy(() => import('./pages/public/LawyerProfileV2').then(m => ({ default: m.LawyerProfileV2 })));
 const News = lazy(() => import('./pages/public/NewsV2').then(m => ({ default: m.NewsV2 })));
 const NewsDetail = lazy(() => import('./pages/public/NewsDetailV2').then(m => ({ default: m.NewsDetailV2 })));
 const PublicMarketplace = lazy(() => import('./pages/public/Marketplace').then(m => ({ default: m.Marketplace })));
