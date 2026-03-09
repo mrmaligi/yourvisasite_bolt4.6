@@ -1,34 +1,41 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Plus, Download, DollarSign, TrendingUp, Clock, FileText } from 'lucide-react';
+import { Plus, Download, DollarSign, FileText, Clock, CheckCircle } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 
-const MOCK_INVOICES = [
-  { id: 'INV-001', client: 'John Doe', date: '2024-03-20', amount: 1500, status: 'paid' },
-  { id: 'INV-002', client: 'Alice Smith', date: '2024-03-18', amount: 2200, status: 'pending' },
-  { id: 'INV-003', client: 'Robert Brown', date: '2024-03-15', amount: 850, status: 'overdue' },
-  { id: 'INV-004', client: 'Emma Wilson', date: '2024-03-10', amount: 3200, status: 'paid' },
-  { id: 'INV-005', client: 'Michael Chen', date: '2024-03-05', amount: 1800, status: 'pending' },
+interface Invoice {
+  id: string;
+  client: string;
+  date: string;
+  amount: string;
+  status: 'paid' | 'pending' | 'overdue';
+}
+
+const MOCK_INVOICES: Invoice[] = [
+  { id: 'INV-001', client: 'John Doe', date: '2024-03-20', amount: '$1,500', status: 'paid' },
+  { id: 'INV-002', client: 'Alice Smith', date: '2024-03-18', amount: '$2,200', status: 'pending' },
+  { id: 'INV-003', client: 'Robert Brown', date: '2024-03-15', amount: '$850', status: 'overdue' },
 ];
 
 export function BillingV2() {
-  const [invoices] = useState(MOCK_INVOICES);
+  const [invoices] = useState<Invoice[]>(MOCK_INVOICES);
 
   const stats = {
-    totalRevenue: invoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.amount, 0),
-    pendingAmount: invoices.filter(i => i.status === 'pending').reduce((sum, i) => sum + i.amount, 0),
-    overdueAmount: invoices.filter(i => i.status === 'overdue').reduce((sum, i) => sum + i.amount, 0),
-    totalInvoices: invoices.length,
+    total: invoices.length,
+    paid: invoices.filter(i => i.status === 'paid').length,
+    pending: invoices.filter(i => i.status === 'pending').length,
+    overdue: invoices.filter(i => i.status === 'overdue').length,
+    totalRevenue: invoices.reduce((sum, i) => sum + parseInt(i.amount.replace(/[$,]/g, '')), 0),
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'paid': return <Badge variant="success">Paid</Badge>;
-      case 'pending': return <Badge variant="warning">Pending</Badge>;
-      case 'overdue': return <Badge variant="danger">Overdue</Badge>;
-      default: return <Badge variant="secondary">{status}</Badge>;
-    }
+    const variants: Record<string, 'success' | 'warning' | 'danger'> = {
+      paid: 'success',
+      pending: 'warning',
+      overdue: 'danger',
+    };
+    return <Badge variant={variants[status]}>{status.charAt(0).toUpperCase() + status.slice(1)}</Badge>;
   };
 
   return (
@@ -38,7 +45,6 @@ export function BillingV2() {
       </Helmet>
 
       <div className="min-h-screen bg-slate-50">
-        {/* Header - SQUARE */}
         <div className="bg-white border-b border-slate-200">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between">
@@ -55,18 +61,18 @@ export function BillingV2() {
         </div>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Stats - SQUARE */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
             {[
-              { label: 'Total Revenue', value: `$${stats.totalRevenue.toLocaleString()}`, icon: DollarSign, color: 'bg-green-100 text-green-600' },
-              { label: 'Pending', value: `$${stats.pendingAmount.toLocaleString()}`, icon: Clock, color: 'bg-yellow-100 text-yellow-600' },
-              { label: 'Overdue', value: `$${stats.overdueAmount.toLocaleString()}`, icon: TrendingUp, color: 'bg-red-100 text-red-600' },
-              { label: 'Total Invoices', value: stats.totalInvoices, icon: FileText, color: 'bg-blue-100 text-blue-600' },
+              { label: 'Total Invoices', value: stats.total, icon: FileText },
+              { label: 'Paid', value: stats.paid, icon: CheckCircle, color: 'text-green-600' },
+              { label: 'Pending', value: stats.pending, icon: Clock, color: 'text-yellow-600' },
+              { label: 'Overdue', value: stats.overdue, icon: Clock, color: 'text-red-600' },
+              { label: 'Revenue', value: `$${stats.totalRevenue.toLocaleString()}`, icon: DollarSign, color: 'text-blue-600' },
             ].map((stat) => (
               <div key={stat.label} className="bg-white border border-slate-200 p-4">
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 flex items-center justify-center ${stat.color}`}>
-                    <stat.icon className="w-5 h-5" />
+                  <div className="w-10 h-10 bg-slate-100 flex items-center justify-center">
+                    <stat.icon className={`w-5 h-5 ${stat.color || 'text-slate-600'}`} />
                   </div>
                   <div>
                     <p className="text-xl font-bold text-slate-900">{stat.value}</p>
@@ -77,12 +83,7 @@ export function BillingV2() {
             ))}
           </div>
 
-          {/* Invoices Table - SQUARE */}
           <div className="bg-white border border-slate-200">
-            <div className="p-6 border-b border-slate-200">
-              <h2 className="text-lg font-semibold text-slate-900">Recent Invoices</h2>
-            </div>
-            
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-slate-50 border-b border-slate-200">
@@ -98,15 +99,14 @@ export function BillingV2() {
                 <tbody className="divide-y divide-slate-200">
                   {invoices.map((invoice) => (
                     <tr key={invoice.id} className="hover:bg-slate-50">
-                      <td className="px-6 py-4 font-mono text-sm text-slate-900">{invoice.id}</td>
-                      <td className="px-6 py-4 text-slate-900">{invoice.client}</td>
+                      <td className="px-6 py-4 font-medium text-slate-900">{invoice.id}</td>
+                      <td className="px-6 py-4 text-slate-700">{invoice.client}</td>
                       <td className="px-6 py-4 text-slate-600">{invoice.date}</td>
-                      <td className="px-6 py-4 font-medium text-slate-900">${invoice.amount.toLocaleString()}</td>
+                      <td className="px-6 py-4 font-medium text-slate-900">{invoice.amount}</td>
                       <td className="px-6 py-4">{getStatusBadge(invoice.status)}</td>
                       <td className="px-6 py-4">
                         <Button variant="outline" size="sm">
-                          <Download className="w-4 h-4 mr-1" />
-                          PDF
+                          <Download className="w-4 h-4" />
                         </Button>
                       </td>
                     </tr>
