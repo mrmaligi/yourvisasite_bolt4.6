@@ -21,7 +21,7 @@ const Checkout = lazy(() => import('./pages/public/CheckoutV2').then(m => ({ def
 const UnifiedLogin = lazy(() => import('./pages/public/LoginV2').then(m => ({ default: m.LoginV2 })));
 const Register = lazy(() => import('./pages/public/RegisterV2').then(m => ({ default: m.RegisterV2 })));
 const VisaSearch = lazy(() => import('./pages/public/VisaSearchV2').then(m => ({ default: m.VisaSearchV2 })));
-const VisaCompare = lazy(() => import('./pages/public/VisaComparison').then(m => ({ default: m.VisaComparison })));
+const VisaCompare = lazy(() => import('./pages/public/VisaComparisonV2').then(m => ({ default: m.VisaComparisonV2 })));
 const VisaDetail = lazy(() => import('./pages/public/VisaDetailV2').then(m => ({ default: m.VisaDetailV2 })));
 const Tracker = lazy(() => import('./pages/public/TrackerV2').then(m => ({ default: m.TrackerV2 })));
 const LawyerDirectory = lazy(() => import('./pages/public/LawyerDirectoryV2').then(m => ({ default: m.LawyerDirectoryV2 })));
