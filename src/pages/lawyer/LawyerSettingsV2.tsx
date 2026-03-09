@@ -1,26 +1,44 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Save, Bell, Lock, Globe, CreditCard } from 'lucide-react';
+import { Save, User, Briefcase, Bell, Lock } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 
 export function LawyerSettingsV2() {
-  const [activeTab, setActiveTab] = useState('profile');
   const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState('profile');
+  
+  const [profileData, setProfileData] = useState({
+    fullName: 'Sarah Wilson',
+    phone: '+61 400 000 000',
+    email: 'sarah@example.com',
+  });
+
+  const [lawyerData, setLawyerData] = useState({
+    jurisdiction: 'NSW',
+    barNumber: '12345',
+    yearsExperience: '10',
+    specializations: 'Skilled Migration, Family Visas',
+    bio: 'Experienced immigration lawyer specializing in skilled migration and family visas.',
+    hourlyRate: '250',
+  });
+
+  const [notifications, setNotifications] = useState({
+    emailAlerts: true,
+    smsAlerts: false,
+    marketingEmails: true,
+  });
 
   const handleSave = () => {
     setSaving(true);
-    setTimeout(() => {
-      setSaving(false);
-      alert('Settings saved!');
-    }, 1000);
+    setTimeout(() => setSaving(false), 1000);
   };
 
   const tabs = [
-    { id: 'profile', label: 'Profile', icon: Globe },
+    { id: 'profile', label: 'Profile', icon: User },
+    { id: 'professional', label: 'Professional', icon: Briefcase },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'security', label: 'Security', icon: Lock },
-    { id: 'billing', label: 'Billing', icon: CreditCard },
   ];
 
   return (
@@ -30,9 +48,8 @@ export function LawyerSettingsV2() {
       </Helmet>
 
       <div className="min-h-screen bg-slate-50">
-        {/* Header - SQUARE */}
         <div className="bg-white border-b border-slate-200">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
@@ -46,123 +63,164 @@ export function LawyerSettingsV2() {
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid lg:grid-cols-4 gap-6">
-            {/* Sidebar - SQUARE */}
-            <div className="bg-white border border-slate-200">
-              <nav className="divide-y divide-slate-200">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-                      activeTab === tab.id
-                        ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
-                        : 'text-slate-700 hover:bg-slate-50'
-                    }`}
-                  >
-                    <tab.icon className="w-5 h-5" />
-                    {tab.label}
-                  </button>
-                ))}
-              </nav>
-            </div>
-
-            {/* Content - SQUARE */}
-            <div className="lg:col-span-3 bg-white border border-slate-200 p-6">
-              {activeTab === 'profile' && (
-                <div className="space-y-6">
-                  <h2 className="text-lg font-semibold text-slate-900">Profile Settings</h2>
-                  
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-                      <input type="text" defaultValue="Sarah Wilson" className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                      <input type="email" defaultValue="sarah@lawyer.com" className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
-                      <input type="tel" defaultValue="+61 400 000 000" className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Location</label>
-                      <input type="text" defaultValue="Sydney, NSW" className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 outline-none" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Bio</label>
-                    <textarea rows={4} defaultValue="Experienced immigration lawyer..." className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 outline-none" />
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'notifications' && (
-                <div className="space-y-6">
-                  <h2 className="text-lg font-semibold text-slate-900">Notification Preferences</h2>
-                  
-                  {[
-                    { label: 'New booking requests', checked: true },
-                    { label: 'Client messages', checked: true },
-                    { label: 'Payment notifications', checked: true },
-                    { label: 'Marketing emails', checked: false },
-                  ].map((item) => (
-                    <div key={item.label} className="flex items-center justify-between py-3 border-b border-slate-100">
-                      <span className="text-slate-700">{item.label}</span>
-                      <input type="checkbox" defaultChecked={item.checked} className="w-5 h-5" />
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {activeTab === 'security' && (
-                <div className="space-y-6">
-                  <h2 className="text-lg font-semibold text-slate-900">Security Settings</h2>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Current Password</label>
-                      <input type="password" className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">New Password</label>
-                      <input type="password" className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Confirm New Password</label>
-                      <input type="password" className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 outline-none" />
-                    </div>
-                  </div>
-
-                  <Button variant="primary">Update Password</Button>
-                </div>
-              )}
-
-              {activeTab === 'billing' && (
-                <div className="space-y-6">
-                  <h2 className="text-lg font-semibold text-slate-900">Billing Settings</h2>
-                  
-                  <div className="bg-slate-50 border border-slate-200 p-4">
-                    <p className="text-sm text-slate-600 mb-2">Current Plan</p>
-                    <p className="text-xl font-bold text-slate-900">Professional</p>
-                    <Badge variant="success" className="mt-2">Active</Badge>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Payment Method</label>
-                    <div className="flex items-center gap-3 p-3 border border-slate-200">
-                      <CreditCard className="w-5 h-5 text-slate-400" />
-                      <span>•••• •••• •••• 4242</span>
-                      <Button variant="outline" size="sm" className="ml-auto">Update</Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex gap-1 mb-6 bg-slate-100 p-1 w-fit">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-2 font-medium transition-colors flex items-center gap-2 ${
+                  activeTab === tab.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600'
+                }`}
+              >
+                <tab.icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            ))}
           </div>
+
+          {activeTab === 'profile' && (
+            <div className="bg-white border border-slate-200 p-6 space-y-4">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Profile Information</h2>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  value={profileData.fullName}
+                  onChange={(e) => setProfileData({...profileData, fullName: e.target.value})}
+                  className="w-full px-3 py-2 border border-slate-200"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={profileData.email}
+                  onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                  className="w-full px-3 py-2 border border-slate-200"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
+                <input
+                  type="tel"
+                  value={profileData.phone}
+                  onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                  className="w-full px-3 py-2 border border-slate-200"
+                />
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'professional' && (
+            <div className="bg-white border border-slate-200 p-6 space-y-4">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Professional Details</h2>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Jurisdiction</label>
+                  <input
+                    type="text"
+                    value={lawyerData.jurisdiction}
+                    onChange={(e) => setLawyerData({...lawyerData, jurisdiction: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-200"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Bar Number</label>
+                  <input
+                    type="text"
+                    value={lawyerData.barNumber}
+                    onChange={(e) => setLawyerData({...lawyerData, barNumber: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-200"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Years of Experience</label>
+                <input
+                  type="number"
+                  value={lawyerData.yearsExperience}
+                  onChange={(e) => setLawyerData({...lawyerData, yearsExperience: e.target.value})}
+                  className="w-full px-3 py-2 border border-slate-200"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Hourly Rate ($)</label>
+                <input
+                  type="number"
+                  value={lawyerData.hourlyRate}
+                  onChange={(e) => setLawyerData({...lawyerData, hourlyRate: e.target.value})}
+                  className="w-full px-3 py-2 border border-slate-200"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Bio</label>
+                <textarea
+                  value={lawyerData.bio}
+                  onChange={(e) => setLawyerData({...lawyerData, bio: e.target.value})}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-slate-200"
+                />
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'notifications' && (
+            <div className="bg-white border border-slate-200 p-6 space-y-4">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Notification Preferences</h2>
+              
+              {[
+                { key: 'emailAlerts', label: 'Email Alerts', desc: 'Receive email notifications for new bookings' },
+                { key: 'smsAlerts', label: 'SMS Alerts', desc: 'Receive text messages for urgent updates' },
+                { key: 'marketingEmails', label: 'Marketing Emails', desc: 'Receive promotional content and updates' },
+              ].map((item) => (
+                <div key={item.key} className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    id={item.key}
+                    checked={notifications[item.key as keyof typeof notifications]}
+                    onChange={(e) => setNotifications({...notifications, [item.key]: e.target.checked})}
+                    className="w-4 h-4 mt-1"
+                  />
+                  <div>
+                    <label htmlFor={item.key} className="font-medium text-slate-900">{item.label}</label>
+                    <p className="text-sm text-slate-500">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === 'security' && (
+            <div className="bg-white border border-slate-200 p-6 space-y-4">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Security Settings</h2>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Current Password</label>
+                <input type="password" className="w-full px-3 py-2 border border-slate-200" />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">New Password</label>
+                <input type="password" className="w-full px-3 py-2 border border-slate-200" />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Confirm New Password</label>
+                <input type="password" className="w-full px-3 py-2 border border-slate-200" />
+              </div>
+              
+              <Button variant="primary">Update Password</Button>
+            </div>
+          )}
         </div>
       </div>
     </>
