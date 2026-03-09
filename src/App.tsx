@@ -56,7 +56,7 @@ const Checklists = lazy(() => import('./pages/public/ChecklistsV2').then(m => ({
 const Templates = lazy(() => import('./pages/public/TemplatesV2').then(m => ({ default: m.TemplatesV2 })));
 const Webinars = lazy(() => import('./pages/public/WebinarsV2').then(m => ({ default: m.WebinarsV2 })));
 const Podcast = lazy(() => import('./pages/public/PodcastV2').then(m => ({ default: m.PodcastV2 })));
-const Events = lazy(() => import('./pages/public/Events').then(m => ({ default: m.Events })));
+const Events = lazy(() => import('./pages/public/EventsV2').then(m => ({ default: m.EventsV2 })));
 const Partners = lazy(() => import('./pages/public/Partners').then(m => ({ default: m.Partners })));
 const Press = lazy(() => import('./pages/public/Press').then(m => ({ default: m.Press })));
 const ApiDocs = lazy(() => import('./pages/public/ApiDocs').then(m => ({ default: m.ApiDocs })));
