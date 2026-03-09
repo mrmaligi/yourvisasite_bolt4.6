@@ -1,143 +1,80 @@
-import { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { Youtube, Trash2, Plus, ExternalLink, Play } from 'lucide-react';
+import { Video, Plus, Eye, ThumbsUp, MessageSquare } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
-
-interface YouTubeVideo {
-  id: string;
-  title: string;
-  channel: string;
-  thumbnail: string;
-  views: string;
-  addedAt: string;
-}
-
-const MOCK_VIDEOS: YouTubeVideo[] = [
-  { id: '1', title: 'Partner Visa Guide 2024', channel: 'VisaBuild', thumbnail: '', views: '12K', addedAt: '2024-03-20' },
-  { id: '2', title: 'Skilled Migration Explained', channel: 'Immigration Expert', thumbnail: '', views: '8.5K', addedAt: '2024-03-18' },
-  { id: '3', title: 'Student Visa Tips', channel: 'VisaBuild', thumbnail: '', views: '5K', addedAt: '2024-03-15' },
-];
 
 export function YouTubeManagementV2() {
-  const [videos] = useState<YouTubeVideo[]>(MOCK_VIDEOS);
-  const [formData, setFormData] = useState({
-    title: '',
-    url: '',
-    channel: '',
-  });
+  const videos = [
+    { id: 1, title: 'Partner Visa Explained', views: '12.5K', likes: 890, comments: 45, status: 'published' },
+    { id: 2, title: 'Skilled Migration 2024', views: '8.2K', likes: 567, comments: 32, status: 'published' },
+    { id: 3, title: 'Document Checklist Tips', views: '0', likes: 0, comments: 0, status: 'draft' },
+  ];
 
   return (
-    <>
-      <Helmet>
-        <title>YouTube Management | VisaBuild Admin</title>
-      </Helmet>
-
-      <div className="min-h-screen bg-slate-50">
-        <div className="bg-white border-b border-slate-200">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900">YouTube Management</h1>
-                <p className="text-slate-600">Manage embedded YouTube videos</p>
-              </div>
-            </div>
+    <div className="min-h-screen bg-slate-50 p-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">YouTube Management</h1>
+            <p className="text-slate-600">Manage your YouTube content</p>
           </div>
+          <Button variant="primary">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Video
+          </Button>
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-white border border-slate-200 p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Add New Video</h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Video Title</label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-200"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">YouTube URL</label>
-                  <input
-                    type="url"
-                    value={formData.url}
-                    onChange={(e) => setFormData({...formData, url: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-200"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Channel Name</label>
-                  <input
-                    type="text"
-                    value={formData.channel}
-                    onChange={(e) => setFormData({...formData, channel: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-200"
-                  />
-                </div>
-
-                <Button variant="primary">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Video
-                </Button>
-              </div>
+        <div className="grid grid-cols-4 gap-4 mb-6">
+          {[
+            { label: 'Total Videos', value: '24' },
+            { label: 'Total Views', value: '156K' },
+            { label: 'Subscribers', value: '8,420' },
+            { label: 'Watch Time', value: '12.5K hrs' },
+          ].map((stat) => (
+            <div key={stat.label} className="bg-white border border-slate-200 p-4">
+              <p className="text-sm text-slate-600">{stat.label}</p>
+              <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
             </div>
+          ))}
+        </div>
 
-            <div className="bg-white border border-slate-200 p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Stats</h2>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-slate-50 border border-slate-200">
-                  <p className="text-2xl font-bold text-slate-900">{videos.length}</p>
-                  <p className="text-sm text-slate-600">Total Videos</p>
-                </div>
-                
-                <div className="p-4 bg-slate-50 border border-slate-200">
-                  <p className="text-2xl font-bold text-slate-900">25.5K</p>
-                  <p className="text-sm text-slate-600">Total Views</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 bg-white border border-slate-200">
-            <div className="p-4 border-b border-slate-200">
-              <h2 className="text-lg font-semibold text-slate-900">Videos</h2>
-            </div>
-            
-            <div className="divide-y divide-slate-200">
-              {videos.map((video) => (
-                <div key={video.id} className="flex items-center gap-4 p-4 hover:bg-slate-50">
-                  <div className="w-16 h-12 bg-slate-200 flex items-center justify-center">
-                    <Play className="w-6 h-6 text-slate-400" />
+        <div className="bg-white border border-slate-200">
+          <div className="divide-y divide-slate-200">
+            {videos.map((video) => (
+              <div key={video.id} className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-10 bg-slate-200 flex items-center justify-center">
+                    <Video className="w-6 h-6 text-slate-400" />
                   </div>
-                  
-                  <div className="flex-1">
+                  <div>
                     <p className="font-medium text-slate-900">{video.title}</p>
-                    <p className="text-sm text-slate-500">{video.channel} • {video.views} views</p>
-                  </div>
-                  
-                  <span className="text-sm text-slate-500">{video.addedAt}</span>
-                  
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <ExternalLink className="w-4 h-4" />
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <span className={`text-xs px-2 py-0.5 ${
+                      video.status === 'published' 
+                        ? 'bg-green-100 text-green-700' 
+                        : 'bg-slate-100 text-slate-700'
+                    }`}>
+                      {video.status}
+                    </span>
                   </div>
                 </div>
-              ))}
-            </div>
+
+                <div className="flex items-center gap-6 text-sm text-slate-600">
+                  <div className="flex items-center gap-1">
+                    <Eye className="w-4 h-4" />
+                    {video.views}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <ThumbsUp className="w-4 h-4" />
+                    {video.likes}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <MessageSquare className="w-4 h-4" />
+                    {video.comments}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
