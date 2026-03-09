@@ -36,7 +36,7 @@ const SuccessStoriesPage = lazy(() => import('./pages/public/SuccessStoriesPageV
 const AboutPage = lazy(() => import('./pages/public/AboutV2').then(m => ({ default: m.AboutV2 })));
 const ContactPage = lazy(() => import('./pages/public/ContactV2').then(m => ({ default: m.ContactV2 })));
 const FAQPage = lazy(() => import('./pages/public/FAQV2').then(m => ({ default: m.FAQV2 })));
-const HelpCenterPage = lazy(() => import('./pages/public/HelpCenter').then(m => ({ default: m.HelpCenter })));
+const HelpCenterPage = lazy(() => import('./pages/public/HelpCenterV2').then(m => ({ default: m.HelpCenterV2 })));
 const TermsPage = lazy(() => import('./pages/public/TermsV2').then(m => ({ default: m.TermsV2 })));
 const PrivacyPage = lazy(() => import('./pages/public/PrivacyV2').then(m => ({ default: m.PrivacyV2 })));
 const CareersPage = lazy(() => import('./pages/public/CareersPage').then(m => ({ default: m.CareersPage })));
