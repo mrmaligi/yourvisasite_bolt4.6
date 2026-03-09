@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Plus, MoreHorizontal } from 'lucide-react';
+import { Plus, Folder, Clock, CheckCircle } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 
@@ -17,6 +17,7 @@ const MOCK_CASES: Case[] = [
   { id: '2', clientName: 'Michael Chen', visaType: 'Skilled Independent (189)', stage: 'processing', lastUpdated: '2024-03-18' },
   { id: '3', clientName: 'James Rodriguez', visaType: 'Employer Nomination (186)', stage: 'assessment', lastUpdated: '2024-03-15' },
   { id: '4', clientName: 'Emma Wilson', visaType: 'Student Visa (500)', stage: 'decision', lastUpdated: '2024-03-10' },
+  { id: '5', clientName: 'David Kim', visaType: 'Partner Visa (801)', stage: 'received', lastUpdated: '2024-03-21' },
 ];
 
 const STAGES = [
@@ -28,12 +29,14 @@ const STAGES = [
 
 export function CasesV2() {
   const [cases] = useState<Case[]>(MOCK_CASES);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
+  const stats = {
+    total: cases.length,
+    received: cases.filter(c => c.stage === 'received').length,
+    processing: cases.filter(c => c.stage === 'processing').length,
+    assessment: cases.filter(c => c.stage === 'assessment').length,
+    decision: cases.filter(c => c.stage === 'decision').length,
+  };
 
   const getCasesByStage = (stage: string) => cases.filter(c => c.stage === stage);
 
@@ -44,7 +47,6 @@ export function CasesV2() {
       </Helmet>
 
       <div className="min-h-screen bg-slate-50">
-        {/* Header - SQUARE */}
         <div className="bg-white border-b border-slate-200">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between">
@@ -61,54 +63,45 @@ export function CasesV2() {
         </div>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Kanban Board - SQUARE */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {STAGES.map((stage) => (
-              <div key={stage.id} className="bg-slate-100 border border-slate-200">
-                <div className={`p-3 ${stage.color}`}>
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold">{stage.title}</span>
-                    <Badge variant="secondary">{getCasesByStage(stage.id).length}</Badge>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+            {[
+              { label: 'Total', value: stats.total, icon: Folder },
+              { label: 'Received', value: stats.received, icon: Folder, color: 'text-blue-600' },
+              { label: 'Processing', value: stats.processing, icon: Clock, color: 'text-yellow-600' },
+              { label: 'Assessment', value: stats.assessment, icon: Clock, color: 'text-purple-600' },
+              { label: 'Decision', value: stats.decision, icon: CheckCircle, color: 'text-green-600' },
+            ].map((stat) => (
+              <div key={stat.label} className="bg-white border border-slate-200 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-slate-100 flex items-center justify-center">
+                    <stat.icon className={`w-5 h-5 ${stat.color || 'text-slate-600'}`} />
                   </div>
-                </div>
-                
-                <div className="p-3 space-y-3">
-                  {loading ? (
-                    <div className="h-20 bg-slate-200 animate-pulse"></div>
-                  ) : (
-                    getCasesByStage(stage.id).map((caseItem) => (
-                      <div key={caseItem.id} className="bg-white border border-slate-200 p-3">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="font-medium text-slate-900">{caseItem.clientName}</h3>
-                          <button className="text-slate-400 hover:text-slate-600">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </button>
-                        </div>
-                        <p className="text-sm text-slate-600 mb-2">{caseItem.visaType}</p>
-                        <p className="text-xs text-slate-500">Updated: {caseItem.lastUpdated}</p>
-                      </div>
-                    ))
-                  )}
-                  
-                  {!loading && getCasesByStage(stage.id).length === 0 && (
-                    <div className="text-center py-8 text-slate-500 text-sm">No cases</div>
-                  )}
+                  <div>
+                    <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
+                    <p className="text-sm text-slate-600">{stat.label}</p>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Summary - SQUARE */}
-          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { label: 'Total Cases', value: cases.length },
-              { label: 'Active', value: cases.filter(c => c.stage !== 'decision').length },
-              { label: 'Completed', value: cases.filter(c => c.stage === 'decision').length },
-              { label: 'This Week', value: cases.filter(c => new Date(c.lastUpdated) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length },
-            ].map((stat) => (
-              <div key={stat.label} className="bg-white border border-slate-200 p-4">
-                <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
-                <p className="text-sm text-slate-600">{stat.label}</p>
+          <div className="grid md:grid-cols-4 gap-4">
+            {STAGES.map((stage) => (
+              <div key={stage.id} className="bg-white border border-slate-200">
+                <div className={`p-3 ${stage.color}`}>
+                  <h3 className="font-semibold">{stage.title}</h3>
+                  <p className="text-sm">{getCasesByStage(stage.id).length} cases</p>
+                </div>
+                
+                <div className="p-3 space-y-3">
+                  {getCasesByStage(stage.id).map((c) => (
+                    <div key={c.id} className="bg-slate-50 border border-slate-200 p-3">
+                      <p className="font-medium text-slate-900">{c.clientName}</p>
+                      <p className="text-sm text-slate-600">{c.visaType}</p>
+                      <p className="text-xs text-slate-500 mt-1">Updated: {c.lastUpdated}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
