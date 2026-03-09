@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Plus, Link as LinkIcon, Eye, Copy, Trash2, Edit } from 'lucide-react';
+import { Plus, Link as LinkIcon, Eye, Copy, Trash2, Edit, Users } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 
@@ -24,7 +24,7 @@ export function LeadCaptureV2() {
   const stats = {
     total: forms.length,
     active: forms.filter(f => f.status === 'active').length,
-    totalSubmissions: forms.reduce((sum, f) => sum + f.submissions, 0),
+    submissions: forms.reduce((acc, f) => acc + f.submissions, 0),
   };
 
   return (
@@ -54,13 +54,11 @@ export function LeadCaptureV2() {
             {[
               { label: 'Total Forms', value: stats.total, icon: LinkIcon },
               { label: 'Active', value: stats.active, icon: LinkIcon, color: 'text-green-600' },
-              { label: 'Submissions', value: stats.totalSubmissions, icon: Eye, color: 'text-blue-600' },
+              { label: 'Submissions', value: stats.submissions, icon: Users, color: 'text-blue-600' },
             ].map((stat) => (
               <div key={stat.label} className="bg-white border border-slate-200 p-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-slate-100 flex items-center justify-center">
-                    <stat.icon className={`w-5 h-5 ${stat.color || 'text-slate-600'}`} />
-                  </div>
+                  <stat.icon className={`w-5 h-5 ${stat.color || 'text-slate-600'}`} />
                   <div>
                     <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
                     <p className="text-sm text-slate-600">{stat.label}</p>
@@ -71,37 +69,38 @@ export function LeadCaptureV2() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {forms.map((form) => (
-              <div key={form.id} className="bg-white border border-slate-200 p-6 hover:border-blue-300 transition-all">
-                <div className="flex items-center justify-between mb-4">
+            {forms.map(form => (
+              <div key={form.id} className="bg-white border border-slate-200 p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="font-semibold text-slate-900">{form.name}</h3>
+                    <p className="text-sm text-slate-500">Updated {form.lastUpdated}</p>
+                  </div>
                   <Badge variant={form.status === 'active' ? 'success' : 'secondary'}>
                     {form.status}
                   </Badge>
-                  <div className="flex gap-1">
-                    <Button variant="outline" size="sm">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button variant="danger" size="sm">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
                 </div>
 
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">{form.name}</h3>
-                <p className="text-sm text-slate-500 mb-4">{form.submissions} submissions</p>
+                <div className="flex items-center gap-2 mb-4">
+                  <Users className="w-4 h-4 text-slate-400" />
+                  <span className="text-slate-600">{form.submissions} submissions</span>
+                </div>
 
-                <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
-                  <span className="text-xs text-slate-400">Updated: {form.lastUpdated}</span>
-                  
-                  <div className="flex gap-1">
-                    <Button variant="outline" size="sm">
-                      <Eye className="w-4 h-4 mr-1" />
-                      View
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Copy className="w-4 h-4" />
-                    </Button>
-                  </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm">
+                    <Eye className="w-4 h-4 mr-1" />
+                    View
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Copy className="w-4 h-4 mr-1" />
+                    Copy
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
             ))}
