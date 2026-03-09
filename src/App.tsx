@@ -52,7 +52,7 @@ const ResetPassword = lazy(() => import('./pages/public/ResetPassword'));
 
 const Resources = lazy(() => import('./pages/public/ResourcesV2').then(m => ({ default: m.ResourcesV2 })));
 const Guides = lazy(() => import('./pages/public/GuidesV2').then(m => ({ default: m.GuidesV2 })));
-const Checklists = lazy(() => import('./pages/public/Checklists').then(m => ({ default: m.Checklists })));
+const Checklists = lazy(() => import('./pages/public/ChecklistsV2').then(m => ({ default: m.ChecklistsV2 })));
 const Templates = lazy(() => import('./pages/public/Templates').then(m => ({ default: m.Templates })));
 const Webinars = lazy(() => import('./pages/public/Webinars').then(m => ({ default: m.Webinars })));
 const Podcast = lazy(() => import('./pages/public/Podcast').then(m => ({ default: m.Podcast })));
