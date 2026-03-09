@@ -121,7 +121,7 @@ const TrackerManagement = lazy(() => import('./pages/admin/TrackerManagementV2')
 const AdminPricing = lazy(() => import('./pages/admin/Pricing').then(m => ({ default: m.Pricing })));
 const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagementV2').then(m => ({ default: m.PromoCodeManagementV2 })));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettingsV2').then(m => ({ default: m.AdminSettingsV2 })));
-const YouTubeManagement = lazy(() => import('./pages/admin/YouTubeManagement').then(m => ({ default: m.YouTubeManagement })));
+const YouTubeManagement = lazy(() => import('./pages/admin/YouTubeManagementV2').then(m => ({ default: m.YouTubeManagementV2 })));
 const PerformanceRouter = lazy(() => import('./pages/admin/performance/PerformanceRouter').then(m => ({ default: m.PerformanceRouter })));
 const Bookings = lazy(() => import('./pages/admin/BookingsV2').then(m => ({ default: m.BookingsV2 })));
 
