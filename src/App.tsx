@@ -39,7 +39,7 @@ const FAQPage = lazy(() => import('./pages/public/FAQV2').then(m => ({ default: 
 const HelpCenterPage = lazy(() => import('./pages/public/HelpCenterV2').then(m => ({ default: m.HelpCenterV2 })));
 const TermsPage = lazy(() => import('./pages/public/TermsV2').then(m => ({ default: m.TermsV2 })));
 const PrivacyPage = lazy(() => import('./pages/public/PrivacyV2').then(m => ({ default: m.PrivacyV2 })));
-const CareersPage = lazy(() => import('./pages/public/CareersPage').then(m => ({ default: m.CareersPage })));
+const CareersPage = lazy(() => import('./pages/public/CareersV2').then(m => ({ default: m.CareersV2 })));
 const ForumHomePage = lazy(() => import('./pages/public/ForumHomePageV2').then(m => ({ default: m.ForumHomePageV2 })));
 const ForumCategoryPage = lazy(() => import('./pages/public/ForumCategoryPageV2').then(m => ({ default: m.ForumCategoryPageV2 })));
 const ForumTopicPage = lazy(() => import('./pages/public/ForumTopicPageV2').then(m => ({ default: m.ForumTopicPageV2 })));
