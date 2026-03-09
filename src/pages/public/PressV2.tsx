@@ -1,88 +1,61 @@
-import { Helmet } from 'react-helmet-async';
-import { Download, ArrowRight, Newspaper } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { FileText, CheckCircle, Clock, Download, ArrowRight } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
 
-const PRESS_RELEASES = [
-  { id: 1, title: 'VisaBuild Launches New Platform', date: 'Oct 01, 2024', category: 'Launch' },
-  { id: 2, title: 'Partnership with Top Law Firms', date: 'Sep 15, 2024', category: 'Partnership' },
-  { id: 3, title: 'Reaching 10,000 Successful Applications', date: 'Aug 28, 2024', category: 'Milestone' },
-];
+export function PublicPressV2() {
+  const releases = [
+    { id: 1, title: 'VisaBuild Raises $10M Series A Funding', date: 'March 15, 2024', excerpt: 'Investment will accelerate platform development and expand team...' },
+    { id: 2, title: 'New Partnership with Leading Migration Law Firm', date: 'March 1, 2024', excerpt: 'Strategic alliance to provide comprehensive visa services...' },
+    { id: 3, title: 'VisaBuild Launches Mobile App', date: 'February 20, 2024', excerpt: 'New iOS and Android apps bring visa services to mobile...' },
+  ];
 
-const RESOURCES = [
-  { name: 'Brand Guidelines', size: '2.4 MB' },
-  { name: 'Logo Pack', size: '5.1 MB' },
-  { name: 'Founder Photos', size: '12.3 MB' },
-];
+  const stats = [
+    { label: 'Users Helped', value: '50,000+' },
+    { label: 'Success Rate', value: '95%' },
+    { label: 'Countries Served', value: '120+' },
+    { label: 'Team Members', value: '150+' },
+  ];
 
-export function PressV2() {
   return (
-    <>
-      <Helmet>
-        <title>Press & Media | VisaBuild</title>
-      </Helmet>
-
-      <div className="min-h-screen bg-slate-50">
-        {/* Hero */}
-        <div className="bg-slate-100 py-16 px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <Newspaper className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-            <h1 className="text-3xl md:text-5xl font-bold mb-4 text-slate-900">Newsroom</h1>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              Latest updates, stories, and resources for media.
-            </p>
-          </div>
-        </div>
-
-        <div className="max-w-5xl mx-auto px-4 py-16">
-          {/* Press Releases */}
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl font-bold text-slate-900">Press Releases</h2>
-            <Button variant="outline">View Archive <ArrowRight className="ml-2 w-4 h-4" /></Button>
-          </div>
-
-          <div className="space-y-4 mb-16">
-            {PRESS_RELEASES.map((item) => (
-              <Link key={item.id} to="#" className="block">
-                <div className="bg-white border border-slate-200 p-6 hover:border-blue-400 transition-colors">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <Badge variant="secondary">{item.category}</Badge>
-                        <span className="text-sm text-slate-500">{item.date}</span>
-                      </div>
-                      <h3 className="text-xl font-bold text-slate-900">{item.title}</h3>
-                    </div>
-                    <ArrowRight className="w-5 h-5 text-slate-400" />
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          {/* Media Resources */}
-          <div className="bg-white border border-slate-200 p-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6">Media Resources</h2>
-            
-            <div className="space-y-3">
-              {RESOURCES.map((resource) => (
-                <div key={resource.name} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200">
-                  <div>
-                    <p className="font-medium text-slate-900">{resource.name}</p>
-                    <p className="text-sm text-slate-500">{resource.size}</p>
-                  </div>
-                  
-                  <Button variant="outline" size="sm">
-                    <Download className="w-4 h-4 mr-1" />
-                    Download
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </div>
+    <div className="min-h-screen bg-slate-50">
+      <div className="bg-slate-900 py-16 px-8">
+        <div className="max-w-6xl mx-auto text-center">
+          <h1 className="text-3xl font-bold text-white mb-4">Press & Media</h1>
+          <p className="text-xl text-slate-300">News, press releases, and media resources</p>
         </div>
       </div>
-    </>
+
+      <div className="max-w-6xl mx-auto px-8 py-12">
+        <div className="grid grid-cols-4 gap-6 mb-12">
+          {stats.map((stat) => (
+            <div key={stat.label} className="bg-white border border-slate-200 p-6 text-center">
+              <p className="text-3xl font-bold text-slate-900">{stat.value}</p>
+              <p className="text-sm text-slate-600">{stat.label}</p>
+            </div>
+          ))}
+        </div>
+
+        <h2 className="text-xl font-bold text-slate-900 mb-6">Press Releases</h2>
+        
+        <div className="space-y-4 mb-12">
+          {releases.map((release) => (
+            <div key={release.id} className="bg-white border border-slate-200 p-6">
+              <span className="text-sm text-slate-500">{release.date}</span>
+              <h3 className="font-semibold text-slate-900 text-lg mt-1 mb-2">{release.title}</h3>
+              <p className="text-slate-600 mb-4">{release.excerpt}</p>
+              <button className="text-blue-600 font-medium flex items-center gap-1 hover:underline">
+                Read More
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-blue-50 border border-blue-200 p-6">
+          <h3 className="font-semibold text-blue-900 mb-2">Media Inquiries</h3>
+          <p className="text-blue-700 mb-4">For press inquiries, please contact our media relations team.</p>
+          <a href="mailto:press@visabuild.com" className="text-blue-600 font-medium hover:underline">press@visabuild.com</a>
+        </div>
+      </div>
+    </div>
   );
 }
