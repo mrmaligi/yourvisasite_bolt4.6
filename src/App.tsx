@@ -117,7 +117,7 @@ const AdminVisaEdit = lazy(() => import('./pages/admin/VisaEdit').then(m => ({ d
 const VisaImport = lazy(() => import('./pages/admin/VisaImport').then(m => ({ default: m.VisaImport })));
 const PremiumContent = lazy(() => import('./pages/admin/PremiumContent').then(m => ({ default: m.PremiumContent })));
 const NewsManagement = lazy(() => import('./pages/admin/NewsManagement').then(m => ({ default: m.NewsManagement })));
-const TrackerManagement = lazy(() => import('./pages/admin/TrackerManagement').then(m => ({ default: m.TrackerManagement })));
+const TrackerManagement = lazy(() => import('./pages/admin/TrackerManagementV2').then(m => ({ default: m.TrackerManagementV2 })));
 const AdminPricing = lazy(() => import('./pages/admin/Pricing').then(m => ({ default: m.Pricing })));
 const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagement').then(m => ({ default: m.PromoCodeManagement })));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettingsV2').then(m => ({ default: m.AdminSettingsV2 })));
