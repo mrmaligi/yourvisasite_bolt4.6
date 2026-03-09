@@ -1,22 +1,23 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Store, Plus, DollarSign, Package } from 'lucide-react';
+import { Store, Plus, Edit, Trash2, Eye, DollarSign, Package } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 
 interface Listing {
   id: string;
   title: string;
+  shortDescription: string;
   price: number;
-  type: 'service' | 'product';
+  listingType: 'service' | 'product';
   isActive: boolean;
-  orders: number;
+  category: string;
 }
 
 const MOCK_LISTINGS: Listing[] = [
-  { id: '1', title: 'Initial Consultation', price: 150, type: 'service', isActive: true, orders: 45 },
-  { id: '2', title: 'Document Review Package', price: 299, type: 'service', isActive: true, orders: 23 },
-  { id: '3', title: 'Visa Application Guide', price: 49, type: 'product', isActive: false, orders: 0 },
+  { id: '1', title: 'Visa Consultation', shortDescription: '30-minute consultation', price: 15000, listingType: 'service', isActive: true, category: 'Consultation' },
+  { id: '2', title: 'Document Review', shortDescription: 'Complete document review', price: 25000, listingType: 'service', isActive: true, category: 'Services' },
+  { id: '3', title: 'Visa Guide', shortDescription: 'PDF guide for applicants', price: 4900, listingType: 'product', isActive: false, category: 'Products' },
 ];
 
 export function MarketplaceV2() {
@@ -25,8 +26,8 @@ export function MarketplaceV2() {
   const stats = {
     total: listings.length,
     active: listings.filter(l => l.isActive).length,
-    totalOrders: listings.reduce((sum, l) => sum + l.orders, 0),
-    revenue: listings.reduce((sum, l) => sum + (l.price * l.orders), 0),
+    services: listings.filter(l => l.listingType === 'service').length,
+    products: listings.filter(l => l.listingType === 'product').length,
   };
 
   return (
@@ -45,7 +46,7 @@ export function MarketplaceV2() {
               </div>
               <Button variant="primary">
                 <Plus className="w-4 h-4 mr-2" />
-                New Listing
+                Add Listing
               </Button>
             </div>
           </div>
@@ -54,18 +55,16 @@ export function MarketplaceV2() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             {[
-              { label: 'Listings', value: stats.total, icon: Store },
-              { label: 'Active', value: stats.active, icon: Package },
-              { label: 'Orders', value: stats.totalOrders, icon: DollarSign },
-              { label: 'Revenue', value: `$${stats.revenue.toLocaleString()}`, icon: DollarSign },
+              { label: 'Total Listings', value: stats.total, icon: Store },
+              { label: 'Active', value: stats.active, icon: Eye, color: 'text-green-600' },
+              { label: 'Services', value: stats.services, icon: Package, color: 'text-blue-600' },
+              { label: 'Products', value: stats.products, icon: Package, color: 'text-purple-600' },
             ].map((stat) => (
               <div key={stat.label} className="bg-white border border-slate-200 p-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-100 flex items-center justify-center">
-                    <stat.icon className="w-5 h-5 text-blue-600" />
-                  </div>
+                  <stat.icon className={`w-5 h-5 ${stat.color || 'text-slate-600'}`} />
                   <div>
-                    <p className="text-xl font-bold text-slate-900">{stat.value}</p>
+                    <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
                     <p className="text-sm text-slate-600">{stat.label}</p>
                   </div>
                 </div>
@@ -73,32 +72,59 @@ export function MarketplaceV2() {
             ))}
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {listings.map((listing) => (
-              <div key={listing.id} className="bg-white border border-slate-200 p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <Badge variant={listing.type === 'service' ? 'primary' : 'secondary'}>
-                    {listing.type}
-                  </Badge>
-                  <Badge variant={listing.isActive ? 'success' : 'secondary'}>
-                    {listing.isActive ? 'Active' : 'Inactive'}
-                  </Badge>
-                </div>
-
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">{listing.title}</h3>
-                <p className="text-2xl font-bold text-blue-600 mb-4">${listing.price}</p>
-
-                <div className="flex items-center justify-between text-sm text-slate-600 mb-4">
-                  <span>{listing.orders} orders</span>
-                  <span>Revenue: ${(listing.price * listing.orders).toLocaleString()}</span>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1">Edit</Button>
-                  <Button variant="outline" size="sm" className="flex-1">Preview</Button>
-                </div>
-              </div>
-            ))}
+          <div className="bg-white border border-slate-200">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Listing</th>
+                    <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Type</th>
+                    <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Price</th>
+                    <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Status</th>
+                    <th className="text-right px-6 py-3 text-sm font-medium text-slate-600">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {listings.map((listing) => (
+                    <tr key={listing.id} className="hover:bg-slate-50">
+                      <td className="px-6 py-4">
+                        <div>
+                          <p className="font-medium text-slate-900">{listing.title}</p>
+                          <p className="text-sm text-slate-500">{listing.shortDescription}</p>
+                          <p className="text-xs text-slate-400">{listing.category}</p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <Badge variant={listing.listingType === 'service' ? 'primary' : 'secondary'}>
+                          {listing.listingType}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-1">
+                          <DollarSign className="w-4 h-4 text-slate-400" />
+                          <span className="font-medium text-slate-900">${(listing.price / 100).toFixed(2)}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <Badge variant={listing.isActive ? 'success' : 'secondary'}>
+                          {listing.isActive ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button variant="outline" size="sm">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
