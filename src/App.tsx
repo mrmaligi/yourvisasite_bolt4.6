@@ -90,7 +90,7 @@ const LawyerConsultations = lazy(() => import('./pages/lawyer/ConsultationsV2').
 const Availability = lazy(() => import('./pages/lawyer/AvailabilityV2').then(m => ({ default: m.AvailabilityV2 })));
 const Marketing = lazy(() => import('./pages/lawyer/MarketingV2').then(m => ({ default: m.MarketingV2 })));
 const LawyerTracker = lazy(() => import('./pages/lawyer/LawyerTrackerV2').then(m => ({ default: m.LawyerTrackerV2 })));
-const LawyerNews = lazy(() => import('./pages/lawyer/LawyerNews').then(m => ({ default: m.LawyerNews })));
+const LawyerNews = lazy(() => import('./pages/lawyer/LawyerNewsV2').then(m => ({ default: m.LawyerNewsV2 })));
 const LawyerMarketplace = lazy(() => import('./pages/lawyer/Marketplace').then(m => ({ default: m.Marketplace })));
 const LawyerSettings = lazy(() => import('./pages/lawyer/LawyerSettingsV2').then(m => ({ default: m.LawyerSettingsV2 })));
 const LawyerTeam = lazy(() => import('./pages/lawyer/Team').then(m => ({ default: m.Team })));
