@@ -119,7 +119,7 @@ const PremiumContent = lazy(() => import('./pages/admin/PremiumContent').then(m 
 const NewsManagement = lazy(() => import('./pages/admin/NewsManagementV2').then(m => ({ default: m.NewsManagementV2 })));
 const TrackerManagement = lazy(() => import('./pages/admin/TrackerManagementV2').then(m => ({ default: m.TrackerManagementV2 })));
 const AdminPricing = lazy(() => import('./pages/admin/Pricing').then(m => ({ default: m.Pricing })));
-const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagement').then(m => ({ default: m.PromoCodeManagement })));
+const PromoCodeManagement = lazy(() => import('./pages/admin/PromoCodeManagementV2').then(m => ({ default: m.PromoCodeManagementV2 })));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettingsV2').then(m => ({ default: m.AdminSettingsV2 })));
 const YouTubeManagement = lazy(() => import('./pages/admin/YouTubeManagement').then(m => ({ default: m.YouTubeManagement })));
 const PerformanceRouter = lazy(() => import('./pages/admin/performance/PerformanceRouter').then(m => ({ default: m.PerformanceRouter })));
