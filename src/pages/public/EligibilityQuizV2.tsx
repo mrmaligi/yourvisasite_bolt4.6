@@ -1,4 +1,4 @@
-import { QuestionMarkCircle, ArrowRight, Lightbulb, CheckCircle } from 'lucide-react';
+import { HelpCircle, ArrowRight, Lightbulb, CheckCircle } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
 export function PublicEligibilityQuizV2() {
@@ -13,7 +13,7 @@ export function PublicEligibilityQuizV2() {
       <div className="bg-slate-900 py-12 px-8">
         <div className="max-w-4xl mx-auto text-center">
           <div className="w-16 h-16 bg-blue-100 mx-auto mb-4 flex items-center justify-center">
-            <QuestionMarkCircle className="w-8 h-8 text-blue-600" />
+            <HelpCircle className="w-8 h-8 text-blue-600" />
           </div>
           <h1 className="text-3xl font-bold text-white">Visa Eligibility Quiz</h1>
           <p className="text-slate-300 mt-2">Find out which visa might be right for you</p>
