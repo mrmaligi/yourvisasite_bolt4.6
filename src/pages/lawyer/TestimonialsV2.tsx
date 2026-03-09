@@ -11,38 +11,44 @@ interface Testimonial {
   content: string;
   status: 'published' | 'pending' | 'hidden';
   date: string;
-  visaType: string;
 }
 
 const MOCK_TESTIMONIALS: Testimonial[] = [
-  { id: '1', clientName: 'Sarah Johnson', rating: 5, content: 'Excellent service, very professional. Made my partner visa process so smooth!', status: 'published', date: '2024-03-18', visaType: 'Partner Visa' },
-  { id: '2', clientName: 'Michael Chen', rating: 4, content: 'Good communication but slightly delayed response times.', status: 'pending', date: '2024-03-15', visaType: 'Skilled Independent' },
-  { id: '3', clientName: 'Emma Wilson', rating: 5, content: 'Highly recommend! Best immigration lawyer I have worked with.', status: 'published', date: '2024-03-10', visaType: 'Employer Nomination' },
-  { id: '4', clientName: 'David Brown', rating: 5, content: 'Very knowledgeable and patient. Answered all my questions.', status: 'published', date: '2024-03-05', visaType: 'Student Visa' },
+  { id: '1', clientName: 'Sarah Johnson', rating: 5, content: 'Excellent service, very professional.', status: 'published', date: '2024-03-18' },
+  { id: '2', clientName: 'Michael Chen', rating: 4, content: 'Good communication but slightly delayed.', status: 'pending', date: '2024-03-15' },
+  { id: '3', clientName: 'Anonymous', rating: 5, content: 'Highly recommend!', status: 'published', date: '2024-03-10' },
 ];
 
 export function TestimonialsV2() {
-  const [activeTab, setActiveTab] = useState('all');
-
-  const filteredTestimonials = MOCK_TESTIMONIALS.filter(t => {
-    if (activeTab === 'all') return true;
-    return t.status === activeTab;
-  });
+  const [testimonials] = useState<Testimonial[]>(MOCK_TESTIMONIALS);
 
   const stats = {
-    total: MOCK_TESTIMONIALS.length,
-    published: MOCK_TESTIMONIALS.filter(t => t.status === 'published').length,
-    pending: MOCK_TESTIMONIALS.filter(t => t.status === 'pending').length,
-    averageRating: (MOCK_TESTIMONIALS.reduce((sum, t) => sum + t.rating, 0) / MOCK_TESTIMONIALS.length).toFixed(1),
+    total: testimonials.length,
+    published: testimonials.filter(t => t.status === 'published').length,
+    pending: testimonials.filter(t => t.status === 'pending').length,
+    average: (testimonials.reduce((sum, t) => sum + t.rating, 0) / testimonials.length).toFixed(1),
+  };
+
+  const getStars = (rating: number) => {
+    return (
+      <div className="flex gap-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`w-4 h-4 ${star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-slate-300'}`}
+          />
+        ))}
+      </div>
+    );
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'published': return <Badge variant="success">Published</Badge>;
-      case 'pending': return <Badge variant="warning">Pending</Badge>;
-      case 'hidden': return <Badge variant="secondary">Hidden</Badge>;
-      default: return <Badge variant="secondary">{status}</Badge>;
-    }
+    const variants: Record<string, 'success' | 'warning' | 'secondary'> = {
+      published: 'success',
+      pending: 'warning',
+      hidden: 'secondary',
+    };
+    return <Badge variant={variants[status]}>{status}</Badge>;
   };
 
   return (
@@ -52,31 +58,29 @@ export function TestimonialsV2() {
       </Helmet>
 
       <div className="min-h-screen bg-slate-50">
-        {/* Header - SQUARE */}
         <div className="bg-white border-b border-slate-200">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold text-slate-900">Testimonials</h1>
-                <p className="text-slate-600">Manage client testimonials and reviews</p>
+                <p className="text-slate-600">Manage client testimonials</p>
               </div>
             </div>
           </div>
         </div>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Stats - SQUARE */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             {[
               { label: 'Total', value: stats.total, icon: Quote },
-              { label: 'Published', value: stats.published, icon: CheckCircle },
-              { label: 'Pending', value: stats.pending, icon: XCircle },
-              { label: 'Avg Rating', value: stats.averageRating, icon: Star },
+              { label: 'Published', value: stats.published, icon: CheckCircle, color: 'text-green-600' },
+              { label: 'Pending', value: stats.pending, icon: XCircle, color: 'text-yellow-600' },
+              { label: 'Avg Rating', value: stats.average, icon: Star, color: 'text-yellow-600' },
             ].map((stat) => (
               <div key={stat.label} className="bg-white border border-slate-200 p-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-100 flex items-center justify-center">
-                    <stat.icon className="w-5 h-5 text-blue-600" />
+                  <div className="w-10 h-10 bg-slate-100 flex items-center justify-center">
+                    <stat.icon className={`w-5 h-5 ${stat.color || 'text-slate-600'}`} />
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
@@ -87,73 +91,42 @@ export function TestimonialsV2() {
             ))}
           </div>
 
-          {/* Tabs - SQUARE */}
-          <div className="flex gap-1 mb-6 bg-slate-100 p-1 w-fit">
-            {['all', 'published', 'pending', 'hidden'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-6 py-2 font-medium transition-colors ${
-                  activeTab === tab
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          {/* Testimonials Grid - SQUARE */}
-          <div className="grid md:grid-cols-2 gap-6">
-            {filteredTestimonials.map((testimonial) => (
-              <div key={testimonial.id} className="bg-white border border-slate-200 p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-100 flex items-center justify-center font-semibold text-blue-600">
-                      {testimonial.clientName.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-900">{testimonial.clientName}</p>
-                      <p className="text-sm text-slate-500">{testimonial.visaType}</p>
-                    </div>
-                  </div>
-                  {getStatusBadge(testimonial.status)}
-                </div>
-
-                <div className="flex items-center gap-1 mb-3">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-4 h-4 ${i < testimonial.rating ? 'text-amber-500 fill-amber-500' : 'text-slate-300'}`}
-                    />
+          <div className="bg-white border border-slate-200">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Client</th>
+                    <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Rating</th>
+                    <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Review</th>
+                    <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Status</th>
+                    <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Date</th>
+                    <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {testimonials.map((t) => (
+                    <tr key={t.id} className="hover:bg-slate-50">
+                      <td className="px-6 py-4 font-medium text-slate-900">{t.clientName}</td>
+                      <td className="px-6 py-4">{getStars(t.rating)}</td>
+                      <td className="px-6 py-4 text-slate-700 max-w-xs truncate">{t.content}</td>
+                      <td className="px-6 py-4">{getStatusBadge(t.status)}</td>
+                      <td className="px-6 py-4 text-slate-600">{t.date}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex gap-1">
+                          {t.status === 'pending' && (
+                            <Button variant="primary" size="sm">Approve</Button>
+                          )}
+                          <Button variant="danger" size="sm">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
                   ))}
-                </div>
-
-                <p className="text-slate-700 mb-4">"{testimonial.content}"</p>
-
-                <div className="flex items-center justify-between pt-4 border-t border-slate-200">
-                  <span className="text-sm text-slate-500">{testimonial.date}</span>
-                  <div className="flex gap-2">
-                    {testimonial.status === 'pending' && (
-                      <>
-                        <Button variant="primary" size="sm">
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Approve
-                        </Button>
-                        <Button variant="danger" size="sm">
-                          <XCircle className="w-4 h-4 mr-1" />
-                          Reject
-                        </Button>
-                      </>
-                    )}
-                    <Button variant="outline" size="sm">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
