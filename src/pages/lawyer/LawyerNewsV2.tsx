@@ -46,7 +46,6 @@ export function LawyerNewsV2() {
       </Helmet>
 
       <div className="min-h-screen bg-slate-50">
-        {/* Header - SQUARE */}
         <div className="bg-white border-b border-slate-200">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between">
@@ -59,7 +58,6 @@ export function LawyerNewsV2() {
         </div>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Filter - SQUARE */}
           <div className="flex gap-1 mb-6 bg-slate-100 p-1 w-fit">
             {categories.map((cat) => (
               <button
@@ -76,7 +74,6 @@ export function LawyerNewsV2() {
             ))}
           </div>
 
-          {/* News List - SQUARE */}
           <div className="space-y-4">
             {filteredNews.map((item) => (
               <div key={item.id} className="bg-white border border-slate-200 p-6">
