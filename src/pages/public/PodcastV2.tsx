@@ -1,98 +1,52 @@
-import { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { Mic, Play, Clock, Share2, Search } from 'lucide-react';
+import { Headphones, Mic, Play, Download, Star } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
 
-const EPISODES = [
-  { id: 1, title: 'Episode 5: Common Visa Mistakes', date: 'Oct 24', duration: '32 min', desc: 'Avoid these common errors in your application.' },
-  { id: 2, title: 'Episode 4: Skilled Occupation Lists', date: 'Oct 17', duration: '45 min', desc: 'Navigating the skilled occupation lists.' },
-  { id: 3, title: 'Episode 3: Regional Migration Explained', date: 'Oct 10', duration: '28 min', desc: 'Opportunities in regional Australia.' },
-  { id: 4, title: 'Episode 2: Interview with a Migration Agent', date: 'Oct 03', duration: '35 min', desc: 'Insights from a registered migration agent.' },
-  { id: 5, title: 'Episode 1: Visa Changes 2024', date: 'Sep 26', duration: '40 min', desc: 'Discussing the latest immigration policy updates.' },
-];
-
-export function PodcastV2() {
-  const [search, setSearch] = useState('');
-
-  const filteredEpisodes = EPISODES.filter(ep => 
-    ep.title.toLowerCase().includes(search.toLowerCase()) ||
-    ep.desc.toLowerCase().includes(search.toLowerCase())
-  );
+export function PublicPodcastV2() {
+  const episodes = [
+    { id: 1, title: 'Partner Visa Success Stories', duration: '45 min', date: 'Mar 15, 2024', plays: 1200 },
+    { id: 2, title: 'Understanding Skilled Migration', duration: '38 min', date: 'Mar 8, 2024', plays: 980 },
+    { id: 3, title: 'Student Visa Tips', duration: '32 min', date: 'Mar 1, 2024', plays: 1500 },
+    { id: 4, title: 'Business Visa Guide', duration: '50 min', date: 'Feb 22, 2024', plays: 750 },
+  ];
 
   return (
-    <>
-      <Helmet>
-        <title>VisaBuild Podcast | Immigration Insights</title>
-      </Helmet>
-
-      <div className="min-h-screen bg-slate-50">
-        <div className="bg-slate-100 border-b border-slate-200 py-16">
-          <div className="max-w-5xl mx-auto px-4">
-            <div className="flex flex-col md:flex-row items-center gap-8">
-              <div className="w-48 h-48 bg-blue-600 flex items-center justify-center flex-shrink-0">
-                <Mic className="w-20 h-20 text-white" />
-              </div>
-              
-              <div className="text-center md:text-left">
-                <h1 className="text-4xl font-bold text-slate-900 mb-4">The VisaBuild Podcast</h1>
-                <p className="text-lg text-slate-600 mb-6">
-                  Weekly conversations with migration experts, lawyers, and successful applicants.
-                </p>
-                
-                <div className="flex gap-4 justify-center md:justify-start">
-                  <Button variant="primary">Subscribe</Button>
-                  <Button variant="outline">Latest Episode</Button>
-                </div>
-              </div>
-            </div>
+    <div className="min-h-screen bg-slate-50">
+      <div className="bg-slate-900 py-16 px-8">
+        <div className="max-w-6xl mx-auto text-center">
+          <div className="w-20 h-20 bg-blue-600 mx-auto mb-6 flex items-center justify-center">
+            <Headphones className="w-10 h-10 text-white" />
           </div>
+          <h1 className="text-3xl font-bold text-white mb-4">VisaBuild Podcast</h1>
+          <p className="text-xl text-slate-300">Immigration insights and expert interviews</p>
         </div>
+      </div>
 
-        <div className="max-w-5xl mx-auto px-4 py-8">
-          <div className="bg-white border border-slate-200 p-4 mb-8">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search episodes..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-slate-200"
-              />
-            </div>
-          </div>
-
-          <h2 className="text-2xl font-bold text-slate-900 mb-6">Recent Episodes</h2>
-          
-          <div className="space-y-4">
-            {filteredEpisodes.map((ep) => (
-              <div key={ep.id} className="bg-white border border-slate-200 p-6 flex items-center gap-6">
-                <button className="w-12 h-12 bg-blue-100 flex items-center justify-center hover:bg-blue-200 transition-colors">
-                  <Play className="w-5 h-5 text-blue-600 ml-1" />
+      <div className="max-w-4xl mx-auto px-8 py-12">
+        <h2 className="text-xl font-bold text-slate-900 mb-6">Latest Episodes</h2>
+        
+        <div className="space-y-4">
+          {episodes.map((ep) => (
+            <div key={ep.id} className="bg-white border border-slate-200 p-6">
+              <div className="flex items-center gap-4">
+                <button className="w-12 h-12 bg-blue-600 flex items-center justify-center hover:bg-blue-700">
+                  <Play className="w-6 h-6 text-white ml-1" />
                 </button>
                 
                 <div className="flex-1">
-                  <h3 className="font-semibold text-slate-900 mb-1">{ep.title}</h3>
-                  <p className="text-slate-600 text-sm mb-2">{ep.desc}</p>
-                  
+                  <h3 className="font-semibold text-slate-900">{ep.title}</h3>
                   <div className="flex items-center gap-4 text-sm text-slate-500">
                     <span>{ep.date}</span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-4 h-4" />
-                      {ep.duration}
-                    </span>
+                    <span>{ep.duration}</span>
+                    <span>{ep.plays} plays</span>
                   </div>
                 </div>
                 
-                <Button variant="outline" size="sm">
-                  <Share2 className="w-4 h-4" />
-                </Button>
+                <button className="p-2 text-slate-400 hover:text-blue-600"><Download className="w-5 h-5" /></button>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
-    </>
+    </div>
   );
 }
