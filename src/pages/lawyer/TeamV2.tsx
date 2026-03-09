@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { UserPlus, Trash2, Mail } from 'lucide-react';
+import { UserPlus, Trash2, Users } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 
@@ -21,12 +21,13 @@ const MOCK_TEAM: TeamMember[] = [
 
 export function TeamV2() {
   const [members] = useState<TeamMember[]>(MOCK_TEAM);
-  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
+  const stats = {
+    total: members.length,
+    active: members.filter(m => m.status === 'active').length,
+    invited: members.filter(m => m.status === 'invited').length,
+  };
 
   const getRoleBadge = (role: string) => {
     const colors: Record<string, string> = {
@@ -36,36 +37,35 @@ export function TeamV2() {
     };
     return (
       <span className={`px-2 py-1 text-xs font-medium ${colors[role] || 'bg-slate-100 text-slate-700'}`}>
-        {role.charAt(0).toUpperCase() + role.slice(1)}
+        {role}
       </span>
     );
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active': return <Badge variant="success">Active</Badge>;
-      case 'invited': return <Badge variant="warning">Invited</Badge>;
-      case 'disabled': return <Badge variant="danger">Disabled</Badge>;
-      default: return <Badge variant="secondary">{status}</Badge>;
-    }
+    const variants: Record<string, 'success' | 'warning' | 'secondary'> = {
+      active: 'success',
+      invited: 'warning',
+      disabled: 'secondary',
+    };
+    return <Badge variant={variants[status]}>{status}</Badge>;
   };
 
   return (
     <>
       <Helmet>
-        <title>Team Management | VisaBuild Lawyer</title>
+        <title>Team | VisaBuild Lawyer</title>
       </Helmet>
 
       <div className="min-h-screen bg-slate-50">
-        {/* Header - SQUARE */}
         <div className="bg-white border-b border-slate-200">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">Team Management</h1>
-                <p className="text-slate-600">Manage your firm members</p>
+                <h1 className="text-2xl font-bold text-slate-900">Team</h1>
+                <p className="text-slate-600">Manage your team members</p>
               </div>
-              <Button variant="primary">
+              <Button variant="primary" onClick={() => setShowModal(true)}>
                 <UserPlus className="w-4 h-4 mr-2" />
                 Invite Member
               </Button>
@@ -74,22 +74,45 @@ export function TeamV2() {
         </div>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Stats - SQUARE */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-3 gap-4 mb-6">
             {[
-              { label: 'Total Members', value: members.length },
-              { label: 'Active', value: members.filter(m => m.status === 'active').length },
-              { label: 'Invited', value: members.filter(m => m.status === 'invited').length },
-              { label: 'Lawyers', value: members.filter(m => m.role === 'lawyer').length },
+              { label: 'Total Members', value: stats.total, icon: Users },
+              { label: 'Active', value: stats.active, icon: Users, color: 'text-green-600' },
+              { label: 'Invited', value: stats.invited, icon: Users, color: 'text-yellow-600' },
             ].map((stat) => (
               <div key={stat.label} className="bg-white border border-slate-200 p-4">
-                <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
-                <p className="text-sm text-slate-600">{stat.label}</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-slate-100 flex items-center justify-center">
+                    <stat.icon className={`w-5 h-5 ${stat.color || 'text-slate-600'}`} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
+                    <p className="text-sm text-slate-600">{stat.label}</p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
 
-          {/* Team Table - SQUARE */}
+          {showModal && (
+            <div className="bg-white border border-slate-200 p-6 mb-6">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Invite Team Member</h2>
+              <div className="grid md:grid-cols-2 gap-4 mb-4">
+                <input type="text" placeholder="Name" className="px-3 py-2 border border-slate-200" />
+                <input type="email" placeholder="Email" className="px-3 py-2 border border-slate-200" />
+              </div>
+              <select className="w-full px-3 py-2 border border-slate-200 mb-4">
+                <option value="paralegal">Paralegal</option>
+                <option value="lawyer">Lawyer</option>
+                <option value="admin">Admin</option>
+              </select>
+              <div className="flex gap-2">
+                <Button variant="primary">Send Invite</Button>
+                <Button variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
+              </div>
+            </div>
+          )}
+
           <div className="bg-white border border-slate-200">
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -103,40 +126,29 @@ export function TeamV2() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  {loading ? (
-                    <tr>
-                      <td colSpan={5} className="px-6 py-8 text-center text-slate-500">Loading...</td>
+                  {members.map((member) => (
+                    <tr key={member.id} className="hover:bg-slate-50">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-slate-200 flex items-center justify-center font-medium text-slate-600">
+                            {member.name.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-medium text-slate-900">{member.name}</p>
+                            <p className="text-xs text-slate-500">{member.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">{getRoleBadge(member.role)}</td>
+                      <td className="px-6 py-4">{getStatusBadge(member.status)}</td>
+                      <td className="px-6 py-4 text-slate-600">{member.joinedAt}</td>
+                      <td className="px-6 py-4">
+                        <Button variant="danger" size="sm">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </td>
                     </tr>
-                  ) : (
-                    members.map((member) => (
-                      <tr key={member.id} className="hover:bg-slate-50">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-blue-100 flex items-center justify-center font-semibold text-blue-600">
-                              {member.name.charAt(0)}
-                            </div>
-                            <div>
-                              <p className="font-medium text-slate-900">{member.name}</p>
-                              <p className="text-sm text-slate-500">{member.email}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">{getRoleBadge(member.role)}</td>
-                        <td className="px-6 py-4">{getStatusBadge(member.status)}</td>
-                        <td className="px-6 py-4 text-slate-600">{member.joinedAt}</td>
-                        <td className="px-6 py-4">
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="sm">
-                              <Mail className="w-4 h-4" />
-                            </Button>
-                            <Button variant="danger" size="sm">
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
+                  ))}
                 </tbody>
               </table>
             </div>
