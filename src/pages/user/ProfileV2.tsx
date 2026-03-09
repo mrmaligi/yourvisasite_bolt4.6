@@ -1,96 +1,68 @@
-import { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { User, MapPin, Mail, Camera, Edit, FileText, Calendar, Award } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
+import { User, Mail, Phone, MapPin, Camera } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
 
-export function ProfileV2() {
-  const { user, profile } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
-
-  const stats = [
-    { label: 'Visas Saved', value: '12', icon: FileText },
-    { label: 'Consultations', value: '3', icon: Calendar },
-    { label: 'Documents', value: '8', icon: FileText },
-    { label: 'Points', value: '1,250', icon: Award },
-  ];
-
+export function UserProfileV2() {
   return (
-    <>
-      <Helmet>
-        <title>My Profile | VisaBuild</title>
-      </Helmet>
+    <div className="min-h-screen bg-slate-50 p-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-slate-900">My Profile</h1>
+          <p className="text-slate-600">Manage your personal information</p>
+        </div>
 
-      <div className="min-h-screen bg-slate-50">
-        <div className="h-48 bg-blue-600"></div>
+        <div className="bg-white border border-slate-200 p-6">
+          <div className="flex items-center gap-6 mb-8">
+            <div className="relative">
+              <div className="w-24 h-24 bg-blue-100 flex items-center justify-center">
+                <span className="text-3xl font-bold text-blue-600">JD</span>
+              </div>
+              <button className="absolute bottom-0 right-0 w-8 h-8 bg-blue-600 text-white flex items-center justify-center">
+                <Camera className="w-4 h-4" />
+              </button>
+            </div>
+            <div>
+              <p className="text-xl font-semibold text-slate-900">John Doe</p>
+              <p className="text-slate-600">Member since March 2024</p>
+            </div>
+          </div>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative -mt-24 mb-8">
-            <div className="bg-white border border-slate-200 p-6">
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-                <div className="relative">
-                  <div className="w-32 h-32 bg-slate-200 border-4 border-white flex items-center justify-center overflow-hidden">
-                    {profile?.avatar_url ? (
-                      <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-                    ) : (
-                      <User className="w-16 h-16 text-slate-400" />
-                    )}
-                  </div>
-                  <button className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white border-2 border-white">
-                    <Camera className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="flex-1">
-                  <h1 className="text-2xl font-bold text-slate-900">{profile?.full_name || 'User'}</h1>
-                  <p className="text-slate-600">Visa Applicant • Member since 2023</p>
-                  <div className="flex flex-wrap gap-4 mt-3 text-sm text-slate-600">
-                    <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> London, UK</span>
-                    <span className="flex items-center gap-1"><Mail className="w-4 h-4" /> {user?.email}</span>
-                  </div>
-                </div>
-
-                <Button variant="outline" onClick={() => setIsEditing(!isEditing)}>
-                  <Edit className="w-4 h-4 mr-2" />
-                  {isEditing ? 'Cancel' : 'Edit Profile'}
-                </Button>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">First Name</label>
+              <input type="text" defaultValue="John" className="w-full px-3 py-2 border border-slate-200" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Last Name</label>
+              <input type="text" defaultValue="Doe" className="w-full px-3 py-2 border border-slate-200" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-slate-400" />
+                <input type="email" defaultValue="john@example.com" className="flex-1 px-3 py-2 border border-slate-200" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-slate-400" />
+                <input type="tel" defaultValue="+61 412 345 678" className="flex-1 px-3 py-2 border border-slate-200" />
+              </div>
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1">Address</label>
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-slate-400" />
+                <input type="text" defaultValue="123 Main St, Sydney NSW 2000" className="flex-1 px-3 py-2 border border-slate-200" />
               </div>
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1 space-y-4">
-              <div className="bg-white border border-slate-200 p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4">Overview</h2>
-                <div className="grid grid-cols-2 gap-4">
-                  {stats.map((stat) => (
-                    <div key={stat.label} className="text-center p-4 bg-slate-50 border border-slate-200">
-                      <stat.icon className="w-5 h-5 text-blue-600 mx-auto mb-2" />
-                      <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
-                      <p className="text-xs text-slate-600">{stat.label}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-2">
-              <div className="bg-white border border-slate-200">
-                <div className="p-6 border-b border-slate-200">
-                  <h2 className="text-lg font-semibold text-slate-900">About Me</h2>
-                </div>
-                <div className="p-6">
-                  <p className="text-slate-700 leading-relaxed">
-                    Software Engineer with 5 years of experience looking to relocate to Australia. 
-                    Interested in skilled migration pathways and employer sponsorship opportunities.
-                  </p>
-                </div>
-              </div>
-            </div>
+          <div className="mt-8 pt-6 border-t border-slate-200 flex justify-end">
+            <Button variant="primary">Save Changes</Button>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
