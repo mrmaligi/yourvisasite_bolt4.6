@@ -96,7 +96,7 @@ const LawyerSettings = lazy(() => import('./pages/lawyer/LawyerSettingsV2').then
 const LawyerTeam = lazy(() => import('./pages/lawyer/TeamV2').then(m => ({ default: m.TeamV2 })));
 const LawyerCases = lazy(() => import('./pages/lawyer/Cases').then(m => ({ default: m.Cases })));
 const LawyerDocuments = lazy(() => import('./pages/lawyer/Documents').then(m => ({ default: m.Documents })));
-const LawyerNotes = lazy(() => import('./pages/lawyer/Notes').then(m => ({ default: m.Notes })));
+const LawyerNotes = lazy(() => import('./pages/lawyer/NotesV2').then(m => ({ default: m.NotesV2 })));
 const LawyerLeadCapture = lazy(() => import('./pages/lawyer/LeadCapture').then(m => ({ default: m.LeadCapture })));
 const LawyerTestimonials = lazy(() => import('./pages/lawyer/Testimonials').then(m => ({ default: m.Testimonials })));
 const LawyerClientDetail = lazy(() => import('./pages/lawyer/ClientDetail').then(m => ({ default: m.ClientDetail })));

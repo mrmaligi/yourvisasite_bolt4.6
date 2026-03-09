@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Plus, Search, Trash2, Save } from 'lucide-react';
+import { Plus, Search, Trash2, FileText } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
 
 interface Note {
   id: string;
@@ -25,10 +24,15 @@ export function NotesV2() {
 
   const selectedNote = notes.find(n => n.id === selectedNoteId);
 
-  const filteredNotes = notes.filter(n => 
-    n.title.toLowerCase().includes(search.toLowerCase()) || 
-    n.clientName?.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleUpdateNote = (field: keyof Note, value: string) => {
+    if (!selectedNoteId) return;
+    setNotes(notes.map(n => n.id === selectedNoteId ? { ...n, [field]: value, updatedAt: new Date().toISOString().split('T')[0] } : n));
+  };
+
+  const handleDelete = (id: string) => {
+    setNotes(notes.filter(n => n.id !== id));
+    if (selectedNoteId === id) setSelectedNoteId(null);
+  };
 
   const handleNewNote = () => {
     const newNote: Note = {
@@ -41,10 +45,10 @@ export function NotesV2() {
     setSelectedNoteId(newNote.id);
   };
 
-  const handleDelete = (id: string) => {
-    setNotes(notes.filter(n => n.id !== id));
-    if (selectedNoteId === id) setSelectedNoteId(null);
-  };
+  const filteredNotes = notes.filter(n => 
+    n.title.toLowerCase().includes(search.toLowerCase()) || 
+    n.clientName?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <>
@@ -58,7 +62,7 @@ export function NotesV2() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold text-slate-900">Notes</h1>
-                <p className="text-slate-600">Keep track of client interactions and tasks</p>
+                <p className="text-slate-600">Manage your case notes and memos</p>
               </div>
               <Button variant="primary" onClick={handleNewNote}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -69,8 +73,8 @@ export function NotesV2() {
         </div>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1 bg-white border border-slate-200">
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-white border border-slate-200">
               <div className="p-4 border-b border-slate-200">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -79,61 +83,68 @@ export function NotesV2() {
                     placeholder="Search notes..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 border border-slate-200"
+                    className="w-full pl-9 pr-3 py-2 border border-slate-200 text-sm"
                   />
                 </div>
               </div>
-              
+
               <div className="divide-y divide-slate-200 max-h-96 overflow-y-auto">
                 {filteredNotes.map((note) => (
                   <button
                     key={note.id}
                     onClick={() => setSelectedNoteId(note.id)}
-                    className={`w-full text-left p-4 transition-colors ${
+                    className={`w-full p-4 text-left transition-colors ${
                       selectedNoteId === note.id ? 'bg-blue-50 border-l-4 border-blue-600' : 'hover:bg-slate-50'
                     }`}
                   >
-                    <p className="font-medium text-slate-900 truncate">{note.title}</p>
-                    {note.clientName && <Badge variant="secondary" size="sm" className="mt-1">{note.clientName}</Badge>}
-                    <p className="text-xs text-slate-400 mt-1">{note.updatedAt}</p>
+                    <div className="flex items-start gap-3">
+                      <FileText className="w-5 h-5 text-slate-400 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-slate-900 truncate">{note.title}</p>
+                        {note.clientName && (
+                          <p className="text-sm text-slate-500">{note.clientName}</p>
+                        )}
+                        <p className="text-xs text-slate-400 mt-1">{note.updatedAt}</p>
+                      </div>
+                      
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleDelete(note.id); }}
+                        className="text-slate-400 hover:text-red-600"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="lg:col-span-2 bg-white border border-slate-200">
+            <div className="md:col-span-2 bg-white border border-slate-200 p-6">
               {selectedNote ? (
-                <>
-                  <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-                    <input
-                      type="text"
-                      value={selectedNote.title}
-                      onChange={(e) => setNotes(notes.map(n => n.id === selectedNote.id ? { ...n, title: e.target.value } : n))}
-                      className="text-lg font-semibold bg-transparent border-none outline-none flex-1"
-                    />
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        <Save className="w-4 h-4 mr-1" />
-                        Save
-                      </Button>
-                      <Button variant="danger" size="sm" onClick={() => handleDelete(selectedNote.id)}>
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    value={selectedNote.title}
+                    onChange={(e) => handleUpdateNote('title', e.target.value)}
+                    className="w-full text-xl font-semibold border-0 border-b border-slate-200 pb-2 focus:outline-none focus:border-blue-600"
+                  />
                   
-                  <div className="p-4">
-                    <textarea
-                      value={selectedNote.content}
-                      onChange={(e) => setNotes(notes.map(n => n.id === selectedNote.id ? { ...n, content: e.target.value } : n))}
-                      className="w-full h-96 p-4 border border-slate-200 resize-none"
-                      placeholder="Start typing..."
-                    />
-                  </div>
-                </>
+                  {selectedNote.clientName && (
+                    <p className="text-sm text-slate-500">Client: {selectedNote.clientName}</p>
+                  )}
+                  
+                  <textarea
+                    value={selectedNote.content}
+                    onChange={(e) => handleUpdateNote('content', e.target.value)}
+                    placeholder="Start typing..."
+                    className="w-full h-96 p-4 border border-slate-200 resize-none"
+                  />
+                  
+                  <p className="text-sm text-slate-400">Last updated: {selectedNote.updatedAt}</p>
+                </div>
               ) : (
-                <div className="flex items-center justify-center h-96 text-slate-400">
-                  <p>Select a note to view</p>
+                <div className="h-96 flex items-center justify-center text-slate-500">
+                  Select a note to view or create a new one
                 </div>
               )}
             </div>
