@@ -28,7 +28,7 @@ const LawyerDirectory = lazy(() => import('./pages/public/LawyerDirectoryV2').th
 const LawyerProfile = lazy(() => import('./pages/public/LawyerProfileV2').then(m => ({ default: m.LawyerProfileV2 })));
 const News = lazy(() => import('./pages/public/NewsV2').then(m => ({ default: m.NewsV2 })));
 const NewsDetail = lazy(() => import('./pages/public/NewsDetailV2').then(m => ({ default: m.NewsDetailV2 })));
-const PublicMarketplace = lazy(() => import('./pages/public/Marketplace').then(m => ({ default: m.Marketplace })));
+const PublicMarketplace = lazy(() => import('./pages/public/MarketplaceV2').then(m => ({ default: m.MarketplaceV2 })));
 const Success = lazy(() => import('./pages/SuccessV2').then(m => ({ default: m.SuccessV2 })));
 const Pricing = lazy(() => import('./pages/public/PricingV2').then(m => ({ default: m.PricingV2 })));
 const EligibilityQuizPage = lazy(() => import('./pages/public/EligibilityQuizPage').then(m => ({ default: m.EligibilityQuizPage })));
