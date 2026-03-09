@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Star, CheckCircle, XCircle, Trash2, Quote } from 'lucide-react';
+import { Star, CheckCircle, XCircle, Trash2, MessageSquare } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 
@@ -13,42 +13,20 @@ interface Testimonial {
   date: string;
 }
 
-const MOCK_TESTIMONIALS: Testimonial[] = [
+const MOCK_REVIEWS: Testimonial[] = [
   { id: '1', clientName: 'Sarah Johnson', rating: 5, content: 'Excellent service, very professional.', status: 'published', date: '2024-03-18' },
   { id: '2', clientName: 'Michael Chen', rating: 4, content: 'Good communication but slightly delayed.', status: 'pending', date: '2024-03-15' },
   { id: '3', clientName: 'Anonymous', rating: 5, content: 'Highly recommend!', status: 'published', date: '2024-03-10' },
 ];
 
 export function TestimonialsV2() {
-  const [testimonials] = useState<Testimonial[]>(MOCK_TESTIMONIALS);
+  const [reviews] = useState<Testimonial[]>(MOCK_REVIEWS);
 
   const stats = {
-    total: testimonials.length,
-    published: testimonials.filter(t => t.status === 'published').length,
-    pending: testimonials.filter(t => t.status === 'pending').length,
-    average: (testimonials.reduce((sum, t) => sum + t.rating, 0) / testimonials.length).toFixed(1),
-  };
-
-  const getStars = (rating: number) => {
-    return (
-      <div className="flex gap-0.5">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={`w-4 h-4 ${star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-slate-300'}`}
-          />
-        ))}
-      </div>
-    );
-  };
-
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'success' | 'warning' | 'secondary'> = {
-      published: 'success',
-      pending: 'warning',
-      hidden: 'secondary',
-    };
-    return <Badge variant={variants[status]}>{status}</Badge>;
+    total: reviews.length,
+    published: reviews.filter(r => r.status === 'published').length,
+    pending: reviews.filter(r => r.status === 'pending').length,
+    average: (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1),
   };
 
   return (
@@ -63,7 +41,7 @@ export function TestimonialsV2() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold text-slate-900">Testimonials</h1>
-                <p className="text-slate-600">Manage client testimonials</p>
+                <p className="text-slate-600">Manage client reviews and testimonials</p>
               </div>
             </div>
           </div>
@@ -72,16 +50,14 @@ export function TestimonialsV2() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             {[
-              { label: 'Total', value: stats.total, icon: Quote },
+              { label: 'Total Reviews', value: stats.total, icon: MessageSquare },
               { label: 'Published', value: stats.published, icon: CheckCircle, color: 'text-green-600' },
               { label: 'Pending', value: stats.pending, icon: XCircle, color: 'text-yellow-600' },
-              { label: 'Avg Rating', value: stats.average, icon: Star, color: 'text-yellow-600' },
+              { label: 'Avg Rating', value: stats.average, icon: Star, color: 'text-yellow-500' },
             ].map((stat) => (
               <div key={stat.label} className="bg-white border border-slate-200 p-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-slate-100 flex items-center justify-center">
-                    <stat.icon className={`w-5 h-5 ${stat.color || 'text-slate-600'}`} />
-                  </div>
+                  <stat.icon className={`w-5 h-5 ${stat.color || 'text-slate-600'}`} />
                   <div>
                     <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
                     <p className="text-sm text-slate-600">{stat.label}</p>
@@ -101,23 +77,39 @@ export function TestimonialsV2() {
                     <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Review</th>
                     <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Status</th>
                     <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Date</th>
-                    <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Actions</th>
+                    <th className="text-right px-6 py-3 text-sm font-medium text-slate-600">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  {testimonials.map((t) => (
-                    <tr key={t.id} className="hover:bg-slate-50">
-                      <td className="px-6 py-4 font-medium text-slate-900">{t.clientName}</td>
-                      <td className="px-6 py-4">{getStars(t.rating)}</td>
-                      <td className="px-6 py-4 text-slate-700 max-w-xs truncate">{t.content}</td>
-                      <td className="px-6 py-4">{getStatusBadge(t.status)}</td>
-                      <td className="px-6 py-4 text-slate-600">{t.date}</td>
+                  {reviews.map((review) => (
+                    <tr key={review.id} className="hover:bg-slate-50">
+                      <td className="px-6 py-4 font-medium text-slate-900">{review.clientName}</td>
                       <td className="px-6 py-4">
-                        <div className="flex gap-1">
-                          {t.status === 'pending' && (
-                            <Button variant="primary" size="sm">Approve</Button>
-                          )}
-                          <Button variant="danger" size="sm">
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: review.rating }).map((_, i) => (
+                            <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-slate-600 max-w-xs truncate">{review.content}</td>
+                      <td className="px-6 py-4">
+                        <Badge variant={
+                          review.status === 'published' ? 'success' : 
+                          review.status === 'pending' ? 'warning' : 'secondary'
+                        }>
+                          {review.status}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4 text-slate-600">{review.date}</td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button variant="outline" size="sm">
+                            <CheckCircle className="w-4 h-4" />
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <XCircle className="w-4 h-4" />
+                          </Button>
+                          <Button variant="outline" size="sm">
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
