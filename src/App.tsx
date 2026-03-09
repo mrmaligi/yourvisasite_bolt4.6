@@ -43,7 +43,7 @@ const CareersPage = lazy(() => import('./pages/public/CareersPage').then(m => ({
 const ForumHomePage = lazy(() => import('./pages/public/ForumHomePageV2').then(m => ({ default: m.ForumHomePageV2 })));
 const ForumCategoryPage = lazy(() => import('./pages/public/ForumCategoryPageV2').then(m => ({ default: m.ForumCategoryPageV2 })));
 const ForumTopicPage = lazy(() => import('./pages/public/ForumTopicPageV2').then(m => ({ default: m.ForumTopicPageV2 })));
-const LawyerRegister = lazy(() => import('./pages/lawyer/LawyerRegister').then(m => ({ default: m.LawyerRegister })));
+const LawyerRegister = lazy(() => import('./pages/lawyer/LawyerRegisterV2').then(m => ({ default: m.LawyerRegisterV2 })));
 const LawyerPending = lazy(() => import('./pages/lawyer/LawyerPending').then(m => ({ default: m.LawyerPending })));
 
 // Password Reset Pages
