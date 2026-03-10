@@ -48,6 +48,10 @@ const Lawyers = lazy(() => import('./pages/admin/LawyersV2').then(m => ({ defaul
 const Payments = lazy(() => import('./pages/admin/PaymentsV2').then(m => ({ default: m.PaymentsV2 })));
 const Users = lazy(() => import('./pages/admin/UsersV2').then(m => ({ default: m.UsersV2 })));
 
+// Tracker Pages (AusVisa Community Tracker)
+const TrackerDashboard = lazy(() => import('./pages/tracker/TrackerDashboardV2').then(m => ({ default: m.TrackerDashboardV2 })));
+const SubmitTimeline = lazy(() => import('./pages/tracker/SubmitTimelineV2').then(m => ({ default: m.SubmitTimelineV2 })));
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -101,6 +105,10 @@ export default function App() {
                         <Route path="admin/payments" element={<Payments />} />
                         <Route path="admin/users" element={<Users />} />
                       </Route>
+
+                      {/* Tracker Routes (AusVisa Community Tracker) */}
+                      <Route path="tracker" element={<TrackerDashboard />} />
+                      <Route path="tracker/submit" element={<SubmitTimeline />} />
                     </Routes>
                   </Suspense>
                 </BrowserRouter>
