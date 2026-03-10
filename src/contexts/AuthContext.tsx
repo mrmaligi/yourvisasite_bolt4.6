@@ -7,16 +7,15 @@ import type { Profile, UserRole } from '../types/database';
 interface AuthContextValue {
   session: Session | null;
   user: User | null;
-  profile: any | null; // Typed loosely to avoid circular dependency issues
+  profile: any | null;
   role: UserRole | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   signIn: (email: string, password: string) => Promise<{ data: { user: User | null; session: Session | null }; error: AuthError | null }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ data: { user: User | null; session: Session | null }; error: AuthError | null }>;
+  signUp: (email: string, password: string, fullName: string, role?: string) => Promise<{ data: { user: User | null; session: Session | null }; error: AuthError | null }>;
+  signUpAsLawyer: (email: string, password: string, fullName: string) => Promise<{ data: { user: User | null; session: Session | null }; error: AuthError | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
-
-  // Aliases/Compat
   signInWithEmail: (email: string, password: string) => Promise<{ data: { user: User | null; session: Session | null }; error: AuthError | null }>;
   signUpWithEmail: (email: string, password: string, fullName: string) => Promise<{ data: { user: User | null; session: Session | null }; error: AuthError | null }>;
   signInWithGoogle: () => Promise<void>;
@@ -31,6 +30,7 @@ const AuthContext = createContext<AuthContextValue>({
   isAuthenticated: false,
   signIn: async () => ({ data: { user: null, session: null }, error: null }),
   signUp: async () => ({ data: { user: null, session: null }, error: null }),
+  signUpAsLawyer: async () => ({ data: { user: null, session: null }, error: null }),
   signOut: async () => {},
   refreshProfile: async () => {},
   signInWithEmail: async () => ({ data: { user: null, session: null }, error: null }),
@@ -137,16 +137,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return await supabase.auth.signInWithPassword({ email, password });
   };
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string, role: string = 'user') => {
     return await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           full_name: fullName,
+          role: role
         },
       },
     });
+  };
+
+  const signUpAsLawyer = async (email: string, password: string, fullName: string) => {
+    return await signUp(email, password, fullName, 'lawyer');
   };
 
   const signOut = async () => {
@@ -182,6 +187,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated,
         signIn,
         signUp,
+        signUpAsLawyer,
         signOut,
         refreshProfile,
         signInWithEmail: signIn,

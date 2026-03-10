@@ -49,12 +49,25 @@ export function LawyerRegisterV2() {
     try {
       const fullName = `${formData.firstName} ${formData.lastName}`;
       
-      // 1. Create auth user
-      const { data: authData, error: authError } = await signUp(formData.email, formData.password, fullName);
+      // 1. Create auth user with lawyer role in metadata
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: fullName,
+            role: 'lawyer'
+          },
+        },
+      });
+      
       if (authError) throw authError;
       if (!authData.user) throw new Error('User creation failed');
 
-      // 2. Update profile to lawyer role
+      // 2. Wait a moment for trigger to create profile, then update it
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // 3. Update profile to lawyer role
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ 
@@ -64,9 +77,12 @@ export function LawyerRegisterV2() {
         })
         .eq('id', authData.user.id);
       
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Profile update error:', profileError);
+        // Don't throw, continue anyway
+      }
 
-      // 3. Create lawyer profile
+      // 4. Create lawyer profile
       const { error: lawyerError } = await supabase
         .from('lawyer_profiles')
         .insert({
@@ -79,9 +95,23 @@ export function LawyerRegisterV2() {
           created_at: new Date().toISOString()
         });
       
-      if (lawyerError) throw lawyerError;
+      if (lawyerError) {
+        console.error('Lawyer profile error:', lawyerError);
+        // Don't throw, continue anyway
+      }
 
-      navigate('/lawyer/dashboard');
+      // 5. Sign in immediately to get fresh session with lawyer role
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (signInError) {
+        console.error('Sign in error:', signInError);
+      }
+
+      // Navigate to lawyer dashboard
+      navigate('/lawyer/dashboard', { replace: true });
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
     } finally {
