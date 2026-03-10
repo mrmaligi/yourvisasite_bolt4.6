@@ -1,7 +1,7 @@
 import { Users, UserPlus, Search, MoreHorizontal } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
-export function AdminUsersV2() {
+export function UsersV2() {
   const users = [
     { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Client', status: 'Active' },
     { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'Lawyer', status: 'Active' },

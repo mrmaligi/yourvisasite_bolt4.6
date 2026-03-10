@@ -2,7 +2,7 @@ import { Settings, CreditCard, Percent, DollarSign, ToggleLeft, ToggleRight } fr
 import { Button } from '../../components/ui/Button';
 import { useState } from 'react';
 
-export function AdminPaymentsV2() {
+export function PaymentsV2() {
   const [settings, setSettings] = useState({
     stripeEnabled: true,
     paypalEnabled: false,

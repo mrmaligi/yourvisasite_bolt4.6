@@ -1,7 +1,7 @@
 import { Users, UserCheck, Clock, Briefcase, Star, AlertCircle } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
-export function AdminLawyersV2() {
+export function LawyersV2() {
   const lawyers = [
     { id: 1, name: 'Jane Smith', email: 'jane@example.com', status: 'verified', cases: 45, rating: 4.9 },
     { id: 2, name: 'Michael Brown', email: 'michael@example.com', status: 'verified', cases: 32, rating: 4.8 },
