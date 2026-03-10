@@ -3,6 +3,8 @@ import {
   Users,
   Scale,
   DollarSign,
+  BarChart3,
+  Settings,
   type LucideIcon,
 } from 'lucide-react';
 import { DashboardLayout } from './DashboardLayout';
@@ -13,12 +15,14 @@ interface SidebarItem {
   icon: LucideIcon;
 }
 
-// Core admin pages only
+// Admin navigation - 6 essential pages
 const sidebarItems: SidebarItem[] = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/admin/users', label: 'Users', icon: Users },
   { to: '/admin/lawyers', label: 'Lawyers', icon: Scale },
   { to: '/admin/payments', label: 'Payments', icon: DollarSign },
+  { to: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
 // Mobile nav items (same as sidebar for essential pages)

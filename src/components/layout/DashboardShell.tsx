@@ -72,6 +72,8 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
           { to: '/admin/users', icon: User, label: 'Users' },
           { to: '/admin/lawyers', icon: Briefcase, label: 'Lawyers' },
           { to: '/admin/payments', icon: DollarSign, label: 'Payments' },
+          { to: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
+          { to: '/admin/settings', icon: Settings, label: 'Settings' },
         ];
       case 'lawyer':
         return [

@@ -1,10 +1,10 @@
 import {
   LayoutDashboard,
-  CalendarDays,
   Briefcase,
-  FileText,
-  Star,
+  CalendarDays,
   DollarSign,
+  Star,
+  FileText,
 } from 'lucide-react';
 import { DashboardLayout } from './DashboardLayout';
 
@@ -17,10 +17,12 @@ const sidebarItems = [
   { to: '/lawyer/reviews', label: 'Reviews', icon: Star },
 ];
 
+const mobileNavItems = sidebarItems;
+
 interface LawyerDashboardLayoutProps {
   children?: React.ReactNode;
 }
 
 export function LawyerDashboardLayout({ children }: LawyerDashboardLayoutProps) {
-  return <DashboardLayout sidebarItems={sidebarItems} title="Lawyer Portal">{children}</DashboardLayout>;
+  return <DashboardLayout sidebarItems={sidebarItems} mobileNavItems={mobileNavItems} title="Lawyer Portal">{children}</DashboardLayout>;
 }

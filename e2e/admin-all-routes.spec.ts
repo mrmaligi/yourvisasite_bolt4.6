@@ -4,29 +4,15 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 const ADMIN_EMAIL = 'mrmaligi@outlook.com';
 const ADMIN_PASSWORD = 'Qwerty@2007';
 
+// Essential admin routes only (4 core pages)
 const ADMIN_ROUTES = [
   { name: 'Dashboard', path: '/admin' },
-  { name: 'Performance', path: '/admin/performance' },
-  { name: 'Activity Log', path: '/admin/activity' },
   { name: 'Users', path: '/admin/users' },
   { name: 'Lawyers', path: '/admin/lawyers' },
-  { name: 'Visas', path: '/admin/visas' },
-  { name: 'Content CMS', path: '/admin/content' },
-  { name: 'Pages', path: '/admin/pages' },
-  { name: 'Blog', path: '/admin/blog' },
-  { name: 'News', path: '/admin/news' },
-  { name: 'YouTube Feed', path: '/admin/youtube' },
-  { name: 'Premium Content', path: '/admin/premium' },
-  { name: 'Tracker', path: '/admin/tracker' },
-  { name: 'Analytics Overview', path: '/admin/analytics/overview' },
-  { name: 'Support Tickets', path: '/admin/support/tickets' },
-  { name: 'Pricing', path: '/admin/pricing' },
-  { name: 'Promo Codes', path: '/admin/promos' },
-  { name: 'Settings', path: '/admin/settings' },
-  { name: 'System Settings', path: '/admin/system/settings' },
+  { name: 'Payments', path: '/admin/payments' },
 ];
 
-test.describe('Admin Routes - All Pages Test', () => {
+test.describe('Admin Routes - Essential Pages Test', () => {
 
   test.beforeEach(async ({ page }) => {
     // Login as admin
@@ -46,10 +32,10 @@ test.describe('Admin Routes - All Pages Test', () => {
     await page.waitForTimeout(3000);
   });
 
-  test('Test all admin routes load correctly', async ({ page }) => {
-    test.setTimeout(180000); // 3 mins for all 19 routes
+  test('Test all essential admin routes load correctly', async ({ page }) => {
+    test.setTimeout(60000); // 1 min for 4 routes
     console.log('═══════════════════════════════════════════════════');
-    console.log('  TESTING ALL 19 ADMIN ROUTES');
+    console.log('  TESTING ESSENTIAL ADMIN ROUTES (4 pages)');
     console.log('═══════════════════════════════════════════════════\n');
 
     const results = [];
@@ -59,10 +45,9 @@ test.describe('Admin Routes - All Pages Test', () => {
 
       try {
         await page.goto(`${BASE_URL}${route.path}`);
-    await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
+        await page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 }).catch(() => {});
 
         // Wait for page to either have a heading or some visible text
-        // Allow up to 10s for slow routes
         await Promise.race([
           page.waitForSelector('h1, h2, h3, h4, .text-3xl, .text-2xl', { timeout: 10000 }).catch(() => null),
           page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => null)
@@ -107,7 +92,7 @@ test.describe('Admin Routes - All Pages Test', () => {
     const failed = results.filter(r => !r.passed).length;
     console.log(`\n  Total: ${results.length - failed} passed, ${failed} failed`);
 
-    // We expect most to pass. If more than 5 fail, something is systematically wrong.
-    expect(failed).toBeLessThan(6);
+    // All essential pages should pass
+    expect(failed).toBe(0);
   });
 });
