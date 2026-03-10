@@ -5,6 +5,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
+import { GlobalSearchProvider } from './contexts/GlobalSearchContext';
+import { GlobalSearch } from './components/GlobalSearch';
 import { PublicLayout } from './components/layout/PublicLayout';
 import { UserDashboardLayout } from './components/layout/UserDashboardLayout';
 import { LawyerDashboardLayout } from './components/layout/LawyerDashboardLayout';
@@ -55,8 +57,10 @@ export default function App() {
         <HelmetProvider>
           <ToastProvider>
             <ErrorBoundary>
-              <BrowserRouter>
-                <Suspense fallback={<Loading fullScreen />}>
+              <GlobalSearchProvider>
+                <BrowserRouter>
+                  <GlobalSearch />
+                  <Suspense fallback={<Loading fullScreen />}>
                   <Routes>
                     {/* Public Routes */}
                     <Route element={<PublicLayout />}>
@@ -104,6 +108,7 @@ export default function App() {
                   </Routes>
                 </Suspense>
               </BrowserRouter>
+            </GlobalSearchProvider>
             </ErrorBoundary>
           </ToastProvider>
         </HelmetProvider>
