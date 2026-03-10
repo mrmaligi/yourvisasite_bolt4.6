@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, ArrowRight, Shield, Eye, EyeOff, Briefcase } from 'lucide-react';
-import { Button } from '../../components/ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
 
 export function RegisterV2() {
@@ -179,10 +178,14 @@ export function RegisterV2() {
               </span>
             </div>
 
-            <Button type="submit" variant="primary" className="w-full" disabled={isLoading}>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-3 px-4 bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center"
+            >
               {isLoading ? 'Creating account...' : 'Create Account'}
               <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
+            </button>
           </form>
 
           {/* Footer */}

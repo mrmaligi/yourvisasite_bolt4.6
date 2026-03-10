@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, Shield, Eye, EyeOff } from 'lucide-react';
-import { Button } from '../../components/ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
 
 export function LoginV2() {
@@ -98,10 +97,14 @@ export function LoginV2() {
               </Link>
             </div>
 
-            <Button type="submit" variant="primary" className="w-full" disabled={isLoading}>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-3 px-4 bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center"
+            >
               {isLoading ? 'Signing in...' : 'Sign In'}
               <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
+            </button>
           </form>
 
           {/* Footer */}
