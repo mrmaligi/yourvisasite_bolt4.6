@@ -1,20 +1,20 @@
-import { CheckCircle, XCircle, ArrowRight, FileText } from 'lucide-react';
+import { Globe, MapPin, Clock, DollarSign, CheckCircle, Briefcase } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
-export function PublicVisaComparisonV2() {
+export function VisaComparisonV2() {
   const visas = [
-    { name: 'Partner Visa (820)', processing: '18-24 months', cost: '$8,085', workRights: true, medicare: true },
-    { name: 'Skilled Independent (189)', processing: '8-12 months', cost: '$4,240', workRights: true, medicare: true },
-    { name: 'Student Visa (500)', processing: '1-3 months', cost: '$650', workRights: 'Limited', medicare: false },
-    { name: 'Working Holiday (417)', processing: '2-4 weeks', cost: '$510', workRights: 'Limited', medicare: false },
+    { name: 'Partner Visa', subclass: '820/801', processing: '12-18 months', cost: '$7,850', work: true, medicare: true },
+    { name: 'Skilled Independent', subclass: '189', processing: '8-12 months', cost: '$4,115', work: true, medicare: true },
+    { name: 'Student Visa', subclass: '500', processing: '1-3 months', cost: '$650', work: 'Limited', medicare: false },
+    { name: 'Visitor Visa', subclass: '600', processing: '1-4 weeks', cost: '$150', work: false, medicare: false },
   ];
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="bg-slate-900 py-16 px-8">
+      <div className="bg-slate-900 py-12 px-8">
         <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-3xl font-bold text-white mb-4">Visa Comparison</h1>
-          <p className="text-xl text-slate-300">Compare visa options side by side</p>
+          <h1 className="text-3xl font-bold text-white mb-4">Compare Visas</h1>
+          <p className="text-slate-400">Compare different visa options side by side</p>
         </div>
       </div>
 
@@ -23,59 +23,44 @@ export function PublicVisaComparisonV2() {
           <table className="w-full">
             <thead className="bg-slate-50">
               <tr>
-                <th className="text-left p-4 font-semibold text-slate-900">Feature</th>
+                <th className="text-left p-4 text-sm font-medium text-slate-600">Feature</th>
                 {visas.map((visa) => (
-                  <th key={visa.name} className="text-left p-4 font-semibold text-slate-900">{visa.name}</th>
+                  <th key={visa.subclass} className="text-center p-4 text-sm font-medium text-slate-900">
+                    <div>{visa.name}</div>
+                    <div className="text-xs text-slate-500">{visa.subclass}</div>
+                  </th>
                 ))}
               </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200">
+            </thead>            
+            <tbody className="divide-y divide-slate-200">              
               <tr>
-                <td className="p-4 text-slate-700">Processing Time</td>
+                <td className="p-4 text-slate-600">Processing Time</td>
                 {visas.map((visa) => (
-                  <td key={visa.name} className="p-4 text-slate-900">{visa.processing}</td>
+                  <td key={visa.subclass} className="p-4 text-center">{visa.processing}</td>
                 ))}
-              </tr>
+              </tr>              
               <tr>
-                <td className="p-4 text-slate-700">Cost (AUD)</td>
+                <td className="p-4 text-slate-600">Cost (AUD)</td>
                 {visas.map((visa) => (
-                  <td key={visa.name} className="p-4 text-slate-900 font-semibold">{visa.cost}</td>
+                  <td key={visa.subclass} className="p-4 text-center font-medium">{visa.cost}</td>
                 ))}
-              </tr>
+              </tr>              
               <tr>
-                <td className="p-4 text-slate-700">Work Rights</td>
+                <td className="p-4 text-slate-600">Work Rights</td>
                 {visas.map((visa) => (
-                  <td key={visa.name} className="p-4">
-                    {visa.workRights === true ? (
-                      <CheckCircle className="w-5 h-5 text-green-500" />
-                    ) : visa.workRights === false ? (
-                      <XCircle className="w-5 h-5 text-red-500" />
-                    ) : (
-                      <span className="text-amber-600">{visa.workRights}</span>
-                    )}
+                  <td key={visa.subclass} className="p-4 text-center">
+                    {visa.work === true ? <CheckCircle className="w-5 h-5 text-green-600 mx-auto" /> :
+                     visa.work === false ? <XCircle className="w-5 h-5 text-red-500 mx-auto" /> :
+                     <span className="text-sm">{visa.work}</span>}
                   </td>
                 ))}
-              </tr>
+              </tr>              
               <tr>
-                <td className="p-4 text-slate-700">Medicare Access</td>
+                <td className="p-4 text-slate-600">Medicare</td>
                 {visas.map((visa) => (
-                  <td key={visa.name} className="p-4">
-                    {visa.medicare ? (
-                      <CheckCircle className="w-5 h-5 text-green-500" />
-                    ) : (
-                      <XCircle className="w-5 h-5 text-red-500" />
-                    )}
-                  </td>
-                ))}
-              </tr>
-              <tr>
-                <td className="p-4"></td>
-                {visas.map((visa) => (
-                  <td key={visa.name} className="p-4">
-                    <Button variant="primary" size="sm">
-                      Details
-                      <ArrowRight className="w-4 h-4 ml-1" />
-                    </Button>
+                  <td key={visa.subclass} className="p-4 text-center">
+                    {visa.medicare ? <CheckCircle className="w-5 h-5 text-green-600 mx-auto" /> :
+                     <XCircle className="w-5 h-5 text-red-500 mx-auto" />}
                   </td>
                 ))}
               </tr>
