@@ -86,7 +86,7 @@ export function UserDashboardV2() {
             <div className="md:col-span-2 bg-white border border-slate-200"
             >
               <div className="p-4 border-b border-slate-200 flex items-center justify-between"
-003e
+>
                 <h2 className="text-lg font-semibold text-slate-900">Recent Activity</h2>
                 <Link to="/user/activity" className="text-sm text-blue-600 hover:underline">View all</Link>
               </div>
