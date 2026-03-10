@@ -4,12 +4,10 @@ import {
   LayoutDashboard, 
   User, 
   Briefcase, 
-  Shield, 
+  DollarSign,
   LogOut, 
   Menu, 
   X,
-  ChevronRight,
-  Bell
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
@@ -35,7 +33,6 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
   const location = useLocation();
   const [profile, setProfile] = useState<any>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [notifications] = useState(0);
 
   useEffect(() => {
     if (user) {
@@ -66,9 +63,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
           { to: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
           { to: '/admin/users', icon: User, label: 'Users' },
           { to: '/admin/lawyers', icon: Briefcase, label: 'Lawyers' },
-          { to: '/admin/visas', icon: Shield, label: 'Visas' },
-          { to: '/admin/tracker', icon: Bell, label: 'Tracker', badge: notifications },
-          { to: '/admin/settings', icon: LayoutDashboard, label: 'Settings' },
+          { to: '/admin/payments', icon: DollarSign, label: 'Payments' },
         ];
       case 'lawyer':
         return [
