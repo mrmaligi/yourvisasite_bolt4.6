@@ -6,7 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 export function LoginV2() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -19,7 +19,8 @@ export function LoginV2() {
     setError('');
 
     try {
-      await login(email, password);
+      const { error } = await signIn(email, password);
+      if (error) throw error;
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Failed to login');

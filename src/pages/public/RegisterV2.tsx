@@ -6,7 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 export function RegisterV2() {
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { signUp } = useAuth();
   const [userType, setUserType] = useState<'user' | 'lawyer'>('user');
   const [formData, setFormData] = useState({
     email: '',
@@ -31,13 +31,9 @@ export function RegisterV2() {
     setError('');
 
     try {
-      await register({
-        email: formData.email,
-        password: formData.password,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        role: userType
-      });
+      const fullName = `${formData.firstName} ${formData.lastName}`;
+      const { error } = await signUp(formData.email, formData.password, fullName);
+      if (error) throw error;
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
