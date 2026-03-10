@@ -1,63 +1,59 @@
-import { Search, MapPin, Star, Filter, Briefcase } from 'lucide-react';
+import { Award, Users, Star, MapPin, Briefcase, Calendar } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
-export function PublicLawyerDirectoryV2() {
+export function LawyerDirectoryV2() {
   const lawyers = [
-    { id: 1, name: 'Jane Smith', specialty: 'Partner Visas', location: 'Sydney', rating: 4.9, reviews: 127, image: 'JS' },
-    { id: 2, name: 'Bob Wilson', specialty: 'Skilled Migration', location: 'Melbourne', rating: 4.8, reviews: 89, image: 'BW' },
-    { id: 3, name: 'Sarah Lee', specialty: 'Student Visas', location: 'Brisbane', rating: 4.9, reviews: 156, image: 'SL' },
-    { id: 4, name: 'Michael Chen', specialty: 'Business Visas', location: 'Sydney', rating: 4.7, reviews: 94, image: 'MC' },
+    { name: 'Jane Smith', title: 'Senior Migration Lawyer', location: 'Sydney', experience: '12 years', rating: 4.9, reviews: 124, verified: true },
+    { name: 'John Doe', title: 'Immigration Consultant', location: 'Melbourne', experience: '8 years', rating: 4.7, reviews: 89, verified: true },
+    { name: 'Sarah Lee', title: 'Partner Visa Specialist', location: 'Brisbane', experience: '15 years', rating: 5.0, reviews: 156, verified: true },
+    { name: 'Michael Brown', title: 'Skilled Migration Expert', location: 'Perth', experience: '10 years', rating: 4.8, reviews: 98, verified: true },
   ];
 
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="bg-slate-900 py-12 px-8">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold text-white mb-4">Find a Migration Lawyer</h1>
-          <div className="flex gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input type="text" placeholder="Search by name or specialty" className="w-full pl-10 pr-4 py-3" />
-            </div>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <select className="pl-10 pr-8 py-3 bg-white">
-                <option>All Locations</option>
-                <option>Sydney</option>
-                <option>Melbourne</option>
-                <option>Brisbane</option>
-              </select>
-            </div>
-          </div>
+        <div className="max-w-6xl mx-auto text-center">
+          <h1 className="text-3xl font-bold text-white mb-4">Find a Lawyer</h1>
+          <p className="text-slate-400">Connect with verified immigration professionals</p>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-8 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-slate-600">Showing {lawyers.length} lawyers</p>
-          <button className="flex items-center gap-2 text-slate-600">
-            <Filter className="w-4 h-4" /> Filter
-          </button>
-        </div>
-
+      <div className="max-w-6xl mx-auto px-8 py-12">
         <div className="grid md:grid-cols-2 gap-6">
           {lawyers.map((lawyer) => (
-            <div key={lawyer.id} className="bg-white border border-slate-200 p-6">
+            <div key={lawyer.name} className="bg-white border border-slate-200 p-6">
               <div className="flex items-start gap-4">
-                <div className="w-16 h-16 bg-blue-100 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xl font-bold text-blue-600">{lawyer.image}</span>
+                <div className="w-16 h-16 bg-blue-100 flex items-center justify-center">
+                  <span className="text-xl font-bold text-blue-600">{lawyer.name.charAt(0)}</span>
                 </div>
+
                 <div className="flex-1">
-                  <h3 className="font-semibold text-slate-900">{lawyer.name}</h3>
-                  <p className="text-blue-600 text-sm mb-2">{lawyer.specialty}</p>
-                  <div className="flex items-center gap-4 text-sm text-slate-500">
-                    <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {lawyer.location}</span>
-                    <span className="flex items-center gap-1"><Star className="w-4 h-4 text-amber-500" /> {lawyer.rating} ({lawyer.reviews})</span>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-slate-900">{lawyer.name}</h3>
+                    {lawyer.verified && (
+                      <Award className="w-4 h-4 text-blue-600" />
+                    )}
+                  </div>
+
+                  <p className="text-slate-500 text-sm mb-2">{lawyer.title}</p>
+
+                  <div className="flex flex-wrap gap-3 text-sm text-slate-600 mb-4">
+                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {lawyer.location}</span>
+                    <span className="flex items-center gap-1"><Briefcase className="w-3 h-3" /> {lawyer.experience}</span>
+                    <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {lawyer.reviews} reviews</span>
+                  </div>
+
+                  <div className="flex items-center gap-1 mb-4">
+                    <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                    <span className="font-medium">{lawyer.rating}</span>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button variant="primary" size="sm">View Profile</Button>
+                    <Button variant="outline" size="sm">Book Consult</Button>
                   </div>
                 </div>
               </div>
-              
-              <Button variant="primary" className="w-full mt-4">View Profile</Button>
             </div>
           ))}
         </div>
