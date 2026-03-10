@@ -1,4 +1,4 @@
-import { Search, Filter, ChevronRight } from 'lucide-react';
+import { Search, Filter, MapPin, DollarSign, Clock, ChevronRight } from 'lucide-react';
 
 export function VisaListV2() {
   const visas = [

@@ -1,4 +1,4 @@
-import { Globe, Clock, DollarSign, CheckCircle, FileText } from 'lucide-react';
+import { Globe, MapPin, Clock, DollarSign, CheckCircle, Briefcase } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
 export function VisaDetailV2() {
@@ -58,7 +58,7 @@ export function VisaDetailV2() {
 
         <div className="flex gap-4">
           <Button variant="primary">Start Application</Button>
-          <Button variant="outline"><FileText className="w-4 h-4 mr-2" />View Checklist</Button>
+          <Button variant="outline">View Checklist</Button>
         </div>
       </div>
     </div>
