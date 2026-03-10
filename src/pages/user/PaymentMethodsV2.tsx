@@ -1,4 +1,4 @@
-import { CreditCard, Plus, Trash2, CheckCircle } from 'lucide-react';
+import { CreditCard, Plus, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
 export function PaymentMethodsV2() {
