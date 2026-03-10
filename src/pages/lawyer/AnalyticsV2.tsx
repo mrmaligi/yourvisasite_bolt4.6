@@ -1,12 +1,11 @@
 import { BarChart3, TrendingUp, Users, DollarSign, Calendar } from 'lucide-react';
-import { Button } from '../../components/ui/Button';
 
 export function LawyerAnalyticsV2() {
   const stats = [
     { label: 'Total Clients', value: '156', change: '+12%', icon: Users },
-    { label: 'Revenue', value: '$45,250', change: '+23%', icon: DollarSign },
-    { label: 'Cases Won', value: '89%', change: '+5%', icon: TrendingUp },
-    { label: 'Consultations', value: '342', change: '+18%', icon: Calendar },
+    { label: 'Active Cases', value: '48', change: '+5%', icon: BarChart3 },
+    { label: 'Revenue (MTD)', value: '$24,500', change: '+18%', icon: DollarSign },
+    { label: 'Consultations', value: '89', change: '+23%', icon: Calendar },
   ];
 
   return (
@@ -32,10 +31,19 @@ export function LawyerAnalyticsV2() {
           ))}
         </div>
 
-        <div className="bg-white border border-slate-200 p-6">
-          <h2 className="font-semibold text-slate-900 mb-4">Revenue Overview</h2>
-          <div className="h-64 bg-slate-50 flex items-center justify-center">
-            <p className="text-slate-400">Chart visualization would appear here</p>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="bg-white border border-slate-200 p-6">
+            <h2 className="font-semibold text-slate-900 mb-4">Revenue Overview</h2>
+            <div className="h-64 bg-slate-50 flex items-center justify-center">
+              <p className="text-slate-400">Chart visualization</p>
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-200 p-6">
+            <h2 className="font-semibold text-slate-900 mb-4">Case Status Breakdown</h2>
+            <div className="h-64 bg-slate-50 flex items-center justify-center">
+              <p className="text-slate-400">Chart visualization</p>
+            </div>
           </div>
         </div>
       </div>

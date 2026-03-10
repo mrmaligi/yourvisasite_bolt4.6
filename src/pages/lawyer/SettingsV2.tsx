@@ -1,4 +1,4 @@
-import { Settings, Bell, Lock, Globe, Mail } from 'lucide-react';
+import { Settings, Bell, Lock, Globe, Mail, User } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
 export function LawyerSettingsV2() {
@@ -14,44 +14,47 @@ export function LawyerSettingsV2() {
       <div className="max-w-4xl mx-auto px-8 py-8">
         <div className="space-y-6">
           <div className="bg-white border border-slate-200 p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <Bell className="w-6 h-6 text-blue-600" />
+            <div className="flex items-center gap-3 mb-4">
+              <User className="w-6 h-6 text-blue-600" />
+              <h2 className="text-lg font-semibold text-slate-900">Profile Information</h2>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">First Name</label>
+                <input type="text" defaultValue="Jane" className="w-full px-3 py-2 border border-slate-200" />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Last Name</label>
+                <input type="text" defaultValue="Smith" className="w-full px-3 py-2 border border-slate-200" />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                <input type="email" defaultValue="jane@example.com" className="w-full px-3 py-2 border border-slate-200" />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
+                <input type="tel" defaultValue="+61 412 345 678" className="w-full px-3 py-2 border border-slate-200" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-200 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Bell className="w-6 h-6 text-green-600" />
               <h2 className="text-lg font-semibold text-slate-900">Notifications</h2>
             </div>
-
+            
             <div className="space-y-3">
-              {['Email notifications for new messages', 'SMS reminders for appointments', 'Weekly summary reports'].map((item) => (
+              {['Email notifications for new clients', 'SMS alerts for appointments', 'Weekly summary reports'].map((item) => (
                 <label key={item} className="flex items-center gap-3">
                   <input type="checkbox" defaultChecked className="w-4 h-4" />
                   <span className="text-slate-700">{item}</span>
                 </label>
               ))}
-            </div>
-          </div>
-
-          <div className="bg-white border border-slate-200 p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <Lock className="w-6 h-6 text-green-600" />
-              <h2 className="text-lg font-semibold text-slate-900">Security</h2>
-            </div>
-
-            <Button variant="outline">Change Password</Button>
-          </div>
-
-          <div className="bg-white border border-slate-200 p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <Globe className="w-6 h-6 text-amber-600" />
-              <h2 className="text-lg font-semibold text-slate-900">Language & Region</h2>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Language</label>
-                <select className="w-full px-3 py-2 border border-slate-200">
-                  <option>English</option>
-                  <option>中文</option>
-                </select>
-              </div>
             </div>
           </div>
 
