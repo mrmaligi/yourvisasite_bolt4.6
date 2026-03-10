@@ -6,7 +6,13 @@ import { useAuth } from '../../contexts/AuthContext';
 export function RegisterV2() {
   const navigate = useNavigate();
   const { signUp } = useAuth();
-  const [userType, setUserType] = useState<'user' | 'lawyer'>('user');
+  const handleUserTypeChange = (type: 'user' | 'lawyer') => {
+    if (type === 'lawyer') {
+      navigate('/lawyer/register');
+      return;
+    }
+    setUserType(type);
+  };
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -58,7 +64,7 @@ export function RegisterV2() {
           <div className="flex gap-2 p-1 bg-slate-100 mb-6">
             <button
               type="button"
-              onClick={() => setUserType('user')}
+              onClick={() => handleUserTypeChange('user')}
               className={`flex-1 flex items-center justify-center gap-2 py-3 font-medium transition-all ${
                 userType === 'user'
                   ? 'bg-white text-blue-600 border border-slate-200'
@@ -69,7 +75,7 @@ export function RegisterV2() {
             </button>
             <button
               type="button"
-              onClick={() => setUserType('lawyer')}
+              onClick={() => handleUserTypeChange('lawyer')}
               className={`flex-1 flex items-center justify-center gap-2 py-3 font-medium transition-all ${
                 userType === 'lawyer'
                   ? 'bg-white text-blue-600 border border-slate-200'

@@ -18,6 +18,8 @@ import { Loading } from './components/ui/Loading';
 const Home = lazy(() => import('./pages/public/HomeV2').then(m => ({ default: m.HomeV2 })));
 const Login = lazy(() => import('./pages/public/LoginV2').then(m => ({ default: m.LoginV2 })));
 const Register = lazy(() => import('./pages/public/RegisterV2').then(m => ({ default: m.RegisterV2 })));
+const LawyerLogin = lazy(() => import('./pages/public/LawyerLoginV2').then(m => ({ default: m.LawyerLoginV2 })));
+const LawyerRegister = lazy(() => import('./pages/public/LawyerRegisterV2').then(m => ({ default: m.LawyerRegisterV2 })));
 const Pricing = lazy(() => import('./pages/public/PricingV2').then(m => ({ default: m.PricingV2 })));
 const VisaSearch = lazy(() => import('./pages/public/VisaSearchV2').then(m => ({ default: m.VisaSearchV2 })));
 const VisaDetail = lazy(() => import('./pages/public/VisaDetailV2').then(m => ({ default: m.VisaDetailV2 })));
@@ -73,6 +75,8 @@ export default function App() {
                         <Route index element={<Home />} />
                         <Route path="login" element={<Login />} />
                         <Route path="register" element={<Register />} />
+                        <Route path="lawyer/login" element={<LawyerLogin />} />
+                        <Route path="lawyer/register" element={<LawyerRegister />} />
                         <Route path="pricing" element={<Pricing />} />
                         <Route path="visas" element={<VisaSearch />} />
                         <Route path="visas/:slug" element={<VisaDetail />} />
