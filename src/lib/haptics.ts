@@ -1,5 +1,3 @@
-import { triggerHaptic, HapticType } from 'tactus';
-
 /**
  * Web Haptics Utility
  * Provides haptic feedback for button clicks and interactions
@@ -8,22 +6,25 @@ import { triggerHaptic, HapticType } from 'tactus';
 
 export type HapticIntensity = 'light' | 'medium' | 'heavy' | 'success' | 'error' | 'warning';
 
-const hapticMap: Record<HapticIntensity, HapticType> = {
-  light: 'selection',
-  medium: 'light',
-  heavy: 'heavy',
-  success: 'success',
-  error: 'error',
-  warning: 'warning',
+// Duration in milliseconds for each haptic type
+const hapticMap: Record<HapticIntensity, number> = {
+  light: 10,
+  medium: 20,
+  heavy: 30,
+  success: 15,
+  error: 25,
+  warning: 20,
 };
 
 /**
- * Trigger haptic feedback
+ * Trigger haptic feedback using Vibration API
  * @param intensity - The intensity/type of haptic feedback
  */
 export function haptic(intensity: HapticIntensity = 'light') {
   try {
-    triggerHaptic(hapticMap[intensity]);
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(hapticMap[intensity]);
+    }
   } catch (err) {
     // Silently fail - not all devices support haptics
     console.debug('Haptic feedback not supported on this device');
@@ -72,5 +73,4 @@ export function initGlobalHaptics() {
 }
 
 // Default export for convenience
-export { triggerHaptic } from 'tactus';
 export default haptic;
