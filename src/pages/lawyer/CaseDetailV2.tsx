@@ -1,4 +1,4 @@
-import { Briefcase, CheckCircle, Clock, User, FileText } from 'lucide-react';
+import { Briefcase, CheckCircle, Clock, AlertCircle, FileText } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
 export function CaseDetailV2() {
@@ -45,7 +45,7 @@ export function CaseDetailV2() {
             </div>
 
             <div className="bg-white border border-slate-200 p-6">
-              <h2 className="font-semibold text-slate-900 mb-4">Required Documents</h2>
+              <h2 className="font-semibold text-slate-900 mb-4">Documents</h2>
               
               <div className="space-y-3">
                 {[
@@ -54,7 +54,11 @@ export function CaseDetailV2() {
                   { name: 'Relationship Evidence', status: 'pending' },
                 ].map((doc) => (
                   <div key={doc.name} className="flex items-center justify-between p-3 bg-slate-50">
-                    <span className="text-slate-700">{doc.name}</span>
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-5 h-5 text-slate-400" />
+                      <span className="text-slate-700">{doc.name}</span>
+                    </div>
+                    
                     <span className={`text-xs px-2 py-1 ${
                       doc.status === 'received' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
                     }`}>
