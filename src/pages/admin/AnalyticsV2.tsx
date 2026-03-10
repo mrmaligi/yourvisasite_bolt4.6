@@ -1,6 +1,6 @@
 import { BarChart3, Users, DollarSign, FileText, TrendingUp } from 'lucide-react';
 
-export function AdminAnalyticsV2() {
+export function AnalyticsV2() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="bg-slate-900 py-8 px-8">
