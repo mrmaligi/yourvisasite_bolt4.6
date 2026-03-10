@@ -1,11 +1,11 @@
-import { FileText, CheckCircle, XCircle, AlertCircle, Eye } from 'lucide-react';
-import { Button } from '../../components/ui/Button';
+import { PieChart, BarChart3, TrendingUp, Users, Globe } from 'lucide-react';
 
 export function AdminReportsV2() {
-  const reports = [
-    { id: 1, user: 'John Doe', type: 'Spam', content: 'Inappropriate message', status: 'Pending', date: 'Mar 20, 2024' },
-    { id: 2, user: 'Jane Smith', type: 'Harassment', content: 'Offensive content', status: 'Resolved', date: 'Mar 18, 2024' },
-    { id: 3, user: 'Bob Wilson', type: 'Fake Profile', content: 'Impersonating lawyer', status: 'Pending', date: 'Mar 15, 2024' },
+  const reportTypes = [
+    { name: 'User Activity Report', description: 'Track user engagement and logins', icon: Users },
+    { name: 'Revenue Analytics', description: 'Financial performance overview', icon: TrendingUp },
+    { name: 'Geographic Distribution', description: 'Users by location', icon: Globe },
+    { name: 'Case Success Rate', description: 'Visa approval statistics', icon: BarChart3 },
   ];
 
   return (
@@ -13,57 +13,46 @@ export function AdminReportsV2() {
       <div className="bg-slate-900 py-8 px-8">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-2xl font-bold text-white">Reports</h1>
-          <p className="text-slate-400">Review and handle user reports</p>
+          <p className="text-slate-400">Generate and view system reports</p>
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-8 py-8">
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-white border border-slate-200 p-4">
-            <p className="text-sm text-slate-600">Pending</p>
-            <p className="text-2xl font-bold text-slate-900">12</p>
-          </div>
-          
-          <div className="bg-white border border-slate-200 p-4">
-            <p className="text-sm text-slate-600">Resolved</p>
-            <p className="text-2xl font-bold text-slate-900">45</p>
-          </div>
-          
-          <div className="bg-white border border-slate-200 p-4">
-            <p className="text-sm text-slate-600">Dismissed</p>
-            <p className="text-2xl font-bold text-slate-900">8</p>
-          </div>
+        <div className="grid md:grid-cols-2 gap-6">
+          {reportTypes.map((report) => (
+            <div key={report.name} className="bg-white border border-slate-200 p-6 cursor-pointer hover:border-blue-600">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-blue-100 flex items-center justify-center">
+                  <report.icon className="w-6 h-6 text-blue-600" />
+                </div>
+                
+                <div>
+                  <p className="font-semibold text-slate-900">{report.name}</p>
+                  <p className="text-sm text-slate-500">{report.description}</p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
-        <div className="bg-white border border-slate-200">
-          <table className="w-full">
-            <thead className="bg-slate-50">
-              <tr>
-                <th className="text-left p-4 text-sm font-medium text-slate-600">User</th>
-                <th className="text-left p-4 text-sm font-medium text-slate-600">Type</th>
-                <th className="text-left p-4 text-sm font-medium text-slate-600">Status</th>
-                <th className="text-left p-4 text-sm font-medium text-slate-600">Date</th>
-                <th className="text-right p-4 text-sm font-medium text-slate-600">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200">
-              {reports.map((report) => (
-                <tr key={report.id}>
-                  <td className="p-4">{report.user}</td>
-                  <td className="p-4">{report.type}</td>
-                  <td className="p-4">
-                    <span className={`px-2 py-1 text-xs font-medium ${
-                      report.status === 'Resolved' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
-                    }`}>{report.status}</span>
-                  </td>
-                  <td className="p-4">{report.date}</td>
-                  <td className="p-4 text-right">
-                    <Button variant="outline" size="sm">Review</Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="mt-8 bg-white border border-slate-200 p-6">
+          <h2 className="font-semibold text-slate-900 mb-4">Recent Reports</h2>
+          
+          <div className="divide-y divide-slate-200">
+            {[
+              { name: 'Monthly User Report', date: 'Mar 1, 2024', status: 'Generated' },
+              { name: 'Q1 Revenue Summary', date: 'Feb 28, 2024', status: 'Generated' },
+              { name: 'Case Analytics', date: 'Feb 15, 2024', status: 'Generated' },
+            ].map((item, i) => (
+              <div key={i} className="py-3 flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-slate-900">{item.name}</p>
+                  <p className="text-sm text-slate-500">{item.date}</p>
+                </div>
+                <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-700">{item.status}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
