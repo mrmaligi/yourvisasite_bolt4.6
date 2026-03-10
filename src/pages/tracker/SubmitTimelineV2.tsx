@@ -1,9 +1,15 @@
 import { useState } from 'react';
-import { Calendar, Briefcase, MapPin, Star, CheckCircle } from 'lucide-react';
+import { Calendar, Briefcase, MapPin, Star, CheckCircle, Loader2 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
+import { supabase } from '../../lib/supabase';
 
 export function SubmitTimelineV2() {
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [processingDays, setProcessingDays] = useState(0);
+  
   const [formData, setFormData] = useState({
     visaSubclass: '',
     anzscoCode: '',
@@ -13,6 +19,7 @@ export function SubmitTimelineV2() {
     dateGranted: '',
     hadMedicals: false,
     hadS56: false,
+    notes: '',
   });
 
   const visaOptions = [
@@ -27,6 +34,58 @@ export function SubmitTimelineV2() {
     { value: 'onshore', label: 'Onshore (In Australia)' },
     { value: 'offshore', label: 'Offshore (Outside Australia)' },
   ];
+
+  const calculateDays = () => {
+    if (formData.dateLodged && formData.dateGranted) {
+      const lodged = new Date(formData.dateLodged);
+      const granted = new Date(formData.dateGranted);
+      const diff = Math.round((granted.getTime() - lodged.getTime()) / (1000 * 60 * 60 * 24));
+      setProcessingDays(diff);
+      return diff;
+    }
+    return 0;
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setSubmitError('');
+    
+    const days = calculateDays();
+    
+    try {
+      // Anonymous submission - no auth required
+      const { error } = await supabase
+        .from('visa_timelines')
+        .insert({
+          visa_subclass: formData.visaSubclass,
+          anzsco_code: formData.anzscoCode || 'N/A',
+          location: formData.location as 'onshore' | 'offshore',
+          date_lodged: formData.dateLodged,
+          date_granted: formData.dateGranted,
+          processing_days: days,
+          had_medicals: formData.hadMedicals,
+          had_s56: formData.hadS56,
+          points: formData.points ? parseInt(formData.points) : null,
+          notes: formData.notes || null,
+          source: 'anonymous_user',
+          verified: false, // Requires admin verification
+          submitted_at: new Date().toISOString(),
+        });
+      
+      if (error) {
+        throw error;
+      }
+      
+      setSubmitSuccess(true);
+    } catch (err: any) {
+      setSubmitError(err.message || 'Failed to submit. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const canProceedStep1 = formData.visaSubclass && formData.location;
+  const canProceedStep2 = formData.dateLodged && formData.dateGranted;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -106,7 +165,13 @@ export function SubmitTimelineV2() {
               </div>
 
               <div className="flex justify-end">
-                <Button variant="primary" onClick={() => setStep(2)}>Continue</Button>
+                <Button 
+                  variant="primary" 
+                  onClick={() => setStep(2)}
+                  disabled={!canProceedStep1}
+                >
+                  Continue
+                </Button>
               </div>
             </div>
           )}
@@ -172,12 +237,89 @@ export function SubmitTimelineV2() {
 
               <div className="flex justify-between">
                 <Button variant="outline" onClick={() => setStep(1)}>Back</Button>
-                <Button variant="primary" onClick={() => setStep(3)}>Continue</Button>
+                <Button 
+                  variant="primary" 
+                  onClick={() => {
+                    calculateDays();
+                    setStep(3);
+                  }}
+                  disabled={!canProceedStep2}
+                >
+                  Continue
+                </Button>
               </div>
             </div>
           )}
 
-          {step === 3 && (
+          {step === 3 && !submitSuccess && (
+            <div className="space-y-6">
+              <h2 className="text-xl font-bold text-slate-900">Review & Submit</h2>
+              
+              <div className="bg-slate-50 p-4 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Visa:</span>
+                  <span className="font-medium">{visaOptions.find(v => v.value === formData.visaSubclass)?.label}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Location:</span>
+                  <span className="font-medium capitalize">{formData.location}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Processing Time:</span>
+                  <span className="font-bold text-emerald-600">{processingDays} days</span>
+                </div>
+                {formData.anzscoCode && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Profession:</span>
+                    <span className="font-medium">{formData.anzscoCode}</span>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Additional Notes (Optional)</label>
+                <textarea
+                  className="w-full px-3 py-2 border border-slate-200 h-24"
+                  placeholder="Any extra details about your visa journey..."
+                  value={formData.notes}
+                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                />
+              </div>
+
+              {submitError && (
+                <div className="bg-red-50 border border-red-200 p-3 text-red-700 text-sm">
+                  {submitError}
+                </div>
+              )}
+
+              <div className="bg-indigo-50 border border-indigo-200 p-4">
+                <p className="text-sm text-indigo-800">
+                  <strong>Anonymous Submission:</strong> Your data helps the community. 
+                  No personal information is collected or stored.
+                </p>
+              </div>
+
+              <div className="flex justify-between">
+                <Button variant="outline" onClick={() => setStep(2)}>Back</Button>
+                <Button 
+                  variant="primary" 
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Submitting...
+                    </>
+                  ) : (
+                    'Submit Timeline'
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {submitSuccess && (
             <div className="text-center py-8">
               <div className="w-16 h-16 bg-emerald-100 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-8 h-8 text-emerald-600" />
@@ -188,10 +330,36 @@ export function SubmitTimelineV2() {
               
               <div className="bg-slate-50 p-4 mb-6">
                 <p className="text-sm text-slate-500">Processing time recorded:</p>
-                <p className="text-xl font-bold text-slate-900">143 days</p>
+                <p className="text-xl font-bold text-slate-900">{processingDays} days</p>
               </div>
               
-              <Button variant="primary">View Community Data</Button>
+              <div className="space-y-3">
+                <Button variant="primary" onClick={() => window.location.href = '/tracker'}>
+                  View Community Data
+                </Button>
+                <div>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setSubmitSuccess(false);
+                      setStep(1);
+                      setFormData({
+                        visaSubclass: '',
+                        anzscoCode: '',
+                        location: '',
+                        points: '',
+                        dateLodged: '',
+                        dateGranted: '',
+                        hadMedicals: false,
+                        hadS56: false,
+                        notes: '',
+                      });
+                    }}
+                  >
+                    Submit Another Timeline
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
         </div>

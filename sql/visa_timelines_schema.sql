@@ -37,8 +37,15 @@ CREATE POLICY "Allow read access to visa_timelines"
   TO authenticated, anon 
   USING (true);
 
+-- Allow insert for anonymous users (no auth required)
+CREATE POLICY "Allow anonymous insert to visa_timelines" 
+  ON public.visa_timelines 
+  FOR INSERT 
+  TO anon, authenticated 
+  WITH CHECK (source = 'anonymous_user' OR source = 'user');
+
 -- Allow insert for authenticated users
-CREATE POLICY "Allow insert to visa_timelines" 
+CREATE POLICY "Allow authenticated insert to visa_timelines" 
   ON public.visa_timelines 
   FOR INSERT 
   TO authenticated 
