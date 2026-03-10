@@ -42,10 +42,8 @@ const LawyerDocuments = lazy(() => import('./pages/lawyer/LawyerDocumentsV2').th
 const MyCases = lazy(() => import('./pages/lawyer/MyCasesV2').then(m => ({ default: m.MyCasesV2 })));
 const Reviews = lazy(() => import('./pages/lawyer/ReviewsV2').then(m => ({ default: m.ReviewsV2 })));
 
-// Admin Pages (6)
+// Admin Pages (4 core only)
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboardV2').then(m => ({ default: m.AdminDashboardV2 })));
-const AdminSettings = lazy(() => import('./pages/admin/AdminSettingsV2').then(m => ({ default: m.AdminSettingsV2 })));
-const Analytics = lazy(() => import('./pages/admin/AnalyticsV2').then(m => ({ default: m.AnalyticsV2 })));
 const Lawyers = lazy(() => import('./pages/admin/LawyersV2').then(m => ({ default: m.LawyersV2 })));
 const Payments = lazy(() => import('./pages/admin/PaymentsV2').then(m => ({ default: m.PaymentsV2 })));
 const Users = lazy(() => import('./pages/admin/UsersV2').then(m => ({ default: m.UsersV2 })));
@@ -61,54 +59,52 @@ export default function App() {
                 <BrowserRouter>
                   <GlobalSearch />
                   <Suspense fallback={<Loading fullScreen />}>
-                  <Routes>
-                    {/* Public Routes */}
-                    <Route element={<PublicLayout />}>
-                      <Route index element={<Home />} />
-                      <Route path="login" element={<Login />} />
-                      <Route path="register" element={<Register />} />
-                      <Route path="pricing" element={<Pricing />} />
-                      <Route path="visas" element={<VisaSearch />} />
-                      <Route path="visas/:slug" element={<VisaDetail />} />
-                    </Route>
+                    <Routes>
+                      {/* Public Routes */}
+                      <Route element={<PublicLayout />}>
+                        <Route index element={<Home />} />
+                        <Route path="login" element={<Login />} />
+                        <Route path="register" element={<Register />} />
+                        <Route path="pricing" element={<Pricing />} />
+                        <Route path="visas" element={<VisaSearch />} />
+                        <Route path="visas/:slug" element={<VisaDetail />} />
+                      </Route>
 
-                    {/* Visa Routes */}
-                    <Route path="visa-list" element={<VisaList />} />
-                    <Route path="visa-detail" element={<VisaDetailPage />} />
+                      {/* Visa Routes */}
+                      <Route path="visa-list" element={<VisaList />} />
+                      <Route path="visa-detail" element={<VisaDetailPage />} />
 
-                    {/* User Routes */}
-                    <Route element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserDashboardLayout /></ProtectedRoute>}>
-                      <Route path="dashboard" element={<ApplicationTracker />} />
-                      <Route path="dashboard/chat" element={<Chat />} />
-                      <Route path="dashboard/documents" element={<DocumentUpload />} />
-                      <Route path="dashboard/payments" element={<PaymentMethods />} />
-                      <Route path="dashboard/profile" element={<Profile />} />
-                      <Route path="dashboard/settings" element={<Settings />} />
-                    </Route>
+                      {/* User Routes */}
+                      <Route element={<ProtectedRoute allowedRoles={['user', 'admin']}><UserDashboardLayout /></ProtectedRoute>}>
+                        <Route path="dashboard" element={<ApplicationTracker />} />
+                        <Route path="dashboard/chat" element={<Chat />} />
+                        <Route path="dashboard/documents" element={<DocumentUpload />} />
+                        <Route path="dashboard/payments" element={<PaymentMethods />} />
+                        <Route path="dashboard/profile" element={<Profile />} />
+                        <Route path="dashboard/settings" element={<Settings />} />
+                      </Route>
 
-                    {/* Lawyer Routes */}
-                    <Route element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerDashboardLayout /></ProtectedRoute>}>
-                      <Route path="lawyer/dashboard" element={<CaseDashboard />} />
-                      <Route path="lawyer/availability" element={<Availability />} />
-                      <Route path="lawyer/cases" element={<MyCases />} />
-                      <Route path="lawyer/documents" element={<LawyerDocuments />} />
-                      <Route path="lawyer/earnings" element={<Earnings />} />
-                      <Route path="lawyer/reviews" element={<Reviews />} />
-                    </Route>
+                      {/* Lawyer Routes */}
+                      <Route element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerDashboardLayout /></ProtectedRoute>}>
+                        <Route path="lawyer/dashboard" element={<CaseDashboard />} />
+                        <Route path="lawyer/availability" element={<Availability />} />
+                        <Route path="lawyer/cases" element={<MyCases />} />
+                        <Route path="lawyer/documents" element={<LawyerDocuments />} />
+                        <Route path="lawyer/earnings" element={<Earnings />} />
+                        <Route path="lawyer/reviews" element={<Reviews />} />
+                      </Route>
 
-                    {/* Admin Routes */}
-                    <Route element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboardLayout /></ProtectedRoute>}>
-                      <Route path="admin" element={<AdminDashboard />} />
-                      <Route path="admin/analytics" element={<Analytics />} />
-                      <Route path="admin/lawyers" element={<Lawyers />} />
-                      <Route path="admin/payments" element={<Payments />} />
-                      <Route path="admin/settings" element={<AdminSettings />} />
-                      <Route path="admin/users" element={<Users />} />
-                    </Route>
-                  </Routes>
-                </Suspense>
-              </BrowserRouter>
-            </GlobalSearchProvider>
+                      {/* Admin Routes - Core 4 Only */}
+                      <Route element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboardLayout /></ProtectedRoute>}>
+                        <Route path="admin" element={<AdminDashboard />} />
+                        <Route path="admin/lawyers" element={<Lawyers />} />
+                        <Route path="admin/payments" element={<Payments />} />
+                        <Route path="admin/users" element={<Users />} />
+                      </Route>
+                    </Routes>
+                  </Suspense>
+                </BrowserRouter>
+              </GlobalSearchProvider>
             </ErrorBoundary>
           </ToastProvider>
         </HelmetProvider>
