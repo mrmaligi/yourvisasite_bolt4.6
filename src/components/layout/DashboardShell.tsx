@@ -8,6 +8,14 @@ import {
   LogOut, 
   Menu, 
   X,
+  ChevronRight,
+  Bell,
+  FileText,
+  Calendar,
+  Star,
+  MessageSquare,
+  CreditCard,
+  Settings,
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
@@ -68,20 +76,20 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
       case 'lawyer':
         return [
           { to: '/lawyer/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-          { to: '/lawyer/clients', icon: User, label: 'Clients' },
-          { to: '/lawyer/consultations', icon: Briefcase, label: 'Consultations' },
-          { to: '/lawyer/availability', icon: LayoutDashboard, label: 'Availability' },
-          { to: '/lawyer/marketing', icon: Bell, label: 'Marketing' },
-          { to: '/lawyer/settings', icon: LayoutDashboard, label: 'Settings' },
+          { to: '/lawyer/cases', icon: Briefcase, label: 'Cases' },
+          { to: '/lawyer/documents', icon: FileText, label: 'Documents' },
+          { to: '/lawyer/availability', icon: Calendar, label: 'Availability' },
+          { to: '/lawyer/earnings', icon: DollarSign, label: 'Earnings' },
+          { to: '/lawyer/reviews', icon: Star, label: 'Reviews' },
         ];
       default: // user
         return [
           { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-          { to: '/dashboard/visas', icon: Briefcase, label: 'My Visas' },
-          { to: '/dashboard/documents', icon: LayoutDashboard, label: 'Documents' },
-          { to: '/dashboard/consultations', icon: User, label: 'Consultations' },
-          { to: '/dashboard/saved', icon: Bell, label: 'Saved' },
-          { to: '/dashboard/settings', icon: LayoutDashboard, label: 'Settings' },
+          { to: '/dashboard/chat', icon: MessageSquare, label: 'Chat' },
+          { to: '/dashboard/documents', icon: FileText, label: 'Documents' },
+          { to: '/dashboard/payments', icon: CreditCard, label: 'Payments' },
+          { to: '/dashboard/profile', icon: User, label: 'Profile' },
+          { to: '/dashboard/settings', icon: Settings, label: 'Settings' },
         ];
     }
   };

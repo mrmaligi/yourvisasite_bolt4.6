@@ -17,9 +17,6 @@ export function Navbar() {
     { to: '/tracker', label: 'Tracker' },
     { to: '/visas', label: 'Visas' },
     { to: '/lawyers', label: 'Lawyers' },
-    { to: '/marketplace', label: 'Marketplace' },
-    { to: '/forum', label: 'Forum' },
-    { to: '/news', label: 'News' },
   ];
 
   return (
