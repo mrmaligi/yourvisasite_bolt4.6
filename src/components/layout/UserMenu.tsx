@@ -20,7 +20,7 @@ export function UserMenu() {
 
   if (!user) {
     return (
-      <Link to="/login">
+      <Link to="/role-select">
         <Button size="sm">Sign in</Button>
       </Link>
     );

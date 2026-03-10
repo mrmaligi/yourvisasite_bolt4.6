@@ -18,6 +18,7 @@ import { Loading } from './components/ui/Loading';
 const Home = lazy(() => import('./pages/public/HomeV2').then(m => ({ default: m.HomeV2 })));
 const Login = lazy(() => import('./pages/public/LoginV2').then(m => ({ default: m.LoginV2 })));
 const Register = lazy(() => import('./pages/public/RegisterV2').then(m => ({ default: m.RegisterV2 })));
+const RoleSelect = lazy(() => import('./pages/public/RoleSelectV2').then(m => ({ default: m.RoleSelectV2 })));
 const LawyerLogin = lazy(() => import('./pages/public/LawyerLoginV2').then(m => ({ default: m.LawyerLoginV2 })));
 const LawyerRegister = lazy(() => import('./pages/public/LawyerRegisterV2').then(m => ({ default: m.LawyerRegisterV2 })));
 const Pricing = lazy(() => import('./pages/public/PricingV2').then(m => ({ default: m.PricingV2 })));
@@ -73,6 +74,7 @@ export default function App() {
                       {/* Public Routes */}
                       <Route element={<PublicLayout />}>
                         <Route index element={<Home />} />
+                        <Route path="role-select" element={<RoleSelect />} />
                         <Route path="login" element={<Login />} />
                         <Route path="register" element={<Register />} />
                         <Route path="lawyer/login" element={<LawyerLogin />} />
