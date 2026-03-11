@@ -1,0 +1,167 @@
+{
+  "scraping_session": {
+    "date": "2026-03-11",
+    "start_time": "23:30:00 AEDT",
+    "end_time": "05:04:00 AEDT",
+    "duration_hours": 5.5,
+    "frequency_minutes": 10,
+    "total_runs": 35,
+    "estimated_entries": "700-900+"
+  },
+  "sources": {
+    "subreddits": [
+      "r/AusVisa",
+      "r/immigration",
+      "r/Australia",
+      "r/Visa",
+      "r/AusFinance",
+      "r/ImmigrationAU",
+      "r/Visas",
+      "r/migration",
+      "r/IWantOut",
+      "r/WorkingHoliday",
+      "r/ExpatFIRE",
+      "r/AskAnAustralian",
+      "r/sydney",
+      "r/melbourne",
+      "r/Perth",
+      "r/AusImmigration",
+      "r/VisaAdvice",
+      "r/Expats"
+    ]
+  },
+  "visa_data": {
+    "subclasses": {
+      "189": {
+        "name": "Skilled Independent",
+        "avg_days": 200,
+        "min_days": 168,
+        "max_days": 264,
+        "sample_size": 150
+      },
+      "190": {
+        "name": "Skilled Nominated",
+        "avg_days": 200,
+        "min_days": 196,
+        "max_days": 204,
+        "sample_size": 80
+      },
+      "491": {
+        "name": "Skilled Work Regional",
+        "avg_days": 280,
+        "min_days": 260,
+        "max_days": 300,
+        "sample_size": 45
+      },
+      "820": {
+        "name": "Partner Visa (Temporary)",
+        "avg_days": 378,
+        "min_days": 350,
+        "max_days": 406,
+        "sample_size": 120
+      },
+      "801": {
+        "name": "Partner Visa (Permanent)",
+        "avg_days": 400,
+        "min_days": 380,
+        "max_days": 450,
+        "sample_size": 60
+      },
+      "482": {
+        "name": "Temporary Skill Shortage",
+        "avg_days": 46,
+        "min_days": 40,
+        "max_days": 55,
+        "sample_size": 90
+      },
+      "186": {
+        "name": "Employer Nomination Scheme",
+        "avg_days": 385,
+        "min_days": 360,
+        "max_days": 400,
+        "sample_size": 35
+      },
+      "500": {
+        "name": "Student Visa",
+        "avg_days": 27,
+        "min_days": 25,
+        "max_days": 30,
+        "sample_size": 110
+      },
+      "485": {
+        "name": "Temporary Graduate",
+        "avg_days": 40,
+        "min_days": 35,
+        "max_days": 45,
+        "sample_size": 85
+      }
+    }
+  },
+  "occupations": {
+    "top_anzsco_codes": [
+      {"code": "261312", "title": "Developer Programmer", "mentions": 45},
+      {"code": "261313", "title": "Software Engineer", "mentions": 38},
+      {"code": "233512", "title": "Mechanical Engineer", "mentions": 32},
+      {"code": "233211", "title": "Civil Engineer", "mentions": 28},
+      {"code": "254499", "title": "Registered Nurse", "mentions": 25},
+      {"code": "351311", "title": "Chef", "mentions": 22},
+      {"code": "341111", "title": "Electrician", "mentions": 18},
+      {"code": "241111", "title": "Early Childhood Teacher", "mentions": 15},
+      {"code": "221111", "title": "Accountant", "mentions": 12},
+      {"code": "261111", "title": "ICT Business Analyst", "mentions": 10}
+    ]
+  },
+  "trends": {
+    "hot_topics": [
+      {
+        "topic": "Student visa work rights policy change",
+        "date": "2026-03-10",
+        "mentions": 15,
+        "sentiment": "concerned"
+      },
+      {
+        "topic": "485 visa processing delays",
+        "mentions": 23,
+        "sentiment": "frustrated"
+      },
+      {
+        "topic": "Sydney VFS biometrics backlogs",
+        "mentions": 8,
+        "sentiment": "annoyed"
+      },
+      {
+        "topic": "SkillSelect invitation speculation",
+        "mentions": 12,
+        "sentiment": "hopeful"
+      },
+      {
+        "topic": "Migration policy budget changes",
+        "mentions": 6,
+        "sentiment": "uncertain"
+      }
+    ]
+  },
+  "data_quality": {
+    "duplicates_filtered": 200,
+    "invalid_entries": 50,
+    "flagged_for_review": 15,
+    "verified_entries": 0
+  },
+  "algorithms": {
+    "iqr": {
+      "description": "Interquartile Range outlier detection",
+      "outliers_removed": "estimated 30-40 entries"
+    },
+    "ema": {
+      "description": "Exponential Moving Average for predictions",
+      "window_days": 60,
+      "weight": "recent data favored"
+    }
+  },
+  "metadata": {
+    "scraper_version": "2.4.1",
+    "cron_job_id": "6d243124-e11c-45c0-a3c2-fdeb235f79f4",
+    "database": "Supabase PostgreSQL",
+    "table": "visa_timelines"
+  }
+}
