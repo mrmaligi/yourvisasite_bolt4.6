@@ -40,6 +40,7 @@ interface Document {
   uploaded_at?: string;
   notes?: string;
   is_custom: boolean;
+  is_mandatory?: boolean;
 }
 
 interface DocumentFolder {
@@ -196,7 +197,7 @@ export function LawyerDocumentDashboard() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'verified': return <Badge variant="success">Verified</Badge>;
-      case 'rejected': return <Badge variant="error">Rejected</Badge>;
+      case 'rejected': return <Badge variant="danger">Rejected</Badge>;
       case 'uploaded': return <Badge variant="warning">Pending Review</Badge>;
       default: return <Badge variant="secondary">Pending</Badge>;
     }
@@ -370,7 +371,7 @@ export function LawyerDocumentDashboard() {
                             <div>
                               <div className="flex items-center gap-2">
                                 <p className="font-medium text-neutral-900">{doc.name}</p>
-                                {doc.is_mandatory && <Badge variant="error" className="text-xs">Required</Badge>}
+                                {doc.is_mandatory && <Badge variant="danger" className="text-xs">Required</Badge>}
                                 {doc.is_custom && <Badge variant="secondary" className="text-xs">Custom</Badge>}
                               </div>
                               {doc.description && (
@@ -391,11 +392,11 @@ export function LawyerDocumentDashboard() {
                           
                           <div className="flex items-center gap-2">
                             {doc.file_url ? (
-                              <Button variant="ghost" size="sm" asChild>
-                                <a href={doc.file_url} target="_blank" rel="noopener noreferrer">
+                              <Button variant="ghost" size="sm" onClick={() => window.open(doc.file_url, "_blank", "noopener,noreferrer")}>
+                                <span>
                                   <Download className="w-4 h-4 mr-2" />
                                   Download
-                                </a>
+                                </span>
                               </Button>
                             ) : (
                               <Button variant="ghost" size="sm" disabled>

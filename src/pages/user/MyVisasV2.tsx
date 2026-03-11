@@ -95,7 +95,7 @@ export function MyVisasV2() {
                   </p>
 
                   <div className="flex gap-2">
-                    <Link to={`/visas/${purchase.visas.slug}`} className="flex-1">
+                    <Link to={`/visas/${(purchase.visas as {slug?: string}).slug}`} className="flex-1">
                       <Button variant="primary" className="w-full">
                         View Guide
                         <ArrowRight className="w-4 h-4 ml-2" />

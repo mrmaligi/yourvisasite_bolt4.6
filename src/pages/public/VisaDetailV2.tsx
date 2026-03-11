@@ -38,7 +38,7 @@ export function VisaDetailV2() {
   const fetchVisa = async () => {
     try {
       setLoading(true);
-      const subclass = extractSubclassFromSlug(slug);
+      const subclass = extractSubclassFromSlug(slug || "");
       
       const { data, error } = await supabase
         .from('visas')
@@ -118,7 +118,7 @@ export function VisaDetailV2() {
                   Requirements
                 </h2>
                 <ul className="space-y-3">
-                  {visa.requirements?.map((req, idx) => (
+                  {(visa.requirements || visa.key_requirements?.split("\n"))?.map((req, idx) => (
                     <li key={idx} className="flex items-start gap-3 text-slate-700">
                       <div className="w-1.5 h-1.5 bg-blue-600 mt-2 flex-shrink-0" />
                       {req}

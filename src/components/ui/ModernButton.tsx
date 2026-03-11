@@ -2,7 +2,10 @@ import { ButtonHTMLAttributes, forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
-interface ModernButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+import { HTMLMotionProps } from 'framer-motion';
+
+interface ModernButtonProps extends Omit<HTMLMotionProps<"button">, "onAnimationStart" | "onDragStart" | "onDragEnd" | "onDrag" | "children"> {
+  children?: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'premium';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;

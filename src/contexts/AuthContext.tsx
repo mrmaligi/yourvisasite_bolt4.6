@@ -15,6 +15,7 @@ interface AuthContextValue {
   signUp: (email: string, password: string, fullName: string, role?: string) => Promise<{ data: { user: User | null; session: Session | null }; error: AuthError | null }>;
   signUpAsLawyer: (email: string, password: string, fullName: string) => Promise<{ data: { user: User | null; session: Session | null }; error: AuthError | null }>;
   signOut: () => Promise<void>;
+  logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<{ data: { user: User | null; session: Session | null }; error: AuthError | null }>;
   signUpWithEmail: (email: string, password: string, fullName: string) => Promise<{ data: { user: User | null; session: Session | null }; error: AuthError | null }>;
@@ -32,6 +33,7 @@ const AuthContext = createContext<AuthContextValue>({
   signUp: async () => ({ data: { user: null, session: null }, error: null }),
   signUpAsLawyer: async () => ({ data: { user: null, session: null }, error: null }),
   signOut: async () => {},
+  logout: async () => {},
   refreshProfile: async () => {},
   signInWithEmail: async () => ({ data: { user: null, session: null }, error: null }),
   signUpWithEmail: async () => ({ data: { user: null, session: null }, error: null }),
@@ -189,6 +191,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signUp,
         signUpAsLawyer,
         signOut,
+        logout: signOut,
         refreshProfile,
         signInWithEmail: signIn,
         signUpWithEmail: signUp,

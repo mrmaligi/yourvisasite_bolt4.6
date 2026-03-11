@@ -196,12 +196,8 @@ const VisaPremiumPage = () => {
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Something went wrong</h1>
           <p className="text-gray-600 mb-6">{error}</p>
           <div className="flex flex-col gap-2">
-            <Button asChild>
-              <Link to="/visas">Browse All Visas</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link to="/">Go Home</Link>
-            </Button>
+            <Link to="/visas" className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-blue-600 text-white hover:bg-blue-700 px-4 py-2">Browse All Visas</Link>
+            <Link to="/" className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50 px-4 py-2">Go Home</Link>
           </div>
         </div>
       </div>
@@ -214,9 +210,7 @@ const VisaPremiumPage = () => {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Visa Not Found</h1>
           <p className="text-gray-600 mb-6">The visa you're looking for doesn't exist.</p>
-          <Button asChild>
-            <Link to="/visas">Browse All Visas</Link>
-          </Button>
+          <Link to="/visas" className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-blue-600 text-white hover:bg-blue-700 px-4 py-2">Browse All Visas</Link>
         </div>
       </div>
     );
@@ -303,7 +297,7 @@ const VisaPremiumPage = () => {
               <div className="grid md:grid-cols-2 gap-4 mt-6">
                 <div className="bg-blue-50 p-4 rounded-xl">
                   <h3 className="font-semibold text-blue-900 mb-2">Processing Time</h3>
-                  <p className="text-sm text-blue-700">{visa.processing_time || 'Varies by application'}</p>
+                  <p className="text-sm text-blue-700">{(visa as {processing_time?: string}).processing_time || 'Varies by application'}</p>
                 </div>
                 
                 <div className="bg-green-50 p-4 rounded-xl">
@@ -317,6 +311,8 @@ const VisaPremiumPage = () => {
             <section className="bg-white rounded-2xl p-8 shadow-sm">
               <PremiumSection 
                 title="Complete Application Guide"
+                description=""
+
                 isPremium={true}
                 hasAccess={hasAccess}
                 previewLength={2}

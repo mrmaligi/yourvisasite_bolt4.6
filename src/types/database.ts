@@ -39,6 +39,7 @@ export interface YouTubeFeed {
 export interface Visa {
   id: string;
   subclass: string;
+  subclass_number?: string;
   name: string;
   country: string;
   category: string;
@@ -53,6 +54,12 @@ export interface Visa {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  requirements?: string[];
+  required_documents?: string[];
+  process_steps?: any[];
+  processing_time?: string;
+  validity?: string;
+  price?: number;
 }
 
 export interface DocumentCategory {

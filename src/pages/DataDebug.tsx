@@ -63,8 +63,8 @@ export function DataDebug() {
       <div className="mb-4">
         <h2 className="text-lg font-semibold mb-2">Supabase Config:</h2>
         <pre className="bg-gray-800 text-green-400 p-4 rounded text-sm overflow-x-auto">
-{`URL: ${supabase.supabaseUrl}
-Key: ${supabase.supabaseKey?.substring(0, 20)}...`}
+{`URL: ${(supabase as any).supabaseUrl}
+Key: ${(supabase as any).supabaseKey?.substring(0, 20)}...`}
         </pre>
       </div>
 

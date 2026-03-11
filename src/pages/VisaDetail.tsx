@@ -18,10 +18,10 @@ import {
   Globe,
   BookOpen
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/Button';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import { PremiumSection } from '@/components/premium/PremiumSection';
 
 const VisaDetail = () => {
@@ -29,7 +29,7 @@ const VisaDetail = () => {
   const navigate = useNavigate();
 
   // Mock data - in real app, fetch from API
-  const visaData = {
+  const visaData: Record<string, any> = {
     '820': {
       subclass: '820/801',
       name: 'Partner Visa',
@@ -107,9 +107,9 @@ const VisaDetail = () => {
     }
   };
 
-  const visa = visaData[subclass] || visaData['820'];
+  const visa = (subclass ? visaData[subclass] : undefined) || visaData['820'];
 
-  const categoryIcons = {
+  const categoryIcons: Record<string, any> = {
     partner: Heart,
     skilled: Briefcase,
     student: GraduationCap,
@@ -265,7 +265,7 @@ const VisaDetail = () => {
                       <h2 className="text-2xl font-bold mb-6">Eligibility Requirements</h2>
                       
                       <div className="space-y-4">
-                        {visa.requirements.map((req, index) => (
+                        {(visa as any).requirements?.map((req: string, index: number) => (
                           <div key={index} className="flex gap-4 p-4 bg-gray-50 rounded-xl">
                             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                               <span className="font-bold text-blue-600">{index + 1}</span>

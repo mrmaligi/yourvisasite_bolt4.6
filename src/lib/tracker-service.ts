@@ -7,22 +7,22 @@ import { calculateEMA, detectOutliersIQR } from './tracker-stats';
 
 export interface TimelineEntry {
   id: string;
-  visa_subclass: string;
-  anzsco_code: string;
+  visaSubclass: string;
+  anzscoCode: string;
   location: 'onshore' | 'offshore';
-  date_lodged: string;
-  date_granted: string;
-  processing_days: number;
-  had_medicals: boolean;
-  had_s56: boolean;
+  dateLodged: string;
+  dateGranted: string;
+  processingDays: number;
+  hadMedicals: boolean;
+  hadS56: boolean;
   source: string;
-  verified: boolean;
-  submitted_at: string;
+  isVerified: boolean;
+  submittedAt: string;
 }
 
 export interface TimelineStats {
-  visa_subclass: string;
-  anzsco_code: string;
+  visaSubclass: string;
+  anzscoCode: string;
   location: string;
   total_entries: number;
   avg_days: number;
@@ -37,7 +37,7 @@ export interface TimelineStats {
  */
 export async function fetchTimelineEntries(
   filters?: {
-    visa_subclass?: string;
+    visaSubclass?: string;
     anzsco_code?: string;
     location?: 'onshore' | 'offshore';
   }
@@ -49,8 +49,8 @@ export async function fetchTimelineEntries(
     .eq('flagged', false)
     .order('submitted_at', { ascending: false });
   
-  if (filters?.visa_subclass) {
-    query = query.eq('visa_subclass', filters.visa_subclass);
+  if (filters?.visaSubclass) {
+    query = query.eq('visa_subclass', filters.visaSubclass);
   }
   if (filters?.anzsco_code) {
     query = query.eq('anzsco_code', filters.anzsco_code);
@@ -73,7 +73,7 @@ export async function fetchTimelineEntries(
  * Fetch pre-calculated statistics
  */
 export async function fetchTimelineStats(
-  visa_subclass?: string,
+  visaSubclass?: string,
   anzsco_code?: string,
   location?: string
 ): Promise<TimelineStats | null> {
@@ -81,8 +81,8 @@ export async function fetchTimelineStats(
     .from('timeline_stats')
     .select('*');
   
-  if (visa_subclass) {
-    query = query.eq('visa_subclass', visa_subclass);
+  if (visaSubclass) {
+    query = query.eq('visa_subclass', visaSubclass);
   }
   if (anzsco_code) {
     query = query.eq('anzsco_code', anzsco_code);
@@ -105,7 +105,7 @@ export async function fetchTimelineStats(
  * Calculate real-time prediction with IQR and EMA
  */
 export async function calculatePrediction(
-  visa_subclass: string,
+  visaSubclass: string,
   anzsco_code?: string,
   location?: 'onshore' | 'offshore'
 ): Promise<{
@@ -117,7 +117,7 @@ export async function calculatePrediction(
 }> {
   // Fetch raw data
   const entries = await fetchTimelineEntries({
-    visa_subclass,
+    visaSubclass,
     anzsco_code,
     location
   });
@@ -133,10 +133,10 @@ export async function calculatePrediction(
   }
   
   // Convert to format for IQR/EMA
-  const dataPoints = entries.map(e => ({
+  const dataPoints = entries.map((e: any) => ({
     ...e,
-    submittedAt: new Date(e.submitted_at),
-    processingDays: e.processing_days
+    submittedAt: new Date(e.submittedAt),
+    processingDays: e.processingDays
   }));
   
   // Remove outliers using IQR
@@ -151,7 +151,7 @@ export async function calculatePrediction(
   const confidence = Math.round((1 - outlierRate) * 0.5 + sampleSizeScore * 0.5) * 100;
   
   // Calculate range (80% confidence interval)
-  const values = cleaned.map(d => d.processing_days);
+  const values = cleaned.map(d => d.processingDays);
   const stdDev = calculateStdDev(values);
   const range = {
     min: Math.max(1, Math.round(estimate - 1.28 * stdDev)),
@@ -160,11 +160,11 @@ export async function calculatePrediction(
   
   // Recent average (last 60 days)
   const recentEntries = cleaned.filter(e => {
-    const daysAgo = (Date.now() - new Date(e.submitted_at).getTime()) / (1000 * 60 * 60 * 24);
+    const daysAgo = (Date.now() - new Date(e.submittedAt).getTime()) / (1000 * 60 * 60 * 24);
     return daysAgo <= 60;
   });
   const recentAvg = recentEntries.length > 0
-    ? Math.round(recentEntries.reduce((a, b) => a + b.processing_days, 0) / recentEntries.length)
+    ? Math.round(recentEntries.reduce((a, b) => a + b.processingDays, 0) / recentEntries.length)
     : estimate;
   
   return {
@@ -188,27 +188,34 @@ function calculateStdDev(values: number[]): number {
  * Submit new timeline entry
  */
 export async function submitTimeline(entry: {
-  visa_subclass: string;
-  anzsco_code: string;
+  visaSubclass: string;
+  anzscoCode: string;
   location: 'onshore' | 'offshore';
-  date_lodged: string;
-  date_granted: string;
-  had_medicals: boolean;
-  had_s56: boolean;
+  dateLodged: string;
+  dateGranted: string;
+  hadMedicals: boolean;
+  hadS56: boolean;
   notes?: string;
 }): Promise<{ success: boolean; error?: string }> {
   const processing_days = Math.round(
-    (new Date(entry.date_granted).getTime() - new Date(entry.date_lodged).getTime()) 
+    (new Date(entry.dateGranted).getTime() - new Date(entry.dateLodged).getTime())
     / (1000 * 60 * 60 * 24)
   );
   
   const { error } = await supabase
     .from('visa_timelines')
     .insert({
-      ...entry,
-      processing_days,
+      visa_subclass: entry.visaSubclass,
+      anzsco_code: entry.anzscoCode,
+      location: entry.location,
+      date_lodged: entry.dateLodged,
+      date_granted: entry.dateGranted,
+      had_medicals: entry.hadMedicals,
+      had_s56: entry.hadS56,
+      notes: entry.notes,
       source: 'user',
-      verified: false,
+      is_verified: false,
+      processing_days,
       submitted_at: new Date().toISOString()
     });
   
@@ -222,15 +229,15 @@ export async function submitTimeline(entry: {
 /**
  * Get ANZSCO statistics for a visa type
  */
-export async function getANZSCOStatsForVisa(visa_subclass: string): Promise<{
+export async function getANZSCOStatsForVisa(visaSubclass: string): Promise<Array<{
   code: string;
   count: number;
   avgDays: number;
-}>[] {
+}>> {
   const { data, error } = await supabase
     .from('timeline_stats')
     .select('anzsco_code, total_entries, avg_days')
-    .eq('visa_subclass', visa_subclass)
+    .eq('visa_subclass', visaSubclass)
     .order('total_entries', { ascending: false });
   
   if (error || !data) return [];

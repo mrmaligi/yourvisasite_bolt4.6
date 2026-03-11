@@ -51,7 +51,7 @@ export function detectOutliersIQR(
   data.forEach(entry => {
     const value = Number(entry[field]);
     if (value < lowerBound || value > upperBound) {
-      outliers.push({ ...entry, _flagged: true as any });
+      outliers.push({ ...entry, flagged: true as any });
     } else {
       cleaned.push(entry);
     }

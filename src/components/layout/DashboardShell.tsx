@@ -16,6 +16,8 @@ import {
   MessageSquare,
   CreditCard,
   Settings,
+  BarChart,
+  ShieldCheck
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
@@ -38,6 +40,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const notifications = 0;
   const location = useLocation();
   const [profile, setProfile] = useState<any>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -72,7 +75,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
           { to: '/admin/users', icon: User, label: 'Users' },
           { to: '/admin/lawyers', icon: Briefcase, label: 'Lawyers' },
           { to: '/admin/payments', icon: DollarSign, label: 'Payments' },
-          { to: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
+          { to: '/admin/analytics', icon: BarChart, label: 'Analytics' },
           { to: '/admin/settings', icon: Settings, label: 'Settings' },
         ];
       case 'lawyer':
@@ -175,7 +178,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
           <div className="p-4 m-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-3 mb-4">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm ${getRoleColor()}`}>
-                {role === 'admin' ? <Shield className="w-5 h-5" /> : 
+                {role === 'admin' ? <ShieldCheck className="w-5 h-5" /> :
                  role === 'lawyer' ? <Briefcase className="w-5 h-5" /> : <User className="w-5 h-5" />}
               </div>
               <div className="flex-1 min-w-0">

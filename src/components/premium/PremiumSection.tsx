@@ -12,8 +12,10 @@ export const PremiumSection = ({
   isPremium = true, 
   hasAccess = false,
   children,
-  previewLength = 2
-}) => {
+  previewLength = 2,
+  visaId,
+  onPurchase
+}: { title: string; description?: string; isPremium?: boolean; hasAccess?: boolean; children?: React.ReactNode; previewLength?: number; visaId?: string; onPurchase?: () => void; }) => {
   const [showPreview, setShowPreview] = useState(true);
   
   if (!isPremium || hasAccess) {
@@ -216,7 +218,7 @@ export const PremiumGuideCard = ({
   image,
   features = [],
   onClick 
-}) => {
+}: { title: string; description: string; price: number; originalPrice?: number; image?: string | null; features?: string[]; onClick?: () => void; }) => {
   return (
     <Card className="group hover:shadow-xl transition-shadow duration-300 overflow-hidden">
       {image && (
@@ -234,7 +236,7 @@ export const PremiumGuideCard = ({
           </div>
           {originalPrice && (
             <div className="absolute top-4 left-4">
-              <Badge variant="destructive">
+              <Badge variant="danger">
                 SAVE ${originalPrice - price}
               </Badge>
             </div>

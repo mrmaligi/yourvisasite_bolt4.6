@@ -27,7 +27,7 @@ const ContentContainer = ({ children, className = '' }: { children: React.ReactN
   <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${className}`}>{children}</div>
 );
 
-const PageHeader = ({ title, description }: { title: string; description?: string }) => (
+const PageHeader = ({ title, subtitle, description, children }: { title: string; subtitle?: string; description?: string; children?: React.ReactNode }) => (
   <div className="text-center mb-12">
     <h1 className="text-4xl font-bold text-slate-900 mb-4">{title}</h1>
     {description && <p className="text-lg text-slate-600 max-w-2xl mx-auto">{description}</p>}
@@ -194,7 +194,7 @@ export function VisaSearchV2() {
                           <div className="flex gap-4 text-sm text-slate-500">
                             <span className="flex items-center gap-1">
                               <Clock className="w-4 h-4" />
-                              {visa.processing_time || 'Varies'}
+                              {(visa as {processing_time?: string}).processing_time || 'Varies'}
                             </span>
                             <span className="flex items-center gap-1">
                               <DollarSign className="w-4 h-4" />

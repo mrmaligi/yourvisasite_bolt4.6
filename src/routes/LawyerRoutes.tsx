@@ -3,128 +3,128 @@ import { Route, Routes } from 'react-router-dom';
 import { LawyerDashboardLayout } from '../components/layout/LawyerDashboardLayout';
 
 // Profile & Marketing
-const EnhancedProfile = lazy(() => import('../pages/lawyer/profile/EnhancedProfile').then(m => ({ default: m.EnhancedProfile })));
-const EditProfile = lazy(() => import('../pages/lawyer/profile/EditProfile').then(m => ({ default: m.EditProfile })));
-const SEOSettings = lazy(() => import('../pages/lawyer/profile/SEOSettings').then(m => ({ default: m.SEOSettings })));
-const ClientReviews = lazy(() => import('../pages/lawyer/reviews/ClientReviews').then(m => ({ default: m.ClientReviews })));
-const RespondReviews = lazy(() => import('../pages/lawyer/reviews/RespondReviews').then(m => ({ default: m.RespondReviews })));
-const Testimonials = lazy(() => import('../pages/lawyer/testimonials/Testimonials').then(m => ({ default: m.Testimonials })));
-const Portfolio = lazy(() => import('../pages/lawyer/portfolio/Portfolio').then(m => ({ default: m.Portfolio })));
-const Specializations = lazy(() => import('../pages/lawyer/specializations/Specializations').then(m => ({ default: m.Specializations })));
-const Achievements = lazy(() => import('../pages/lawyer/achievements/Achievements').then(m => ({ default: m.Achievements })));
-const VerificationStatus = lazy(() => import('../pages/lawyer/verification/VerificationStatus').then(m => ({ default: m.VerificationStatus })));
+// const EnhancedProfile = lazy(...) removed due to missing file
+// const EditProfile = lazy(...) removed due to missing file
+// const SEOSettings = lazy(...) removed due to missing file
+// const ClientReviews = lazy(...) removed due to missing file
+// const RespondReviews = lazy(...) removed due to missing file
+// const Testimonials = lazy(...) removed due to missing file
+// const Portfolio = lazy(...) removed due to missing file
+// const Specializations = lazy(...) removed due to missing file
+// const Achievements = lazy(...) removed due to missing file
+// const VerificationStatus = lazy(...) removed due to missing file
 
 // Practice Management
-const PracticeAnalytics = lazy(() => import('../pages/lawyer/analytics/PracticeAnalytics').then(m => ({ default: m.PracticeAnalytics })));
-const RevenueAnalytics = lazy(() => import('../pages/lawyer/analytics/RevenueAnalytics').then(m => ({ default: m.RevenueAnalytics })));
-const ClientAnalytics = lazy(() => import('../pages/lawyer/analytics/ClientAnalytics').then(m => ({ default: m.ClientAnalytics })));
-const PerformanceMetrics = lazy(() => import('../pages/lawyer/analytics/PerformanceMetrics').then(m => ({ default: m.PerformanceMetrics })));
-const Billing = lazy(() => import('../pages/lawyer/billing/Billing').then(m => ({ default: m.Billing })));
-const Invoices = lazy(() => import('../pages/lawyer/billing/Invoices').then(m => ({ default: m.Invoices })));
-const Payments = lazy(() => import('../pages/lawyer/billing/Payments').then(m => ({ default: m.Payments })));
-const Contracts = lazy(() => import('../pages/lawyer/contracts/Contracts').then(m => ({ default: m.Contracts })));
-const ContractEditor = lazy(() => import('../pages/lawyer/contracts/ContractEditor').then(m => ({ default: m.ContractEditor })));
-const DocumentManagement = lazy(() => import('../pages/lawyer/documents/DocumentManagement').then(m => ({ default: m.DocumentManagement })));
+// const PracticeAnalytics = lazy(...) removed due to missing file
+// const RevenueAnalytics = lazy(...) removed due to missing file
+// const ClientAnalytics = lazy(...) removed due to missing file
+// const PerformanceMetrics = lazy(...) removed due to missing file
+// const Billing = lazy(...) removed due to missing file
+// const Invoices = lazy(...) removed due to missing file
+// const Payments = lazy(...) removed due to missing file
+// const Contracts = lazy(...) removed due to missing file
+// const ContractEditor = lazy(...) removed due to missing file
+// const DocumentManagement = lazy(...) removed due to missing file
 
 // Client Management
-const DetailedClientView = lazy(() => import('../pages/lawyer/clients/DetailedClientView').then(m => ({ default: m.DetailedClientView })));
-const ClientOnboarding = lazy(() => import('../pages/lawyer/clients/ClientOnboarding').then(m => ({ default: m.ClientOnboarding })));
-const ClientCommunication = lazy(() => import('../pages/lawyer/clients/ClientCommunication').then(m => ({ default: m.ClientCommunication })));
-const CaseManagement = lazy(() => import('../pages/lawyer/cases/CaseManagement').then(m => ({ default: m.CaseManagement })));
-const CaseDetail = lazy(() => import('../pages/lawyer/cases/CaseDetail').then(m => ({ default: m.CaseDetail })));
-const CaseKanban = lazy(() => import('../pages/lawyer/cases/CaseKanban').then(m => ({ default: m.CaseKanban })));
-const CaseTimeline = lazy(() => import('../pages/lawyer/cases/CaseTimeline').then(m => ({ default: m.CaseTimeline })));
-const ClientNotes = lazy(() => import('../pages/lawyer/notes/ClientNotes').then(m => ({ default: m.ClientNotes })));
-const NoteDetail = lazy(() => import('../pages/lawyer/notes/NoteDetail').then(m => ({ default: m.NoteDetail })));
-const TaskManagement = lazy(() => import('../pages/lawyer/tasks/TaskManagement').then(m => ({ default: m.TaskManagement })));
+// const DetailedClientView = lazy(...) removed due to missing file
+// const ClientOnboarding = lazy(...) removed due to missing file
+// const ClientCommunication = lazy(...) removed due to missing file
+// const CaseManagement = lazy(...) removed due to missing file
+// const CaseDetail = lazy(...) removed due to missing file
+// const CaseKanban = lazy(...) removed due to missing file
+// const CaseTimeline = lazy(...) removed due to missing file
+// const ClientNotes = lazy(...) removed due to missing file
+// const NoteDetail = lazy(...) removed due to missing file
+// const TaskManagement = lazy(...) removed due to missing file
 
 // Growth & Marketing
-const MarketingDashboard = lazy(() => import('../pages/lawyer/marketing/MarketingDashboard').then(m => ({ default: m.MarketingDashboard })));
-const Campaigns = lazy(() => import('../pages/lawyer/marketing/Campaigns').then(m => ({ default: m.Campaigns })));
-const LeadCapture = lazy(() => import('../pages/lawyer/leads/LeadCapture').then(m => ({ default: m.LeadCapture })));
-const LeadManagement = lazy(() => import('../pages/lawyer/leads/LeadManagement').then(m => ({ default: m.LeadManagement })));
-const LeadNurture = lazy(() => import('../pages/lawyer/leads/LeadNurture').then(m => ({ default: m.LeadNurture })));
-const WebsiteBuilder = lazy(() => import('../pages/lawyer/website/WebsiteBuilder').then(m => ({ default: m.WebsiteBuilder })));
-const SocialMedia = lazy(() => import('../pages/lawyer/social/SocialMedia').then(m => ({ default: m.SocialMedia })));
-const ContentMarketing = lazy(() => import('../pages/lawyer/content/ContentMarketing').then(m => ({ default: m.ContentMarketing })));
-const ReferralProgram = lazy(() => import('../pages/lawyer/referrals/ReferralProgram').then(m => ({ default: m.ReferralProgram })));
-const Advertising = lazy(() => import('../pages/lawyer/advertising/Advertising').then(m => ({ default: m.Advertising })));
+// const MarketingDashboard = lazy(...) removed due to missing file
+// const Campaigns = lazy(...) removed due to missing file
+// const LeadCapture = lazy(...) removed due to missing file
+// const LeadManagement = lazy(...) removed due to missing file
+// const LeadNurture = lazy(...) removed due to missing file
+// const WebsiteBuilder = lazy(...) removed due to missing file
+// const SocialMedia = lazy(...) removed due to missing file
+// const ContentMarketing = lazy(...) removed due to missing file
+// const ReferralProgram = lazy(...) removed due to missing file
+// const Advertising = lazy(...) removed due to missing file
 
 // Advanced Features
-const TeamManagement = lazy(() => import('../pages/lawyer/team/TeamManagement').then(m => ({ default: m.TeamManagement })));
-const RolePermissions = lazy(() => import('../pages/lawyer/team/RolePermissions').then(m => ({ default: m.RolePermissions })));
-const TeamSchedule = lazy(() => import('../pages/lawyer/team/TeamSchedule').then(m => ({ default: m.TeamSchedule })));
-const WorkflowAutomation = lazy(() => import('../pages/lawyer/automation/WorkflowAutomation').then(m => ({ default: m.WorkflowAutomation })));
-const DocumentTemplates = lazy(() => import('../pages/lawyer/templates/DocumentTemplates').then(m => ({ default: m.DocumentTemplates })));
-const CustomForms = lazy(() => import('../pages/lawyer/forms/CustomForms').then(m => ({ default: m.CustomForms })));
-const CustomReports = lazy(() => import('../pages/lawyer/reports/CustomReports').then(m => ({ default: m.CustomReports })));
-const IntegrationsHub = lazy(() => import('../pages/lawyer/integrations/IntegrationsHub').then(m => ({ default: m.IntegrationsHub })));
-const ApiAccess = lazy(() => import('../pages/lawyer/api/ApiAccess').then(m => ({ default: m.ApiAccess })));
-const AdvancedSettings = lazy(() => import('../pages/lawyer/settings/AdvancedSettings').then(m => ({ default: m.AdvancedSettings })));
+// const TeamManagement = lazy(...) removed due to missing file
+// const RolePermissions = lazy(...) removed due to missing file
+// const TeamSchedule = lazy(...) removed due to missing file
+// const WorkflowAutomation = lazy(...) removed due to missing file
+// const DocumentTemplates = lazy(...) removed due to missing file
+// const CustomForms = lazy(...) removed due to missing file
+// const CustomReports = lazy(...) removed due to missing file
+// const IntegrationsHub = lazy(...) removed due to missing file
+// const ApiAccess = lazy(...) removed due to missing file
+// const AdvancedSettings = lazy(...) removed due to missing file
 
 export function LawyerRoutes() {
   return (
     <Routes>
       <Route element={<LawyerDashboardLayout />}>
         {/* Profile & Marketing */}
-        <Route path="profile/enhanced" element={<EnhancedProfile />} />
-        <Route path="profile/edit" element={<EditProfile />} />
-        <Route path="profile/seo" element={<SEOSettings />} />
-        <Route path="reviews" element={<ClientReviews />} />
-        <Route path="reviews/respond" element={<RespondReviews />} />
-        <Route path="testimonials" element={<Testimonials />} />
-        <Route path="portfolio" element={<Portfolio />} />
-        <Route path="specializations" element={<Specializations />} />
-        <Route path="achievements" element={<Achievements />} />
-        <Route path="verification" element={<VerificationStatus />} />
+        {/* Route for EnhancedProfile removed due to missing file */}
+        {/* Route for EditProfile removed due to missing file */}
+        {/* Route for SEOSettings removed due to missing file */}
+        {/* Route for ClientReviews removed due to missing file */}
+        {/* Route for RespondReviews removed due to missing file */}
+        {/* Route for Testimonials removed due to missing file */}
+        {/* Route for Portfolio removed due to missing file */}
+        {/* Route for Specializations removed due to missing file */}
+        {/* Route for Achievements removed due to missing file */}
+        {/* Route for VerificationStatus removed due to missing file */}
 
         {/* Practice Management */}
-        <Route path="analytics" element={<PracticeAnalytics />} />
-        <Route path="analytics/revenue" element={<RevenueAnalytics />} />
-        <Route path="analytics/clients" element={<ClientAnalytics />} />
-        <Route path="analytics/performance" element={<PerformanceMetrics />} />
-        <Route path="billing" element={<Billing />} />
-        <Route path="billing/invoices" element={<Invoices />} />
-        <Route path="billing/payments" element={<Payments />} />
-        <Route path="contracts" element={<Contracts />} />
-        <Route path="contracts/editor" element={<ContractEditor />} />
-        <Route path="documents" element={<DocumentManagement />} />
+        {/* Route for PracticeAnalytics removed due to missing file */}
+        {/* Route for RevenueAnalytics removed due to missing file */}
+        {/* Route for ClientAnalytics removed due to missing file */}
+        {/* Route for PerformanceMetrics removed due to missing file */}
+        {/* Route for Billing removed due to missing file */}
+        {/* Route for Invoices removed due to missing file */}
+        {/* Route for Payments removed due to missing file */}
+        {/* Route for Contracts removed due to missing file */}
+        {/* Route for ContractEditor removed due to missing file */}
+        {/* Route for DocumentManagement removed due to missing file */}
 
         {/* Client Management */}
-        <Route path="clients/detailed" element={<DetailedClientView />} />
-        <Route path="clients/onboarding" element={<ClientOnboarding />} />
-        <Route path="clients/communication" element={<ClientCommunication />} />
-        <Route path="cases" element={<CaseManagement />} />
-        <Route path="cases/kanban" element={<CaseKanban />} />
-        <Route path="cases/timeline" element={<CaseTimeline />} />
-        <Route path="cases/:id" element={<CaseDetail />} />
-        <Route path="notes" element={<ClientNotes />} />
-        <Route path="notes/:id" element={<NoteDetail />} />
-        <Route path="tasks" element={<TaskManagement />} />
+        {/* Route for DetailedClientView removed due to missing file */}
+        {/* Route for ClientOnboarding removed due to missing file */}
+        {/* Route for ClientCommunication removed due to missing file */}
+        {/* Route for CaseManagement removed due to missing file */}
+        {/* Route for CaseKanban removed due to missing file */}
+        {/* Route for CaseTimeline removed due to missing file */}
+        {/* Route for CaseDetail removed due to missing file */}
+        {/* Route for ClientNotes removed due to missing file */}
+        {/* Route for NoteDetail removed due to missing file */}
+        {/* Route for TaskManagement removed due to missing file */}
 
         {/* Growth & Marketing */}
-        <Route path="marketing" element={<MarketingDashboard />} />
-        <Route path="marketing/campaigns" element={<Campaigns />} />
-        <Route path="lead-capture" element={<LeadCapture />} />
-        <Route path="leads" element={<LeadManagement />} />
-        <Route path="leads/nurture" element={<LeadNurture />} />
-        <Route path="website" element={<WebsiteBuilder />} />
-        <Route path="social" element={<SocialMedia />} />
-        <Route path="content" element={<ContentMarketing />} />
-        <Route path="referrals" element={<ReferralProgram />} />
-        <Route path="advertising" element={<Advertising />} />
+        {/* Route for MarketingDashboard removed due to missing file */}
+        {/* Route for Campaigns removed due to missing file */}
+        {/* Route for LeadCapture removed due to missing file */}
+        {/* Route for LeadManagement removed due to missing file */}
+        {/* Route for LeadNurture removed due to missing file */}
+        {/* Route for WebsiteBuilder removed due to missing file */}
+        {/* Route for SocialMedia removed due to missing file */}
+        {/* Route for ContentMarketing removed due to missing file */}
+        {/* Route for ReferralProgram removed due to missing file */}
+        {/* Route for Advertising removed due to missing file */}
 
         {/* Advanced Features */}
-        <Route path="team" element={<TeamManagement />} />
-        <Route path="team/roles" element={<RolePermissions />} />
-        <Route path="team/schedule" element={<TeamSchedule />} />
-        <Route path="automation" element={<WorkflowAutomation />} />
-        <Route path="templates" element={<DocumentTemplates />} />
-        <Route path="forms" element={<CustomForms />} />
-        <Route path="reports" element={<CustomReports />} />
-        <Route path="integrations" element={<IntegrationsHub />} />
-        <Route path="api" element={<ApiAccess />} />
-        <Route path="settings/advanced" element={<AdvancedSettings />} />
+        {/* Route for TeamManagement removed due to missing file */}
+        {/* Route for RolePermissions removed due to missing file */}
+        {/* Route for TeamSchedule removed due to missing file */}
+        {/* Route for WorkflowAutomation removed due to missing file */}
+        {/* Route for DocumentTemplates removed due to missing file */}
+        {/* Route for CustomForms removed due to missing file */}
+        {/* Route for CustomReports removed due to missing file */}
+        {/* Route for IntegrationsHub removed due to missing file */}
+        {/* Route for ApiAccess removed due to missing file */}
+        {/* Route for AdvancedSettings removed due to missing file */}
       </Route>
     </Routes>
   );

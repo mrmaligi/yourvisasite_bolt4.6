@@ -14,15 +14,15 @@ import {
   FileText,
   Star
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
+} from './ui/DropdownMenu';
+import { Badge } from '@/components/ui/Badge';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const Navigation = () => {

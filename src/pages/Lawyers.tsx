@@ -15,11 +15,11 @@ import {
   ArrowRight,
   MessageCircle
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/Avatar';
 
 const Lawyers = () => {
   const navigate = useNavigate();
@@ -181,7 +181,7 @@ const Lawyers = () => {
                 type="text"
                 placeholder="Search by name, firm, or location..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                 className="pl-12 pr-4 py-6 text-lg rounded-xl border-0 shadow-lg"
               />
             </div>
@@ -348,7 +348,7 @@ const Lawyers = () => {
                               <span>Speaks: {lawyer.languages.join(', ')}</span>
                             </div>
 
-                            <Button onClick={(e) => {
+                            <Button onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                               e.stopPropagation();
                               navigate(`/booking/${lawyer.id}`);
                             }}>

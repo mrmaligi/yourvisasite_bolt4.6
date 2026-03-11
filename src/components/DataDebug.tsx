@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 
 export function DataDebug() {
   const [status, setStatus] = useState('Checking...');
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [visaCount, setVisaCount] = useState(0);
 
   useEffect(() => {
@@ -24,8 +24,8 @@ export function DataDebug() {
           setVisaCount(data?.length || 0);
           setStatus(`Found ${data?.length || 0} visas`);
         }
-      } catch (e) {
-        setError(e.message);
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : String(e));
         setStatus('Exception');
       }
     };

@@ -21,7 +21,6 @@ const Register = lazy(() => import('./pages/public/RegisterV2').then(m => ({ def
 const RoleSelect = lazy(() => import('./pages/public/RoleSelectV2').then(m => ({ default: m.RoleSelectV2 })));
 const LawyerLogin = lazy(() => import('./pages/public/LawyerLoginV2').then(m => ({ default: m.LawyerLoginV2 })));
 const LawyerRegister = lazy(() => import('./pages/public/LawyerRegisterV2').then(m => ({ default: m.LawyerRegisterV2 })));
-const Pricing = lazy(() => import('./pages/public/PricingV2').then(m => ({ default: m.PricingV2 })));
 const VisaSearch = lazy(() => import('./pages/public/VisaSearchV2').then(m => ({ default: m.VisaSearchV2 })));
 const VisaDetail = lazy(() => import('./pages/public/VisaDetailV2').then(m => ({ default: m.VisaDetailV2 })));
 
@@ -36,16 +35,12 @@ const DocumentUpload = lazy(() => import('./pages/user/DocumentUploadV2').then(m
 const PaymentMethods = lazy(() => import('./pages/user/PaymentMethodsV2').then(m => ({ default: m.PaymentMethodsV2 })));
 const Profile = lazy(() => import('./pages/user/ProfileV2').then(m => ({ default: m.ProfileV2 })));
 const Settings = lazy(() => import('./pages/user/SettingsV2').then(m => ({ default: m.SettingsV2 })));
-const Consultations = lazy(() => import('./pages/user/ConsultationsV2').then(m => ({ default: m.ConsultationsV2 })));
 const MyVisas = lazy(() => import('./pages/user/MyVisasV2').then(m => ({ default: m.MyVisasV2 })));
 
 // Lawyer Pages
-const Availability = lazy(() => import('./pages/lawyer/AvailabilityV2').then(m => ({ default: m.AvailabilityV2 })));
 const CaseDashboard = lazy(() => import('./pages/lawyer/CaseDashboardV2').then(m => ({ default: m.CaseDashboardV2 })));
-const Earnings = lazy(() => import('./pages/lawyer/EarningsV2').then(m => ({ default: m.EarningsV2 })));
 const LawyerDocuments = lazy(() => import('./pages/lawyer/LawyerDocumentsV2').then(m => ({ default: m.LawyerDocumentsV2 })));
 const MyCases = lazy(() => import('./pages/lawyer/MyCasesV2').then(m => ({ default: m.MyCasesV2 })));
-const Reviews = lazy(() => import('./pages/lawyer/ReviewsV2').then(m => ({ default: m.ReviewsV2 })));
 
 // Admin Pages (Core + Essential)
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboardV2').then(m => ({ default: m.AdminDashboardV2 })));
@@ -79,7 +74,7 @@ export default function App() {
                         <Route path="register" element={<Register />} />
                         <Route path="lawyer/login" element={<LawyerLogin />} />
                         <Route path="lawyer/register" element={<LawyerRegister />} />
-                        <Route path="pricing" element={<Pricing />} />
+                        {/* removed */}
                         <Route path="visas" element={<VisaSearch />} />
                         <Route path="visas/:slug" element={<VisaDetail />} />
                       </Route>
