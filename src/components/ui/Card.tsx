@@ -32,6 +32,9 @@ export function CardBody({ children, className = '' }: { children: ReactNode; cl
   return <div className={`px-6 py-5 ${className}`}>{children}</div>;
 }
 
+// Alias for compatibility
+export const CardContent = CardBody;
+
 export function CardFooter({ children, className = '' }: { children: ReactNode; className?: string }) {
   return <div className={`px-6 py-4 border-t border-neutral-100 dark:border-neutral-700/50 bg-neutral-50/50 dark:bg-neutral-900/50 rounded-b-2xl ${className}`}>{children}</div>;
 }
