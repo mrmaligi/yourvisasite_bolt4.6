@@ -96,18 +96,14 @@ export default function App() {
                         <Route path="dashboard/profile" element={<Profile />} />
                         <Route path="dashboard/settings" element={<Settings />} />
                         <Route path="dashboard/visas" element={<MyVisas />} />
-                        <Route path="dashboard/consultations" element={<Consultations />} />
-                      </Route>
+                                              </Route>
 
                       {/* Lawyer Routes */}
                       <Route element={<ProtectedRoute allowedRoles={['lawyer']}><LawyerDashboardLayout /></ProtectedRoute>}>
                         <Route path="lawyer/dashboard" element={<CaseDashboard />} />
-                        <Route path="lawyer/availability" element={<Availability />} />
-                        <Route path="lawyer/cases" element={<MyCases />} />
+                                                <Route path="lawyer/cases" element={<MyCases />} />
                         <Route path="lawyer/documents" element={<LawyerDocuments />} />
-                        <Route path="lawyer/earnings" element={<Earnings />} />
-                        <Route path="lawyer/reviews" element={<Reviews />} />
-                      </Route>
+                                                                      </Route>
 
                       {/* Admin Routes */}
                       <Route element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboardLayout /></ProtectedRoute>}>
