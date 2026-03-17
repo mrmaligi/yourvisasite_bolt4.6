@@ -99,7 +99,7 @@ export function LawyerDashboard() {
       // Get stats
       const [{ count: clients }, { count: upcoming }, { count: completed }] = await Promise.all([
         supabase.from('bookings').select('user_id', { count: 'exact', head: true }).eq('lawyer_id', profile.id),
-        supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile.id).eq('status', 'confirmed').gte('booking_date', new Date().toISOString()),
+        supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile.id).eq('status', 'confirmed').gte('scheduled_at', new Date().toISOString()),
         supabase.from('bookings').select('id', { count: 'exact' }).eq('lawyer_id', profile.id).eq('status', 'completed'),
       ]);
 
