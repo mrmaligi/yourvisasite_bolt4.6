@@ -203,7 +203,7 @@ export function Performance() {
                     <Badge variant="warning">High</Badge>
                   </td>
                   <td className="px-6 py-3 font-medium text-neutral-900 dark:text-white">Storage Service</td>
-                  <td className="px-6 py-3 text-neutral-600 dark:text-neutral-300">High latency detected (>500ms)</td>
+                  <td className="px-6 py-3 text-neutral-600 dark:text-neutral-300">High latency detected (&gt;500ms)</td>
                   <td className="px-6 py-3 text-neutral-500">10 mins ago</td>
                   <td className="px-6 py-3 text-right">
                     <span className="text-yellow-600 font-medium text-xs">Investigating</span>

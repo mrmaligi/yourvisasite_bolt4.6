@@ -16,9 +16,7 @@ const mockBooking = {
   slot_id: "slot1",
   status: "confirmed",
   scheduled_at: "2023-10-10T10:00:00Z",
-  booking_date: "2023-10-01",
-  start_time: "10:00",
-  end_time: "11:00",
+  duration_minutes: 60,
   questions: "Help me",
   created_at: "2023-10-01T09:00:00Z",
   updated_at: "2023-10-01T09:00:00Z"

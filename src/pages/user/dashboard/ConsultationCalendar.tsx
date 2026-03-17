@@ -8,8 +8,8 @@ import { useAuth } from '../../../contexts/AuthContext';
 
 interface Booking {
   id: string;
-  booking_date: string;
-  start_time: string;
+  scheduled_at: string;
+  duration_minutes: number;
   status: string;
   lawyer: {
     full_name: string;
@@ -31,14 +31,15 @@ export function ConsultationCalendar() {
           .from('bookings')
           .select(`
             id,
-            booking_date,
-            start_time,
+            scheduled_at,
+            duration_minutes,
+
             status,
             lawyer:profiles!lawyer_id(full_name, avatar_url)
           `)
           .eq('user_id', user.id)
-          .gte('booking_date', new Date().toISOString().split('T')[0])
-          .order('booking_date', { ascending: true })
+          .gte('scheduled_at', new Date().toISOString())
+          .order('scheduled_at', { ascending: true })
           .limit(3);
 
         if (error) throw error;
@@ -46,8 +47,8 @@ export function ConsultationCalendar() {
         // Transform the data to match our interface
         const transformedData: Booking[] = (data || []).map((item: any) => ({
           id: item.id,
-          booking_date: item.booking_date,
-          start_time: item.start_time,
+          scheduled_at: item.scheduled_at,
+          duration_minutes: item.duration_minutes,
           status: item.status,
           lawyer: {
             full_name: item.lawyer?.full_name || 'Lawyer',
@@ -117,11 +118,11 @@ export function ConsultationCalendar() {
                 <div className="flex items-center justify-between text-xs text-neutral-600 dark:text-neutral-300 pt-2 border-t border-blue-100 dark:border-blue-800">
                   <div className="flex items-center gap-1">
                     <CalendarIcon className="w-3 h-3" />
-                    <span>{new Date(booking.booking_date).toLocaleDateString()}</span>
+                    <span>{new Date(booking.scheduled_at).toLocaleDateString()}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="w-3 h-3" />
-                    <span>{booking.start_time}</span>
+                    <span>{new Date(booking.scheduled_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                   </div>
                 </div>
               </div>

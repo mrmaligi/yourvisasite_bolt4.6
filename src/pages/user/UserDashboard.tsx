@@ -43,23 +43,22 @@ export function UserDashboard() {
   }, [user]);
 
   const fetchUserStats = async () => {
-    if (!user?.id) return; // Add null check
+    if (!user?.id) return;
     
     try {
-      // Get counts via RPC for performance
-      const { data, error } = await supabase.rpc('get_user_dashboard_stats');
+      const [{ count: savedVisas }, { count: myVisas }, { count: documents }, { count: upcomingConsultations }] = await Promise.all([
+        supabase.from('saved_visas').select('id', { count: 'exact' }).eq('user_id', user.id),
+        supabase.from('user_visas').select('id', { count: 'exact' }).eq('user_id', user.id),
+        supabase.from('user_documents').select('id', { count: 'exact' }).eq('user_id', user.id),
+        supabase.from('bookings').select('id', { count: 'exact' }).eq('user_id', user.id).gte('scheduled_at', new Date().toISOString()),
+      ]);
 
-      if (error) throw error;
-
-      if (data) {
-        const statsData = data as UserDashboardStats;
-        setStats({
-          savedVisas: statsData.savedVisas || 0,
-          myVisas: statsData.myVisas || 0,
-          documents: statsData.documents || 0,
-          upcomingConsultations: statsData.upcomingConsultations || 0,
-        });
-      }
+      setStats({
+        savedVisas: savedVisas || 0,
+        myVisas: myVisas || 0,
+        documents: documents || 0,
+        upcomingConsultations: upcomingConsultations || 0,
+      });
     } catch (err) {
       console.error('Error fetching stats:', err);
     }

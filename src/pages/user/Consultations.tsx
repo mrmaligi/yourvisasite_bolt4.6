@@ -57,12 +57,12 @@ export function Consultations() {
 
   const now = new Date();
   const upcomingBookings = bookings.filter(b => {
-    const time = new Date(`${b.booking_date}T${b.start_time}`);
+    const time = new Date(b.scheduled_at);
     return time >= now && b.status !== 'cancelled' && b.status !== 'completed';
   });
 
   const pastBookings = bookings.filter(b => {
-    const time = new Date(`${b.booking_date}T${b.start_time}`);
+    const time = new Date(b.scheduled_at);
     return time < now || b.status === 'cancelled' || b.status === 'completed';
   });
 

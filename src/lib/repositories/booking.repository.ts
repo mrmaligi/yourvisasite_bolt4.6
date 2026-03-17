@@ -8,8 +8,7 @@ export class BookingRepository {
       .from('bookings')
       .select('*')
       .eq('user_id', userId)
-      .order('booking_date', { ascending: false })
-      .order('start_time', { ascending: false }));
+      .order('scheduled_at', { ascending: false }));
     return { data: (data || []) as Booking[], error };
   }
 
@@ -18,8 +17,7 @@ export class BookingRepository {
       .from('bookings')
       .select('*')
       .eq('lawyer_id', lawyerId)
-      .order('booking_date', { ascending: false })
-      .order('start_time', { ascending: false }));
+      .order('scheduled_at', { ascending: false }));
     return { data: (data || []) as Booking[], error };
   }
 
